@@ -1,0 +1,94 @@
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" alt="Loading..." />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<div class="filtertagPage">
+  <h2>Filter &amp; Tag Management </h2>
+  <div class="filtertagDiv">
+
+    <div class="container-fluid padding-0">
+      <div class="row">
+        <div class="col-md-6 col-sm-12">
+          <div class="row">
+            <div class="col-md-8 col-sm-12 dpdownDiv">
+              <label>Tags</label>
+              <p-dropdown   [autoDisplayFirst]="false" [resetFilterOnHide]="true" [options]="tagDPList" [(ngModel)]="selectedTag" (onChange)="loadFilterbyTagId(true);" [filter]="true"
+                ></p-dropdown>
+            </div>
+            <div class="col-md-3 col-sm-12 dpdownDiv">
+              <label>Sequence</label>
+              <p-dropdown  [autoDisplayFirst]="false" [options]="tagSeqList" [(ngModel)]="selectedTagSeq" (onChange)="showTagSeqInfo()"
+                ></p-dropdown>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-2 col-sm-12 ">
+              <label class="explabel-font">Expires: </label>
+            </div>
+            <div class="col-md-6 col-sm-12">
+              <label class="expDate">{{expDate | date:'MM/dd/yyyy':'UTC'}}</label>
+            </div>
+            <div class="col-md-3 col-sm-12">
+              <button [disabled]="disableExtend" type="button" (click)="extendExpiry();" class="btn btn-primary fullwidth" title="Extend">Extend</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-11 col-sm-12 dpdownDiv">
+              <label>Filters</label>
+              <p-dropdown [resetFilterOnHide]="true" [autoDisplayFirst]="false" [options]="filterDPList" [(ngModel)]="selectedFilter" (onChange)="showFilterInfo(true)"
+                [filter]="true" ></p-dropdown>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-11 col-sm-12">
+              <div class="button-container">
+                <button [disabled]="disableEdit" (click)="updateData()"
+                  type="button" class="btn btn-primary fullwidth right-10" title="Edit">Edit</button>
+                <button [disabled]="disableDelete" (click)="deleteData()" 
+                  type="button" class="btn btn-primary fullwidth right-10" title="Delete">Delete</button>
+                <button type="button" (click)="resetAll()" class="btn btn-primary fullwidth"
+                  title="Reset">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <div class="row">
+            <div class="col-md-12 col-sm-12 dpdownDiv">
+              <label>Screen Created On</label>
+              <input type="text" [readOnly]="true" class="form-control" [(ngModel)]="createdScreen" />
+            </div>
+          </div>
+
+          <div class="row filterCondDiv">
+            <div class="col-md-12 col-sm-12">
+              <label>Filter Condition(s)</label>
+              <textarea pInputTextarea  [(ngModel)]="conditionString"
+                [readOnly]="true" class="form-control txtareaheight"> </textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rule-table">
+        <div class="col-12">
+            <label class='table-header'>Rules</label>
+            <ecl-table #tableResults [tableModel]="tableConfig" (onServiceCall)="onServiceCall($event)"></ecl-table>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 col-sm-12 ">
+          <div class="button-container">
+            <button [disabled]="disableExport" type="button" (click)="generateReport();"
+              class="btn btn-primary right-10" title="Generate Report">Generate Report</button>
+            <button [disabled]="disableEmail"  type="button"  (click)="sendEmail();"
+              class="btn btn-primary" title="Send Email">Send Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p-confirmDialog [style]="{width: '35vw'}" key="filterTagDelete"></p-confirmDialog>

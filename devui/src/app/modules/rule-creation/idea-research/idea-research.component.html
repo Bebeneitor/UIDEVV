@@ -1,0 +1,33 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<p-tabView (onChange)="handleTabViewChange($event)" [activeIndex]="tabIndex">
+    <p-tabPanel header="Assigned">
+        <div *ngIf="tabIndex == 0">
+            <ecl-table #assignedTable [tableModel]='assignedTableConfig' (onAcctionLink)="redirect($event, 'assigned')"
+                (onSelectRecord)="setSelectRules($event, 'assigned')"(onUnSelectRecord)="setSelectRules($event, 'assigned')"></ecl-table>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="float-right" style="padding-bottom: 10px; padding-top: 10px">
+                        <button type="button" value="Submit" style="width:90%;" (click)="refreshEclTable('assigned')"
+                            class="btn btn-primary btn-default-height small-td">Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-tabPanel>
+    <p-tabPanel header="Returned">
+        <div *ngIf="tabIndex == 1">
+            <ecl-table #returnedTable [tableModel]='returnedTableConfig' (onHoverColumn)="showReviewComments($event)" (onAcctionLink)="redirect($event, 'returned')"
+                (onSelectRecord)="setSelectRules($event, 'returned')" (onUnSelectRecord)="setSelectRules($event, 'returned')"></ecl-table>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="float-right" style="padding-bottom: 10px; padding-top: 10px" >
+                        <button type="button" value="Submit" style="width:90%;" (click)="refreshEclTable('returned')"
+                            class="btn btn-primary btn-default-height small-td">Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-tabPanel>
+</p-tabView>

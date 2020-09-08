@@ -1,0 +1,31 @@
+<p-blockUI [blocked]="blockedDocument">
+    <div class="img-loading text-center">
+      <img src="assets/img/loading.gif" style="width: 60%" />
+      <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+    </div>
+  </p-blockUI>
+
+<div class="row">
+  <div class="col-12" *ngIf="loadPayers">
+    
+    <!--DATA-->
+    <p-accordion #accordion (onOpen)="onTabOpen($event.index)">        
+        <p-accordionTab *ngFor="let payer of payers" header="{{payer}}">                    
+          <div class="row">          
+            <div class=col-12>             
+              <ng-template pTemplate="content">
+                <ecl-table [tableModel]="payerTable"></ecl-table>
+              </ng-template>                            
+            </div>          
+          </div>        
+        </p-accordionTab>            
+    </p-accordion>
+  </div>
+  
+  <div class="col-12" *ngIf="showResultLayer">    
+    <!--This div is for present the result from search by filter-->    
+    <button type="button" pButton (click)="cleanResult()" label="Return" style="margin: 2px;"></button>    
+    <ecl-table #resultTableView [tableModel]='resultTableFilter' (onAcctionLink)="viewRuleDetailModal($event.row)"></ecl-table>
+  </div>
+
+</div>

@@ -1,0 +1,571 @@
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" alt="Loading..." />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<h5 class="text-center title-header relative-pos">
+  LIBRARY VIEW SEARCH
+</h5>
+<hr>
+<div>
+  <div class="container-fluid widget">
+    <div class="row">
+      <div class="col-md-3 col-sm-12 dpdownDiv">
+        <label>Saved Filters</label>
+        <p-dropdown (onChange)="getConditions(event)" [options]="searchDropdownFilters"
+          [(ngModel)]="selectedSavedFilter" [filter]="true" [resetFilterOnHide]="true" class="dropdown-full-width">
+        </p-dropdown>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <label>Keyword</label>
+        <input type="text" maxlength="100" class="form-control" [(ngModel)]="keyword" placeholder="Search" />
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <label>Line of Business</label>
+        <p-multiSelect [options]="lobs" [(ngModel)]="selectedLobs" defaultLabel="Select item" [maxSelectedLabels]="0">
+        </p-multiSelect>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <label>Category</label>
+        <p-multiSelect [options]="categories" [(ngModel)]="selectedCategories" defaultLabel="Select item"
+          [maxSelectedLabels]="0">
+        </p-multiSelect>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 col-sm-12">
+        <label>State</label>
+        <p-multiSelect [disabled]="checkMedicaid()" [options]="states" [(ngModel)]="selectedStates"
+          defaultLabel="Select item" [maxSelectedLabels]="0">
+        </p-multiSelect>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <label>Jurisdiction</label>
+        <p-multiSelect [disabled]="checkMedicare()" [options]="jurisdictions" [(ngModel)]="selectedJurisdictions"
+          defaultLabel="Select item" [maxSelectedLabels]="0">
+        </p-multiSelect>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <label>Reference Source</label>
+        <p-multiSelect [options]="references" [(ngModel)]="selectedReferences" defaultLabel="Select item"
+          [maxSelectedLabels]="0">
+        </p-multiSelect>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <label>Reference Title</label>
+        <input type="text" maxlength="500" class="form-control" [(ngModel)]="referenceTitle"
+          placeholder="Enter Reference Title" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 col-sm-12">
+        <div>
+          <span class="set-space">
+            <input type="radio" name="hcpcsCodeInd" [value]="'0'" [(ngModel)]="hcpcsCodeDescInd"
+              (change)="checkHcpcs(event)">
+            <label class="set-space-left">HCPCS Code</label>
+          </span>
+          <span class="set-space">
+            <input type="radio" name="hcpcsCodeInd" [value]="'1'" [(ngModel)]="hcpcsCodeDescInd"
+              (change)="checkHcpcs(event)">
+            <label class="set-space-left">HCPCS Description</label>
+          </span>
+        </div>
+        <textarea type="text" maxlength="30" [hidden]="hcpcsCodeDescInd && hcpcsCodeDescInd == '1'"
+          class="form-control library-code" [(ngModel)]="hcpcsProcCode" placeholder="HCPCS Procedure Code"></textarea>
+        <textarea type="text" maxlength="30" [hidden]="hcpcsCodeDescInd && hcpcsCodeDescInd == '0'"
+          class="form-control library-code" [(ngModel)]="hcpcsProcDesc" placeholder="HCPCS Code Description"></textarea>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <div>
+          <span class="set-space">
+            <input type="radio" name="cptCodeInd" [value]="'0'" [(ngModel)]="cptCodeDescInd" (change)="checkCpt(event)">
+            <label class="set-space-left">CPT Code</label>
+          </span>
+          <span class="set-space">
+            <input type="radio" name="cptCodeInd" [value]="'1'" [(ngModel)]="cptCodeDescInd" (change)="checkCpt(event)">
+            <label class="set-space-left">CPT Description</label>
+          </span>
+        </div>
+        <textarea type="text" maxlength="30" [hidden]="cptCodeDescInd && cptCodeDescInd == '1'"
+          class="form-control library-code" [(ngModel)]="cptProcCode" placeholder="CPT Procedure Code"></textarea>
+        <textarea type="text" maxlength="30" [hidden]="cptCodeDescInd && cptCodeDescInd == '0'"
+          class="form-control library-code" [(ngModel)]="cptProcDesc" placeholder="CPT Code Description"></textarea>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <div>
+          <span class="set-space">
+            <input type="radio" [disabled]="true" name="icdCodeInd" [value]="'0'" [(ngModel)]="icdCodeDescInd"
+              (change)="checkIcd(event)">
+            <label class="set-space-left">ICD Code</label>
+          </span>
+          <span class="set-space">
+            <input type="radio" [disabled]="true" name="icdCodeInd" [value]="'1'" [(ngModel)]="icdCodeDescInd"
+              (change)="checkIcd(event)">
+            <label class="set-space-left">ICD Description</label>
+          </span>
+        </div>
+        <textarea type="text" [disabled]="true" maxlength="30" [hidden]="icdCodeDescInd && icdCodeDescInd == '1'"
+          class="form-control library-code" [(ngModel)]="icdProcCode" placeholder="ICD Procedure Code"></textarea>
+        <textarea type="text" [disabled]="true" maxlength="30" [hidden]="icdCodeDescInd && icdCodeDescInd == '0'"
+          class="form-control library-code" [(ngModel)]="icdProcDesc" placeholder="ICD Code Description"></textarea>
+      </div>
+      <div class="col-md-3 col-sm-12 flex-column">
+        <div>
+          <label>Logic Effective Date, From</label>
+          <p-calendar [(ngModel)]="startDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
+            [yearRange]="yearValidRange" [minDate]="minDate" [maxDate]="endDate" placeholder="{{dateFormat}}"
+            dateFormat="mm/dd/yy" [disabled]="true">
+          </p-calendar>
+        </div>
+        <div>
+          <label>Logic Effective Date, To</label>
+          <p-calendar [(ngModel)]="endDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
+            [yearRange]="yearValidRange" [minDate]="startDate" placeholder="{{dateFormat}}" dateFormat="mm/dd/yy"
+            [disabled]="true">
+          </p-calendar>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-3 col-sm-12">
+        <label><span *ngIf="hcpcsProcCode !== ''" class="required-field-color">*</span>HCPCS Procedure Type</label>
+        <p-multiSelect [options]="hcpcProcCodeCats" [(ngModel)]="selectedHcpcProcCodeCats" defaultLabel="Select item"
+          [maxSelectedLabels]="0" [disabled]="hcpcsProcCode && hcpcsProcCode.trim().length === 0">
+        </p-multiSelect>
+      </div>
+      <div class="col-md-3 col-sm-12">
+        <label><span *ngIf="cptProcCode !== ''" class="required-field-color">*</span>CPT Procedure Type</label>
+        <p-multiSelect [options]="cptProcCodeCats" [(ngModel)]="selectedCptProcCodeCats" defaultLabel="Select item"
+          [maxSelectedLabels]="0" [disabled]="cptProcCode && cptProcCode.trim().length === 0">
+        </p-multiSelect>
+      </div>
+      <div class="col-md-3 col-sm-12" style="margin-top: 10px">
+        <label style="display: block;">Rule Status</label>
+        <p-checkbox [(ngModel)]="statusActive" (onChange)="checkToTrigger($event)" binary="true" label="Show Only Active">
+        </p-checkbox>
+      </div>
+    </div>
+
+    <div class="row set-row-topmargin">
+      <div class="col-12">
+        <p-panel class="add-search-panel" [header]="additionalSearchPanelHeader" [collapsed]="isAdditionalSettings"
+          [toggleable]="true" (onBeforeToggle)="changePanelHeader()">
+          <div class="row">
+            <div class="col-md-3 col-sm-12">
+              <label>Specialties</label>
+              <p-multiSelect [options]="specialties" [(ngModel)]="selectedSpecialty" (onChange)="filterSubSpecialty()"
+                defaultLabel="Select item" [maxSelectedLabels]="0">
+              </p-multiSelect>
+            </div>
+            <div class="col-md-3 col-sm-12">
+              <label>Sub Specialties</label>
+              <p-multiSelect [disabled]="disableSubSpecialty" [options]="subSpecialtyFiltered"
+                [(ngModel)]="selectedSubSpecialty" defaultLabel="Select item" [maxSelectedLabels]="0">
+              </p-multiSelect>
+            </div>
+            <div class="col-md-3 col-sm-12">
+              <label>Place Of Service</label>
+              <p-multiSelect [disabled]="true" [options]="placeOfServices" [(ngModel)]="selectedPlaceOfService"
+                defaultLabel="Select item" [maxSelectedLabels]="0">
+              </p-multiSelect>
+            </div>
+            <div class="col-md-3 col-sm-12">
+              <label>Bill Types</label>
+              <p-multiSelect [disabled]="true" [options]="billTypes" [(ngModel)]="selectedBillType"
+                defaultLabel="Select item" [maxSelectedLabels]="0">
+              </p-multiSelect>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3 col-sm-12">
+              <label>Revenue Codes</label>
+              <p-multiSelect [options]="revenueCodes" [(ngModel)]="selectedRevCodes" defaultLabel="Select item"
+                [maxSelectedLabels]="0">
+              </p-multiSelect>
+            </div> 
+            <div class="col-md-3 col-sm-12">
+              <label>Modifiers</label>
+              <input type="text" [disabled]="true" maxlength="30" class="form-control" [(ngModel)]="procedureCode"
+                placeholder="Enter Modifiers" />
+            </div>
+            <div class="custom-flex-item dpdownDiv">
+              <label>Gender</label>
+              <p-dropdown [options]="genders" [(ngModel)]="selectedGender" defaultLabel="Select item"
+                class="dropdown-full-width"></p-dropdown>
+            </div>
+            <div class="custom-flex-item hide-div">
+              <label>Age</label>
+              <input type="text" [disabled]="true" maxlength="30" class="form-control custom-input-lib"
+                [(ngModel)]="procedureCode" placeholder="Enter Age Here" />
+            </div>
+            <div class="custom-flex-item">
+              <label>Rule Engine</label>
+              <p-multiSelect [options]="engines" [(ngModel)]="selectedEngines"
+                defaultLabel="Select item" [maxSelectedLabels]="0">
+              </p-multiSelect>
+            </div>
+            <div class="custom-flex-item hide-div">
+              <label>Dosage</label>
+              <input type="text" [disabled]="true" maxlength="30" class="form-control custom-input-lib"
+                [(ngModel)]="procedureCode" placeholder="Enter Dosage Here" />
+            </div>
+          </div>
+        </p-panel>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="button-container">
+        <button type="button" (click)="reset()" class="btn btn-primary" title="Reset"><i class="fa fa-refresh"></i>
+          Refresh</button>
+        <button type="button" (click)="clearTableFilters(); view()" class="btn btn-primary" [disabled]="disableView"
+          title="View"><i class="fa fa-eye"></i>
+          View</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid widget">
+    <div class="row set-row-topmargin">
+      <div class="col-12">
+        <p-panel class="selection-panel" [header]="selectionPanelHeader" [collapsed]="showSelectionPanel"
+          [toggleable]="true" (onBeforeToggle)="changeSelectionPanelHeader()">
+          <label>Selected</label>
+          <div class="rules-savings">
+            <div class="top-35" *ngIf="hasSelectedItems(); else showSelection" class="div-no-data">
+              <img src="assets/img/no-data.png" class="img-no-data" alt="No data" />
+              <p class="no-data">NO ITEMS SELECTED</p>
+            </div>
+            <ng-template #showSelection>
+              <div class="row search-item" *ngIf="keyword != ''">
+                <label class="col-2 default">Keyword:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.keyword)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{keyword}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedLobs.length > 0">
+                <label class="col-2 default">Line of business:</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedLobs; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedLobs, i, cacheConstant.lob)"
+                      class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                     {{getValueFromId(lobs, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedCategories.length > 0">
+                <label class="col-2 default">Categories :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedCategories; let i = index">
+                      <div class="icon-div">
+                        <i (click)="removeFromList(selectedCategories, i, cacheConstant.category)"
+                          class="fa fa-times-circle icon-remove" title="Remove"></i>
+                      </div>
+                      <div class="sel-value-div">{{getValueFromId(categories, v)}}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedStates.length > 0">
+                <label class="col-2 default">State :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedStates; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedStates, i, cacheConstant.state)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{getValueFromId(states, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedJurisdictions.length > 0">
+                <label class="col-2 default">Jurisdiction :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedJurisdictions; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedJurisdictions, i, cacheConstant.jurisdiction)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{getValueFromId(jurisdictions, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedReferences.length > 0">
+                <label class="col-2 default">Reference Source :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedReferences; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedReferences, i, cacheConstant.reference)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                     {{getValueFromId(references, v) | titlecase}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="referenceTitle != ''">
+                <label class="col-2 default">Reference Title :</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.referenceTitle)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{referenceTitle}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="hcpcsProcCode !== ''">
+                <label class="col-2 default">HCPCS Procedure Codes&nbsp;:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.hcpcs)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                     {{hcpcsProcCode}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="hcpcsProcCode !== '' && selectedHcpcProcCodeCats.length == 0">
+                <label class="col-2 default">HCPCS Procedure Code Category&nbsp;:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="sel-value-div">All</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="hcpcsProcCode !== '' && selectedHcpcProcCodeCats.length > 0">
+                <label class="col-2 default">HCPCS Procedure Code Category&nbsp;:</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedHcpcProcCodeCats; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedHcpcProcCodeCats, i, cacheConstant.hcpcs_proc_type)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{getValueFromId(procCodeCategories, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="hcpcsProcDesc !== ''">
+                <label class="col-2 default">HCPCS Procedure Code Description&nbsp;:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.hcpcs_desc)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{hcpcsProcDesc}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="cptProcCode != ''">
+                <label class="col-2 default">CPT Procedure Code&nbsp;:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.cpt)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{cptProcCode}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="cptProcCode !== '' && selectedCptProcCodeCats.length == 0">
+                <label class="col-2 default">CPT Procedure Code Category&nbsp;:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="sel-value-div">All</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="cptProcCode !== '' && selectedCptProcCodeCats.length > 0">
+                <label class="col-2 default">CPT Procedure Code Category&nbsp;:</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedCptProcCodeCats; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedCptProcCodeCats, i, cacheConstant.cpt_proc_type)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{getValueFromId(procCodeCategories, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="cptProcDesc !== ''">
+                <label class="col-2 default">CPT Procedure Code Description&nbsp;:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.cpt_desc)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{cptProcDesc}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedRevCodes.length > 0">
+                <label class="col-2 default">Revenue Codes :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedRevCodes; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedRevCodes, i, cacheConstant.revenueCode)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{getValueFromId(revenueCodes, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedSpecialty.length > 0">
+                <label class="col-2 default">Specialties :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedSpecialty; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedSpecialty, i, cacheConstant.specialty)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div wrap-text">
+                      {{getValueFromId(specialties, v) | titlecase}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedSubSpecialty.length > 0">
+                <label class="col-2 default">Sub Specialties :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedSubSpecialty; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedSubSpecialty, i, cacheConstant.subspecialty)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div wrap-text">
+                      {{getValueFromId(subSpecialtyFiltered, v) | titlecase}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedGender !== 0">
+                <label class="col-2 default">Gender :</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.gender)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{getValueFromId(genders, selectedGender)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedEngines.length > 0">
+                <label class="col-2 default">Rule Engines :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedEngines; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedEngines, i, cacheConstant.rule_engine)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                     {{getValueFromId(engines, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="statusActive !== false">
+                <label class="col-2 default">Show Active Rules:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.statusActive)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      <span>{{statusActive}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </p-panel>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <p-panel class="panel-filters" header="CATALOG RESULTS">
+        <div class="ui-fluid filters-div">
+          <div class="p-grid p-justify-start">
+            <div class="p-field p-col dpdownDiv filterdpdown">
+                <label>Filter Name</label>
+                <p-dropdown name="selectedFilterName" [options]="filterNames" [(ngModel)]="selectedFilterName"  
+                class="dropdown-full-width" (onChange)="loadFilterCondition($event)" ></p-dropdown>
+              </div>
+              <div class="p-field p-col-5">
+                <label>Filter Condition</label>
+                <input name="filterCondition" pInputText   [(ngModel)]="filterCondition"  readonly class="form-control"
+                placeholder="No Selections" (mouseover)="showCurrent($event, filterCondition, op)"/>
+              </div>
+              <div class="p-field p-col-2 dpdownDiv">
+                <label>Tag Name</label>
+                <p-dropdown name="selectedTagName" [options]="tagNames" [(ngModel)]="selectedTagName" 
+                class="dropdown-full-width" (onChange)="loadTaggedResults($event)" [disabled]="disableTag"></p-dropdown>
+              </div>
+              <div class="p-field p-col dpdownDiv" style="max-width: 95px;">
+                <label>Tag Sequence</label>
+                <p-dropdown name="selectedTagSequenceId" [options]="tagSequenceIds" [(ngModel)]="selectedTagSequenceId"  class="dropdown-full-width"
+                (onChange)="loadFilterName($event)" [disabled]="disableTagSequence"></p-dropdown>
+              </div>
+              <div class="p-col text-right" style="padding-right: 10px;max-width: 130px;">
+                <button type="button" (click)="updateTag()" class="btn btn-primary btn-sm btn-toolbar save-margin-22" title="Save"
+                  [disabled]="disableSave">Save</button>
+              </div>
+          </div>
+        </div>
+        <ecl-table #tableResults [tableModel]="tableConfig" (onAcctionLink)="redirect($event)"
+          (onServiceCall)="onServiceCall($event)" (onSelectRecord)="selectedData=$event"
+          (onUnSelectRecord)="selectedData=$event"></ecl-table>
+      </p-panel>
+    </div>
+  </div>
+</div>
+<p-overlayPanel #op [dismissable]="true" [style]="{'width':'500px', 'font-size':'12px'}">
+  {{this.customToolTip}}
+</p-overlayPanel>
+<p-confirmDialog [style]="{width: '35vw'}" key="confirmDeleteTagFilter"></p-confirmDialog>

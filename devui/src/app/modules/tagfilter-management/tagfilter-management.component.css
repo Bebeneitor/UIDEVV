@@ -1,0 +1,86 @@
+.filtertagDiv {
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 20px;
+    left: 0px;
+    top: 0px;
+    background: inherit;
+    background-color: rgba(255, 255, 255, 1);
+    box-sizing: border-box;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(161, 161, 161, 1);
+    border-radius: 3px;
+    -moz-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    -webkit-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+  }
+  .filtertagPage {
+    margin: 0% 5%;
+  }
+  .filtertagPage h2 {    
+    font-size: 17px;
+    color: #31006F;
+  }
+
+label {
+    font-size: 12px;
+    color: #949494;
+}
+
+.row {
+    margin-top: 5px;
+}
+
+ .button-container {
+    padding-top: 15px;
+    padding-bottom : 15px;
+    display: flex;
+    width: 100%;
+} 
+
+.btn-primary {
+    border-radius: 2px;
+    font-size: 12px;
+    height: 35px;
+} 
+
+::ng-deep .btn-toolbar {
+    margin-left: 5px !important;
+    display: inline-block;
+    font-size: 11px !important;
+    width: 85px;
+}
+::ng-deep .ui-g-12 {
+    padding: 0px !important;
+}
+
+::ng-deep h3 {
+    color : #707070 !important;
+}
+
+::ng-deep .w-45 {
+    width: 45px;
+}
+
+::ng-deep body .ui-dropdown .ui-dropdown-label {
+    text-align: left !important;
+    color : gray !important;
+}
+
+::ng-deep .dpdownDiv .ui-dropdown {min-width: 100% !important;}
+::ng-deep .rule-table .ui-table .ui-table-tbody > tr {height : 31px !important;}
+.rule-table .table-header { 
+    font-family: "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 14px;
+	font-weight : 700;
+	color : #333333;}
+.padding-0 {padding: 0px;}
+.explabel-font { font-weight: bold; }
+.expDate {font-weight: bold; text-align: left;margin-left:-10px;}
+.fullwidth {width : 100%;}
+.right-10 {margin-right : 10px;}
+.img-loading img {width : 60%;}
+.filterCondDiv {margin-top :40px;}
+.txtareaheight {height : 90px !important;}
+.btn.btn-primary:disabled {cursor : default;}

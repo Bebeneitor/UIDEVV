@@ -1,0 +1,17 @@
+.text-box {
+    width: 960px;
+    height: 150px;
+    text-align: top;
+}
+textarea {
+    font-size: 1.2em !important;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.btn {
+    border-radius: 1px;
+}

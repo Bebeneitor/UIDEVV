@@ -1,0 +1,99 @@
+<div class="widget-container">
+  <div class="card">
+    <div class="card-header text-uppercase">
+      <div class="title-header">&nbsp;</div>
+      <span>{{title}}</span>
+      <span style="font-size : 12px; font-weight: 400;" *ngIf="dt != undefined">({{dt.filteredValue != null && dt.filteredValue != undefined ? dt.filteredValue.length : dt.value.length}} RULES)</span>
+      <div class="float-right">
+        <a nghref="#" class="icon-link" (click)="changeView('slider')" pTooltip="Slider View" tooltipPosition="left"
+          [ngClass]="typeView == 'slider' ? 'active' : ''"><i class="fa fa-heart"></i></a>
+        <a nghref="#" class="icon-link" (click)="changeView('table')" pTooltip="Table View" tooltipPosition="left"
+          [ngClass]="typeView == 'table' ? 'active' : ''"><i class="fa fa-table"></i></a>
+        <a nghref="#" class="icon-link" pTooltip="Refresh" tooltipPosition="left" (click)="refresh()"><i
+            class="fa fa-refresh"></i></a>
+      </div>
+    </div>
+    <div class="card-body" style="min-height: 150px; padding : 10px !important;">
+
+      <div class="container-fluid" style="padding: 0px;" *ngIf="data.length == 0" >
+        <div class="row">
+          <div class="div-no-data">
+            <img src="assets/img/no-data.png" class="img-no-data" />
+            <p class="no-data">NO DATA FOUND</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid" style="padding: 0px;" [hidden]="typeView != 'slider' || dataView.length == 0">
+        <div class="row" style="margin: 0px !important;">
+          <p-dataView [value]="dataView" [paginator]="true" [rows]="9" layout="grid">
+            <ng-template let-data pTemplate="gridItem">
+              <div class="ui-md-4 ui-sm-6">
+                <div class="text-center favorite-card" [style.background-color]="data.color"
+                  (click)="showFilteredData(data.category)">
+                  <div style="margin : auto;">
+                    <p style="font-size: 24px;color:#fff">{{data.count}}</p>
+                    <p style="font-size: 9px;color:#fff">{{limitString(data.category, 100)}}</p>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </p-dataView>
+        </div>
+      </div>
+
+      <div class="container-fluid" style="padding: 0px;" [hidden]="typeView != 'table' || data.length == 0">
+        <div class="">
+
+          <p-table #dt [columns]="cols" [value]="data" [paginator]="true" [rows]="15">
+            <ng-template pTemplate="header" let-columns>
+              <tr>
+                <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                  [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}">
+                  {{col.header}}
+                  <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                    ariaLabelDesc="Activate to sort in descending order"
+                    ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+                </th>
+              </tr>
+              <tr>
+                <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center"
+                  [ngStyle]="{'width': col.width}">
+                  <input *ngIf="col.field == 'id' || col.field == 'name' || col.field == 'type'" pInputText type="text"
+                    style="width : 100%; padding : 5px; border-radius: 5px"
+                    (input)="dt.filter($event.target.value, col.field, 'contains')"
+                    [placeholder]="'Search by ' + col.header">
+
+                  <p-dropdown [(ngModel)]="selectedCategory" *ngIf="col.field == 'category'" appendTo='body'
+                    [options]="categories" [style]="{'width':'100%'}"
+                    (onChange)="dt.filter($event.value, col.field, 'equals')"></p-dropdown>
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+              <tr [pSelectableRow]="rowData">
+                <td class="small-td" *ngFor="let col of columns">
+                  <span *ngIf="col.field == 'id'">
+                    <a style="text-decoration: underline; cursor: pointer;color:inherit" nghref="#" (click)="redirect(rowData.favoriteId, rowData.type)">{{rowData.id}}</a>
+                  </span>
+                  <span *ngIf="col.field == 'name'">
+                    {{rowData.name}}
+                  </span>
+                  <span *ngIf="col.field == 'category'">
+                    {{rowData.category}}
+                  </span>
+                  <span *ngIf="col.field == 'type'">
+                    {{rowData.type}}
+                  </span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+          <button style="margin-top: 10px;" *ngIf="selectedCategory != null && isClick"
+            class="btn btn-sm btn-block btn-primary" (click)="return()"><i class="fa fa-arrow-left"
+              aria-hidden="true"></i> Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+div.file-uploader label {
+    display: block;
+    margin-top: 5px;
+}
+
+div.file-uploader div.file-uploader-container {
+    width: 100%; 
+}
+
+div.file-uploader input.input-text-one {
+    width: 50%; 
+    display: inline-block;
+}
+
+div.file-uploader input.input-text-one-100 {
+    width: 100%; 
+    display: inline-block;
+}
+
+div.file-uploader input.input-text-two {
+    width: 73%; 
+    display: inline-block; 
+    margin-left: 3px;
+}
+
+div.file-uploader input.input-text-two-100 {
+    width: 87%; 
+    display: inline-block; 
+}
+
+div.file-uploader button.load-button {
+    width: 20%; 
+    display: inline-block; 
+    max-width: 38px;
+    height: 28px;
+}
+
+div.file-uploader .input-group-file-uploader {
+    display: inline-block !important;
+    width: 50%;
+}
+
+div.file-uploader .input-group-file-uploader-100 {
+    display: inline-block !important;
+    width: 100%;
+}
+
+div.file-uploader div.inline-block {
+    display: inline-block !important;
+}
+
+div.file-uploader a.link-file-download {
+    color: #31006F !important;
+    font-size: 11px;
+    margin-left: 0px;
+    text-decoration: underline;
+}
+
+div.file-uploader textarea.input-text-area {
+    width: 100%;
+}

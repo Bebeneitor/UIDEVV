@@ -1,0 +1,17 @@
+<div class="sections-navigation-wrapp" [ngClass]="{ 'is-fullscreen': isFullScreen }">
+  <button
+    (click)="toggleNavigation()"
+    class="navigation-toggle"
+    [ngClass]="{ 'closed-toggle': !isNavigationOpen }"
+    [attr.slm-id]="'navigation_toggle_btn'"
+  >
+    <span class="fa fa-bars"></span>
+  </button>
+  <ul [attr.slm-id]="'navigation_panel'" *ngIf="isNavigationOpen">
+    <li *ngFor="let section of navigationItems">
+      <button (click)="scrollTo(section.id)" [attr.slm-id]="section.id">
+        {{ section.name }}
+      </button>
+    </li>
+  </ul>
+</div>

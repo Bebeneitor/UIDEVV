@@ -1,0 +1,101 @@
+.flex-row,
+.flex-container  {
+  display: flex;
+}
+
+.flex-column {
+  display: flex;
+  padding: 0px 15px 0px 15px;
+  height: 100%;
+  width: 400px;
+}
+
+.flex-column-button {
+  display: flex;
+  flex-direction: column;
+  width: 80px;
+}
+
+.disable-field {
+  background-color: #F5F5F5;
+}
+.provider-header {
+  margin-left: 15px;
+  font-size: 1.15em;
+  padding-bottom: 10px;
+}
+.flex-column-item {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.button-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  padding-bottom: 15px;
+}
+fieldset {
+  margin-left: 15px;
+}
+button {
+  border-radius: 2px !important;
+  height: 40px;
+  margin: 10px 0px 10px 0px;
+  font-size: 20px;
+}
+
+legend {
+  display: flex;
+  font-size: 16px !important;
+  background: inherit;
+  align-items: center;
+}
+legend span {
+  background: #fff;
+  margin: 0 15px;
+}
+legend:after {
+  background: darkgrey;
+  height: 1px;
+  flex: 1;
+  content: '';
+  margin-top: 9px;
+  margin-left: -15px;
+}
+legend.right:before {
+  background: none;
+}
+.border {
+  border: 1px grey solid;
+}
+.ecl-pad {
+  margin: 5px 0px 5px 0px;
+  padding: 10px;
+}
+.set-space {
+  padding: 0px 15px 15px 15px;
+}
+
+.disable-field ::ng-deep.ui-listbox .ui-listbox-list .ui-listbox-item,
+.disable-field ::ng-deep.ui-listbox .ui-listbox-list .ui-listbox-item:hover {
+  background-color: #F5F5F5 ;
+  pointer-events: none;
+}
+.disable-field ::ng-deep.ui-widget-header.ui-listbox-header {
+  background-color: #F5F5F5 ;
+}
+.disable-field ::ng-deep.ui-listbox .ui-listbox-list .ui-listbox-item .ui-chkbox,
+.disable-field ::ng-deep.ui-chkbox {
+  display: none;
+}
+.disable-field ::ng-deep.ui-listbox-filter-container {
+  width: 100% !important;
+  background-color: #FFFFFF;
+}
+
+.disable-field ::ng-deep.ui-inputtext {
+  background-color: transparent !important;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,21 @@
+.fa_custom {
+    color: rgb(204, 0, 187);
+    padding-left: 8px;
+}
+
+.fa_pad {
+    padding-right: 10px;
+}
+
+p-table::ng-deep .ui-table table {
+    table-layout: auto !important;
+  }
+
+p-table#industryUpdate::ng-deep .ui-paginator {
+      border-top: none !important;
+  }
+
+::ng-deep .ui-tooltip.ui-widget.ui-tooltip-right {
+  max-width: 400px;
+  word-break: keep-all;
+}

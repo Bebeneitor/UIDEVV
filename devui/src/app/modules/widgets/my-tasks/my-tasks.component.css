@@ -1,0 +1,94 @@
+span.number {
+    display: block;
+    text-align: center;
+    font-size: 33px;
+    font-weight: 100;
+}
+
+span.text {
+    display: block;
+    font-size: 9px;
+    text-align: center;
+    color : #ffffff;
+    font-weight: 400;
+    word-wrap: break-word;
+    white-space: normal;
+    margin-top: 5px;
+}
+
+.container-text {
+    cursor: pointer;
+    border-radius: 5px;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    padding-right: 5px !important;
+    padding-left: 5px !important;
+    display: flex;
+    align-items: center;
+}
+
+.badge {
+    min-width: 50px !important;
+    min-height: 85px !important;
+    opacity: 0.7;
+    padding: 9px;
+    text-align: center;
+    margin-bottom: 7px;
+    font-weight: 300 !important;
+    width: 100%;
+    -webkit-box-shadow: 0 7px 2px -3px rgba(143,143,143,0.56);
+    -moz-box-shadow: 0 7px 2px -3px rgba(143,143,143,0.56);
+    box-shadow: 0 7px 2px -3px rgba(143,143,143,0.56);
+}
+
+.badge:hover {
+    opacity: 1;
+}
+
+.badge-primary{
+    background-color : #31006F !important;
+}
+
+.badge-success{
+    background-color : #9579D3 !important;
+}
+
+.badge-secondary{
+    background-color : #E9008B !important;
+}
+
+.badge-danger{
+    background-color : #333333 !important;
+}
+
+.small-badge {
+    min-width: unset !important;
+    min-height: unset !important;
+    margin-bottom: unset !important;
+    width: 20px !important;
+    padding: 6px !important;
+}
+
+p-chart > div > div > canvas {
+    width:  100% !important;
+}
+
+/*.container-text-blue:hover {
+    background: #062699; 
+}
+
+.container-text-green:hover {
+    background: #00853D; 
+}
+
+.container-text-yellow:hover {
+    background: #8e0155; 
+}
+
+.container-text-red:hover {
+    background: #D6312C; 
+}
+
+.container-text:hover > span {         
+    color : #fff !important;  
+}*/

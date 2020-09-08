@@ -1,0 +1,127 @@
+<fieldset [disabled]="provDialogDisable" id="ruleCreationProvider">
+  <legend *ngIf="maintenanceOnly">Provider Updates</legend>
+  <label class="provider-header" *ngIf="fromMaintenanceProcess">Provider Selection</label>
+  <div class="flex-row" *ngIf="!fromMaintenanceProcess">
+    <label class="set-space">Provider Type:</label>
+    <span class="set-space">
+      <input type="radio" name="providerTypeInd" [(ngModel)]="currRuleInfo.providerTypeInd" [value]="1"><label>Same
+        Provider</label>
+    </span>
+    <span class="set-space">
+      <input type="radio" name="providerTypeInd" [(ngModel)]="currRuleInfo.providerTypeInd" [value]="0"><label>Any
+        Provider</label>
+    </span>
+  </div>
+
+  <div class="flex-row" *ngIf="!fromMaintenanceProcess">
+    <label class="set-space">Specific Specialities/Subspecialities Applicable:</label>
+    <span class="set-space">
+      <input type="radio" name="specialityInd" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
+        [(ngModel)]="currRuleInfo.specialityInd" [value]="1"><label>Yes</label>
+    </span>
+    <span class="set-space">
+      <input type="radio" name="specialityInd" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
+        [(ngModel)]="currRuleInfo.specialityInd" [value]="0"><label>No</label>
+    </span>
+  </div>
+
+  <div [ngClass]="!fromMaintenanceProcess ? 'flex-row' : 'flex-row disable-field'">
+    <fieldset [disabled]="provDialogDisable" id="fieldset">
+      <label>List Of Speciality Types</label>
+      <div class="flex-row border ecl-pad">
+        <div class="flex-column" *ngIf="!fromMaintenanceProcess">
+          <p-listbox class="list-box" [readonly]="disableSpecialityList || ruleReadOnly"
+            [disabled]="specialityListboxDisable || provDialogDisable" [options]="specialityTypes"
+            [(ngModel)]="selectedspecialityTypes" [ngModelOptions]="{standalone: true}" multiple="multiple"
+            checkbox="checkbox" filter="filter" style="width:100%;overflow:auto;margin-top:20px;"
+            [style]="{'width':'100%','overflow': 'auto','height':'400px', 'margin-top': '1px'}">
+          </p-listbox>
+        </div>
+        <div class="flex-column-button" *ngIf="!fromMaintenanceProcess">
+          <div class="button-item">
+            <button id="addIncludeSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="moveToIncludeR()"> > </button>
+            <button id="removeIncludeSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="moveToIncludeL()"> &#60; </button>
+          </div>
+          <div class="button-item">
+            <button id="addExcludeSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="moveToExcludeR()"> > </button>
+            <button id="removeExcludeSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="moveToExcludeL()"> &#60; </button>
+          </div>
+        </div>
+        <div class="flex-column">
+          <div class="flex-column-item">
+            <label>Include</label>
+            <p-listbox class="list-box" [readonly]="disableSpecialityList || ruleReadOnly"
+              [disabled]="specialityListboxDisable || provDialogDisable" [options]="includedSpecialityTypes"
+              [(ngModel)]="selectedIncludedTypes" [ngModelOptions]="{standalone: true}" (click)="onClickSpeciality()"
+              multiple="multiple" checkbox="checkbox" filter="filter" style="width:100%;overflow:auto;"
+              [style]="{'width':'100%','overflow': 'auto','height':'180px', 'margin-top': '1px'}">
+            </p-listbox>
+          </div>
+          <div class="flex-column-item">
+            <label>Exclude</label>
+            <p-listbox class="list-box" [readonly]="disableSpecialityList || ruleReadOnly"
+              [disabled]="specialityListboxDisable || provDialogDisable" [options]="excludedSpecialityTypes"
+              [(ngModel)]="selectedExcludedTypes" [ngModelOptions]="{standalone: true}" (click)="onClickSpeciality()"
+              multiple="multiple" checkbox="checkbox" filter="filter" style="width:100%;overflow:auto;"
+              [style]="{'width':'100%','overflow': 'auto','height':'180px', 'margin-top': '1px'}">
+            </p-listbox>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset [disabled]="provDialogDisable" id="fieldset">
+      <label>List of Subspecialty Types</label>
+      <div class="flex-row border ecl-pad">
+        <div class="flex-column" *ngIf="!fromMaintenanceProcess">
+          <p-listbox class="list-box" [readonly]="disableSpecialityLis || ruleReadOnly"
+            [disabled]="specialityListboxDisable || provDialogDisable" [options]="subspecialityTypesFiltered"
+            [(ngModel)]="selectedSubspecialityTypes" [ngModelOptions]="{standalone: true}" multiple="multiple"
+            checkbox="checkbox" filter="filter" style="width:100%;overflow:auto;margin-top:20px;"
+            [style]="{'width':'100%','overflow': 'auto','height':'400px', 'margin-top': '1px'}">
+          </p-listbox>
+        </div>
+
+        <div class="flex-column-button" *ngIf="!fromMaintenanceProcess">
+          <div class="button-item">
+            <button id="addIncludeSubSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="setToMoveSub(1)"> > </button>
+            <button id="removeIncludeSubSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="setToMoveSub(3)"> &#60; </button>
+          </div>
+          <div class="button-item">
+            <button id="addExcludeSubSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="setToMoveSub(2)"> > </button>
+            <button id="removeExcludeSubSpecialty" class="button btn-primary" [disabled]="disableSpecialityList"
+              (click)="setToMoveSub(4)"> &#60; </button>
+          </div>
+        </div>
+        <div class="flex-column">
+          <div class="flex-column-item">
+            <label>Include</label>
+            <p-listbox class="list-box" [readonly]="disableSpecialityList || ruleReadOnly"
+              [disabled]="specialityListboxDisable || provDialogDisable" [options]="includedSubspecialityTypes"
+              [(ngModel)]="selectedIncludedSubspecialityTypes" [ngModelOptions]="{standalone: true}" multiple="multiple"
+              checkbox="checkbox" filter="filter" style="width:100%;overflow:auto;"
+              [style]="{'width':'100%','overflow': 'auto','height':'180px', 'margin-top': '1px'}">
+            </p-listbox>
+          </div>
+
+          <div class="flex-column-item">
+            <label>Exclude</label>
+            <p-listbox class="list-box" [readonly]="disableSpecialityList || ruleReadOnly"
+              [disabled]="specialityListboxDisable || provDialogDisable" [options]="excludedSubspecialityTypes"
+              [(ngModel)]="selectedExcludedSubspecialityTypes" [ngModelOptions]="{standalone: true}" multiple="multiple"
+              checkbox="checkbox" filter="filter" style="width:100%;overflow:auto;"
+              [style]="{'width':'100%','overflow': 'auto','height':'180px', 'margin-top': '1px'}">
+            </p-listbox>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+</fieldset>

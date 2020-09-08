@@ -1,0 +1,51 @@
+<div class="audit-log">
+  <div class="row">
+    <div class="col-12">
+      <div class="ui-g radio-audit-log">
+        Deltas:
+        <span *ngFor="let d of deltas; let i = index">
+          &nbsp;
+          <p-radioButton name="type" [value]="d.type" [label]="d.name" [(ngModel)]="type"
+            (onClick)="onChangeDelta(d.type, i)">
+          </p-radioButton>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading">
+    <div class="row" *ngIf="auditLogs.length == 0">
+      <div class="col-12">
+        <div class="div-no-data" style="margin: unset !important;">
+          <img src="assets/img/no-data.png" class="img-no-data" />
+          <p class="no-data">NO RECORDS</p>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="auditLogs.length > 0">
+      <div class="row">
+          <div class="col-6">
+            <h6>{{deltas[idType].longNameOld}}</h6>
+          </div>
+          <div class="col-6">
+            <h6>{{deltas[idType].longNameNew}}</h6>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col-12"><hr/></div>
+      </div>
+    </div>
+    <div class="row" *ngFor="let l of auditLogs">
+      <div class="col-12">
+        <label>{{l.columnName}}</label>
+      </div>
+      <div class="col-6">
+        <div class="text-container-diff" [innerHTML]="parse(l.oldValue)"></div>
+      </div>
+      <div class="col-6">
+        <div class="text-container-diff" [innerHTML]="parse(l.delta)"></div>
+      </div>
+    </div>
+  </div>
+
+</div>

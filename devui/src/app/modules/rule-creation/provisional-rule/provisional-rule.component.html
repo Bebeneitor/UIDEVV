@@ -1,0 +1,473 @@
+<p-blockUI baseZIndex="10001" [blocked]="loading">
+    <div class="block-img-loading text-center">
+        <img src="assets/img/loading.gif" style="width: 60%" />
+        <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+    </div>
+</p-blockUI>
+
+
+<h5 *ngIf="selectorConfig != undefined" style="margin-left: 20px; margin-right: 20px;">{{header}}</h5>
+<div #parentDiv [ngClass]="dialogMode ? 'provisionalRule' : 'provisionalRule whitebg'">
+    <form ngNativeValidate>
+        <fieldset [ngClass]="dialogMode ? 'grid-container top-section-sticky' : 'grid-container'">
+            <div style="z-index: 99999; width: 100%; margin-bottom: -10px;"
+                *ngIf="ruleInfo.ruleId != undefined || ruleInfo.ideaId != undefined">
+                <app-marker-favorites [id]="ruleInfo.ruleId == undefined ? ruleInfo.ideaId : ruleInfo.ruleId"
+                    [type]="ruleInfo.ruleId == undefined ? 'IDEA' : 'RULE'" [readOnlyView]="false">
+                </app-marker-favorites>
+            </div>
+            <div class="row" Id="provisonalRows">
+                <div class="col-md-2">
+                    <label *ngIf="!ruleReview">Provisional Rule Id</label>
+                    <label *ngIf="ruleReview">Rule Id</label>
+                    <input type="text" name="ruleCode" class="disable widthSet" [ngModel]="ruleInfo.ruleCode"
+                        [readonly]="true">
+                </div>
+                <div [ngClass]="ruleProvisionalReview ? 'col-md-4' : 'col-md-2'">
+                    <label>Library PRM</label>
+                    <input type="text" name="library-prm-number" class="disable widthSet"
+                        pTooltip="{{libraryPrmNumber}}" tooltipPosition="bottom" [ngModel]="libraryPrmNumber"
+                        [readonly]="true">
+                </div>
+                <div class="col-md-2">
+                    <label><span class="required-field-color">*</span>Logic Effective Date</label>
+                    <p-calendar type="date" id="ruleLogicEffDt" name="ruleLogicEffDt" [maxDate]="maxDate"
+                        [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRange"
+                        [(ngModel)]="ruleInfo.ruleLogicEffDt"
+                        [disabled]="(provDialogDisable || readOnlyView || disableTopFields) && !retireStatusChild"
+                        dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy">
+                    </p-calendar>
+                </div>
+                <div class="col-md-2" *ngIf="ruleReview">
+                    <label><span class="required-field-color">*</span>Approval Status</label>
+                    <p-dropdown name="selectedReviewStatus" [options]="reviewStatus" [(ngModel)]="selectedReviewStatus"
+                        [style]="{'width':'100%'}"
+                        [disabled]="(!isSameSim && readOnlyView) || disableTopFields || impactTypeNo">
+                    </p-dropdown>
+                </div>
+                <div class="col-md-2" *ngIf="ruleProvisionalReview">
+                    <label>Review Status</label>
+                    <p-dropdown name="selectedReviewStatus" [options]="reviewStatus" [(ngModel)]="selectedReviewStatus"
+                        [disabled]="readOnlyView" [style]="{width:'100%'}">
+                    </p-dropdown>
+                </div>
+                <div class="col-md-2" *ngIf="ruleReview">
+                    <label><span class="required-field-color">*</span>Approval Comments</label>
+                    <input type="text" name="ruleReviewComments" class="widthSet" pTooltip="{{ruleReviewComments}}"
+                        tooltipPosition="bottom" [(ngModel)]="ruleReviewComments" style="width:90%;"
+                        [disabled]="(!isSameSim && readOnlyView)  || disableTopFields || impactTypeNo"></div>
+                <div class="col-md-2" *ngIf="ruleProvisionalReview || wasNeedMoreInfo">
+                    <label>Review Comments</label>
+                    <input type="text" name="ruleReviewComments" class="widthSet" pTooltip="{{ruleReviewComments}}"
+                        tooltipPosition="bottom" [(ngModel)]="ruleReviewComments" [disabled]="readOnlyView">
+                </div>
+                <div id="lobID" class="col-md-2">
+                    <label>Lines Of Business</label>
+                    <p-multiSelect [options]="lobs" (onChange)="checkStateJurisdiction()" name="selectedLobs"
+                        id="lobfield"
+                        *ngIf="!((provDialogDisable || readOnlyView || disableTopFields) && !retireStatusChild)"
+                        [(ngModel)]="selectedLobs" [style]="{width:'100%'}">
+                    </p-multiSelect>
+                    <div class="adjust-margin"
+                        *ngIf="(provDialogDisable || readOnlyView || disableTopFields) && !retireStatusChild">
+                        <div class="col-md-12">
+                            <p-multiSelect #lobSelect [options]="lobs" (onChange)="checkStateJurisdiction()"
+                                name="selectedLobs" pTooltip={{selectedLobsTooltip}} tooltipPosition="bottom"
+                                [appendTo]="lobSelect" id="lobfield" [disabled]="true" [(ngModel)]="selectedLobs"
+                                [style]="{width:'100%'}">
+                            </p-multiSelect>
+                        </div>
+                    </div>
+                </div>
+                <div [ngClass]="ruleProvisionalReview ? 'col-md-3' : 'col-md-2'">
+                    <label><span class="required-field-color">*</span>Category</label>
+                    <p-dropdown [options]="categories" (onChange)="reloadAssignTo()"
+                        [disabled]="provDialogDisable || readOnlyView || fromMaintenanceProcess" name="selectedCategory"
+                        [(ngModel)]="ruleInfo.category.categoryId" [required]="true" [style]="{width:'100%'}">
+                    </p-dropdown>
+                </div>
+                <div [ngClass]="ruleProvisionalReview ? 'col-md-2' : 'col-md-1'">
+                    <label>State</label>
+                    <p-multiSelect [options]="states"
+                        *ngIf="!(provDialogDisable || disableState || readOnlyView || disableTopFields)"
+                        name="selectedStates" [(ngModel)]="selectedStates" [style]="{width:'100%'}">
+                    </p-multiSelect>
+                    <div class="adjust-margin"
+                        *ngIf="provDialogDisable || disableState || readOnlyView || disableTopFields">
+                        <div class="col-md-12">
+                            <p-multiSelect #stateSelect [options]="states" pTooltip={{selectedStatesTooltip}}
+                                tooltipPosition="bottom" [appendTo]="stateSelect" [disabled]="true"
+                                name="selectedStates" [(ngModel)]="selectedStates" [style]="{width:'100%'}">
+                            </p-multiSelect>
+                        </div>
+                    </div>
+                </div>
+                <div id="jurisID" class="col-md-1">
+                    <label>Jurisdiction</label>
+                    <p-multiSelect [options]="jurisdictions"
+                        *ngIf="!(provDialogDisable || disableJurisdiction || readOnlyView)" name="selectedJurisdictions"
+                        [(ngModel)]="selectedJurisdictions" [style]="{width:'100%'}">
+                    </p-multiSelect>
+                    <div class="adjust-margin" *ngIf="provDialogDisable || disableJurisdiction || readOnlyView">
+                        <div class="col-md-12">
+                            <p-multiSelect #jurisdictionSelect [options]="jurisdictions"
+                                pTooltip={{selectedJurisdictionsTooltip}} tooltipPosition="bottom"
+                                [appendTo]="jurisdictionSelect" [disabled]="true" name="selectedJurisdictions"
+                                [(ngModel)]="selectedJurisdictions" [style]="{width:'100%'}">
+                            </p-multiSelect>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <label *ngIf="!ruleReview">
+                        <span class="required-field-color">*</span>Provisional Rule Name</label>
+                    <label *ngIf="ruleReview">
+                        <span class="required-field-color">*</span>Rule Name</label>
+                    <input type="text" name="ruleName" class="widthSet"
+                        [disabled]="provDialogDisable || readOnlyView || fromMaintenanceProcess"
+                        [(ngModel)]="ruleInfo.ruleName">
+
+                </div>
+                <div class="col-md-6">
+                    <label><span class="required-field-color">*</span>Rule Logic</label>
+                    <textarea style="width:100%;height:60px;" name="ruleLogicOriginal"
+                        [(ngModel)]="ruleInfo.ruleLogicOriginal"
+                        [disabled]="provDialogDisable || readOnlyView || fromMaintenanceProcess"
+                        pTooltip="{{ruleInfo.ruleLogicOriginal}}" tooltipPosition="top"></textarea>
+                </div>
+                <div class="col-md-2" *ngIf="isProvisionalRuleCreation">
+                    <label><span class="required-field-color">*</span>Assign To</label>
+                    <p-dropdown [options]="policyOwners" name="selectedPO" [required]="true" [style]="{width:'100%'}"
+                        (onChange)="validSelectedPo()" [(ngModel)]="ruleInfo.assignedTo" [disabled]="provDialogDisable">
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <hr style="width: 100%">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!--     Tab View Of the Provisional Rule Screen -->
+        <p-tabView [style]="{padding: '20px'}" id="tabView" [(activeIndex)]="indexVal" (onChange)="onTabChange($event)">
+
+            <!--     Rationale tabpanel view including opportunity value selector -->
+
+            <p-tabPanel header="Rationale">
+
+                <app-opportunity-value [(ruleId)]="ruleId" [(ruleInfo)]="ruleInfo"
+                    [fromMaintenanceProcess]="fromMaintenanceProcess"
+                    [provDialogDisable]="provDialogDisable || readOnlyView"
+                    (messageSend)="messageRecieve($event)"></app-opportunity-value>
+
+                <app-rationale [(ruleInfo)]="ruleInfo" [(fromMaintenanceProcess)]="fromMaintenanceProcess"
+                    [provDialogDisable]="provDialogDisable || readOnlyView">
+                </app-rationale>
+                
+            </p-tabPanel>
+
+            <!--     Claims tabpanel view -->
+
+
+            <p-tabPanel header="Claims">
+
+                <app-claims [(ruleInfo)]="ruleInfo" [(ruleInfoOriginal)]="ruleInfoOriginal" 
+                    [(ruleRevenueCodesList)]="ruleRevenueCodesList"
+                    [(fromMaintenanceProcess)]="fromMaintenanceProcess"
+                    [provDialogDisable]='provDialogDisable || readOnlyView'>
+                </app-claims>
+
+            </p-tabPanel>
+
+            <!--     Providers tabpanel view -->
+            <p-tabPanel header="Providers">
+                <!-- Rule Creation & Read-Only Rule maintenance -->
+                <app-provisional-rule-providers [(ruleInfoOriginal)]="ruleInfoOriginal || ruleInfo"
+                    [(fromMaintenanceProcess)]="fromMaintenanceProcess" [(ruleReadOnly)]="ruleReadOnly"
+                    [(includedSubspecialityTypes)]="includedSubspecialityTypes"
+                    [(excludedSubspecialityTypes)]="excludedSubspecialityTypes"
+                    [(includedSpecialityTypes)]="includedSpecialityTypes"
+                    [(excludedSpecialityTypes)]="excludedSpecialityTypes"
+                    [provDialogDisable]="provDialogDisable || readOnlyView">
+                </app-provisional-rule-providers>
+                <!-- Editable Rule maintenance -->
+                <app-provisional-rule-providers *ngIf="fromMaintenanceProcess" [(ruleInfo)]="ruleInfo"
+                    [maintenanceOnly]="maintenanceOnly" [(fromMaintenanceProcess)]="!fromMaintenanceProcess"
+                    [provDialogDisable]="provDialogDisable || readOnlyView">
+                </app-provisional-rule-providers>
+            </p-tabPanel>
+            <!--     Codes tabpanel view -->
+
+            <p-tabPanel header="Codes">
+
+                <app-provisional-rule-codes [(ruleInfo)]="ruleInfo" [(userId)]="userId"
+                    [(ruleInfoOriginal)]="ruleInfoOriginal" [(fromMaintenanceProcess)]="fromMaintenanceProcess"
+                    [provDialogDisable]="!isSameSim && (provDialogDisable || readOnlyView)  && logicalCodesFlag"
+                    [readOnlyView]="!isSameSim && readOnlyView"
+                    (canContinueAction)="canContinueAction($event)">
+                </app-provisional-rule-codes>
+
+            </p-tabPanel>
+
+            <!--     Impacts tabpanel view -->
+
+            <p-tabPanel header="ICDs/Impacts">
+
+                <app-impacts [(ruleInfo)]="ruleInfo" 
+                [(ruleInfoOriginal)]="ruleInfoOriginal"
+                [(fromMaintenanceProcess)]="fromMaintenanceProcess"
+                [provDialogDisable]='provDialogDisable || readOnlyView'></app-impacts>
+
+            </p-tabPanel>
+
+            <!--     References tabpanel view -->
+
+            <p-tabPanel header="References">
+
+                <app-provisional-references [(ruleInfo)]="ruleInfo" [ruleReferences]="ruleReferences"
+                    [ruleReferencesArray]="ruleReferencesArray" [provDialogDisable]='provDialogDisable'
+                    [reassignmentFlag]="reassignmentFlag" [readOnlyView]='readOnlyView' [isSameSim]='isSameSim'
+                    [provRuleNeedsMoreInfo]="provRuleNeedsMoreInfo" [addButtonDisable]="addButtonDisable"
+                    [ruleCreationStatus]="ruleCreationStatus" [ruleId]="ruleInfo.ruleId" [reference]="reference"
+                    [eclRef]="eclRef" [selectedReference]="selectedReference"
+                    [fromMaintenanceProcess]="fromMaintenanceProcess"
+                    [isReferenceDisableObject]="isReferenceDisableObject" [isRemovableObject]="isRemovableObject"
+                    [isProvisionalRuleCreation]="isProvisionalRuleCreation" [isSavableObject]="isSavableObject"
+                    [isAddingObject]="isAddingObject" [ruleImpactAnalysisRun]="ruleImpactAnalysisRun"
+                    (approvalDropdownRefresh)="populateApprovalDropdownValues()"
+                    (clearApprovalValues)="resetApprovalValues()" (enableApprovalStatus)="enableApprovalDetails()"
+                    (populateApprovalStatus)="populateApprovalDropdownValues()"
+                    (retireStatusValue)="setRetireStatusValue($event)"
+                    (setDefaultValueForApprovalDropdown)="setDefaultValueForImpactTypeChange()"
+                    (retireRuleTabStatus)="retireRuleTabStatus()">
+                </app-provisional-references>
+
+            </p-tabPanel>
+
+            <!--    Rule Details tabpanel view -->
+
+            <p-tabPanel header="Rule Update" *ngIf="fromMaintenanceProcess">
+                <app-rule-details [(ruleInfo)]="ruleInfo"
+                    [provDialogDisable]='!isSameSim && (provDialogDisable || readOnlyView)'></app-rule-details>
+            </p-tabPanel>
+
+
+            <!--    Rule Application tabpanel view -->
+
+            <p-tabPanel header="Rule Application">
+                <app-rule-application *ngIf="ruleInfo.ruleId != undefined" [(showELLLink)]="showELLLink" [(ruleInfo)]="ruleInfo" 
+                    [(isIdea)]="isIdea" (loadingELLDetail)="onLoadingELLDetail($event)" (ruleApplicationsEmitter)="onRuleApplicationsLoad($event)">
+                </app-rule-application>
+            </p-tabPanel>
+
+            <!--    Rule History tabpanel view -->
+
+            <p-tabPanel header="Rule History">
+
+                <app-rule-history [(ruleId)]="ruleId" [ruleCreationStatus]="ruleCreationStatus">
+                </app-rule-history>
+
+            </p-tabPanel>
+
+            <p-tabPanel header="Audit Log" [disabled]="!enableAuditLogTab()">
+                <app-audit-log [(ruleInfo)]="ruleInfo"
+                    *ngIf="(indexVal == 8 || indexVal == 9)&& ruleInfo.ruleId != undefined">
+                </app-audit-log>
+            </p-tabPanel>
+
+
+        </p-tabView>
+
+        <!--    End of tab views -->
+
+        <div *ngIf="isProvisionalRuleCreation && !provRuleNeedsMoreInfo">
+            <div class="row">
+                <div class="col" style="margin-left: 10px">
+                    <button class="btn btn-primary" style="width: 10%; height: 2.5em;" (click)="addRule()"
+                        [disabled]="addButtonDisable">Add</button>
+                </div>
+            </div>
+
+            <div style="margin: 10px;">
+                <p-table #viewGrid [columns]="cols" [value]="filteredRules" [paginator]="true" selectionMode="single"
+                    [(selection)]="selectedRule" [resizableColumns]="true" columnResizeMode="fit"
+                    [reorderableColumns]="true" [rows]="5" [rowsPerPageOptions]="[5,10]" [loading]="loading"
+                    [responsive]="true" sortField="ruleCode" sortOrder="1" (onRowSelect)="onRowSelect($event)"
+                    dataKey="ruleCode">
+
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                                [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+                                {{col.header}}
+                                <span *ngIf="col.field !== 'delete'">
+                                    <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                                        ariaLabelDesc="Activate to sort in descending order"
+                                        ariaLabelAsc="Activate to sort in ascending order">
+                                    </p-sortIcon>
+                                </span>
+                            </th>
+                        </tr>
+
+                    </ng-template>
+                    <ng-template pTemplate="body" let-rule let-columns="columns">
+                        <tr [pSelectableRow]="rule">
+                            <td class="small-td" *ngFor="let col of columns">
+                                <span *ngIf="col.field == 'ruleCode'" class="span-centered">
+                                    <a (click)="viewRuleModal(rule)">{{rule.ruleCode}}</a>
+                                </span>
+
+                                <span *ngIf="col.field == 'name'">
+                                    {{rule.name}}
+                                </span>
+                                <span *ngIf="col.field === 'delete'" class="span-centered" style="cursor: pointer"
+                                    (click)="deleteRule(rule)"><i class="fa fa-trash"
+                                        style="margin:4px 4px 4px 4px"></i>
+                                </span>
+
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="paginatorright" let-state>
+                        <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+                            Showing <b>{{(state.page  * state.rows) + 1}}</b> -
+                            <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+                            of <b>{{state.totalRecords}}</b>
+                        </span>
+                        <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No
+                            records found.</span>
+                    </ng-template>
+                </p-table>
+
+            </div>
+        </div>
+
+        <!--   Navigation Buttons -->
+        <div [ngClass]="dialogMode ? 'row bottom-section-sticky' : 'row'" Id="provisonalRows">
+            <div *ngIf="!readOnlyView || isSameSim" class="col"><button class="btn btn-primary"
+                    [disabled]="saveBtnDisable" style="width:90%;" (click)="checkToContinueAction('save')">Save</button>
+            </div>
+            <div class="col">
+                <button *ngIf="!fromMaintenanceProcess && !readOnlyView" class="btn btn-primary" style="width:90%;"
+                    (click)="checkToContinueAction('submit')" [disabled]='submitBtnDisable'>Submit</button>
+                <button *ngIf="fromMaintenanceProcess && (isSameSim || !readOnlyView)" class="btn btn-primary"
+                    style="width:90%;" (click)="clearData()">Refresh</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-primary" style="width:90%;" *ngIf="!templateActivate"
+                    (click)="confirmExit()">Exit</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div *ngIf="templateActivate" class="button-bar-engine">
+    <fieldset class="field-set-custom">
+        <legend>Rule Engine Adoption</legend>
+        <!-- template Buttons -->
+        <div class="template" Id="provisonalRows">
+            <div class="full-size">
+                <button class="btn btn-primary btn-size" (click)="showIcmsTemplate(ruleInfo)">ICMS</button>
+            </div>
+            <div *ngIf="showChangeRmr && deltas?.length > 0" class="full-size">
+                <button class="btn btn-primary btn-size" (click)="showIcmsTemplateChange(ruleInfo)">ICMS Change
+                    RMR</button>
+            </div>
+            <div class="full-size">
+                <button class="btn btn-primary btn-size" (click)="showIconsForCVP()">CVP</button>
+                <div *ngIf="showIcon" class="col no-pad">
+                    <a style="font-size: 18px" (click)="downloadCvpFiles()">Open CVP template to fill.</a><br>
+                    <a style="font-size: 18px" (click)="downloadCvpFilesById()">Download CVP template.</a>
+                    <p-fileUpload #uploadControl customUpload="true" [showUploadButton]="true" [maxFileSize]="1000000"
+                        [fileLimit]="1" [multiple]="false" (uploadHandler)="onFileUpload($event)">
+                        <ng-template pTemplate="toolbar">
+                            <div>Upload CVP Template to ECL</div>
+                        </ng-template>
+                    </p-fileUpload>
+                </div>
+            </div>
+            <div class="full-size">
+                <button class="btn btn-primary btn-size" (click)="showIconsForRPE()">CPE</button>
+                <div *ngIf="showRpeIcon" class="col no-pad">
+                    <a style="font-size: 18px" (click)="downloadRpeFiles()">Open CPE template to fill.</a><br>
+                    <a style="font-size: 18px" (click)="downloadRpeFilesById()">Download CPE template.</a>
+                    <p-fileUpload #rpeUploadControl customUpload="true" [showUploadButton]="true"
+                        [maxFileSize]="1000000" [fileLimit]="1" [multiple]="false"
+                        (uploadHandler)="rpeFileUpload($event)">
+                        <ng-template pTemplate="toolbar">
+                            <div>Upload CPE Template to ECL</div>
+                        </ng-template>
+                    </p-fileUpload>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+    <button class="btn btn-primary" style="width: 19%; height: 35px; padding: 0; margin-top: 25px; border-radius: 2px;"
+        (click)="confirmExit()">Exit</button>
+</div>
+
+<!--   Confirmation Dialog -->
+<p-dialog header="Confirmation" [class]="confirmDialog" [(visible)]="saveDisplay">
+    <p>{{Message}}</p>
+    <p-footer>
+        <div class="row">
+            <div class="col-md-9">
+                <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check" (click)="saveDialog()"
+                    label="OK"></button>
+            </div>
+        </div>
+    </p-footer>
+</p-dialog>
+
+<p-dialog header="Confirmation" [class]="confirmDialog" [(visible)]="selectDisplay">
+    <p>{{Message}}</p>
+    <p-footer>
+        <div class="row">
+            <div class="col-md-9">
+                <button name="selectCancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+                    (click)="selectDisplayYes()" label="Yes"></button>
+            </div>
+            <div class="col-md-3">
+                <button name="selectConfirmDialogbtn" class="btn btn-primary" pButton icon="pi pi-close"
+                    (click)="selectDisplayNo()" label="No"></button>
+            </div>
+        </div>
+    </p-footer>
+</p-dialog>
+
+<p-dialog header="Confirmation" [class]="confirmDialog" [(visible)]="deleteDisplay">
+    <p>{{Message}}</p>
+    <p-footer>
+        <div class="row">
+            <div class="col-md-9">
+                <button name="deleteCancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+                    (click)="deleteDialogYes()" label="Yes"></button>
+            </div>
+            <div class="col-md-3">
+                <button name="deleteConfirmDialogbtn" class="btn btn-primary" pButton icon="pi pi-close"
+                    (click)="deleteDialogNo()" label="No"></button>
+            </div>
+        </div>
+    </p-footer>
+</p-dialog>
+
+<p-dialog *ngIf="saveGoodIdeas" [visible]="saveGoodIdeas" header="Good Ideas" class="confirmDialog" [closable]="false"
+    appendTo="body" modal="true" [draggable]="false" [resizable]="false">
+    <app-good-ideas typeTable="provisional" [goodIdeasBody]="selectedShelved"
+        (statusGoodIdeasSaved)="goodIdeasEvent($event)"></app-good-ideas>
+</p-dialog>
+<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle" key="codesTab">
+</p-confirmDialog>
+
+<p-blockUI [blocked]="loadingELLDetail">
+    <div class="img-loading text-center">
+      <img src="assets/img/loading.gif" style="width: 60%" />
+      <p style="font-size: 12px; color: #fff;">loading ELL Detail...</p>
+    </div>
+</p-blockUI>

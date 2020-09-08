@@ -1,0 +1,92 @@
+<div class="container">
+
+  <!-- show the block elements when 'fromMaintenanceProcess' flag is 'false' -->
+
+  <div *ngIf="!fromMaintenanceProcess">
+
+    <fieldset class="col-md-12" Id="provisonalRows" [disabled]="provDialogDisable">
+
+      <div class="row" Id="provisonalRows">
+        <div class="col-md-12">
+          <div class="row"><label>Reasons For Development</label></div>
+          <div class="row">
+            <textarea name="ruleReasonsForDev" id="rationale-text-mark-up" [(ngModel)]="ruleInfo.reasonsForDev"
+              pTooltip="{{ruleInfo.reasonsForDev}}" tooltipPosition="top"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" Id="provisonalRows">
+
+        <div class="col-md-6">
+          <div class="row"><label>Script/Internal Rationale</label></div>
+          <div class="row">
+            <textarea name="ruleScriptRationale" id="rationale-text-mark-up" [(ngModel)]="ruleInfo.scriptRationale"
+              pTooltip="{{ruleInfo.scriptRationale}}" tooltipPosition="top"></textarea>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="row"><label>Client Rationale</label></div>
+          <div class="row">
+            <textarea name="ruleClientRationale" id="rationale-text-mark-up" [(ngModel)]="ruleInfo.clientRationale"
+              pTooltip="{{ruleInfo.clientRationale}}" tooltipPosition="top"></textarea>
+          </div>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+  </div>
+
+  <!-- show the block elements when 'fromMaintenanceProcess' flag is 'true' -->
+
+  <div *ngIf="fromMaintenanceProcess">
+
+    <fieldset class="col-md-12" Id="provisonalRows" [disabled]="provDialogDisable">
+
+      <div class="row" Id="provisonalRows">
+        <div class="col-md-12">
+          <div class="row"><label>Reasons For Development</label></div>
+          <div class="row">
+            <app-dif-markups-editor id="rationale-text-mark-up" name="ruleReasonsForDev" #markpupEd class="textarea"
+              [(ngModel)]="ruleInfo.reasonsForDev" [saveAsDelta]="true" [originalText]="ruleInfo.ruleReasonOriginal"
+              [provDialogDisable]="provDialogDisable"></app-dif-markups-editor>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" Id="provisonalRows">
+
+        <div class="col-md-6">
+          <div class="row">
+            <label>Script/Internal Rationale</label>
+          </div>
+          <div class="row">
+            <app-dif-markups-editor id="rationale-text-mark-up" name="ruleScriptRationale" #markpupEd class="textarea"
+              [(ngModel)]="ruleInfo.scriptRationale" [saveAsDelta]="true"
+              [originalText]="ruleInfo.scriptRationaleOriginal" [provDialogDisable]="provDialogDisable">
+            </app-dif-markups-editor>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="row">
+            <label>Client Rationale</label>
+          </div>
+          <div class="row">
+            <app-dif-markups-editor id="rationale-text-mark-up" name="ruleClientRationale" #markpupEd class="textarea"
+              [(ngModel)]="ruleInfo.clientRationale" [saveAsDelta]="true"
+              [originalText]="ruleInfo.clientRationaleOriginal" [provDialogDisable]="provDialogDisable">
+            </app-dif-markups-editor>
+          </div>
+        </div>
+
+      </div>
+
+    </fieldset>
+
+  </div>
+
+</div>

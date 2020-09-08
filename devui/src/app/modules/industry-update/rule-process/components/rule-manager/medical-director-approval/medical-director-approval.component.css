@@ -1,0 +1,9 @@
+.space {
+    width: 100%;
+    height: 5px;
+  }
+  
+  ::ng-deep .ui-tooltip .ui-tooltip-text {
+    width: 25em; 
+  }
+  

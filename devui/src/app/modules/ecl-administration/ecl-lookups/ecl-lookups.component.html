@@ -1,0 +1,104 @@
+<h5 class='title-header' style="position: relative; font-size: 16px;">
+  ECL LOOKUPS
+
+  <button type="button" class="btn btn-primary btn-sm" (click)="create()"
+    style="position: absolute; right: 0px; font-size: 11px;"><i class="fa fa-plus"></i> Add
+    New</button>
+</h5>
+
+<hr>
+
+<div class="row">
+  <div class="col-md-4 col-sm-12">
+    <label>Lookup Type:</label>
+    <input type="text" class="form-control" placeholder="Lookup Type" [(ngModel)]="type" />
+  </div>
+  <div class="col-md-4 col-sm-12">
+    <label>Lookup Code:</label>
+    <input type="text" class="form-control" placeholder="Lookup Code" [(ngModel)]="code" />
+  </div>
+  <div class="col-md-4 col-sm-12">
+    <label>Lookup Description:</label>
+    <input type="text" class="form-control" placeholder="Lookup Description" [(ngModel)]="description" />
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <button class="btn btn-primary btn-sm float-right" (click)="first = 0; viewGrid.reset(); search()"
+      style="margin-top: 10px;font-size: 11px;" type="button"><i class="fa fa-search"></i> Search Lookups</button>
+  </div>
+</div>
+
+<hr>
+
+<p-table #viewGrid [columns]="cols" [value]="data" [paginator]="true" [rows]="5" [responsive]="true" [lazy]="true"
+  (onLazyLoad)="loadLazy($event)" [totalRecords]="totalRecords" [loading]="loading"
+  [rowsPerPageOptions]="[5,10,25,50,100]">
+
+  <ng-template pTemplate="header" let-columns>
+    <tr>
+      <th class="small-th" style="text-align: center" *ngFor="let col of columns" [ngStyle]="{'width': col.width}">
+        {{col.header}}
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-i="rowIndex" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+    <tr>
+      <td *ngFor="let col of columns; let i = index" style="font-size: 11px;">
+        <span
+          *ngIf="col.field != 'statusId' && col.field != 'options' && col.field != 'createdBy' && col.field != 'updatedBy' && col.field != 'createdDt' && col.field != 'updatedOn'"
+          style="word-break: break-all;">
+          {{rowData[col.field]}}
+        </span>
+
+        <span *ngIf="(col.field == 'createdBy' || col.field == 'updatedBy') && rowData[col.field]">
+          {{rowData[col.field]?.firstName}} {{rowData[col.field]?.lastName}}
+        </span>
+
+        <span *ngIf="(col.field == 'createdDt' || col.field == 'updatedOn') && rowData[col.field]"
+          [innerHTML]="parseDate(rowData[col.field])"></span>
+
+        <span *ngIf="col.field == 'statusId'">
+          <span *ngIf="rowData[col.field] == 1">Active</span>
+          <span *ngIf="rowData[col.field] == 2">Inactive</span>
+        </span>
+
+        <span *ngIf="col.field == 'options'" style="display: block; width: 100%; text-align: center;">
+          <button type="button" (click)="edit(rowData)" class="btn btn-transparent btn-sm" style="font-size: 11px; width: 30px;"><i
+              class="fa fa-pencil"></i></button>
+          &nbsp;
+          <button *ngIf="rowData.statusId == 1" type="button" (click)="remove(rowData)" class="btn btn-transparent btn-sm"
+            style="font-size: 11px; width: 30px;"><i class="fa fa-trash"></i></button>
+          <button *ngIf="rowData.statusId == 2" type="button" (click)="activate(rowData)"
+            class="btn btn-transparent btn-sm" style="font-size: 11px; width: 30px;"><i class="fa fa-check"></i></button>
+        </span>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog header="Lookup" [(visible)]="showDialog">
+  <div style="font-size: 11px;">
+    <label>Lookup Type</label>
+    <input type="text" maxlength="200" placeholder="Type" class="form-control" [(ngModel)]="lookup.lookupType" />
+
+    <label>Lookup Code</label>
+    <input type="text" maxlength="200" placeholder="Code" class="form-control" [(ngModel)]="lookup.lookupCode" />
+
+    <label>Lookup Description</label>
+    <textarea maxlength="200" placeholder="Description" style="width: 100%; height: 80px;"
+      [(ngModel)]="lookup.lookupDesc"></textarea>
+
+    <hr>
+
+    <div class="float-right" style="margin-bottom: 10px;">
+      <button style="font-size: 11px;" type="button" class="btn btn-primary btn-sm" (click)="save()"><i
+          class="fa fa-save"></i> Save</button>
+      &nbsp;
+      <button style="font-size: 11px;" type="button" class="btn btn-secondary btn-sm" (click)="closeDialog()"><i
+          class="fa fa-remove"></i>
+        Cancel</button>
+    </div>
+  </div>
+</p-dialog>

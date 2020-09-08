@@ -1,0 +1,14 @@
+<div class="currency-box">
+  <span *ngIf="fromMaintenanceProcess" (click)="focusInput(1)"
+    [ngClass]="format != originalFormat ? 'currency-red' : 'currency'">{{originalFormat | currency:'USD'}}
+  </span>
+  <div *ngIf="fromMaintenanceProcess">
+    <input [ngClass]="format == originalFormat ? 'currency-input' : 'currency-input-new'" #cvpCurr prefix="$"
+      maxlength="19" [(ngModel)]="format" mask="comma_separator.2" (change)="newOppValue()"
+      (keypress)="onKeyPress($event)" [disabled]="provDialogDisable" />
+  </div>
+  <div *ngIf="!fromMaintenanceProcess">
+    <input class="currency-input" #cvpCurr prefix="$" maxlength="19" [(ngModel)]="format" mask="comma_separator.2"
+      (change)="newOppValue()" (keypress)="onKeyPress($event)" [disabled]="provDialogDisable" />
+  </div>
+</div>

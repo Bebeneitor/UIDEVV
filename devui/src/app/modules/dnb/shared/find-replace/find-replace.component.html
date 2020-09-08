@@ -1,0 +1,76 @@
+<div class="search-box" *ngIf="showFindAndReplace">
+  <div class="find">
+    <span>
+      <input type="text" placeholder="Find" [(ngModel)]="findWord" />
+      <button (click)="startSearch()" title="Find search">
+        <span class="fa fa-search"></span>
+      </button>
+    </span>
+    <span *ngIf="coincidences.length > 0">
+      <button
+        (click)="highlightSearchUp()"
+        [disabled]="disableArrowUp"
+        title="Select Previous"
+      >
+        <span class="fa fa-arrow-up"></span>
+      </button>
+      <button
+        (click)="highlightSearchDown()"
+        [disabled]="disableArrowDown"
+        title="Select Next"
+      >
+        <span class="fa fa-arrow-down"></span>
+      </button>
+      <button
+        *ngIf="showButtonReplace"
+        (click)="shouldSeeReplaceBox = !shouldSeeReplaceBox"
+      >
+        <ng-container *ngIf="!shouldSeeReplaceBox; else minus">
+          <span title="Display Replace Box">R</span>
+        </ng-container>
+        <ng-template #minus>
+          <span class="fa fa-minus"></span>
+        </ng-template>
+      </button>
+    </span>
+    <button (click)="toggleSearch()" title="Close Find and Replace">
+      <span class="fa fa-times"></span>
+    </button>
+  </div>
+  <div class="replace" *ngIf="shouldSeeReplaceBox">
+    <input type="text" placeholder="Replace" [(ngModel)]="replaceWord" />
+    <span>
+      <button
+        *ngIf="coincidences.length > 0"
+        (click)="replaceSelected()"
+        [disabled]="disableReplace"
+        title="Replace Selected"
+      >
+        <span class="fa fa-refresh"></span>
+      </button>
+      <button
+        (click)="confirmReplaceAll()"
+        title="Replace All"
+        [disabled]="disableReplaceAll"
+      >
+        <span class="fa fa-refresh"></span><sup>all</sup>
+      </button>
+      <button
+        *ngIf="replacedCoincidencesBackUp"
+        (click)="confirmUndoReplaceAll()"
+        title="Undo Replace All"
+      >
+        <span class="fa fa-undo"></span>
+      </button>
+    </span>
+  </div>
+  <div>
+    <span class="search-total-count">
+      {{
+        coincidences.length === 0
+          ? "No Results"
+          : highlightIndex + 1 + " of " + coincidences.length
+      }}
+    </span>
+  </div>
+</div>

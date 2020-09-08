@@ -1,0 +1,32 @@
+export interface StagedRule {
+    ruleCode?: string;
+    identifier: number;
+    subIdentifier: number;
+    disabledYn?: any;
+    deactivatedYn?: any;
+    retiredYn?: any;
+    name?: any;
+    implementationDate?: Date;
+    lineOfBusiness?: any;
+    jurisdiction?: any;
+    logic: any;
+    ruleHeaderDescription: any;
+    internalRationale?: any;
+    clientRationale?: any;
+    providerTypes?: any;
+    pendingProcedureCodes?: any;
+    otherProcedureCodes?: any;
+    percentageReduction?: any;
+    gender?: any;
+    preferences?: any;
+    referencesSourc?: any;
+    title?: any;
+    rmr?: any;
+    payers?: any;
+    libraryCustomInternal: any;
+    cptArdYn?: any;
+    icdArdYn?: any;
+    mrRelationsYn?: any;
+    cvRuleYn?: any;
+    editFlag?: any;
+}

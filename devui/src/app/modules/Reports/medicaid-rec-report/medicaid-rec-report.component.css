@@ -1,0 +1,118 @@
+.form-container {
+    display: flex;
+    flex-direction: column;
+    -moz-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    -webkit-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    padding: 10px;
+    background-color: white;
+    height: 100%;
+    width: 100%;
+    min-width: 1080px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(161, 161, 161, 1);
+    border-radius: 3px;
+    margin-bottom: 20px;
+    justify-content: space-between
+}
+.search-filter {
+    display: flex;
+}
+.result-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    padding-right: 7.5px;
+}
+.filter-wrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    padding-left: 7.5px;
+}
+
+.font-md {
+    font-size: 14px;
+}
+
+.flex-row {
+    display: flex;
+}
+
+.listbox {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+.list-buttons {
+    font-size: 24px;
+    border-radius: 4px;
+    padding: 5px;
+}
+
+.arrow-buttons {
+    width: 60px;
+    padding: 1px;
+    margin: 5px;
+}
+.group {
+    display: inherit;
+    flex-direction: column;
+    padding: 5px;
+    width: 100%;
+}
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    padding:10px 20px 0px 20px;
+}
+
+.resultButtons {
+    width: 30%;
+}
+.closeable-list {
+    border: 1px #a6a6a6 solid;
+    height: 80px;
+    padding: 5px;
+    overflow: auto;
+}
+
+.list-item {
+    padding: 4px;
+    list-style-type: none;
+}
+
+.item-label {
+    padding-left: 15px;
+}
+
+.closeable-list {
+    border: 1px #a6a6a6 solid;
+    height: 80px;
+    padding: 5px;
+    overflow: auto;
+}
+
+.list-item {
+    padding: 4px;
+    list-style-type: none;
+}
+
+.item-label {
+    padding-left: 15px;
+}
+:host ::ng-deep .ui-listbox {
+    margin-bottom: 0 !important;
+}
+.block-img-loading {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  width: 120px
+}
+:host::ng-deep.pi-spinner:before {
+  content: "";
+}
+

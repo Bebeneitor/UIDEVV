@@ -1,0 +1,51 @@
+:host {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1;
+  width: 293px;
+}
+
+.search-box {
+  padding: 4px;
+  background: #31006f;
+  color: #fff;
+}
+
+.search-box input {
+  border: 0;
+}
+.search-box .search-total-count {
+  font-size: 11px;
+}
+
+.search-box .find {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 5px;
+}
+
+.search-box .replace {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-box button {
+  border: 0;
+  color: #31006f;
+  background: #fff;
+  margin-left: 4px;
+}
+
+.search-box button[disabled] {
+  color: #656565;
+  background: #c3c3c3;
+}
+
+.search-box .find > span,
+.search-box .replace > span {
+  align-items: center;
+  display: flex;
+}

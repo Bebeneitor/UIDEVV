@@ -1,0 +1,48 @@
+<p-tabView [activeIndex]="tabIndex">
+  <p-tabPanel header="Assigned" [cache]="false">
+    <ng-template pTemplate="content">
+      <ecl-table #rulesTable [tableModel]='tableConfig' (onAcctionLink)="redirect($event, 'assigned')"
+        (onAcctionIcon)="showLunchBox($event)" (onSelectRecord)="setSelectRules($event, 'assigned')"
+        (onUnSelectRecord)="setSelectRules($event, 'assigned')" (onServiceCall)="onServiceCall($event, 'assigned')">
+      </ecl-table>
+      <br>
+      <p-dropdown #userAssignedPO required [options]="users" [disabled]="!selectedRules || selectedRules.length < 1"
+        [(ngModel)]="selectedUser" [filter]="true" (onChange)="userAssignedPO.resetFilter();" filterBy="label,value"
+        [style]="{'width':'150px'}" class="no-print float-left small-td"></p-dropdown>
+
+      <p-dropdown required [(ngModel)]="selectedComment" [disabled]="!selectedRules || selectedRules.length < 1"
+        [(ngModel)]="reassignComments" [options]="comments" [style]="{'width':'150px'}"
+        class="no-print float-left small-td"></p-dropdown>
+
+      <button type="submit" value="Reassign" (click)="reassignRules('assigned')"
+        [disabled]="!selectedUser || !selectedComment || !selectedRules || selectedRules.length < 1"
+        class="btn btn-primary btn-default-height  small-td">Reassign</button>
+      <button class="no-print btn btn-primary btn-default-height float-right small-td " type="button"
+        (click)="refreshEclTable('assigned')">Refresh</button>
+    </ng-template>
+  </p-tabPanel>
+  <p-tabPanel header="Returned" [cache]="false">
+    <ng-template pTemplate="content">
+      <ecl-table #rulesTableReturned [tableModel]='tableConfigReturned' (onAcctionLink)="redirect($event, 'returned')"
+        (onAcctionIcon)="showLunchBox($event)" (onSelectRecord)="setSelectRules($event, 'returned')"
+        (onUnSelectRecord)="setSelectRules($event, 'returned')" (onServiceCall)="onServiceCall($event, 'returned')">
+      </ecl-table>
+      <br>
+      <p-dropdown #userReturnedPO required [options]="users"
+        [disabled]="!selectedRulesReturned || selectedRulesReturned.length < 1" [(ngModel)]="selectedUserReturned"
+        [filter]="true" (onChange)="userReturnedPO.resetFilter();" filterBy="label,value" [style]="{'width':'150px'}"
+        class="no-print float-left small-td"></p-dropdown>
+
+      <p-dropdown required [(ngModel)]="selectedCommentReturned"
+        [disabled]="!selectedRulesReturned || selectedRulesReturned.length < 1" [options]="comments"
+        [style]="{'width':'150px'}" class="no-print float-left small-td"></p-dropdown>
+
+      <button type="submit" value="Reassign" (click)="reassignRules('returned')"
+        [disabled]="!selectedUserReturned || !selectedCommentReturned || !selectedRulesReturned || selectedRulesReturned.length < 1"
+        class="btn btn-primary btn-default-height  small-td">Reassign</button>
+      <button class="no-print btn btn-primary btn-default-height float-right small-td " type="button"
+        (click)="refreshEclTable('returned')">Refresh</button>
+    </ng-template>
+  </p-tabPanel>
+</p-tabView>
+<p-toast [baseZIndex]="999999"></p-toast>

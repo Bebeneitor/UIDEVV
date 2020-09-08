@@ -1,0 +1,52 @@
+.leftMargin {
+  margin-left: 15px;
+}
+
+.cols {
+  margin: 5px;
+}
+
+.row {
+  padding-left: 10px;
+}
+
+.opp-textarea-field {
+  width: 100%;
+}
+
+.opp-input-field {
+  width: 100%;
+}
+
+.container {
+  max-width: 1400px;
+}
+
+.btn.btn-primary.jira-btn {
+  margin: 20%;
+  padding: 1px 5px;
+  font-size: 1rem;
+}
+
+label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  color: #707070;
+  margin-left: 0px;
+  margin-bottom: 0px !important;
+}
+
+textarea {
+  border: 1px solid #31006F;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  border-radius: 2px;
+  overflow: auto;
+  resize: none;
+}
+
+.row.opp-row {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-left: 0px;
+}

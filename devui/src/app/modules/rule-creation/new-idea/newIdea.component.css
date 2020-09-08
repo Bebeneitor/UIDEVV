@@ -1,0 +1,161 @@
+.newIdeaForm {
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 20px;
+  left: 0px;
+  top: 0px;
+  background: inherit;
+  background-color: rgba(255, 255, 255, 1);
+  box-sizing: border-box;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(161, 161, 161, 1);
+  border-radius: 3px;
+  -moz-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+  -webkit-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+  box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+}
+.newIdeaPage {
+  margin: 0% 5%;
+}
+
+.newIdeaPage h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  color: #31006F;
+}
+
+input {
+  border: 1px solid #31006F;
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 4px;
+  font-size: 12px;
+}
+
+
+label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  color: #707070;
+  margin-left: 0px;
+  margin-bottom: 0px !important;
+}
+textarea {
+  background-color: #FFFFFF;
+  border: 1px solid #31006F;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  border-radius: 2px;
+  color: #333333;
+  overflow: auto;
+  resize: none;
+}
+::placeholder {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  color: #707070;
+}
+.row{
+    margin:5px;
+}
+.btn {
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.btn-section {
+  border-radius: 2px;
+  background-color: #281c71;
+  color: white;
+  width:100%;
+  height: 75%;
+}
+
+.submit-btn {
+  display: inline-block;
+}
+.disable {
+  background-color: #F5F5F5;
+  border: 1px solid #D7D7D7;
+  font-family: 'Montserrat', sans-serif;
+  color: #707070;
+  font-size: 12px;
+}
+.nav-footer {
+  text-align: left;
+}
+.refDetails{
+   border:1px solid ;
+}
+.plusSign{
+  max-width: 0.33333%;
+}.plusSignData{
+padding-left:0px;
+padding-right: 8px;
+}
+.ui-fileupload-buttonbar button:nth-child(2){
+  display:none;
+}
+.confirmation-btn {
+  background-color: #281c71;
+  color: white;
+  border-radius: 2px;
+}
+
+.newIdeaPage fieldset {
+  border: 1px solid #ccc;
+  margin-right: 5px;
+  padding-top: 0px;
+  padding-right: 5px;
+  padding-left: 5px;
+  padding-bottom: 0px;
+  min-height: 77px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.newIdeaPage legend {
+  display: block;
+  width: auto;
+  padding: 0 5px;
+  margin-bottom: 0;
+  font-size: inherit;
+  line-height: inherit;
+  border: auto;
+  border-bottom: none;
+  color : #333333 !important;
+  font-size: 13px;
+}
+
+/***File deletion warning dialog***/
+.message-bold {
+  font-weight: bold;
+}
+.message-center {
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.icon-float-left {
+  float: left;
+  font-size: 2em; 
+  color: red;
+}
+
+::ng-deep.ui-fileupload-content.ui-widget-content {
+  overflow-x: scroll;
+}
+
+.block-img-loading {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  width: 120px
+}
+
+:host::ng-deep.idea-custom-toast .ui-toast {  
+  overflow-wrap: break-word;
+  word-break: break-word;
+}

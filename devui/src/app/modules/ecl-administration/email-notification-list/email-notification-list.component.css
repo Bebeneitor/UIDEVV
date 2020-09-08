@@ -1,0 +1,4 @@
+::ng-deep span.spanList > ul {
+    padding-left: 10px !important;
+    font-size: 10px !important;
+}

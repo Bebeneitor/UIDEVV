@@ -1,0 +1,52 @@
+<div class="file-uploader">
+  <label [ngClass]="{ 'error-label': errorLabel }">{{label}} <span class="text-danger" *ngIf="isRequired">(*)</span></label>
+  <div *ngIf="showRadioButtons" class="inline-block" style="margin-bottom: 7px;">
+    <p-radioButton [name]="'group_' + inputGroup" value="1" [(ngModel)]="flag" [label]="labelYes" [disabled]="disabled">
+    </p-radioButton>
+    &nbsp;
+    <p-radioButton [name]="'group_' + inputGroup" value="0" [(ngModel)]="flag" [label]="labelNo" [disabled]="disabled">
+    </p-radioButton>
+  </div>
+  <div class="file-uploader-container" *ngIf="!isTextArea">
+    <input *ngIf="showInputText" [(ngModel)]="inputText" pInputText type="text" [disabled]="flag == 0 || disabled"
+      [placeholder]="label" [ngClass]="(showInputText && showInputFile) ? 'input-text-one' : 'input-text-one-100'"
+      (focus)="setData($event)" (input)="setData($event)" />
+
+    <div
+      [ngClass]="(showInputText && showInputFile) ? 'ui-inputgroup input-group-file-uploader' : 'ui-inputgroup input-group-file-uploader-100'"
+      *ngIf="showInputFile">
+      <input readonly pInputText type="text" [(ngModel)]="selectedFile.name" [disabled]="flag == 0 || disabled"
+        placeholder="File..." [ngClass]="(showInputText && showInputFile) ? 'input-text-two' : 'input-text-two-100'"
+        (focus)="setData($event)" (input)="setData($event)" />
+      <button pButton type="button" (click)="myFile.click()" [disabled]="flag == 0 || disabled"
+        class="load-button btn btn-sm btn-primary f-11" icon="fa fa-file" title="Add file"></button>
+
+      <input #myFile type="file" [hidden]="true" (change)="setFile($event)" />
+    </div>
+  </div>
+  <div class="file-uploader-container" *ngIf="isTextArea">
+
+    <div style="display: block;">
+      <textarea *ngIf="showInputText && isTextArea" [(ngModel)]="inputText" [disabled]="flag == 0 || disabled"
+        [placeholder]="label" [ngClass]="input-text-area" (focus)="setData($event)"
+        (input)="setData($event)" style="width: 100%; height: 70px;"></textarea>
+    </div>
+
+    <div
+      [ngClass]="(showInputText && showInputFile) ? 'ui-inputgroup input-group-file-uploader' : 'ui-inputgroup input-group-file-uploader-100'"
+      *ngIf="showInputFile" style="display: block; width: 100%;">
+      <input readonly pInputText style="margin-left: 0px !important; width: 90%;" type="text" [(ngModel)]="selectedFile.name" [disabled]="flag == 0 || disabled"
+        placeholder="File..." [ngClass]="(showInputText && showInputFile) ? 'input-text-two' : 'input-text-two-100'"
+        (focus)="setData($event)" (input)="setData($event)" />
+      <button pButton type="button" (click)="myFile.click()" [disabled]="flag == 0 || disabled"
+        class="load-button btn btn-sm btn-primary f-11" icon="fa fa-file" title="Add file" style="width: 10% !important; max-width: unset !important;"></button>
+
+      <input #myFile type="file" [hidden]="true" (change)="setFile($event)" />
+    </div>
+  </div>
+  <div class="inline-block" *ngIf="fileId > 0">
+    <a nghref="#" (click)="downloadFile()" class="link-file-download">Download file</a>
+    &nbsp;
+    <a nghref="#" (click)="removeFile(fileId)" class="link-file-download" title="Remove file"><i class="fa fa-remove"></i></a>
+  </div>
+</div>

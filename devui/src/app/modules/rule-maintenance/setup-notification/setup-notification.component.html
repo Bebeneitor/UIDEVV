@@ -1,0 +1,33 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div>
+    <ecl-table #setupNotif [tableModel]="setupNotifTableConfig">
+    </ecl-table>
+</div>
+<br>
+<div class="btn-container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="md-3">
+                    <button class="btn btn-primary btn-default-height small-td mr-2" (click)="add()">Add</button>
+                </div>
+                <div class="md-3">
+                    <button class="btn btn-primary btn-default-height small-td mr-2" (click)="remove()">Remove</button>
+                </div>
+                <div class="md-3">
+                    <button class="btn btn-primary btn-default-height small-td mr-2" (click)="save()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<p-dialog class="IdeaSaveModal" header="Message"  [(visible)]="showDuplicateMessage"
+          [style]="{width: '40%', 'white-space':'pre-line'}">
+  {{duplicateMessage}}
+  <p-footer >
+    <button type="button" class="btn submit-btn btn-section" (click)="this.showDuplicateMessage =false" value="OK">OK</button>
+  </p-footer>
+</p-dialog>
+
+<p-toast [baseZIndex]="99999"></p-toast>

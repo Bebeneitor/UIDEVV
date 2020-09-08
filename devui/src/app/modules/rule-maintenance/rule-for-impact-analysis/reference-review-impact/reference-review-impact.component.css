@@ -1,0 +1,35 @@
+::ng-deep body .ui-dropdown-panel {
+    z-index: 999999 !important
+}
+
+.wrapper {
+    max-height: 640px;
+}
+
+.rule-box {
+    width: 100%;
+}
+
+.flex-section {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.flex-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 15px;
+    justify-content: space-evenly;
+}
+
+.flex-item {
+    padding-left: 15px;
+    padding-top: 15px;
+    padding-right: 15px;
+}
+
+.set-in-line {
+    display: inline-block; 
+    width: 65px;
+    margin-left: 7px;
+}

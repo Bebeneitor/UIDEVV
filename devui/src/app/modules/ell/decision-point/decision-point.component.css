@@ -1,0 +1,99 @@
+.decision-point {
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.decision-point h4 {
+    font-size: 16px;
+}
+
+.decision-point p.subtitle {
+    margin-bottom: 3px;
+    margin-top: 0px;
+    font-size: 11px;
+    position: absolute;
+    top: 0;
+    right: 15px;
+}
+
+.decision-point table.decision-point-table-detail {
+    width: 100%;
+}
+
+.decision-point table.decision-point-table-detail > tbody > tr > td:first-child {
+    width: 20%;
+    color: #31006F;
+}
+
+.decision-point table.decision-point-table-detail > tbody > tr > td:last-child {
+    background: #FFF;
+}
+
+.decision-point .library-rules-decision-point {
+    width: 100%;
+    height: 85px !important;
+    background: #FFF;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid black;
+    padding: 10px;
+    font-size: 11px;
+    margin-bottom: 10px;
+    line-height: 28px;
+}
+
+.decision-point table.decision-point-table-detail > tbody > tr > td {
+    padding: 3px;
+}
+
+.decision-point .container-library-rules {
+    padding: 10px;
+    background: #fff;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.decision-point .container-library-rules div.text-right {
+    height: 25px;
+}
+
+.decision-point .container-library-rules button {
+    font-size: 11px;
+}
+
+.decision-point ul.accordion-list {
+    margin: 0px !important
+} 
+
+.decision-point .library-rules-decision-point > .rule-label {
+    padding: 5px;
+    margin-right: 5px;
+    background: #F2F3F7;
+    color: black;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.decision-point .library-rules-decision-point > .rule-label.active {
+    background: #31006F;
+    color: #FFF;
+}
+
+.decision-point .container-claim-types-rules {
+    padding: 10px;
+    background: #FFF;
+}
+
+.decision-point .claim-types-rules {
+    width: 100%;
+    height: 85px !important;
+    background: rgb(245, 245, 245);
+    overflow: auto;
+    border: 1px solid gray;
+    padding: 10px;
+    font-size: 11px;
+}
+
+.decision-point .claim-types-rules > .rule-label {
+    color: gray;
+}

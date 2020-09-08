@@ -1,0 +1,59 @@
+<p-blockUI [blocked]="loading">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<h5 class='title-header' style="position: relative;">
+  {{pageTitle}}
+</h5>
+<div class="container-fluid" style="padding: 0px">
+  <hr>
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <p-tabView [activeIndex]="activeTab" (onChange)="handleChange($event)">
+        <p-tabPanel header="ICMS" *ngIf="!cvpUserRoleOnly">
+          <ng-template pTemplate="content">
+            <ecl-table #icmsTable [tableModel]="tableConfig" (onAcctionLink)="redirectToRule($event)"></ecl-table>
+          </ng-template>
+        </p-tabPanel>
+
+        <p-tabPanel header="CVP">
+          <ng-template pTemplate="content">
+            <ecl-table #cvpIngestionTable [tableModel]='cvpTableConfig' (onAcctionLink)="redirect($event)"
+              (onSelectRecord)="setSelectRules($event)" (onUnSelectRecord)="setSelectRules($event)"></ecl-table>
+            <br>
+            <div class="row">
+              <div class="col-6">
+                <button type="button" class="no-print btn btn-primary float-left small-td"
+                  [disabled]="disableExportSelected" (click)="exportCVPTemplate()"
+                  value="Export Selected CVP Template">Export selected CVP Templates to Excel</button>
+              </div>
+              <div class="col-6" *ngIf="userHasCvpRole">
+                <ecl-file-uploader [fileUpladerOptions]="fileUpladerOptions"
+                  (uploadEnded)="onCvpTemplateUploadEnded($event)">
+                </ecl-file-uploader>
+              </div>
+            </div>
+            <br><br>
+          </ng-template>
+        </p-tabPanel>
+        <p-tabPanel header="RPE" *ngIf="!cvpUserRoleOnly">
+          <ng-template pTemplate="content">
+
+          </ng-template>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+  </div>
+
+</div>
+
+<p-toast [baseZIndex]="999999"></p-toast>
+
+<p-overlayPanel #ruleDescriptionOverlayPanel>
+  <div *ngIf="selectedRuleOverlay">
+    Rule description: {{selectedRuleOverlay.logic}}
+  </div>
+</p-overlayPanel>

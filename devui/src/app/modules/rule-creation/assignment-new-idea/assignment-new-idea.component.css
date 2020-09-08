@@ -1,0 +1,11 @@
+::ng-deep .ui-dropdown-label.ui-inputtext  {
+    min-width: 70px;
+}
+
+::ng-deep.ui-overlaypanel-content {
+    max-width: 660px;
+    max-height: 240px;
+    word-wrap: break-word;
+    font-size: 12px;
+    overflow: scroll;
+}

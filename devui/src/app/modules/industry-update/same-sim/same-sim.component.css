@@ -1,0 +1,19 @@
+::ng-deep #fileUploadSameSim .ui-button-text.ui-clickable,
+::ng-deep #fileUploadSameSim .ui-button-icon-left.pi.pi-plus,
+::ng-deep #fileUploadSameSim .ui-button-icon-left.pi.pi-upload {
+    font-size: 11px !important;
+}
+
+::ng-deep .panel-data {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+p-table::ng-deep .ui-table table {
+    table-layout: fixed !important;
+  }
+
+  p-table::ng-deep .ui-table-scrollable-body {
+      z-index: 1 !important;
+  }

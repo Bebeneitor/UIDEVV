@@ -1,0 +1,153 @@
+<p-blockUI [blocked]="loading">
+    <div class="img-loading text-center">
+        <img src="assets/img/loading.gif" style="width: 60%" />
+        <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+    </div>
+</p-blockUI>
+
+<div class="roleSetup">
+    <h5>{{pageTitle}}</h5>
+    <div class="flex-container" id="roleSetupPage">
+        <div class="row">
+            <div class="col-md-3">
+                <label>User</label>
+                <div>
+                    <input type="text" class="user-search-input" name="selectedUserName" [(ngModel)]="selectedUserName"
+                        (onchange)="searchUser()" (keyup)="searchUser()" id="userSearch" list="usersList"
+                        [disabled]="selectedEditable">
+                    <span class="fa fa-search" style="margin-left: -20px" aria-hidden="true" (click)="searchUser()"
+                        *ngIf="newUser">
+                    </span>
+                </div>
+                <datalist id="usersList" style="width: 80%">
+                    <option *ngFor="let user of userList" [value]="user.userName">{{user.email}}</option>
+                </datalist>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <label>Role Assignment</label>
+                <p-listbox [options]="roles" (onChange)="showRoleFunctionalitiesAccess()"
+                    (onClick)="showRoleFunctionalitiesAccess();validateSelectedRole();roleConfirmationMessage();"
+                    [(ngModel)]="selectedRoles" [checkbox]="true" [showToggleAll]="false" [multiple]="true"
+                    [style]="{ 'height':'337px','overflow': 'auto','border': '1px solid #31006F'}" [disabled]="newUser">
+                </p-listbox>
+            </div>
+            <div class="col-md-3">
+                <label>Rule Engines</label>
+                <p-listbox [options]="engines" [(ngModel)]="selectedEngines" [showToggleAll]="false" [multiple]="true"
+                    [checkbox]="true" [style]="{ 'height':'337px','overflow': 'auto','border': '1px solid #31006F'}"
+                    [disabled]="newUser">
+                </p-listbox>
+            </div>
+            <div class="col-md-3">
+                <fieldset [disabled]="ruleMaintenance">
+                    <label>Teams</label>
+                    <p-table #viewGrid [columns]="cols" [value]="teams" [resizableColumns]="true" columnResizeMode="fit"
+                        [reorderableColumns]="true" [rows]="10" [(selection)]="selectedTeams" [loading]="loading"
+                        [responsive]="true" (onRowUnselect)="teamConfirmationMessage($event.data)" sortField="teamName"
+                        sortOrder="1" [style]="{ 'height':'337px','overflow': 'auto','border': '1px solid #31006F'}">
+                        <ng-template pTemplate="body" let-team let-columns="columns">
+                            <tr [pSelectableRow]="team">
+                                <td class="checkbox-center" style="width:20%">
+                                    <p-tableCheckbox [value]="team" [disabled]="ruleMaintenance"></p-tableCheckbox>
+                                </td>
+                                <ng-container *ngIf="this.teamSelected == team.teamId">
+                                    <td class="highlightSelectedTeam" *ngFor="let col of columns"
+                                        (click)="loadSelectedTeamCategoryMapping(team)"
+                                        style="width:80%;cursor:pointer">
+                                        <span *ngIf="col.field == 'teamName'">{{team.teamName}}</span>
+                                    </td>
+                                </ng-container>
+                                <ng-container *ngIf="this.teamSelected != team.teamId">
+                                    <td *ngFor="let col of columns" (click)="loadSelectedTeamCategoryMapping(team)"
+                                        style="width:80%;cursor:pointer">
+                                        <span *ngIf="col.field == 'teamName'">{{team.teamName}}</span>
+                                    </td>
+                                </ng-container>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </fieldset>
+            </div>
+            <div class="col-md-3">
+                <label>Functionality Access</label>
+                <div id="roleFunctionalityAccess">
+                    <div *ngIf="functionalities !== null && functionalities.length > 0">
+                        <div class="functionality" *ngFor="let functionality of functionalities">
+                            <div class="functionality_without_element" *ngIf="functionality.elements.length === 0">{{functionality.functionalityName}}</div>
+                            <p-accordion [multiple]="true" expandIcon="fa fa-plus" collapseIcon="fa fa-minus" *ngIf="functionality.elements.length">
+                                <p-accordionTab header="{{functionality.functionalityName}}">
+                                    <div *ngIf="functionality.elements !== null && functionality.elements.length > 0">
+                                        <div>
+                                            <ul *ngFor="let element of uniqueElements(functionality.elements)">
+                                                <i class="fa fa-level-up"></i>{{element.elementName}}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </p-accordionTab>
+                            </p-accordion>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-6">
+                <div class="row">
+                    <label class="col-md-6">Rule Creation</label>
+                    <label (click)="showDialog('RC')" class="col-md-6 view-assignments">
+                        View Assignments
+                        <span class="pi pi-external-link"></span>
+                    </label>
+                </div>
+                <fieldset [disabled]="ruleCreation">
+                    <app-cca-po-setup [creationOrMaintenance]="creationOrMaintenance" [roleCCA]="roleCCA"
+                        [selectedCreationCategoryMapDtoList]="selectedCreationCategoryMapDtoList"
+                        [selectedMaintenanceCategoryMapDtoList]="selectedMaintenanceCategoryMapDtoList"
+                        [teamSelected]="teamSelected" [rolePO]="rolePO" [roleDisable]="ruleCreation"
+                        [categoryMappingData]="categoryMappingDataRC"
+                        [categoryMappingDataList]="categoryMappingDataListRC">
+                    </app-cca-po-setup>
+                </fieldset>
+            </div>
+
+            <div class="col-6">
+                <div class="row">
+                    <label class="col-md-6">Rule Maintenance</label>
+                    <label (click)="showDialog('RM')" class="col-md-6 view-assignments">
+                        View Assignments
+                        <span class="pi pi-external-link"></span>
+                    </label>
+                </div>
+                <fieldset [disabled]="ruleMaintenance">
+                    <app-cca-po-setup [selectedMaintenanceCategoryMapDtoList]="selectedMaintenanceCategoryMapDtoList"
+                        [selectedCreationCategoryMapDtoList]="selectedCreationCategoryMapDtoList"
+                        [creationOrMaintenance]="!creationOrMaintenance" [teamSelected]="teamSelected"
+                        [roleCCA]="roleCCA" [rolePO]="rolePO" [roleDisable]="ruleMaintenance"
+                        [categoryMappingData]="categoryMappingDataRM"
+                        [categoryMappingDataList]="categoryMappingDataListRM">
+                    </app-cca-po-setup>
+                </fieldset>
+            </div>
+        </div>
+        <div class="flex-button-group">
+            <button class="btn btn-primary" [disabled]="newUser || saveDisable" (click)="saveUserAccess()">Save</button>
+            <button class="btn btn-primary" (click)="refreshUserAccess()">Refresh</button>
+            <button class="btn btn-primary" (click)="exitUserAccess()">Exit</button>
+        </div>
+
+        <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+        <p-dialog header="{{successHeader}}" [(visible)]="display" [modal]="true" [responsive]="true"
+            [style]="{width: '350px', minWidth: '200px'}" [minY]="70" [maximizable]="true" [baseZIndex]="10000">
+            <p>{{message}}</p>
+            <p-footer>
+                <button type="button" pButton icon="pi pi-check" (click)="display=false" label="Ok"></button>
+            </p-footer>
+        </p-dialog>
+
+        <app-user-team-category-view [display]="displayViewAssignmentsComponent" (displayChange)="onDialogClose($event)"
+            [functionType]="functionType"></app-user-team-category-view>
+    </div>
+</div>

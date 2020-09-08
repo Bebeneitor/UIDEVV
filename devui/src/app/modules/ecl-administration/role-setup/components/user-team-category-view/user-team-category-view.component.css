@@ -1,0 +1,38 @@
+.treeTable-row > td {
+  background-color: rgb(230, 224, 238) !important;
+  color: black !important;
+  border-style: dotted !important;
+}
+
+.treeTable-no-border > td {
+  border-style: none;
+}
+
+.ui-treetable .ui-treetable-scrollable-body {
+  border-style: dotted !important;
+}
+
+.tree-table-header {
+  color: black !important;
+  background-color: #f4f4f4 !important;
+}
+
+.tree-table-header ::ng-deep .ui-sortable-column-icon {
+  color: black !important;
+}
+
+
+.user-team-category-view-dialog ::ng-deep .ui-dialog-content {
+  background-color: lightgray !important;
+  padding: 10px !important;
+}
+
+.user-team-category-view-treedata ::ng-deep .ui-treetable-scrollable-view {
+  border: 1px solid black !important;
+}
+
+.user-team-category-view-dialog ::ng-deep .ui-dialog {
+  width: 35%;
+  position: absolute;
+  bottom: 15% !important;
+}

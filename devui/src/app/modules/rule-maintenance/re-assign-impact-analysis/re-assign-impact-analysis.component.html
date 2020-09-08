@@ -1,0 +1,23 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div>
+    <ecl-table #reassigmentTable [tableModel]='tableConfig' (onAcctionLink)="viewRuleModal($event)"
+        (onSelectRecord)="setSelectRules($event)" (onUnSelectRecord)="setSelectRules($event)">
+    </ecl-table>
+    <br>
+    <label class="float-left required-field-color">*</label>
+    <p-dropdown #userDD required [options]="users" (onChange)="this.userDD.resetFilter();"
+        [disabled]="!this.selectedRules || this.selectedRules.length < 1" [(ngModel)]="selectedUser" [filter]="true"
+        filterBy="label,value" [style]="{'width':'150px', 'margin-right': '15px'}" class="float-left small-td">
+    </p-dropdown>
+    <label class="float-left required-field-color">*</label>
+    <p-dropdown required [(ngModel)]="selectedComment" [disabled]="!this.selectedRules || this.selectedRules.length < 1"
+        [options]="comments" [style]="{'width':'150px'}" class="no-print float-left small-td">
+    </p-dropdown>
+    <button type="submit" class="btn btn-primary btn-default-height  small-td" (click)="reassignIdeas($event)"
+        [disabled]="!this.selectedUser || !this.selectedRules || !selectedComment || this.selectedRules.length < 1">
+        Reassign</button>
+    <button (click)="refreshEclTable()" style="display: inherit"
+        class="btn btn-primary btn-default-height float-right small-td" type="button"
+        value="refreshAssignIdea">Refresh</button>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>

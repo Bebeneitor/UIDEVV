@@ -1,0 +1,208 @@
+<div class="form-container">
+  <div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+      <span><strong>
+          {{ruleInfo?.ruleCode}}</strong></span>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" [ngStyle]="statusAlignment">
+      <span>
+        <strong> Template status: <span class="h5" style="color: #31006F">{{templateStatus}}</span></strong>
+      </span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 text-right">
+      <button type="button" class="btn-transparent float-rigth" (click)="exportToExcel()"
+        title="Export to Excel"><i class="fa fa-download"></i>
+      </button>
+    </div>
+  </div>
+  <form [formGroup]="templateForm" novalidate>
+
+    <hr>
+    <div class="row">
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <label for="prid"><span class="required-field-color">*</span>PRID</label>
+
+          <div class="ui-inputgroup">
+            <input formControlName="prid" pInputText class="form-control" type="text" id="prid"
+            class="form-control form-control-sm remove-radius" style="border-top-right-radius: 0% !important; 
+            border-bottom-right-radius: 0% !important;">
+
+              <button (click)="showPridCreationForm()" pButton type="button" label="Create Project ID"
+                  [disabled]="submitBtnDisable || config.data.readOnlyView" style="min-width: 150px !important; height: 30px !important;  width: max-content !important;"></button>
+          </div>
+          <div class="col" *ngIf="lotusNotesUrl">
+              <div class="form-group nopadding"
+                  style="padding-top: 30px !important; text-decoration: underline !important; cursor: pointer !important;">
+                  <a [href]="lotusNotesUrl">Lotus Notes Link</a>
+              </div>
+          </div>
+              <label *ngIf="getControl('prid').errors?.required && getControl('prid').touched"><span
+                  class="required-field-color">PRID is
+                  <strong>Required</strong>.</span></label>
+              <label *ngIf="getControl('prid').errors?.pattern && getControl('prid').touched"><span
+                  class="required-field-color">PRID pattern does not
+                  <strong>match</strong>.</span></label>
+            
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <label for="versionNumber"><span class="required-field-color">*</span>Subrule key</label>
+          <input formControlName="versionNumber" pInputText class="form-control" type="text" id="versionNumber">
+          <label *ngIf="getControl('versionNumber').errors?.required && getControl('versionNumber').touched"><span
+              class="required-field-color">Sub rule key is
+              <strong>Required</strong>.</span></label>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <label for="description"><span class="required-field-color">*</span>Description</label>
+          <textarea formControlName="description" class="form-control" id="description" rows="3" cols="318"
+            pInputTextarea></textarea>
+          <label *ngIf="getControl('description').errors?.required && getControl('description').touched"><span
+              class="required-field-color">Description is
+              <strong>Required</strong>.</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <label for="dueDate"><span class="required-field-color">*</span>Due date</label>
+          <p-calendar formControlName="dueDate" type="date" id="dueDate" [monthNavigator]="true" [yearNavigator]="true"
+          [yearRange]="yearValidRangeEft" dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy">
+          </p-calendar>
+          <label *ngIf="getControl('dueDate').errors?.required && getControl('dueDate').touched"><span
+              class="required-field-color">Due date is
+              <strong>Required</strong>.</span></label>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <label for="purpose"><span class="required-field-color">*</span>Purpose</label>
+          <input formControlName="purpose" pInputText class="form-control" type="text" id="purpose">
+          <label *ngIf="getControl('purpose').errors?.required && getControl('purpose').touched"><span
+              class="required-field-color">Purpose is
+              <strong>Required</strong>.</span></label>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-12 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <label for="writtenBy"><span class="required-field-color">*</span>Written by</label>
+          <p-dropdown [style]="{'width':'100%'}" formControlName="writtenBy" [options]="writtenBy" id="writtenBy"
+            placeholder="Select">
+          </p-dropdown>
+          <label *ngIf="getControl('writtenBy').errors?.required && getControl('writtenBy').touched"><span
+              class="required-field-color">Written by is
+              <strong>Required</strong>.</span></label>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row" #eclDeltas>
+      <div class="col">
+        <ecl-table [tableModel]="tableConfig"></ecl-table>
+      </div>
+    </div>
+
+    <br>
+    <div class="row" *ngIf="procedureCodesTableConfig.data.length > 0">
+      <div class="col" #eclCodes>
+        <ecl-table [tableModel]="procedureCodesTableConfig"></ecl-table>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12" style="padding: 5px; text-align: center;">
+        <button [class]="blockButtonClass" style="padding: 5px;" appThrottleTimeClick
+          (throttleTimeClick)="processIcmsTemplate('save')" [throttleTime]="2500"
+          [disabled]="templateForm.invalid || sendTemplateInProgress || buttonsDisabled || config.data.readOnlyView">Save</button>
+      </div>
+      <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12" style="padding: 5px; text-align: center;">
+        <button [class]="blockButtonClass" style="padding: 5px;"
+          [disabled]="templateForm.invalid  || sendTemplateInProgress || buttonsDisabled || config.data.readOnlyView"
+          appThrottleTimeClick (throttleTimeClick)="processIcmsTemplate('submit')" [throttleTime]="2500">Submit</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<p-blockUI [blocked]="blockDocument" [baseZIndex]="999999">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<p-dialog [header]="headerText" [(visible)]="saveDisplay" appendTo="body">
+  <p>{{Message}}</p>
+  <p-footer>
+      <div class="row">
+          <div class="col-md-12">
+              <div class="text-center">
+                  <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+                      (click)="saveDialog()" label="OK"></button>
+              </div>
+          </div>
+      </div>
+  </p-footer>
+</p-dialog>
+
+<p-dialog header="Create Project ID" (onHide)="onHide($event)" [(visible)]="projectCreationModal"
+    [style]="{width: '45vw'}" [modal]="true" appendTo="body" [baseZIndex]="10000" [draggable]="false"
+    [resizable]="false">
+    <form [formGroup]="createProjectForm">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group nopadding">
+                        <label class="custom-label" [ngClass]="{'required-field-color': creationName.invalid}"><span
+                                class="required-field-color">*</span>User Name (This must be a valid Notes user name)
+                        </label>
+                        <input pInputText class="form-control form-control-sm" type="text"
+                            placeholder="Valid Notes User Name" formControlName="name">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+
+                    <div class="form-group nopadding">
+                        <label class="custom-label" [ngClass]="{'required-field-color': creationSummary.invalid }"><span
+                                class="required-field-color">*</span>Summary</label>
+                        <input pInputText class="form-control form-control-sm" type="text" formControlName="summary">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group nopadding">
+                        <label class="custom-label" [ngClass]="{'required-field-color': creationDescription.invalid }"><span
+                            class="required-field-color">*</span>Description</label>
+                        <input pInputText class="form-control form-control-sm" type="text" formControlName="description">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p-messages [closable]="false" [style]="{'background-color': '#9579D3'}"
+                        [showTransitionOptions]="'1000ms ease-out'" [hideTransitionOptions]="'1000ms ease-in'"
+                        [value]="arrayMessage" severity="info"></p-messages>
+                </div>
+            </div>
+        </div>
+    </form>
+    <p-footer>
+        <button type="submit" [disabled]="createProjectForm.invalid" pButton icon="pi pi-check"
+            (click)="submitProjectCreation()" label="Submit"></button>
+    </p-footer>
+</p-dialog>

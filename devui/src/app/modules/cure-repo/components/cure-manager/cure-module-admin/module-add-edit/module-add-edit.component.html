@@ -1,0 +1,66 @@
+<p-card>
+    <div class="text-right" style="right: 15px;">
+        <a nghref="#" style="margin-bottom: 10px;" routerLink="/cure-and-repo/cure/module-admin-list" 
+            class="btn btn-sm btn-primary f-11">
+            <i class="fa fa-arrow-left"></i> Back</a>
+    </div>
+    
+    <form [formGroup]="moduleTemplateForm" novalidate>
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <div class="form-group">
+                    <label for="moduleName"><span class="required-field-color">*</span>Module Name</label>
+                    <input formControlName="moduleName" pInputText class="form-control" type="text" 
+                        id="moduleName" [attr.disabled]="formInactive"/>
+                    <small class="text-danger" *ngIf="isInvalidElement('moduleName')">Required field</small>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <div class="form-group">
+                    <label for="moduleView"><span class="required-field-color">*</span>Module View</label>
+                    <input formControlName="moduleView" pInputText class="form-control" type="text" 
+                       id="moduleView" [attr.disabled]="formInactive"/>
+                    <small class="text-danger" *ngIf="isInvalidElement('moduleView')">Required field</small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="text-right" style="right: 15px; padding: 5px; padding-left: 15px;">
+                <button class="btn btn-sm btn-primary f-11" style="padding: 5px;"
+                    [attr.disabled]="formInactive" (click)="showNewAttributeTemplate(null, 0)">
+                  <i class="fa fa-plus"></i> Add new attribute
+                </button>
+            </div>
+        </div>
+        <ecl-table #attributesTable [tableModel]="attributesTableModel" (onAcctionIcon)="onClickEditAttribute($event)"></ecl-table>
+        <div class="row">
+            <div class="col" style="margin-bottom: 10px; margin-top:10px" Id="provisonalRows">
+                <div *ngIf="formInactive"class="float-left">
+                    <button class="btn btn-primary" (click)="activateModule()">Activate</button>
+                </div>
+                <div class="float-right">
+                    <button class="btn btn-primary" [disabled]="formInactive"
+                        (click)="saveCureModule()">
+                        <i class="fa fa-save"></i> Save
+                    </button> &nbsp;
+                </div>
+            </div>
+        </div>
+    </form>
+    
+</p-card>
+
+<p-dialog [header]="headerText" [(visible)]="saveDisplay" appendTo="body" [draggable]="false"
+    [resizable]="false"  [modal]="true">
+    <p>{{message}}</p>
+    <p-footer>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+                        (click)="saveDialog()" label="OK"></button>
+                </div>
+            </div>
+        </div>
+    </p-footer>
+</p-dialog>

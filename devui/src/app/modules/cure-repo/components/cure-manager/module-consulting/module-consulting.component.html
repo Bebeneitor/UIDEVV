@@ -1,0 +1,99 @@
+<p-card>
+  <div class="ui-fluid">
+    <form [formGroup]="modulesForm">
+
+      <div class="p-grid">
+        <div class="p-field p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-6">
+          <label for="module">Module</label>
+          <p-multiSelect id="attributes" [style]="{'height':'30px'}" [options]="modulesList" formControlName="modules"
+            [maxSelectedLabels]="3" (onPanelHide)="onModuleSelectionHide()"
+            (onChange)="onModuleSelectionChange($event)">
+          </p-multiSelect>
+        </div>
+      </div>
+      <hr *ngIf="moduleSelection.length > 0">
+
+      <ng-container formArrayName="selectedModules">
+        <p-accordion [multiple]="true">
+
+          <div *ngFor="let module of moduleSelection; index as i">
+            <p-accordionTab [header]="module.moduleName">
+              <ng-container [formGroupName]="i">
+                <div class="p-grid">
+                  <div class="p-field p-col-6 p-sm-12 p-md-12 p-lg-6 p-xl-6">
+                    <label for="attributes">Module Attributes</label>
+                    <p-multiSelect id="attributes" [style]="{'height':'30px'}" [options]="module.attributes"
+                      formControlName="attributes" (onPanelHide)="onAttributeSelectionhide(module, i)"
+                      (onPanelShow)="onPanelOpen()"></p-multiSelect>
+                  </div>
+                </div>
+
+                <div formArrayName="selectedAttributes">
+                  <hr>
+                  <div class="p-grid">
+                    <div class="p-field p-col"
+                      *ngFor="let selectedAttribute of getModuleAttributesControl(i); index as j">
+
+                      <div [ngSwitch]="selectedAttribute.attribute.uiDataType">
+                        <label for="attributes">
+                          <span *ngIf="selectedAttribute.attribute.mandatory" class="text-danger">*</span>
+                          {{selectedAttribute.attribute.attributeName}} </label>
+                        <p *ngSwitchCase="'text'">
+                          <input type="text" [formControlName]="j" pInputText style="min-width: 150px;">
+                        </p>
+                        <p *ngSwitchCase="attrbutesDatatypes.date">
+                          <p-calendar [yearRange]="yearValidRange" [monthNavigator]="true"  [yearNavigator]="true" [formControlName]="j"
+                            [style]="{'min-width': '150px', 'max-width': setAttributeSize(i)}">
+                          </p-calendar>
+                        </p>
+                        <p *ngSwitchCase="attrbutesDatatypes.dropdown">
+                          <p-dropdown [options]="selectedAttribute.attribute.options" [formControlName]="j"
+                            [style]="{'min-width': '150px'}">
+                          </p-dropdown>
+                        </p>
+                        <span class="text-danger"
+                          *ngIf="(attributeNotValid(i,j)) && (attributeNotValid(i,j).invalid && attributeNotValid(i,j).touched)">Required
+                          field</span>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+
+                <br>
+                <div class="p-grid">
+                  <div class="p-col-12" style="text-align: right;">
+                    <p-checkbox [formControl]="selectedModules.at(i).controls['exactMatch']" 
+                        binary="false" inputId="exactMatch" label="Exact Match"></p-checkbox>
+
+                    <button [disabled]="moduleNotValid(i)" type="button" class="btn-transparent"
+                      (click)="exportToExcel(i)" title="Export to Excel">
+                      <em class="fa fa-download" [ngClass]="{'invalid-button': moduleNotValid(i)}"></em>
+                    </button>
+
+                    <button [disabled]="moduleNotValid(i)" type="button" class="btn-transparent" (click)="saveQuery(i)"
+                      title="Save Query"><em class="fa fa-save"
+                        [ngClass]="{'invalid-button': moduleNotValid(i)}"></em></button>
+                  </div>
+                </div>
+              </ng-container>
+
+            </p-accordionTab>
+          </div>
+        </p-accordion>
+
+
+      </ng-container>
+
+      <hr *ngIf="moduleSelection.length > 0">
+    </form>
+  </div>
+
+</p-card>
+
+<p-blockUI [blocked]="blocked">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">{{blockedMessage}}</p>
+  </div>
+</p-blockUI>

@@ -1,0 +1,105 @@
+<p-blockUI [blocked]="!readingFile">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Generating report, please wait...</p>
+  </div>
+</p-blockUI>
+
+<h5 style="font-size : 17px;margin-bottom: 15px; display: inline-block;">Same-Sim</h5>
+
+<div class="text-right" style="display: inline-block;position: absolute;right: 15px;">
+  <a nghref="#" style="margin-bottom: 10px;" routerLink="/same-sim" class="btn btn-sm btn-primary f-11"><i
+      class="fa fa-arrow-left"></i> Back</a>
+</div>
+
+<div class="panel-data" *ngIf="!editMode">
+  <div class="row">
+    <div class="col-12">
+      <label>Name:</label>
+      <input type="text" [(ngModel)]="nameReport" maxlength="200" class="form-control" placeholder="Name" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <label>File (xlsx):</label>
+      <br />
+      <input id="file" #fileInput style="font-size : 11px;" type="file" (change)="fileChange($event.target.files)"
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="float-right">
+        <button *ngIf='file != null && !preview' style="width: 100px; font-size: 11px; margin-right: 5px;" type="button"
+          class="btn btn-sm btn-primary" (click)="showPreview()"><i class="fa fa-eye"></i> Show Preview</button>
+        <button *ngIf='file != null && preview' style="width: 100px; font-size: 11px; margin-right: 5px;" type="button"
+          class="btn btn-sm btn-primary" (click)="hidePreview()"><i class="fa fa-eye-slash"></i> Hide Preview</button>
+
+        <button style="width: 100px; font-size: 11px; margin-right: 5px;" type="button" class="btn btn-sm btn-primary"
+        [disabled]="this.disabledGenerate" (click)="generateReport()"><i class="fa fa-check"></i> Generate</button>
+        <button style="width: 100px; font-size: 11px;" type="button" class="btn btn-sm btn-primary" (click)="clear()"><i
+            class="fa fa-trash"></i> Clear</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel-data" *ngIf="preview" style="margin-top: 10px;">
+  <div class="row">
+    <div class="col-12">
+
+      <h5 style="font-size: 16px;">File Preview</h5>
+      <p style="font-size: 13px;">{{dateReport}}</p>
+
+      <button style="font-size: 20px; margin-right: 5px;position: absolute;top:-13px; right: 1px; border:none;"
+        type="button" class="close" (click)="hidePreview()" title="Hide Preview">&times;</button>
+
+      <p-tabView>
+        <p-tabPanel *ngFor="let preview of arrayPreview" [header]="preview.tab" [selected]="preview.selected">
+
+          <div *ngIf="preview.rows.length == 0" class="div-no-data" style="margin: unset !important;">
+            <img src="assets/img/no-data.png" class="img-no-data" />
+            <p class="no-data">NO RECORDS HERE</p>
+          </div>
+
+          <p-table *ngIf="preview.rows.length > 0" [columns]="preview.cols" [value]="preview.rows" [scrollable]="true"
+            scrollHeight="300px" [style]="{width:'100%'}">
+            <ng-template pTemplate="colgroup" let-columns>
+              <colgroup>
+                <col *ngFor="let col of columns" style="width:120px">
+              </colgroup>
+            </ng-template>
+            <ng-template pTemplate="header" let-columns>
+              <tr>
+                <th *ngFor="let col of columns">
+                  {{col.header}}
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rowData let-columns="columns">
+              <tr>
+                <td *ngFor="let col of columns" style="word-break: break-all !important;">
+                  <span [pTooltip]="rowData[col.field]"
+                    tooltipPosition="right">{{ (rowData[col.field] != undefined && rowData[col.field].length > 50) ? (rowData[col.field] | slice:0:50) + '...': (rowData[col.field]) }}</span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+  </div>
+</div>
+<div class="panel-data" *ngIf="readingFile && id > 0" style="margin-top: 10px;">
+  <div class="row">
+    <div class="col-12">
+      <app-reference-analysis [instanceId]="id"
+        [editMode]="editMode">
+      </app-reference-analysis>
+    </div>
+  </div>
+</div>
+
+<p-confirmDialog [acceptLabel]="'OK'" [rejectVisible]="false"></p-confirmDialog>

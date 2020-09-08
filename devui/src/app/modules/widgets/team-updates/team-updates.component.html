@@ -1,0 +1,72 @@
+<div class="widget-container teams-update">
+  <div class="card">
+    <div class="card-header text-uppercase">
+      <div class="title-header">&nbsp;</div>
+      <span>{{title}}</span>
+      <div class="float-right">
+        <a nghref="#" class="icon-link" (click)="changeView('chart')" pTooltip="Chart View" tooltipPosition="left"
+          [ngClass]="typeView == 'chart' ? 'active' : ''"><i class="fa fa-bar-chart"></i></a>
+        <a nghref="#" class="icon-link" pTooltip="Refresh" tooltipPosition="left" (click)="loadData(userIdLast)"><i
+            class="fa fa-refresh"></i></a>
+      </div>
+    </div>
+    <div class="card-body" *ngIf="teams.length == 0">
+      <div class="div-no-data">
+        <img src="assets/img/no-data.png" class="img-no-data" />
+        <p class="no-data">NO TEAMS ASSIGNED</p>
+      </div>
+    </div>
+    <div class="card-body" *ngIf="teams.length > 0" style="padding-top: 0px !important;">
+      <div class="container-fluid">
+        <div class="row" style="margin-top: 10px;">
+          <div class="col-6">
+            <p-dropdown [options]="teams" [(ngModel)]="selectedTeam" placeholder="Select team" optionLabel="name"
+              [filter]="true" [style]="{'width':'100%'}" (onChange)="changeTeam($event)">
+            </p-dropdown>
+          </div>
+          <div class="col-6">
+            <p-dropdown [options]="team" [(ngModel)]="selectedTeamMember" placeholder="Global View" optionLabel="name"
+              [filter]="true" [showClear]="true" [style]="{'width':'100%'}" (onChange)="changeMember($event)">
+            </p-dropdown>
+          </div>
+        </div>
+        <hr>
+        <div class="row" *ngIf="team.length == 0 && !loading">
+          <div class="col-12">
+            <div class="div-no-data">
+              <img src="assets/img/no-data.png" class="img-no-data" />
+              <p class="no-data">NO USERS ASSIGNED</p>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="loading" class="text-center">
+          <img src="assets/img/loading.gif" class="image-loading-block-ui" style="width: 100px;"/>
+        </div>
+        <div class="row" *ngIf="team.length > 0 && !loading">
+          <div class="col-12">
+            <p style="font-size: 13px; font-weight: bold; color: #31006F;margin-bottom: -5px !important;">Total Records:
+              {{totalItems | number : '1.0-0'}}</p>
+          </div>
+          <div class="col-12">
+            <p-scrollPanel [style]="{width: '100%', 'margin-top': '15px'}" styleClass="custombar2">
+              <div style="padding:0px;line-height:1.5;width:600px;margin-top: 20px;">
+                <p-chart *ngIf="!hideChart" type="bar" [data]="data" [options]="options" height="150px"></p-chart>
+              </div>
+            </p-scrollPanel>
+            <hr>
+            <div class="row">
+              <div class="col-6" *ngFor="let badge of badges">
+                <div (click)="redirect(badge.type)" class="badge-teams-update"
+                  [ngStyle]="{'background-color': badge.color, 'display': 'flex', 'margin-bottom': '5px'}">
+                  <div class="text-left">
+                    <h5>{{badge.count | number : '1.0-0'}} <small>{{badge.name}}</small></h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,92 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div>
+    <p-table #viewGrid [columns]="cols" [value]="paginatedData" [resizableColumns]="true" columnResizeMode="fit"
+        [reorderableColumns]="true" [loading]="loading" [responsive]="true" dataKey="accordianHeading" [expandedRowKeys]="expandedRows"
+        [rows]="10" [rowsPerPageOptions]="eclConstantsService.ROWS_PER_PAGE_OPTIONS" [paginator]="true"
+             sortField="effectiveDate" sortOrder="-1">
+
+      <ng-template pTemplate="caption">
+        <app-grid-tools [primeTableLocalReference]="viewGrid"
+                        [pageTitle]="pageTitle">
+        </app-grid-tools>
+        <div style="text-align: right">
+          <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
+                 (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+                 style="width:150px; border-radius: 5px">
+          <span style="cursor: pointer"><i *ngIf = "keywordSearch !== ''" (click)="viewGrid.reset(); resetDataTable(viewGrid);" style="cursor: pointer" class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
+          <i *ngIf = "keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+        </div>
+      </ng-template>
+
+        <ng-template pTemplate="colgroup" let-columns>
+            <colgroup>
+                <ng-container *ngFor="let col of columns">
+                    <col *ngIf="!col.hide" [style.width.px]="col.width">
+                </ng-container>
+
+            </colgroup>
+        </ng-template>
+
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th class="header-item" class="small-th" style="text-align: center; background-color: white;" *ngFor="let col of columns" [ngStyle]="{'width': col.width}" pResizableColumn>
+                    {{col.header}}
+<!--                  <p-sortIcon *ngIf="col.field === 'industryUpdateName' || col.field === 'effectiveDate'" [field]="col.field" ariaLabel="Activate to sort"-->
+<!--                              ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">-->
+<!--                  </p-sortIcon>-->
+                </th>
+            </tr>
+
+        </ng-template>
+        <ng-template pTemplate="body"  let-rowData let-rowIndex="rowIndex" let-expanded="expanded" let-columns="columns">
+            <tr class="ui-widget-header" *ngIf="rowLocalGroupMetadata[rowData.accordianHeading].index === rowIndex">
+                <td colspan="11">
+                    <a href="#" [pRowToggler]="rowData">
+                        <i [ngClass]="expanded ? 'fa fa-minus fa_pad' : 'fa fa-plus fa_pad'"></i>
+                        <span pTooltip="{{rowData.industryUpdateDesc}}">{{rowData.accordianHeading}}</span>
+                    </a>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="rowexpansion" let-iu let-col="columns">
+          <tr>
+            <td style="width:10%"><span class="span-centered small-td">{{iu.industryUpdateName}}</span></td>
+
+            <td style="width:10%"><span  class="span-centered small-td">{{iu.effectiveDate | date }}</span></td>
+
+            <td  style="width:10%">
+                <span *ngIf="iu.action === 'Pending' || iu.action === 'Current'"  class="span-centered" style="text-align: center; ">
+                <button *ngIf="iu.action === 'Pending'" [disabled]="true" type="submit" value="Reassign" (click)="initiateIndustryUpdate(iu.updateInstanceKey)"
+                        style="border-radius: 3px; cursor: default;">Initiate Industry Update Integration</button>
+                <button *ngIf="iu.action === 'Current'" type="submit" value="Reassign" (click)="initiateIndustryUpdate(iu)"
+                        class="btn-primary" style="border-radius: 3px;">Initiate Industry Update Integration</button>
+              </span>
+                <span *ngIf="iu.action === 'Completed'"  class="span-centered" style="text-align: center; ">
+                 {{iu.action}}
+              </span>
+            </td>
+
+            <td style="width:10%"><span  class="span-centered small-td">{{iu.status}}</span></td>
+          </tr>
+
+        </ng-template>
+
+      <ng-template pTemplate="paginatorright" let-state>
+          <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+            Showing <b>{{(state.page  * state.rows) + 1}}</b> -
+            <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+            of <b>{{state.totalRecords}}</b>
+          </span>
+        <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+      </ng-template>
+    </p-table>
+
+  <br>
+  <button (click)="fetchIndustryUpdateDetails(); " style="display: inherit"
+          class="btn btn-primary btn-default-height float-right small-td" type="button"
+          value="refreshAssignIdea">Refresh</button>
+
+
+</div>
+<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+<p-toast [baseZIndex]="999999"></p-toast>

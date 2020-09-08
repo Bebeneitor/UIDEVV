@@ -1,0 +1,43 @@
+.audit-log label {
+    font-weight: bold;
+    color: #707070;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 5px !important;
+    margin-top: 5px !important;
+}
+
+.text-container-diff {
+    width: 100%;
+    padding: 10px;
+    display: absolute;
+    height: auto;
+    margin: 0 auto;
+    font-size: 13px;
+    line-height: 2.0;
+    overflow: auto;
+    border: 1px solid #DADADA;
+    min-height: 10px;
+}
+
+.audit-log h6 {
+    margin-bottom: 0px !important; 
+    color: #31006F !important;
+}
+
+.audit-log hr {
+    margin-top: 0px !important;
+}
+
+.radio-audit-log { 
+    margin-bottom: 15px;
+}
+
+::ng-deep .text-container-diff span.added {
+    color: blue !important;
+}
+
+::ng-deep .text-container-diff span.deleted {
+    color: red !important;
+    text-decoration: line-through !important;
+}

@@ -1,0 +1,15 @@
+<div class="codes-box">
+  <label class="label-codes-box">{{boxTitle}}</label>
+  <p-blockUI [target]="codesBox" [blocked]="blocked">
+  </p-blockUI>
+  <p-panel #codesBox>
+    <div #procCodeBox class="codes-box-area">
+    </div>
+  </p-panel>  
+  <div class="codes-box-footer"  [hidden]="_readOnly">
+    <div [ngClass]="['codes-box-error-message', valMsgClass]" [title]="validationTooltip"><i class="fa fa-info-circle"></i> {{validationMsg}}</div>
+    <div class="codes-box-buttons">
+      <button type="button" class="btn btn-primary btn-sm" [disabled]="readOnly" (click)="validateProcedureCodes()"><i class="fa fa-check"></i> Validate</button>
+    </div>
+  </div>
+</div>

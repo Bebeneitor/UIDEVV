@@ -1,0 +1,1 @@
+export { CopyToNew } from './components/copytonew';

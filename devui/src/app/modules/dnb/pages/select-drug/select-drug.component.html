@@ -1,0 +1,19 @@
+<div class="dnb-page-header">
+  <h1 class="dnb-title">Drug Library</h1>
+  <div class="dnb-filter-list">
+    <app-dnb-filter-list (filter)="filter($event)"> </app-dnb-filter-list>
+  </div>
+</div>
+<div class="table-container">
+  <ecl-table
+    #rulesTable
+    [tableModel]="tableConfig"
+    (onAcctionLink)="selectDrug($event)"
+    (onAcctionIcon)="openSelectType($event)"
+  ></ecl-table>
+</div>
+<dnb-app-dialog
+  [(openDialog)]="shouldOpenDownload"
+  (selectionSet)="downloadSelected($event)"
+  [setUpDialog]="setUpDialog"
+></dnb-app-dialog>

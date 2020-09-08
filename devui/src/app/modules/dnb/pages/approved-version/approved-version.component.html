@@ -1,0 +1,89 @@
+<div
+  class="content dnb-page"
+  [ngClass]="{
+    'is-fullscreen': isFullScreen,
+    'navigation-closed': !isNavigationOpen
+  }"
+>
+  <div class="row" *ngIf="sections$ | async as sections">
+    <div class="dnb-section-navigation">
+      <app-dnb-section-navigation
+        [isFullScreen]="isFullScreen"
+        [(isNavigationOpen)]="isNavigationOpen"
+        [navigationItems]="navigationItems"
+      ></app-dnb-section-navigation>
+    </div>
+    <div class="page-content">
+      <div class="sentinal"></div>
+      <div class="dnb-page-header sticky-header">
+        <h1 class="dnb-title">
+          <span class="drug-name">
+            <app-cell-editor
+              [attr.slm-id]="'drug_name_text'"
+              [column]="drugNameColumn"
+              [searchInfo]="drugNameColumn.searchData"
+              [highLight]="drugNameColumn.highlight"
+              [isReadOnly]="true"
+            ></app-cell-editor>
+          </span>
+        </h1>
+        <div class="dnb-header-buttons">
+          <span class="dnb-toggle">
+            <button
+              [attr.slm-id]="'toggle_find_replace_btn'"
+              (click)="showFindAndReplace = !showFindAndReplace"
+            >
+              Find
+            </button>
+          </span>
+          <span class="dnb-toggle">
+            <p-inputSwitch
+              [(ngModel)]="isFullScreen"
+              [attr.slm-id]="'is_full_screen_btn'"
+              (onChange)="onSwitchChange($event)"
+            ></p-inputSwitch>
+            <label>{{ toggleLabel }}</label>
+          </span>
+        </div>
+        <app-find
+          [sections]="sections"
+          [drugNameColumn]="drugNameColumn"
+          [(showFindAndReplace)]="showFindAndReplace"
+          [showButtonReplace]="false"
+          [shouldShowCurrent]="false"
+        ></app-find>
+      </div>
+      <div class="sections-container">
+        <div class="row">
+          <div class="col-12">Version {{ majorVersion }}</div>
+        </div>
+        <div *ngFor="let section of sections">
+          <ng-container *ngIf="!section.grouped; else groupedSection">
+            <app-dnb-sections-container
+              [id]="section.id"
+              [attr.slm-id]="section.id"
+              [currentVersion]="section.current"
+              [newVersion]="section.new"
+              [hasRowHeading]="section.hasRowHeading"
+              [isComparing]="false"
+              [enableEditing]="false"
+              [showCurrent]="false"
+            >
+            </app-dnb-sections-container>
+          </ng-container>
+          <ng-template #groupedSection>
+            <app-dnb-grouped-sections-container
+              [id]="section.id"
+              [attr.slm-id]="section.id"
+              [currentVersion]="section.current"
+              [newVersion]="section.new"
+              [isComparing]="false"
+              [enableEditing]="false"
+              [showCurrent]="false"
+            ></app-dnb-grouped-sections-container>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

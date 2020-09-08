@@ -1,0 +1,153 @@
+<p-blockUI [blocked]="loading">
+  <div class="block-img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<h5> {{ pageTitle }} </h5>
+<form class="form-container">
+  <div class="search-filter">
+    <div class="result-wrapper">
+      <label class="font-md">Result List</label>
+      <div class="listbox">
+        <div>
+          <p-pickList [source]="resultFields" [target]="selectedResultFields" sourceHeader="Result Fields"
+            targetHeader="Selected" [responsive]="true" dragdrop="true"
+            [sourceStyle]="{'height': '300px', 'width': '10rem', 'font-size': '0.9em'}"
+            [targetStyle]="{'height': '300px', 'width': '10rem', 'font-size': '0.9em'}"
+            (onSourceSelect)="changeOrderAndMoveButtons('source', $event.items)"
+            (onTargetSelect)="onSelectItem('target', $event.items)"
+            (onMoveToTarget)="changeOrderAndMoveButtons('moveToTarget', $event.items)"
+            (onMoveToSource)="changeOrderAndMoveButtons('moveToSource', $event.items)"
+            (onSourceReorder)="enableDisableOrderButtons('source', $event.items)"
+            (onTargetReorder)="enableDisableOrderButtons('target', $event.items)">
+            <ng-template let-field pTemplate="item">{{field.label}}</ng-template>
+          </p-pickList>
+        </div>
+      </div>
+    </div>
+    <div class="filter-wrapper">
+      <label class="font-md">Filter Criteria</label>
+      <div>
+        <div class="flex-row">
+          <div class="col-4-md group">
+            <label>* From Date</label>
+            <p-calendar #calendar [(ngModel)]="selectedStartDate" [readonlyInput]="false" [monthNavigator]="true"
+            name="selectedStartDate" [yearNavigator]="true" [yearRange]="yearValidRangeEft" [maxDate]="maxDate" (onSelect)="setEnteredDate()"
+            dateFormat="mm/dd/yy" placeholder="Select Start Date"></p-calendar>
+          </div>
+          <div class="col-4-md group">
+            <label>To Date</label>
+            <p-calendar #calendar [(ngModel)]="selectedEndDate" [readonlyInput]="false" [monthNavigator]="true"
+              name="selectedEndDate" [yearNavigator]="true" [yearRange]="yearValidRangeEft" [maxDate]="maxDate"
+              dateFormat="mm/dd/yy" placeholder="Select End Date" [disabled]="fromDateNotEntered"></p-calendar>
+          </div>
+
+          <div class="col-4-md group">
+            <label class="label-of-dropdown">* Update Instance Name:</label>
+            <p-dropdown [style]="{'width': '20rem'}" [options]="updateInstanceNames"
+              [(ngModel)]="selectedUpdateInstanceName" name="selectedUpdateInstanceName" (onChange)="getClients()"
+              placeholder="Select item" [style]="{'width':'100%'}">
+            </p-dropdown>
+          </div>
+        </div>
+        <div class="flex-row">
+          <div class="col-6-md group">
+            <label>Client</label>
+            <p-dropdown [options]="clients" [(ngModel)]="selectedClient" name="client" (onChange)="getPayers()"
+              placeholder="Select" [style]="{'width':'20rem'}"></p-dropdown>
+          </div>
+          <div class="col-6-md group">
+            <label>Payer Shorts</label>
+            <p-multiSelect [options]="payers" [(ngModel)]="selectedPayer" placeholder="Select" name="payers"
+              (onChange)="appendToClient($event)">
+            </p-multiSelect>
+
+
+
+          </div>
+        </div>
+        <div class="flex-row mrr-listbox">
+          <div class="col-6-md group">
+            <label>Selected Clients & Payers</label>
+            <ul class="closeable-list">
+              <li *ngFor="let value of clientsPayers" class="list-item">
+                <i (click)="removeSelectedClient(value.value)" class="fa fa-window-close" aria-hidden="true"></i>
+                <span class="item-label">{{value.label}}</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+        <div class="flex-row">
+          <div class="col-12-md group">
+            <!-- Jeffrey's Piece of work goes here (Component for markups that does Mid Rule ID-->
+            <label>Mid Rule ID</label>
+            <mid-rule-box style="height: 70px;" (midTextOutput)="sendUpdateMidText($event)"></mid-rule-box>
+          </div>
+        </div>
+        <div class="row button-group">
+          <button class="btn btn-primary resultButtons" [disabled]="isViewButtonDisabled" (click)="viewResults()">View Results</button>
+          <button class="btn btn-primary resultButtons" (click)="refresh()">Refresh</button>
+
+        <button class="btn btn-primary resultButtons" (click)="runValidation(true)">Validate Mid-Rule IDs</button>
+
+      </div>
+
+    </div>
+
+</div>
+    </div>
+  <div *ngIf="isMwfTableDisplay">
+    <p-table #viewGrid [columns]="filteredCols" [value]="filteredData" [paginator]="true" [resizableColumns]="true"
+             columnResizeMode="fit"
+             [reorderableColumns]="true" [rows]="10" [loading]="loading" [responsive]="true"
+             sortField="medicalPolicy" sortOrder="-1" [style]="{'margin-top': '15px'}">
+      <ng-template pTemplate="header" let-columns>
+
+
+        <tr>
+          <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+              [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+            {{col.header}}
+
+          </th>
+        </tr>
+
+      </ng-template>
+
+      <ng-template pTemplate="body" let-mwfReport let-columns="columns">
+
+        <tr>
+          <td class="small-td" *ngFor="let col of columns">
+            <span *ngIf="col.field == 'medicalPolicy'" class="span-centered">{{mwfReport.medicalPolicy}}</span>
+            <span *ngIf="col.field == 'topic'" class="span-centered">{{mwfReport.topic}}</span>
+            <span *ngIf="col.field == 'decisionPointKey'" class="span-centered">{{mwfReport.decisionPointKey}}</span>
+            <span *ngIf="col.field == 'decisionPointDesc'" class="span-centered">{{mwfReport.decisionPointDesc}}</span>
+            <span *ngIf="col.field == 'midRuleDotVersion'" class="span-centered">{{mwfReport.midRuleDotVersion}}</span>
+            <span *ngIf="col.field == 'subRuleNotes'" class="span-centered">{{mwfReport.subRuleNotes}}</span>
+            <span *ngIf="col.field == 'reRecommendationComments'"
+                  class="span-centered">{{mwfReport.reRecommendationComments}}</span>
+            <span *ngIf="col.field == 'raRecommendationDesc'"
+                  class="span-centered">{{mwfReport.raRecommendationDesc}}</span>
+            <span *ngIf="col.field == 'raLink1'" class="span-centered">{{mwfReport.raLink1}}</span>
+            <span *ngIf="col.field == 'raLink2'" class="span-centered">{{mwfReport.raLink2}}</span>
+            <span *ngIf="col.field == 'raLink3'" class="span-centered">{{mwfReport.raLink3}}</span>
+            <span *ngIf="col.field == 'raReviewDetails'" class="span-centered">{{mwfReport.raReviewDetails}}</span>
+            <span *ngIf="col.field == 'state'" class="span-centered">{{mwfReport.state}}</span>
+            <span *ngIf="col.field == 'instanceName'" class="span-centered">{{mwfReport.instanceName}}</span>
+            <span *ngIf="col.field == 'clients'" class="span-centered">{{mwfReport.clients}}</span>
+            <span *ngIf="col.field == 'payers'" class="span-centered">{{mwfReport.payers}}</span>
+            <span *ngIf="col.field == 'subRuleKey'" class="span-centered">{{mwfReport.subRuleKey}}</span>
+
+            <span *ngIf="col.field == 'instanceCompletionDt'"
+                  class="span-centered">{{mwfReport.instanceCompletionDt | date:'yyyy-MM-dd'}}</span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <div> <button class="btn btn-primary resultButtons" (click)="generateReport()">Generate Report</button></div>
+  </div>
+</form>
+<p-toast [baseZIndex]="999999"></p-toast>

@@ -1,0 +1,100 @@
+<div class="widget-container">
+  <div class="card">
+    <div class="card-header text-uppercase">
+      <div class="title-header">&nbsp;</div>
+      <span>{{title}}</span>
+      <span style="font-size : 12px; font-weight: 400;" *ngIf="dt != undefined">({{dt.filteredValue != null && dt.filteredValue != undefined ? dt.filteredValue.length : dt.value.length}} RULES)</span>
+      <div class="float-right">
+        <a nghref="#" class="icon-link" (click)="changeView('timeline')" pTooltip="Timeline View" tooltipPosition="left"
+          [ngClass]="typeView == 'timeline' ? 'active' : ''"><i class="fa fa-clock-o"></i></a>
+        <a nghref="#" class="icon-link" (click)="changeView('table')" pTooltip="Table View" tooltipPosition="left"
+          [ngClass]="typeView == 'table' ? 'active' : ''"><i class="fa fa-table"></i></a>
+        <a nghref="#" class="icon-link" pTooltip="Refresh" tooltipPosition="left" (click)="loadData()"><i class="fa fa-refresh"></i></a>
+      </div>
+    </div>
+    <div class="card-body" style="min-height: 150px; padding : 12px !important; padding-top : 0px !important">
+
+      <div class="container-fluid" style="padding: 0px;">
+        <div class="row">
+          <div class="col-md-6 col-sm-12">
+            <label>From</label>
+            <p-calendar [(ngModel)]="startDate" (onSelect)="saveDate('START')" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft" [minDate]="minDate" [maxDate]="endDate" placeholder="Start Date" dateFormat="mm/dd/yy"></p-calendar>
+          </div>
+          <div class="col-md-6 col-sm-12">
+            <label>To</label>
+            <div class="input-group">
+              <p-calendar [(ngModel)]="endDate" (onSelect)="saveDate('END')" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft" [minDate]="startDate" [maxDate]="maxDate" placeholder="End Date" dateFormat="mm/dd/yy"></p-calendar>
+              <div class="input-group-append group-absolute">
+                <button class="btn btn-secondary btn-sm" type="button" (click)="loadData()"><i class="fa fa-search"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="container-fluid" *ngIf="typeView == 'timeline'">
+        <div class="row">
+          <div [hidden]="data.length == 0" class="timeline-container" style="width: 100%; margin-bottom: 15px; max-height: 300px; overflow: auto;">
+          </div>
+
+          <div *ngIf="data.length == 0" class="div-no-data">
+            <img src="assets/img/no-data.png" class="img-no-data"/>
+            <p class="no-data">NO DATA FOUND</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid" style="padding: 0px;" [hidden]="typeView != 'table'">
+        <div class="">
+
+          <div *ngIf="data.length == 0" class="div-no-data">
+            <img src="assets/img/no-data.png" class="img-no-data"/>
+            <p class="no-data">NO DATA FOUND</p>
+          </div>
+
+          <p-table #dt [hidden]="data.length == 0" [columns]="cols" [value]="data" [paginator]="true" [rows]="15">
+            <ng-template pTemplate="header" let-columns>
+              <tr>
+                <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                  [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}">
+                  {{col.header}}
+                  <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                    ariaLabelDesc="Activate to sort in descending order"
+                    ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+                </th>
+              </tr>
+              <tr>
+                <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center"
+                  [ngStyle]="{'width': col.width}">
+                  <input *ngIf="col.field != 'category'" pInputText
+                    type="text" style="width : 100%; padding : 5px; border-radius: 5px"
+                    (input)="dt.filter($event.target.value, col.field, 'contains')"
+                    [placeholder]="'Search by ' + col.header">
+
+                  <p-dropdown *ngIf="col.field == 'category'" appendTo='body' [options]="categories"
+                    [style]="{'width':'100%'}" (onChange)="dt.filter($event.value, col.field, 'equals')"></p-dropdown>
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+              <tr [pSelectableRow]="rowData">
+                <td class="small-td" *ngFor="let col of columns">
+                  <span *ngIf="col.field == 'id'">
+                    <a style="text-decoration: underline; cursor: pointer; color : inherit" nghref="#" (click)="redirect(rowData.ruleId, 'RULE')">{{rowData.id}}</a>
+                  </span>
+                  <span *ngIf="col.field != 'id' && col.field != 'ideaCode'">
+                    {{rowData[col.field]}}
+                  </span>
+                  <span *ngIf="col.field == 'ideaCode'">
+                    <a *ngIf="rowData.ideaCode != ''" style="text-decoration: underline; cursor: pointer; color:inherit" nghref="#"
+                      (click)="redirect(rowData.ideaId, 'IDEA')">{{rowData.ideaCode}}</a>
+                  </span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

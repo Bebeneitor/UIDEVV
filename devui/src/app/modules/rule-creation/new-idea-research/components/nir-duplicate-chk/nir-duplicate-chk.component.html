@@ -1,0 +1,92 @@
+<div class="keyword-box">
+    <span><input class="keyword-search" type="text" pInputText size="50" placeholder="Search Enterprise Content Library"
+            (keyup)="searchChanged.next($event.target.value)" [(ngModel)]="searchString">
+        <i *ngIf="!searchChangeBool" class="magnify fa fa-search purple"></i>
+        <a *ngIf="searchChangeBool" class="cancel-x" (click)="clearSearchBox()">X</a>
+    </span>
+</div>
+<p-table class="print-size" #dt [columns]="cols" [value]="data" [paginator]="true" [(selection)]="selectedData"
+    [rows]="10" [rowsPerPageOptions]="[10,20,30]" [loading]="loading" (onPage)="paginate($event)">
+    <ng-template pTemplate="header" let-columns>
+        <tr>
+            <th *ngIf="!readOnlyView" class="checkbox-center" style="width:44px; background-color: white;">
+                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
+                [ngStyle]="{'width': col.width}">
+                {{col.header}}
+                <p-sortIcon [field]="col.field" *ngIf="colShouldOrder(col)" ariaLabel="Activate to sort"
+                    ariaLabelDesc="Activate to sort in descending order"
+                    ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+            </th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+        <tr [pSelectableRow]="rowData">
+            <td *ngIf="!readOnlyView" class="small-td">
+                <span class="span-centered">
+                    <p-tableCheckbox [(value)]="rowData"></p-tableCheckbox>
+                </span>
+            </td>
+            <td class="small-td" *ngFor="let col of columns">
+                <span *ngIf="col.field === 'code'" class="span-centered">
+                        <a style="text-decoration: underline; cursor: pointer" nghref="#" (click)="onIdClick(rowData)" >{{rowData.code}}</a>
+                </span>
+                <span *ngIf="col.field === 'name'" class="span-centered">
+                    {{rowData.name}}
+                </span>
+                <span *ngIf="col.field === 'category'" class="span-centered">{{rowData.category}}</span>
+                <span *ngIf="col.field === 'lineOfBusiness'" class="span-centered">{{rowData.lineOfBusiness}}</span>
+                <span *ngIf="col.field === 'description'" class="span-centered" (mouseover)="showCurrent($event, rowData.description, op)">
+                    {{rowData.description && rowData.description.length > 100 ? rowData.description.substring(0, 99)+'... ' : rowData.description}}
+                </span>
+                <span *ngIf="col.field === 'cptCode'" class="span-centered" (mouseover)="showCurrentCptCode($event, rowData.cptCode, op)">
+                    {{rowData.cptCode && rowData.cptCode.length > 100 ? rowData.cptCode.substring(0, 99)+'... ' : rowData.cptCode}}
+                </span>
+                <span *ngIf="col.field == 'status'" class="span-centered">
+                    {{rowData.statusDescription}}
+                </span>
+            </td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="paginatorright" let-state>
+        <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+            Showing <b>{{(state.page  * state.rows) + setOne}} to </b>
+            <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+            of <b>{{state.totalRecords}}</b>
+        </span>
+        <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">Showing
+            <b>{{(state.page  * state.rows)}} to </b>
+            <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+            of <b>{{state.totalRecords}}</b>
+        </span>
+    </ng-template>
+</p-table>
+<div class="comment-container">
+    <div class="comment-item">
+        <label class="custom-label-ideaComment">Duplicate Status</label>
+        <p-dropdown [options]="duplicateStatus" [disabled]="readOnlyView" [(ngModel)]="selectedDupStatus"
+            (onChange)="updateDupStatus()" placeholder="Select a status"></p-dropdown>
+    </div>
+
+    <div class="comment-item">
+        <label class="custom-label-ideaComment">Duplicate Comments</label>
+        <input id="disable-dup-state" class="cat-search" pInputText placeholder="Enter Comments"
+            [(ngModel)]="inputDupCmt" [disabled]="dupCmtToggle || readOnlyView">
+    </div>
+
+    <div class="comment-item">
+        <label class="custom-label-ideaComment">Idea Status</label>
+        <p-dropdown [options]="ideaStatus" [(ngModel)]="selectedIdeaStatus" (onChange)="updateIdeaStatus()"
+            placeholder="Select a status" [disabled]="readOnlyView"></p-dropdown>
+    </div>
+
+    <div class="comment-item-last">
+        <label class="custom-label-ideaComment">Idea Status Comments</label>
+        <input id="disable-idea-state" class="cat-search" pInputText placeholder="Enter Comments"
+            [(ngModel)]="inputIdeaStatusCmt" [disabled]="ideaCmtToggle || readOnlyView">
+    </div>
+</div>
+<p-overlayPanel #op>
+    {{this.customToolTip}}
+</p-overlayPanel>

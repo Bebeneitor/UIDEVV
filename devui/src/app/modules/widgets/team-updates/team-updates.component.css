@@ -1,0 +1,52 @@
+::ng-deep .teams-update p-chart > div {
+    position: unset !important;
+}
+
+.badge-teams-update {
+    width: 100%; 
+    border-radius: 3px; 
+    border: 1px solid #c8c8c8; 
+    text-align: center; 
+    padding: 7px; 
+    color: #fff;
+    opacity: 0.8;
+    cursor: pointer;
+}
+
+.badge-teams-update:hover {
+    opacity: 1 !important;
+}
+
+.badge-teams-update > div > h5 {
+    color : #fff !important;
+    font-size: 18px !important;
+    margin-bottom: 0px !important;
+}
+
+.badge-teams-update > div > h5 > small {
+    color : #fff !important;
+    font-size: 11px !important;
+}
+
+.badge-teams-update > div > p {
+    color : #fff !important;
+    font-size: 11px !important;
+}
+
+::ng-deep .teams-update .ui-scrollpanel-bar.ui-scrollpanel-bar-x {
+    display: none;
+}
+
+::ng-deep .teams-update .ui-scrollpanel-content {
+    padding: 0px !important;
+    margin-bottom: 10px !important;
+}
+
+.teams-update .card-body {
+    min-height: 150px; 
+    padding : 12px !important; 
+}
+
+::ng-deep .teams-update .ui-scrollpanel-content {
+    width: 100% !important;
+}

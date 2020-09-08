@@ -1,0 +1,130 @@
+<div class="dnb-table-container">
+  <table
+    class="table"
+    [ngClass]="{ 'new-version-table': !isReadOnly, disabled: disabled }"
+  >
+    <thead>
+      <tr>
+        <th *ngFor="let header of section.headers" class="overflow">
+          {{ header }}
+        </th>
+      </tr>
+    </thead>
+    <tbody
+      *ngFor="
+        let group of section.groups;
+        let lastG = last;
+        index as groupIndex
+      "
+      [ngClass]="{
+        border: group.hasBorder,
+        'group-selected': selectedGroupIndex === groupIndex && contextMenuOpen
+      }"
+    >
+      <tr
+        *ngFor="
+          let row of group.rows;
+          index as rowIndex;
+          let lastR = last;
+          let firstRow = first
+        "
+        [ngClass]="{
+          border: row.hasBorder,
+          'row-selected':
+            selectedGroupIndex === groupIndex &&
+            selectedRowIndex === rowIndex &&
+            contextMenuOpen
+        }"
+      >
+        <ng-container *ngIf="firstRow">
+          <td
+            *ngFor="let groupNameCol of group.names; index as namesIndex"
+            [attr.rowspan]="group.rows.length"
+            (contextmenu)="
+              openRowMenu($event, groupIndex, rowIndex, namesIndex, true);
+              $event.preventDefault()
+            "
+          >
+            <ng-container *ngIf="isReadOnly; else editor; index as columnIndex">
+              <app-cell-editor
+                [column]="groupNameCol"
+                [negativeDiff]="groupNameCol.diff"
+                [isComparing]="isComparing"
+                [searchInfo]="groupNameCol.searchData"
+                [highLight]="groupNameCol.highlight"
+                [isReadOnly]="groupNameCol.isReadOnly"
+              ></app-cell-editor>
+            </ng-container>
+            <ng-template #editor>
+              <app-cell-editor
+                [column]="groupNameCol"
+                [isComparing]="isComparing"
+                [searchInfo]="groupNameCol.searchData"
+                [highLight]="groupNameCol.highlight"
+                [isReadOnly]="!enableEditing"
+                [sectionId]="section.section.name"
+              ></app-cell-editor>
+            </ng-template>
+          </td>
+        </ng-container>
+        <td
+          *ngFor="
+            let column of row.columns;
+            let first = first;
+            let last = last;
+            index as columnIndex
+          "
+          class="overflow2"
+          (contextmenu)="
+            openRowMenu($event, groupIndex, rowIndex, columnIndex);
+            $event.preventDefault()
+          "
+        >
+          <ng-container *ngIf="isReadOnly; else editor">
+            <app-cell-editor
+              [column]="column"
+              [negativeDiff]="column.diff"
+              [isComparing]="isComparing"
+              [searchInfo]="column.searchData"
+              [highLight]="column.highlight"
+              [isReadOnly]="column.isReadOnly"
+            >
+            </app-cell-editor>
+          </ng-container>
+          <ng-template #editor>
+            <app-cell-editor
+              [column]="column"
+              [isComparing]="isComparing"
+              [searchInfo]="column.searchData"
+              [highLight]="column.highlight"
+              [isReadOnly]="!enableEditing"
+              [isLastSectionColumn]="last && lastR && lastG"
+              [sectionId]="section.section.name"
+            ></app-cell-editor>
+          </ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div
+  class="context-menu"
+  *ngIf="enableEditing && contextMenuOpen"
+  [style.top.px]="top"
+  [style.left.px]="left"
+>
+  <div class="options">
+    <app-dnb-row-menu
+      [section]="section"
+      [isGrouped]="true"
+      [groupIndex]="selectedGroupIndex"
+      [rowIndex]="selectedRowIndex"
+      [undoItems]="undoItems"
+      [menuPermissions]="menuPermissions"
+      [visible]="enableEditing"
+      (undoItemsBack)="undoItems = $event"
+      (behaviorEvent)="behavior($event)"
+    >
+    </app-dnb-row-menu>
+  </div>
+</div>

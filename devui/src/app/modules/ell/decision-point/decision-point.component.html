@@ -1,0 +1,98 @@
+<div class="decision-point">
+  <div class="row">
+    <div class="col-12">
+      <h4>Decision Point</h4>
+      <p class="subtitle"> {{(decisionPointDto.ellMrToMpDto ? decisionPointDto.ellMrToMpDto.releasedWhen : '') | date:'MMMM y' }} &nbsp; Release #{{decisionPointDto.releaseLogKey}}</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <table border="1" class="decision-point-table-detail">
+        <tr>
+          <td>Policy Type</td>
+          <td>{{decisionPointDto.ellPolicyDto.policyType}}</td>
+        </tr>
+        <tr>
+          <td>Medical Policy</td>
+          <td>{{decisionPointDto.ellPolicyDto.medPolTitle}}</td>
+        </tr>
+        <tr>
+          <td>Topic</td>
+          <td>{{decisionPointDto.ellTopicDto.topicTitle}}</td>
+        </tr>
+        <tr>
+          <td>Decision Point</td>
+          <td>{{decisionPointDto.dpDesc}}</td>
+        </tr>
+        <tr>
+          <td>Decision Point Key</td>
+          <td>{{decisionPointDto.dpKey}}</td>
+        </tr>
+        <tr>
+          <td>Decision Type</td>
+          <td>{{decisionPointDto.decisionType}}</td>
+        </tr>
+        <tr>
+          <td>Setup Considerations</td>
+          <td>{{decisionPointDto.dpSetupDesc}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="container-library-rules">
+        <label>Library Rules</label>
+        <div class="library-rules-decision-point">
+          <span class="rule-label" (click)="selectedRule = r" [ngClass]="{'active': (selectedRule != null && selectedRule == r)}" *ngFor="let r of decisionPointDto.ellRuleDtos">{{ r.midRuleKey + '.' + r.ruleVersion + ' ' }}</span>
+        </div>
+        <div class="text-right">
+          <button type="button" [disabled]="selectedRule == null" (click)="openRule(selectedRule)" class="btn btn-primary btn-sm float-right"><i class="fa fa-check"></i> Open Rule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <p-accordion>
+        <p-accordionTab header="Claim Types in Decision" [selected] = "(this.decisionPointDto.claimTypesInDecision && this.decisionPointDto.claimTypesInDecision.length > 0)" >
+          <ul class="accordion-list" *ngFor="let c of decisionPointDto.claimTypesInDecision">
+            <li>{{c}}</li>
+          </ul>
+        </p-accordionTab>
+      </p-accordion>
+      <p-accordion>
+        <p-accordionTab header="Claim Types/Rules">
+          <div class="container-claim-types-rules" *ngFor="let c of decisionPointDto.claimTypesByRule">
+            <label>{{c.claimTypeByRule}}</label>
+            <div class="claim-types-rules">
+              <span class="rule-label"  *ngFor="let r of c.ellRuleDtos; let isLast = last">{{r.midRuleKey + '.' + r.ruleVersion}}{{isLast ? '' : ', '}}</span>
+            </div>
+          </div>
+        </p-accordionTab>
+      </p-accordion>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="text-right">
+        <button type="button" (click)="returnPreviousScreen()"
+          class="btn btn-primary btn-sm btn-sm f-11"><i class="fa fa-reply"></i> Return </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>

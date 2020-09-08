@@ -1,0 +1,186 @@
+
+#provisonalRows {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-left:10px;
+  padding-right:10px;
+}
+#fieldset{
+  border: 1px solid #707070;
+  width:100%
+}
+.container{
+  max-width: 1400px;
+}
+input {
+  border: 1px solid #31006F;
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 4px;
+  font-size: 12px;
+}
+
+.codes-header .header-buttons {
+  float: right;
+  margin-top: 5px;
+  height: 20px;
+  font-size: 10px;
+  line-height: 11px;
+}
+
+.codes-header .header-buttons>button {
+  height: 20px;
+  font-size: 10px;
+  line-height: 11px;
+}
+
+input[type="radio"] {
+  margin-right: 0;
+}
+
+label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  color: #707070;
+  margin-left: 0px;
+  margin-bottom: 0px !important;
+}
+
+textarea {
+    border: 1px solid #31006F;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    border-radius: 2px;
+    overflow: auto;
+    resize: none;
+  }
+
+  textarea.diff-markup {
+    font-family: "Open Sans", "Helvetica Neue", sans-serif !important;
+    font-size: 12px !important;
+    border-radius: unset !important;
+    height: 100px !important;
+    border: 1px solid #AAAAAA !important;
+    padding: 10px;
+  }
+
+/***File deletion warning dialog***/
+.message-bold {
+  font-weight: bold;
+}
+.message-center {
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.icon-float-left {
+  float: left;
+  font-size: 2em;
+  color: red;
+}
+.code-text-area{
+    width: 100%;
+    padding: 10px;
+    margin-right: 10px;
+    min-height: 90px;
+    margin-left: 10px;
+}
+.code-label{
+ margin-left: 10px;
+}
+
+
+:host ::ng-deep input.ui-inputtext.ui-widget {
+  height: 24px !important;
+  background-color: white;
+  width:100%;
+}
+
+:host ::ng-deep .ui-button.ui-button-text-icon-left .ui-button-text {
+  background-color: transparent;
+  text-align: end;
+  font-size: 12px;
+  text-decoration: underline;
+  width: 80px;
+  padding: 0px 0px 5px 0px;
+}
+
+:host ::ng-deep .ui-dialog-footer.ui-widget-content.ng-star-inserted:host ::ng-deep .ui-fileupload .ui-fileupload-buttonbar .ui-button {
+  background-color: transparent !important;
+  color: black !important;
+  margin-right: 0px;
+}
+
+:host ::ng-deep .ui-button {
+  background-color: transparent !important;
+  color: black !important;
+}
+
+:host ::ng-deep .ui-fileupload-buttonbar {
+  padding: 0;
+}
+
+:host ::ng-deep .ui-button-icon-left.ui-clickable.pi.pi-plus {
+  display: none;
+}
+
+:host ::ng-deep .ui-fileupload.ui-widget.ng-star-inserted {
+  margin-top: -20px;
+  width: 100%;
+}
+
+:host ::ng-deep .ui-fileupload-buttonbar.ui-widget-header.ui-corner-top {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+:host ::ng-deep .ui-fileupload-buttonbar button:nth-child(1) {
+  display: none;
+}
+
+:host ::ng-deep .ui-fileupload-files {
+  font-size: 12px;
+}
+
+:host ::ng-deep.ui-inputtext {
+  background-color: transparent !important;
+  text-overflow: ellipsis;
+}
+
+::ng-deep .provisional-rule-codes p-fileUpload .ui-fileupload-row>div:first-child {
+  display: none !important;
+}
+
+::ng-deep .provisional-rule-codes p-fileUpload .ui-fileupload-row>div:last-child {
+  position: absolute;
+  right: 0 !important;
+}
+
+::ng-deep .provisional-rule-codes p-fileUpload .ui-fileupload-row>div>button.ui-button.ui-widget.ui-button-icon-only,
+::ng-deep .provisional-rule-codes p-dataView .ui-button.ui-widget.ui-button-icon-only  {
+  height: 25px !important;
+  width: 25px !important;
+}
+
+::ng-deep .provisional-rule-codes p-dataView .ui-dataview-header.ui-widget-header.ui-corner-top {
+  display: none !important;
+}
+
+::ng-deep .provisional-rule-codes p-dataView .ui-dataview-content.ui-widget-content {
+  padding-right: 0px !important;
+  padding-left: 0px !important;
+}
+
+::ng-deep .provisional-rule-codes p-fileUpload .ui-fileupload-content.ui-widget-content.ui-corner-bottom {
+  border-radius: unset !important;
+  min-height: 50px !important;
+}
+
+::ng-deep .provisional-rule-codes p-dataView.grey-box .ui-dataview-content.ui-widget-content {
+  opacity: 0.5;
+  background: #F5F5F5;
+  border: 1px solid gray;
+}

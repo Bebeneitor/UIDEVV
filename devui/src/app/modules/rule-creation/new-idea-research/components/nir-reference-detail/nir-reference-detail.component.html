@@ -1,0 +1,336 @@
+<div class="ref-source">
+    <div class="ref-source-title ">
+        <div><label> Reference Source</label></div>
+        <div>
+            <p-dropdown id="selectionSourceId" class="ref-search" [options]="newRefSource" name="selectSource" [style]="{'width':'205px'}"
+                [(ngModel)]="selectedSource" [disabled]="readOnlyView" (onChange)="showRefDetailsPage($event)">
+            </p-dropdown>
+        </div>
+    </div>
+    <div class="ref-detail">
+        <span class="required-field-color">*</span><label>Reference Details</label>
+        <div class="reference_Table">
+            <table class="referenceTable" id="referenceTable">
+                <thead>
+                    <tr>
+                        <th style="width:25%;text-align: left;"><span>Reference Source</span></th>
+                        <th style="width:40%;text-align: left;"><span>Title</span></th>
+                        <th style="width:20%;text-align: center;"><span>Edit/View Details</span>
+                        </th>
+                        <th style="width:15%;text-align: center;"><span>Delete</span></th>
+                    </tr>
+                </thead>
+            </table>
+            <div class="referenceTableBody">
+                <table id="referenceTableBody">
+                    <tbody>
+                        <tr *ngFor="let reference of referenceArray">
+                            <td style="width:25%;text-align: left;">
+                                {{reference.refInfo.refSource.sourceDesc}}
+                            </td>
+                            <td style="width:40%;text-align: left;">
+                                {{reference.refInfo.referenceTitle}}
+                            </td>
+                            <td style="width:20%;text-align: center;"><span
+                                    (click)="selectReference(reference.eclReferenceId)">select</span>
+                            </td>
+                            <td style="width:15%;text-align: center;"><span style="text-decoration:none;"
+                                    (click)="deleteReference(reference.eclReferenceId)">X</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal" id="refDetailsModal" [ngStyle]="{'display':display, 'z-index': '999999'}" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <h4 class="modal-title">Reference Details {{reference.referenceSource.sourceDesc}} need to confirm to with PO</h4> -->
+                <h4 class="modal-title">Reference Details</h4>
+                <button type="button" class="close" (click)="closEcleRefDetailsDialog()">&times;</button>
+
+            </div>
+            <div class="modal-body">
+                <div #refdetail class="reference">
+                    <div class="ref-header">
+                        <div class="ref-item name">
+                            <label class="ref-label"><span style="color: #E72B8A;">*</span>Reference Source</label>
+                              <p-dropdown id="refSourceId" class="ref-search" [options]="newRefSource" name="selectedReferenceValue"  [style]="{'width':'205px'}" 
+                                [(ngModel)]="selectedReferenceValue" [disabled]="readOnlyView" ></p-dropdown>     
+                        </div>
+
+                        <div class="ref-item title">
+                              <label class="ref-label"><span style="color: #E72B8A;">*</span>Title</label>
+                            <input pInputText class="reference-title input" type="text"
+                                [(ngModel)]="reference.referenceTitle" [pTooltip]="reference.referenceTitle" tooltipPosition="top"
+                                   name="refTitle" maxlength="250" [disabled]="readOnlyView" tooltipEvent="focus" tooltipZIndex="9999999"/>
+
+                        </div>
+                    </div>
+
+
+                    <div class="ref-details">
+                        <div class="ref-attach">
+                            <div class="refinput">
+                                <label>URL</label>
+                                <input pInputText class="ref-url-input" type="text" [(ngModel)]="reference.referenceURL"
+                                    pattern="https?://.+" #url="ngModel" name="refUrl" [disabled]="readOnlyView"
+                                    placeholder="Type or Paste Reference URL..." [readonly]="refValuesEditable" />
+                                <div *ngIf="url.invalid && (url.dirty || url.touched)" class="alert alert-danger">
+                                    <div *ngIf="url.errors.pattern">
+                                        Must start with http:// or https:// and one or more characters
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!------- REFERENCE DETAIL FILE -------->
+                            <p-fileUpload #uploadControl [disabled]="eclRef.refFile"
+                                (onClear)="onClearFile(1)"
+                                (onRemove)="onRemove($event, 1)"
+                                (onSelect)="onSelect($event, 1)"
+                                class="upload-size"
+                                *ngIf="!readOnlyView"
+                                customUpload="true"
+                                maxFileSize="10245760"
+                                [showUploadButton]="false"
+                                invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
+                                [fileLimit]="1"
+                                [multiple]="false">
+                                <ng-template pTemplate="toolbar">
+                                </ng-template>
+                            </p-fileUpload>
+                            <span *ngIf="eclRef.refFile === true">
+                                <span (click)="referenceFileDownload1(refFileDownload,reference.refUrlFileName,reference.refUrlFileType)">
+                                    <span id="refAttach" class="file-name-display">{{reference.refUrlFileName}}</span>
+                                    <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                                </span>
+                                <span (click)="deleteReferenceFile(1)">
+                                    <a>
+                                        <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                    </a>
+                                </span>
+                            </span>
+
+                        </div>
+                        <div class="ref-effective-group">
+                            <div class="ref-item effFrom">
+                                <label class="ref-label">Effective From</label>
+                                <p-calendar type="date" name="refEffeFromDate"
+                                    [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+                                    [(ngModel)]="reference.refEffectiveFromDt" dateFormat="mm/dd/yy"
+                                    placeholder="mm/dd/yyyy" [disabled]="readOnlyView">
+                                </p-calendar>
+                            </div>
+                            <div class="ref-item effFrom">
+                                <label class="ref-label">Effective To</label>
+                                <p-calendar type="date" name="refEffeToDate" [minDate]="reference.refEffectiveFromDt"
+                                    [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+                                    [(ngModel)]="reference.refEffectiveToDt" dateFormat="mm/dd/yy"
+                                    placeholder="mm/dd/yyyy" [disabled]="readOnlyView">
+                                </p-calendar>
+                            </div>
+                            <div class="ref-item ref-ingested">
+                                <label class="ref-label">Reference(s)</label>
+                                <input class="ref-input" type="text" [(ngModel)]="eclRef.referenceIngested"
+                                    name="referenceIngested" [disabled]="true" />
+                            </div>
+                        </div>
+                        <div class=ref-detail-group>
+                            <div class="ref-item">
+                                <label class="ref-label">Publication Date</label>
+                                <p-calendar type="date" name="refPubDate" [minDate]="minDate" [maxDate]="maxDate"
+                                    [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+                                    [(ngModel)]="reference.refUrlPublicationDt" dateFormat="mm/dd/yy"
+                                    placeholder="mm/dd/yyyy" [disabled]="readOnlyView">
+                                </p-calendar>
+                            </div>
+                            <div class="ref-item">
+                                <label class="ref-label">Edition</label>
+                                <input class="ref-input" type="text" [(ngModel)]="eclRef.edition"
+                                    name="refEdition" [readonly]="refValuesEditable" [disabled]="readOnlyView" />
+                            </div>
+                            <div class="ref-item">
+                                <label class="ref-label">Chapter</label>
+                                <input maxlength="50" class="ref-input" type="text" [(ngModel)]="eclRef.chapter" name="refChapter"
+                                    [disabled]="readOnlyView" />
+                            </div>
+                            <div class="ref-item">
+                                <label class="ref-label">Page#</label>
+                                <input maxlength="10" class="ref-input" type="text" [(ngModel)]="eclRef.page" name="refPage"
+                                    [disabled]="readOnlyView" />
+                            </div>
+                            <div class="ref-item">
+                                <label class="ref-label">Section</label>
+                                <input maxlength="50" class="ref-input" type="text" [(ngModel)]="eclRef.section" name="refSection"
+                                    [disabled]="readOnlyView" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <label [hidden]="readOnlyView">Additional Attachments(Up to 2 files)</label>
+                    <div [hidden]="readOnlyView" class="ref-add-attach">
+                        <label>Reference Document 1</label>
+                        <div>
+                            <p-fileUpload #uploadControl1 [disabled]="eclRef.refFile1"
+                                (onClear)="onClearFile(2)"
+                                (onRemove)="onRemove($event, 2)"
+                                (onSelect)="onSelect($event, 2)"
+                                customUpload="true"
+                                maxFileSize="10245760"
+                                [showUploadButton]="false"
+                                invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
+                                [fileLimit]="1"
+                                [multiple]="false" >
+                                <ng-template pTemplate="toolbar">
+                                </ng-template>
+
+                            </p-fileUpload>
+                            <span *ngIf="eclRef.refFile1 === true">
+                                <span (click)="referenceFileDownload2(refFileDownload1,reference.refDocFileName1,reference.refDocFileType1)">
+                                    <span id="refAttach" class="file-name-display">{{reference.refDocFileName1}}</span>
+                                    <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                                </span>
+                                <span (click)="deleteReferenceFile(2)">
+                                    <a>
+                                        <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                    </a>
+                                </span>
+                            </span>
+                        </div>
+                        <label>Reference Document 2</label>
+                        <div>
+                            <p-fileUpload  #uploadControl2 [disabled]="eclRef.refFile2"
+                                (onClear)="onClearFile(3)"
+                                (onRemove)="onRemove($event, 3)"
+                                (onSelect)="onSelect($event, 3)"
+                                customUpload="true"
+                                maxFileSize="10245760"
+                                [showUploadButton]="false"
+                                invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
+                                [fileLimit]="1"
+                                [multiple]="false">
+                                <ng-template pTemplate="toolbar">
+                                </ng-template>
+                            </p-fileUpload>
+                            <span *ngIf="eclRef.refFile2 === true">
+                                <span (click)="referenceFileDownload3(refFileDownload2,reference.refDocFileName2,reference.refDocFileType2)">
+                                    <span id="refAttach" class="file-name-display">{{reference.refDocFileName2}}</span>
+                                    <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                                </span>
+                                <span (click)="deleteReferenceFile(3)">
+                                    <a>
+                                        <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                    </a>
+                                </span>
+                            </span>
+
+                        </div>
+                    </div>
+
+                    <div class="ref-comment">
+                        <label class="ref-label">Comments</label>
+                        <textarea maxlength="250" class="ref-comment-text" rows="5" cols="100" placeholder="Add Comments..."
+                            [(ngModel)]="eclRef.comments" name="refDetailsComments" maxLength="512"
+                            (input)="keylimitset($event.target.value)" [disabled]="readOnlyView"></textarea>
+                        <label class="char-limit">Character Limit: {{showCount}}</label>
+                    </div>
+                    <div class="ref-comment-attachements">
+                        <label>Select File</label>
+                        <div style="margin-bottom: 10px;">
+                            <p-fileUpload #uploadControl3 [disabled]="eclRef.commentsFile1 === true"
+                                (onClear)="onClearFile(4)"
+                                (onRemove)="onRemove($event, 4)"
+                                (onSelect)="onSelect($event, 4)"
+                                customUpload="true"
+                                maxFileSize="10245760"
+                                [showUploadButton]="false"
+                                invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
+                                [fileLimit]="1"
+                                [multiple]="false" >
+                                <ng-template pTemplate="toolbar">
+                                </ng-template>
+
+                            </p-fileUpload>
+                            <span *ngIf="eclRef.commentsFile1 === true">
+                                <span (click)="referenceFileDownload4(refcommentsFileDownload1,eclRef.eclAttachmentList[0].attachmentFileName,null)">
+                                    <span id="refAttach" class="file-name-display">{{eclRef.eclAttachmentList[0].attachmentFileName}}</span>
+                                    <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                                </span>
+                                <span (click)="deleteCommentsFile(1)">
+                                    <a>
+                                        <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                    </a>
+                                </span>
+                            </span>
+
+                        </div>
+                        <label>Select File</label>
+                        <div style="margin-bottom: 10px;">
+                            <p-fileUpload #uploadControl4
+                                (onClear)="onClearFile(5)"  [disabled]="eclRef.commentsFile2 === true"
+                                (onRemove)="onRemove($event, 5)"
+                                (onSelect)="onSelect($event, 5)"
+                                customUpload="true"
+                                maxFileSize="10245760"
+                                [showUploadButton]="false"
+                                invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
+                                [fileLimit]="1"
+                                [multiple]="false" >
+                                <ng-template pTemplate="toolbar">
+                                </ng-template>
+
+                            </p-fileUpload>
+                            <span *ngIf="eclRef.commentsFile2 === true">
+                                    <span (click)="referenceFileDownload5(refcommentsFileDownload2,eclRef.eclAttachmentList[1].attachmentFileName,null)">
+                                        <span id="refAttach" class="file-name-display">{{eclRef.eclAttachmentList[1].attachmentFileName}}</span>
+                                        <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                                    </span>
+                                    <span (click)="deleteCommentsFile(2)">
+                                        <a>
+                                            <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                        </a>
+                                    </span>
+                                </span>
+
+                        </div>
+                    </div>
+
+                <div class="button-group">
+                    <button type="button" class="basic-cot btn btn-primary" (click)="closEcleRefDetailsDialog()"
+                        name="refDetailCancel" value="Cancel">Cancel</button>
+                    <button [hidden]="readOnlyView" type="button" class="basic-cot btn btn-primary" name="refDetailSave"
+                        value="Save" (click)="saveEclReferenceDetails()">Save</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>
+
+<p-dialog header="Are you sure?" [class]="confirmDialog" [(visible)]="removeAttachmentDisplay">
+    <p class="message-bold">
+        <span class="icon-float-left">
+            <i class="fa fa-exclamation-triangle warning-icon-font" aria-hidden="true"></i>
+        </span>
+        <span>Are you sure you want to delete this attachment?</span>
+    </p>
+    <p class="message-center">This action cannot be undone.</p>
+    <p-footer>
+        <div class="row">
+            <div class="col-md-5">
+                <button name="removeAttachmentCancelBtn" class="btn btn-primary" pButton
+                    (click)="removeAttachmentCancel()" label="Cancel"></button>
+            </div>
+            <div class="col-md-6">
+                <button name="removeAttachmentDeletebtn" class="btn btn-primary" pButton
+                    (click)="removeAttachmentDelete()" label="Delete"></button>
+            </div>
+        </div>
+    </p-footer>
+</p-dialog>

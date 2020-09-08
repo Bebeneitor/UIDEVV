@@ -1,0 +1,11 @@
+<p-card>
+    <div class="text-right" style="right: 15px; padding: 5px;">
+        <button class="btn btn-sm btn-primary f-11" style="padding: 5px;"
+          [disabled]="false" [routerLink]="['/cure-and-repo/cure/module-add-edit/', 0]">
+          <i class="fa fa-plus"></i> Add new CURE module
+        </button>
+    </div>
+    <div class="ui-fluid">
+        <ecl-table #cureModulesTable [tableModel]='cureModulesTableModel' (onAcctionIcon)="onClickIcon($event)"></ecl-table>
+    </div>
+</p-card>

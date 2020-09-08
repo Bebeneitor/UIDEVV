@@ -1,0 +1,3 @@
+::ng-deep p-table#tableGoodIdeas > div > .ui-table-caption.ui-widget-header {
+    padding-bottom: 8px !important;
+}

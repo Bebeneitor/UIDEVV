@@ -1,0 +1,48 @@
+<p-table #viewGrid [columns]="cols" [value]="categoryMappingData" [paginator]="true" [resizableColumns]="true"
+  columnResizeMode="fit" [reorderableColumns]="true" [rows]="10" [rowsPerPageOptions]="[5,10,25,50,100]"
+  [loading]="loading" [responsive]="true" (sortFunction)="customSort($event)" [customSort]="true">
+  <ng-template pTemplate="header" let-columns>
+    <tr>
+      <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
+        [ngStyle]="{'width': col.width}" pResizableColumn>
+        {{col.header}}
+        <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+          ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">
+        </p-sortIcon>
+      </th>
+    </tr>
+    <tr>
+      <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center" [ngStyle]="{'width': col.width}">
+        <input pInputText type="text" style="width : 100%; padding : 5px; border-radius: 5px"
+          *ngIf="col.field === 'categoryName'" (input)="viewGrid.filter($event.target.value, col.field, 'contains')">
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-categoryMapping let-columns="columns">
+    <tr (click)="updateUserTeamCategoryMapping(categoryMapping)" [pSelectableRow]="categoryMapping">
+      <td class="small-td" *ngFor="let col of columns">
+        <span *ngIf="col.field == 'categoryName'">{{categoryMapping.categoryName}}</span>
+        <span *ngIf="col.field == 'selectedCCA'" class="span-centered">
+          <p-checkbox name="selectedCCA" [disabled]="!roleCCA || roleDisable" value="categoryMapping.selectedCCA"
+            [(ngModel)]="categoryMapping.selectedCCA" binary="true"></p-checkbox>
+        </span>
+        <span *ngIf="col.field == 'selectedPO' && creationOrMaintenance" class="span-centered">
+          <p-checkbox name="selectedPO" [disabled]="!rolePO || categoryMapping.rolePO || roleDisable"
+            value="categoryMapping.selectedPO" [(ngModel)]="categoryMapping.selectedPO" binary="true"></p-checkbox>
+        </span>
+        <span *ngIf="col.field == 'selectedPO' && !creationOrMaintenance" class="span-centered selectedPOCheck">
+          <p-checkbox name="selectedPO" [disabled]="!rolePO || categoryMapping.rolePO || roleDisable"
+            value="categoryMapping.selectedPO" [(ngModel)]="categoryMapping.selectedPO" binary="true"></p-checkbox>
+        </span>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="paginatorright" let-state>
+    <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+      Showing <b>{{(state.page  * state.rows) + 1}}</b> -
+      <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+      of <b>{{state.totalRecords}}</b>
+    </span>
+    <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+  </ng-template>
+</p-table>

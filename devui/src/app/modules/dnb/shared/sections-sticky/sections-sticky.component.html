@@ -1,0 +1,63 @@
+<div
+  class="tableContainer"
+  *ngFor="let stickyItem of stickySection; index as stickyIndex"
+>
+  <div class="table-header">
+    <h3>
+      {{ stickyItem.section.name }}
+    </h3>
+    <button
+      (click)="undoStickySection(stickyIndex)"
+      class="button pin"
+      [attr.slm-id]="'undo_pin' + stickyItem.id"
+    >
+      <i class="fa fa-map-pin"></i>
+    </button>
+  </div>
+  <div class="table-overflow">
+    <table class="table" [id]="stickyItem.section.name">
+      <thead>
+        <tr>
+          <th *ngFor="let header of stickyItem.headers">{{ header }}</th>
+        </tr>
+      </thead>
+      <ng-container *ngIf="stickyItem.groups; else rowSticky">
+        <tbody
+          *ngFor="let group of stickyItem.groups; index as groupIndex"
+          [ngClass]="{
+            border: group.hasBorder
+          }"
+        >
+          <tr
+            *ngFor="let row of group.rows; let firstRow = first"
+            [ngClass]="{
+              border: row.hasBorder
+            }"
+          >
+            <ng-container *ngIf="firstRow">
+              <td
+                *ngFor="let groupNameCol of group.names"
+                [attr.rowspan]="group.rows.length"
+              >
+                {{ groupNameCol.value }}
+              </td>
+            </ng-container>
+            <td *ngFor="let column of row.columns">{{ column.value }}</td>
+          </tr>
+        </tbody>
+      </ng-container>
+      <ng-template #rowSticky>
+        <tbody>
+          <tr
+            *ngFor="let row of stickyItem.rows"
+            [ngClass]="{
+              border: row.hasBorder
+            }"
+          >
+            <td *ngFor="let column of row.columns">{{ column.value }}</td>
+          </tr>
+        </tbody>
+      </ng-template>
+    </table>
+  </div>
+</div>

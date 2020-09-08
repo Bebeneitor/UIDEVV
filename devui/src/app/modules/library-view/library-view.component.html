@@ -1,0 +1,63 @@
+<h5>Summary View</h5>
+<div class="library-view-container">
+<LibraryViewSearch></LibraryViewSearch>
+
+<p-table #dt [columns]="cols"  
+             sortMode="multiple" 
+             [resizableColumns]="true" 
+             columnResizeMode="fit" 
+             [value]="data" 
+             [reorderableColumns]="true" 
+             [paginator]="true" 
+             [rows]="10" 
+             [responsive]="true"
+             [lazy]="true"
+             (onLazyLoad)="lazyLoad($event)"
+             [totalRecords]="totalRecords">
+
+    <ng-template pTemplate="header" let-columns>
+        <tr>
+            <th class="small-th" *ngFor="let col of columns" [ngStyle]="{'width': col.width}" [pSortableColumn]="col.field">
+                {{col.header}}
+                <p-sortIcon [field]="col.field"></p-sortIcon>
+            </th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+        <tr class="border-responsive" [pSelectableRow]="rowData" [pSelectableRowIndex]="rowIndex">
+            <td class="small-td" *ngFor="let col of columns" >
+                <span class="ui-column-title">{{col.header}}</span>
+
+                <span *ngIf="col.field == 'ruleId'" style='display: block'>
+                    <a style="text-decoration: underline; cursor: pointer"  (click)="viewRuleDialog(rowData[col.field])">{{rowData[col.field]}}</a>
+                </span>
+
+                <span *ngIf="col.field == 'ruleDesc'" style='display: block'>
+                    {{rowData[col.field]}}
+                </span>
+
+                <span *ngIf="col.field == 'lobDesc'" class="span-centered">
+                    {{rowData[col.field]}}
+                </span>
+
+                <span *ngIf="col.field == 'categoryDesc'" class="span-centered">
+                    {{rowData[col.field]}}
+                </span>
+
+                <span *ngIf="col.field == 'state'" class="span-centered">
+                    {{rowData[col.field]}}
+                </span>
+                <span *ngIf="col.field == 'jurisdiction'" class="span-centered">
+                    {{rowData[col.field]}}
+                </span>
+
+            </td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="paginatorleft" let-state>
+        Showing {{(state.page  * state.rows) + 1}} to {{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}} of {{state.totalRecords}}
+    </ng-template>
+    
+</p-table>
+</div>

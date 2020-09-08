@@ -1,0 +1,332 @@
+* {
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 12px;
+  color: #707070;
+}
+  
+body {
+  overflow-x: hidden;
+}
+
+.wrapper {
+    display: flex;
+}
+/*************************
+ REFERENCE DETAIL        *
+**************************/
+.ref-source {
+  width: 100%;
+  display: inline-flex;
+}
+
+.ref-source-title {
+  padding-right: 10px;
+  width: 40%;
+}
+
+::ng-deep.ng-tns-c12-10.ui-dropdown.ui-widget.ui-state-default.ui-corner-all.ui-helper-clearfix {
+  border-color: #281c71
+}
+/*************************
+ REFERENCE MODAL         *
+**************************/
+.modal {
+  background: rgba(47, 79, 79, 0.6) !important;
+  overflow: auto;
+}
+
+.modal-content {
+margin:5%;
+}
+
+.ref-header {
+  display: flex;
+}
+.close {
+  padding: 10px;
+  font-size: 25px;
+}
+.ref-details {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #281c71;
+  border-radius: 2px;
+  padding: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 15px 0px 15px 0px; /*Top Right Bottom Left */
+}
+
+.ref-label {
+  display: block;
+}
+
+.ref-input {
+  padding: 5px;
+  width: 100%;
+  height: 31px;
+  border-color: #281c71;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.basic-cot.btn {
+  width: 150px;
+  border-radius: 1px;
+  height: 40px;
+  font-size: 1.3em;
+}
+/**************************
+ REFERENCE NAME & TITLE   *
+***************************/
+.ref-item {
+  padding-top: 0px;
+  padding-bottom: 5px;
+  width: auto;
+}
+
+.ref-item.name {
+  width: 40%;
+  padding-right: 20px;
+}
+
+.ref-item.title {
+  width: 60%;
+}
+
+.reference-name,
+.reference-title {
+  width: 100%;
+}
+/************************
+ REFERENCE URL          *
+*************************/
+.ref-url-input {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.upload-size {
+  padding-bottom: 5px;
+}
+
+.ref-detail-group{
+  display: flex;
+  justify-content: space-between;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.ref-effective-group{
+  display: flex;
+  padding-top: 25px;
+  padding-bottom: 5px;
+  
+
+}
+
+.ref-item.effFrom{
+  margin-right:10px;
+}
+
+::ng-deep.ng-tns-c14-11.ui-inputtext.ui-widget.ui-state-default.ui-corner-all.ng-star-inserted {
+  border-radius: 2px;
+  border-color: #281c71;
+}
+/************************
+ REFERENCE ADDITIONAL   *
+ ************************/
+.ref-add-attach {
+  border: 1px solid #281c71;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+/************************
+ REFERENCE COMMENT      *
+ ************************/
+ .ref-comment {
+  width: 100%;
+  margin-bottom: 15px;
+}
+.ref-comment-text {
+  width: 100%;
+  border-radius: 2px;
+}
+textarea {
+  border: 1px solid #31006F;
+  border-radius: 2px;
+  color: #333333;
+  overflow: auto;
+  resize: none;
+}
+.char-limit {
+  color: #b8b8b8;
+  margin-bottom: 40px;
+  position: relative;
+}
+/************************
+REFERENCE TABLE         *
+************************/
+  .reference_Table {
+    width: 100%;
+    max-height: 150px;
+    min-height: 150px;
+    background: linear-gradient(180deg, #D8E2EB 10%, #FFFFFF 90%);
+    border: 1px solid #281c71;
+    border-radius: 3px;
+  }
+  
+  .referenceTable th {
+    height: 40px;
+    font-size: 12px;
+    color: #31006F;
+    padding: 5px;
+  
+  }
+  #refAttach{
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: #31006F;
+    text-decoration: underline;
+    margin-left: 0px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    cursor: pointer;
+  }
+  
+  .referenceTable th span {
+    background-color: #F5F5F5;
+    display: block;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: normal;
+    padding: 1px 5px;
+    color: #31006F;
+  }
+
+  .referenceTableBody{
+    width: 99.8%;
+    max-height: 107px;
+    min-height: 100px;
+    table-layout: fixed;
+    overflow: auto;
+  }
+  
+  #referenceTableBody {
+    width: 99.8%;
+    max-height: 107px;
+    min-height: 100px;
+    table-layout: fixed;
+    overflow: auto;
+  }
+  
+  #referenceTableBody td {
+    min-height: 20px;
+    word-wrap: break-word;
+    font-size: 12px;
+    color: #333333;
+    padding: 0px 10px;
+  }
+  
+  
+  #referenceTableBody tr::selection {
+    min-height: 25px;
+    width: 100%;
+    background-color: #31006F;
+    display: inline-flex;
+    font-size: 12px;
+    color: #e1eaf2;
+    padding: 4px 10px;
+  }
+  
+  #referenceTableBody tr:nth-child(even) {
+    min-height: 25px;
+    width: 100%;
+    margin-left: 1px;
+    background-color: #e1eaf2;
+    display: inline-flex;
+    font-size: 12px;
+    color: #333333;
+    padding: 4px 10px;
+  }
+  
+  #referenceTableBody tr:nth-child(odd) {
+    min-height: 25px;
+    width: 100%;
+    margin-left: 1px;
+    background-color: #FFFFFF;
+    display: inline-flex;
+    font-size: 12px;
+    color: #333333;
+    padding: 4px 10px;
+  }
+  
+  #referenceTableBody td span {
+    min-height: 20px;
+    font-size: 12px;
+    color: #31006F;
+    cursor: pointer;
+    padding: 2px 10px;
+    text-decoration: underline;
+  
+  }
+
+  .referenceTable,
+  .referenceTable tr,
+  .tablelob select,
+  .tablelob input,
+  .tablelob,
+  .referenceTable,
+  .referenceTable tr  {
+    width: 100%;
+  }
+
+  .tableCol {
+    display: inline-grid;
+  }
+
+  /************************
+ REFERENCE COMMENT ATTACHMENTS      *
+ ************************/
+ .ref-comment-attachements {
+  width: 100%;
+  margin-bottom: 15px;
+}
+.ref-comment-text {
+  width: 100%;
+  border-radius: 2px;
+}
+
+/***File deletion warning dialog***/
+.message-bold {
+  font-weight: bold;
+}
+.message-center {
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.icon-float-left {
+  float: left;
+  font-size: 2em; 
+  color: red;
+}
+.warning-icon-font {
+  font-family: fontawesome !important; 
+  font-size: 1.2em; 
+  margin-left: 0.5em; 
+  color: red;
+}
+
+/***Attached file name***/
+.file-name-display {
+  overflow-wrap: break-word;
+}
+
+.ref-ingested{
+width:100%;
+}

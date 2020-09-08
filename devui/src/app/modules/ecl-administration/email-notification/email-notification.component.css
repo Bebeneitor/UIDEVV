@@ -1,0 +1,21 @@
+::ng-deep body #emailNotification .ui-chips > ul.ui-inputtext {
+    width: 100% !important;
+}
+
+::ng-deep body #emailNotification li.ui-chips-input-token > input[type="text"] {
+    border: none !important;
+}
+
+::ng-deep body #emailNotification .ui-chips > ul.ui-inputtext .ui-chips-token {
+    background : #31006F !important;
+}
+
+::ng-deep body #emailNotification .ui-chips > ul.ui-inputtext:not(.ui-state-disabled).ui-state-focus,
+::ng-deep body #emailNotification textarea,
+::ng-deep body #emailNotification .ui-chips > ul.ui-inputtext {
+    border-color:  #31006F !important;
+}
+
+::ng-deep body #emailNotification .ui-chips-token .ui-chips-token-label {
+    font-size: 11px !important;
+}

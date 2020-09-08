@@ -1,0 +1,9 @@
+<form>
+    <textarea pInputTextarea class="text-box" type="text" [(ngModel)]="selectedInfo" name="return"
+        (input)="returnMessage($event.target.value)" maxLength="256"></textarea>
+    <div>Character Limit: {{showCount}}</div>
+    <div class="button-container">
+        <button class="btn btn-primary" (click)="cancelReturnDialog()">Cancel</button>
+        <button class="btn btn-primary" (click)="routeToReassign()"  [disabled]="selectedInfo === '' ">Return</button>
+    </div>
+</form>

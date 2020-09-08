@@ -1,0 +1,19 @@
+::ng-deep p-chart {
+    width: 100%;
+    padding : 12px;
+    padding-bottom: 0px;
+}
+
+::ng-deep .marker{
+    width: 10px;
+    height: 10px;
+    margin-right: 3px;
+    background: red;
+    display: inline-block;
+}
+
+::ng-deep .marker-text {
+    font-size: 11px;
+    display: inline-block;
+    margin-right: 8px;
+}

@@ -1,0 +1,34 @@
+.dnb-page-header {
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.letters-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+.letters-links li {
+  margin: 2px;
+}
+
+.letters-links li a {
+  color: #31006f;
+  text-decoration: underline;
+}
+
+.letters-links li a:hover {
+  color: purple;
+}
+
+.table-container {
+  margin-bottom: 15px;
+}
+
+.dnb-filter-list {
+  display: flex;
+  justify-content: flex-end;
+  flex-basis: 100%;
+}

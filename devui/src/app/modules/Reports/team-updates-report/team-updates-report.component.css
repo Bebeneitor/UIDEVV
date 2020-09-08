@@ -1,0 +1,41 @@
+
+.team-updates-report {
+    margin-left: 0%;
+    margin-right: 0%;
+}
+
+.team-updates-report .container-of-dropdown {
+    margin:  2px 0px;
+    padding: 0px;
+    width:   100%;
+}
+
+.team-updates-report .container-of-button {
+    margin: 20px 0px;
+    padding: 0px;
+    width:   100%;
+}
+
+.team-updates-report .container-of-chart {
+    margin:  20px 0px;
+    padding: 0px;
+    width:   100%;
+}
+
+::ng-deep .team-updates-report .container-of-dropdown .ui-dropdown{
+    width: 100% !important;
+}
+
+.team-updates-report .container-of-dropdown .label-of-dropdown {
+    width: 100%;
+}
+
+.team-updates-report .container-of-button .btn-of-dropdown{
+    font-size: 11px;
+    width: 100%
+}
+
+.team-updates-report .icon-float-left {
+    float: left;
+    color: red;
+}

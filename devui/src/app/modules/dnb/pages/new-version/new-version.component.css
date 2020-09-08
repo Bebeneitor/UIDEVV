@@ -1,0 +1,183 @@
+.sticky-sections {
+  position: fixed;
+  display: inline-block;
+  right: 15px;
+  left: 0;
+  z-index: 999999;
+  top: 0em;
+  padding: 10px;
+  background: #412585;
+  width: calc(100% - 450px);
+  margin-left: auto;
+}
+
+.has-sticky-header .sticky-sections {
+  top: 45px;
+}
+
+.button.is-text {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+}
+
+.button.is-text.pin {
+  margin-right: 10px;
+}
+
+.is-pulled-right {
+  float: right !important;
+}
+
+.dnb-drag-placeholder {
+  border: 2px dashed #afafaf;
+  height: 50px;
+  background-color: #d8d8d8;
+}
+
+.page-content {
+  margin-left: auto;
+  width: calc(100% - 150px);
+  padding: 15px;
+}
+
+.navigation-closed .page-content {
+  width: calc(100% - 50px);
+}
+
+.dnb-page-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sticky-header {
+  background-color: #f2f3f7 !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 10px 0 5px;
+}
+
+.has-sticky-header .sticky-header {
+  border-bottom: 1px solid #31006f;
+}
+
+.dnb-modal {
+  width: 50vh;
+  max-width: 500px;
+}
+
+.dnb-page.is-fullscreen .sticky-sections {
+  width: calc(100% - 145px);
+}
+
+.dnb-page.navigation-closed .sticky-sections {
+  width: calc(100% - 350px);
+}
+
+.dnb-page.is-fullscreen.show-current .sticky-sections {
+  width: calc(50% - 75px);
+}
+
+.dnb-page.navigation-closed.show-current .sticky-sections {
+  width: calc(50% - 177px);
+}
+
+.dnb-page.is-fullscreen.navigation-closed .sticky-sections {
+  width: calc(100% - 45px);
+}
+
+.dnb-page.is-fullscreen.navigation-closed.show-current .sticky-sections {
+  width: calc(50% - 23px);
+}
+
+.sidebar-collapsed .dnb-page .sticky-sections {
+  width: calc(100% - 23px);
+}
+
+.dnb-page.show-current .sticky-sections {
+  width: calc(50% - 224px);
+}
+
+body .dnb-page .ui-listbox .ui-listbox-header {
+  border: none;
+}
+
+.dnb-page .ui-listbox-header::after {
+  clear: both;
+  content: "Select All";
+  display: inline-block;
+  vertical-align: middle;
+}
+
+body
+  .dnb-page
+  .ui-listbox
+  .ui-listbox-list
+  .ui-listbox-item.ui-state-highlight {
+  color: #333333 !important;
+  background-color: #ffffff !important;
+}
+
+body .dnb-page .ui-listbox {
+  margin-bottom: 10px;
+  border: none;
+}
+
+body .dnb-page .ui-overlaypanel .ui-overlaypanel-content {
+  padding: 10px;
+}
+
+body .dnb-page .ui-listbox .ui-listbox-list .ui-listbox-item {
+  padding: 3px 0;
+}
+
+body .dnb-page .ui-listbox .ui-listbox-header {
+  padding: 3px 0;
+}
+
+body
+  .dnb-page
+  .ui-listbox:not(.ui-state-disabled)
+  .ui-listbox-item:not(.ui-state-highlight):not(.ui-state-disabled):hover {
+  background-color: #ffffff;
+}
+
+body .dnb-page .ui-listbox {
+  max-height: 320px;
+  overflow-y: scroll;
+}
+
+.sortable_list {
+  padding-top: 20px !important;
+}
+
+.ui-overlaypanel {
+  top: 34px !important;
+  left: -235px !important;
+}
+
+.dnb-toggle {
+  position: relative;
+}
+
+.current-toggle {
+  min-width: 132px;
+}
+
+.drug-name {
+  border-bottom: 1px solid #9179b7;
+  padding: 3px;
+  padding: 3px;
+  display: inline-block;
+  color: black;
+  font-weight: normal;
+  position: relative;
+  top: 6px;
+}
+
+.drug-name .ql-container {
+  font-size: 14px;
+}

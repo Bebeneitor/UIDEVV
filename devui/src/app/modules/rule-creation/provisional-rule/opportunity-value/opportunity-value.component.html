@@ -1,0 +1,101 @@
+<div class="container">
+
+  <div class="col-md-12">
+
+    <div class="row">
+      <label>Estimated Opportunity Value</label>
+    </div>
+
+    <div class="row opp-row">
+
+      <div class="col-md-3" style="margin-top: 25px;">
+        <div class="row"><label>CVP</label></div>
+        <div class="row">
+          <app-currency-box [fromMaintenanceProcess]="fromMaintenanceProcess" [format]="cvpFormat"
+            [originalFormat]="originalCvpFormat" (newFormat)="opportunityValue.cvpOppValue=$event"
+            [provDialogDisable]="provDialogDisable">
+          </app-currency-box>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="row"><label>Notes</label></div>
+        <div class="row">
+          <app-dif-markups-editor *ngIf="fromMaintenanceProcess && originalOppValue" name="cvpComments"
+            #markpupEd class="opp-textarea-field" [(ngModel)]="opportunityValue.cvpComments" [saveAsDelta]="true"
+            [originalText]="originalOppValue.cvpComments" [provDialogDisable]="provDialogDisable" [maxLength]="1000">
+          </app-dif-markups-editor>
+          <textarea *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" rows="4" maxlength="1000" name="cvpNotes"
+            [disabled]="provDialogDisable" [(ngModel)]="opportunityValue.cvpComments"
+            (paste)="checkLength($event, 'CVP Notes')"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row opp-row">
+
+      <div class="col-md-3" style="margin-top: 25px;">
+        <div class="row"><label>ICMS</label></div>
+        <div class="row">
+          <app-currency-box [fromMaintenanceProcess]="fromMaintenanceProcess" [format]="icmsFormat"
+            [originalFormat]="originalIcmsFormat" (newFormat)="opportunityValue.icmsOppValue=$event"
+            [provDialogDisable]="provDialogDisable">
+          </app-currency-box>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="row"><label>Notes</label></div>
+        <div class="row">
+          <app-dif-markups-editor *ngIf="fromMaintenanceProcess && originalOppValue" name="icmsComments"
+            #markpupEd class="opp-textarea-field" [(ngModel)]="opportunityValue.icmsComments" [saveAsDelta]="true"
+            [originalText]="originalOppValue.icmsComments" [provDialogDisable]="provDialogDisable" [maxLength]="1000">
+          </app-dif-markups-editor>
+          <textarea *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" rows="4" maxlength="1000"
+            name="icmsNotes" [(ngModel)]="opportunityValue.icmsComments" [disabled]="provDialogDisable"
+            (paste)="checkLength($event, 'ICMS Notes')"></textarea>
+        </div>
+      </div>
+
+      <div class="col-md-1">
+        <div class="row"></div>
+        <div class="row">
+          <a nghref="#" (click)="routeToJira()">
+            <button class="btn btn-primary jira-btn" [disabled]="provDialogDisable">Open Jira</button>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row opp-row">
+
+      <div class="col-md-3" style="margin-top: 25px;">
+        <div class="row"><label>CPE</label></div>
+        <div class="row">
+          <app-currency-box [fromMaintenanceProcess]="fromMaintenanceProcess" [format]="rpeFormat"
+            [originalFormat]="originalRpeFormat" (newFormat)="opportunityValue.rpeOppValue=$event"
+            [provDialogDisable]="provDialogDisable">
+          </app-currency-box>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="row"><label>Notes</label></div>
+        <div class="row">
+          <app-dif-markups-editor *ngIf="fromMaintenanceProcess && originalOppValue" name="rpeComments"
+            #markpupEd class="opp-textarea-field" [(ngModel)]="opportunityValue.rpeComments" [saveAsDelta]="true"
+            [originalText]="originalOppValue.rpeComments" [provDialogDisable]="provDialogDisable" [maxLength]="1000">
+          </app-dif-markups-editor>
+          <textarea *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" maxlength="1000" rows="4" name="rpeNotes"
+            [(ngModel)]="opportunityValue.rpeComments" [disabled]="provDialogDisable"
+            (paste)="checkLength($event, 'CPE Notes')"></textarea>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,70 @@
+.wrapper {
+    height: 100%;
+    width: 100%;
+    min-width: 960px;
+    display: flex;
+    flex-direction: column;
+
+    margin: auto;
+    border: 1px solid #31006F;
+    background-color: white;
+}
+
+.section-top {
+    display: flex;
+    justify-content: space-evenly;
+    margin-left: -24px;
+}
+
+.section-bottom {
+    display: flex;
+    justify-content: space-evenly;
+
+}
+.master-date {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 5px;
+
+}
+.search-date {
+    display: flex;
+    align-content: flex-end;
+    justify-content: flex-end;
+    padding: 5px;
+}
+.search-item-date {
+    padding: 5px;
+}
+.label-date {
+    display: block;
+}
+
+.list-box {
+    border: 1px solid #31006F;
+    border-radius: 2px;
+    height: 280px;
+    min-width: 200px;
+    max-width: 200px;
+    overflow: auto;
+    overflow-x: hidden;
+    padding-right: 5px;
+    margin: 5px;
+}
+
+.in-date {
+    padding: 5px;
+    width: 150px;
+    height: 28px;
+    font-size: 12px;
+}
+
+.section {
+    float: left;
+    padding: 10px;
+}
+:host>>>.ui-listbox {
+
+    border: 0px;
+}

@@ -1,0 +1,117 @@
+<p-blockUI [blocked]="loading">
+  <div class="block-img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<div>
+  <h2>Initiate Impact Analysis Process</h2> <span id="errMessage"></span>
+
+  <p-tabView [activeIndex]="index" (onChange)="indexShift($event)">
+
+    <!-- Internal Request Tab-panel-view -->
+
+    <p-tabPanel class="tab-panel-container" header="Internal Request" [disabled]="roleCCA">
+      <div class="wrapper">
+        <div class="row row-div">
+          <div class="col-6">
+            <label>*Categories</label>
+            <p-multiSelect name="selectedCategory" [options]="categories" [(ngModel)]="selectedCategory"
+              (onChange)="categoryCheck()" [style]="dropDownStyles"></p-multiSelect>
+          </div>
+          <div class="col-6">
+            <label>Place of Service</label>
+            <p-multiSelect name="selectedPlaceOfService" [options]="placeOfServiceList"
+              [(ngModel)]="selectedPlaceOfService" [style]="dropDownStyles"></p-multiSelect>
+          </div>
+        </div>
+
+        <div class="row row-div">
+          <div class="col-6">
+            <label>Line Of Business</label>
+            <p-multiSelect [options]="lobsList" name="selectedLobs" [(ngModel)]="selectedLobs" [style]="dropDownStyles">
+            </p-multiSelect>
+          </div>
+        </div>
+
+        <div class="row row-div">
+          <div class="col-12">
+            <label>Selected</label>
+            <div class="selection-box col-12">
+              <div *ngIf="selectedCategory.length > 0 || selectedLobs.length > 0 || selectedPlaceOfService.length > 0">
+                <div class="selected-items row" *ngIf="selectedCategory.length > 0 ">
+                  <span class="selected-span col-1">Categories: </span>
+                  <span class="col-11">
+                    <span class="selected-span" *ngFor="let item of selectedCategory">
+                      <span class="fa fa-times-circle" aria-hidden="true" (click)="removeCatSelection(item)"></span>
+                      <span>{{item.name | titlecase }}</span>
+                    </span>
+                  </span>
+                </div>
+                <div class="selected-items row" *ngIf="selectedLobs.length > 0">
+                  <span class="selected-span col-1">Line of Business: </span>
+                  <span class="col-11">
+                    <span class="selected-span" *ngFor="let item of selectedLobs">
+                      <span class="fa fa-times-circle" aria-hidden="true" (click)="removeLobSelection(item)"></span>
+                      <span>{{item.name | titlecase }}</span>
+                    </span>
+                  </span>
+                </div>
+                <div class="selected-items row" *ngIf="selectedPlaceOfService.length > 0">
+                  <span class="selected-span col-1">Place of Service: </span>
+                  <span class="col-11">
+                    <span class="selected-span" *ngFor="let item of selectedPlaceOfService">
+                      <span class="fa fa-times-circle" (click)="removePlaceOfServiceSelection(item)"></span>
+                      <span>{{item.name | titlecase }}</span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="no-selection-ietm"
+                *ngIf="selectedCategory.length <= 0 && selectedLobs.length <= 0 && selectedPlaceOfService.length <= 0">
+                <label>No Selections</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row-div">
+          <div class="col-12 button-submit">
+            <button class="btn btn-primary" name="action" [disabled]="disableViewBtn" type="submit"
+              (click)="viewImpactedRules()" value="View">View</button>​
+          </div>
+        </div>
+
+      </div>
+      <div [hidden]="isViewTableHidden">
+        <div class="row row-div">
+          <div class="col-12">
+            <h2>Rule Results</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <ecl-table #viewTable [tableModel]='tableConfig' (onSelectRecord)="setSelectRules($event)"
+              (onUnSelectRecord)="setSelectRules($event)" (onAcctionLink)="viewRuleModal($event)">
+            </ecl-table>
+          </div>
+        </div>
+        <div class="row row-div">
+          <div class="col-12 button-submit">
+            <button class="btn btn-primary" name="action" [disabled]="disableInitiateBtn" type="submit"
+              (click)="initate()">​Initiate impact Analysis</button>
+          </div>
+        </div>
+      </div>
+    </p-tabPanel>
+
+    <!-- Reference change Request Tab-panel-view -->
+
+    <p-tabPanel header="Reference Change">
+      <app-reference-change></app-reference-change>
+    </p-tabPanel>
+
+  </p-tabView>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>

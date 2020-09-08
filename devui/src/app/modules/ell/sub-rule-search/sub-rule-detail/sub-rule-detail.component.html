@@ -1,0 +1,29 @@
+<div class="sub-rule-detail">
+
+  <div class="row">
+    <div class="col-12">
+      <div class="text-right">
+        <button type="button" (click)="exportPdf()" class="btn btn-primary btn-sm btn-sm f-11"><i class="fa fa-print"></i> Print </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">    
+    <div class="col-12">
+      <br>
+      <h4>{{header}}</h4>
+      <br>
+    </div>
+
+    <div class="col-12">
+      <table border="1" class="change-type-table-detail" id="dataSourceTable">
+        <tbody>
+          <tr *ngFor="let tableDetail of tableDetailDto">
+            <td>{{tableDetail.title}}</td>
+            <td>{{tableDetail.value}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

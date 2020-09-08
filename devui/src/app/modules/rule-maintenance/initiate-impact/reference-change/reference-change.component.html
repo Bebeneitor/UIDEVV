@@ -1,0 +1,104 @@
+<p-blockUI [blocked]="loading">
+  <div class="block-img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<div class="row">
+  <div class="col-md-4">
+    <div>
+      <label>References</label>
+    </div>
+    <div>
+      <p-listbox [options]="newRefSource" name="selectSource" [(ngModel)]="selectedRefSource" [style]="listStyles"
+        checkbox="checkbox" filter="filter" multiple="multiple" (onChange)="loadReferences()"
+        placeholder="Select a Reference Source...">
+      </p-listbox>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div>
+      <label></label>
+    </div>
+    <div>
+      <p-table #viewGrid [columns]="cols" [value]="references" [(selection)]="selectedReferences" [paginator]="true"
+        [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10" [responsive]="true"
+        sortField="refSourceName" [scrollable]="true" scrollHeight="335px" sortOrder="1">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th class="checkbox-center">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
+              [ngStyle]="{'width': col.width}" pResizableColumn>
+              {{col.header}}
+              <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">
+              </p-sortIcon>
+            </th>
+          </tr>
+          <tr>
+            <th class="checkbox-center"></th>
+            <th class="small-th" style="text-align: right" *ngFor="let col of columns" [ngStyle]="{'width': col.width}"
+              pResizableColumn>
+              <div>
+                <i class="fa fa-search purple searc-icon"></i>
+                <input pInputText type="text" class="search-input"
+                  (input)="viewGrid.filter($event.target.value, col.field, 'contains')">
+              </div>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-reference let-columns="columns">
+          <tr [pSelectableRow]="reference">
+            <td class="checkbox-center">
+              <p-tableCheckbox [value]="reference"></p-tableCheckbox>
+            </td>
+            <td class="small-td" *ngFor="let col of columns" [ngStyle]="{'width': col.width}">
+              <span *ngIf="col.field === 'refSourceName'" class="span-centered">{{reference.refSourceName}}</span>
+              <span *ngIf="col.field === 'referenceTitle'" class="span-centered">{{reference.referenceTitle}}</span>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="paginatorright" let-state>
+          <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+            Showing <b>{{(state.page  * state.rows) + 1}}</b> -
+            <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+            of <b>{{state.totalRecords}}</b>
+          </span>
+          <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12 button-submit">
+    <button class="btn btn-primary" name="action" type="submit" [disabled]="this.selectedReferences.length < 1"
+      (click)="viewImpactedRules()" value="View">View</button>​
+  </div>
+</div>
+
+<div [hidden]="isViewTableHidden">
+  <div class="row">
+    <div class="col-12">
+      <h2>Reference Results</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <ecl-table #viewTable [tableModel]='tableConfig' (onSelectRecord)="setSelectRules($event)"
+        (onUnSelectRecord)="setSelectRules($event)" (onAcctionLink)="viewRuleModal($event)">
+      </ecl-table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 button-submit">
+      <button class="btn btn-primary btn-init-impact" name="action" [disabled]="disableInitiateBtn" type="submit"
+        (click)="initiateReferenceImpact()" value="Initiate impact Analysis">​
+        Initiate impact Analysis</button>
+    </div>
+  </div>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>

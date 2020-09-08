@@ -1,0 +1,130 @@
+* {
+  box-sizing: border-box;
+  font-size: 12px;
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.block-img-loading {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  width: 120px
+}
+
+/************************
+     Initiate Impact        *
+    *************************/
+.wrapper {
+  height: 100%;
+  width: 100%;
+  min-width: 960px;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  background-color: white;
+}
+
+.section-top {
+  display: flex;
+}
+
+.section-bottom {
+  float: left;
+  padding: 10px;
+}
+
+.list-box {
+  border: 1px solid #31006F;
+  border-radius: 2px;
+  height: 440px;
+  min-width: 245px;
+  overflow: auto;
+  overflow-x: hidden;
+  margin: 5px;
+}
+
+.selection-box {
+  display: flex;
+}
+
+.select-history {
+  font-weight: bolder;
+}
+
+.button-submit {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.searc-icon {
+  width: 5%;
+  position: absolute;
+  z-index: 1;
+  right: 10px;
+  margin-top: 8px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 5px;
+  border-radius: 5px;
+  position: relative;
+  z-index: 0;
+}
+
+.span-centered {
+  text-align: left;
+}
+
+.btn-primary {
+  width: 20%;
+  border-radius: 3px;
+}
+
+/* host do what? */
+:host>>>.ui-listbox {
+  width: 240px;
+  border: 0px;
+}
+
+:host>>>.ui-listbox-item {
+  font-size: 12px;
+}
+
+:host>>>.ui-listbox-header {
+  position: sticky;
+  top: 0;
+  background-color: white;
+
+}
+
+:host>>>.ui-listbox-footer {
+  position: sticky;
+  overflow: hidden;
+  word-wrap: break-word;
+  bottom: 0;
+}
+
+::ng-deep .ui-datatable-scrollable-view .ui-datatable-scrollable-body {
+  min-height: 435px;
+  border: 1px solid #31006F;
+}
+
+.checkbox-center {
+  width: 44px;
+  background-color: white;
+}
+
+h2 {
+  font-size: 16px;
+  color: #31006F;
+  font-weight: bold;
+}
+
+.btn-init-impact {
+  margin-top: 20px;  
+}

@@ -1,0 +1,89 @@
+<div class="wrapper">
+    <form ng NativeValidate>
+        <div class="wrapper">
+            <div class="search-row">
+            <div class='search-item'>
+                <label class="custom-label">Idea Id</label>
+                <input pInputText class="input-control-ideaId" type="text" name="irId" [disabled]="true"
+                    [(ngModel)]="displayIdea.ideaCode">
+            </div>
+
+            <div class='search-item'>
+                <label class="custom-label">Library PRM Number</label>
+                <input pInputText class="input-control-prm" type="text" name="libraryprm" [disabled]="readOnlyView"
+                maxlength="32" [(ngModel)]="libraryPrmNumber">
+            </div>
+
+            <div class='search-item'>
+                <label class="custom-label">Creator</label>
+                <input pInputText class="input-control-creator" type="text" name="creator" [disabled]="true"
+                    [(ngModel)]="displayIdea.fullName">
+            </div>
+
+            <div class="search-item">
+                <label class="custom-label-cat"><span class="required-field-color">*</span>Category</label>
+                <p-dropdown class="cat-search" [disabled]="readOnlyView" [options]="categories" [style]="{'width':'100%'}" name="selectedCat"
+                    [(ngModel)]="selectedCat" placeholder="Choose">
+                </p-dropdown>
+            </div>
+
+            <div id="groupItem" class=group-item-search>
+                <div id="selectLobID" class="search-item-box-lob">
+                    <p-multiSelect class="lob-search" [disabled]="readOnlyView" [options]="business" [style]="{'width':'140px'}" [filter]="false"
+                        (onChange)="lobInput()"  name="selectedLobs"
+                        [(ngModel)]="selectedLobs">
+                        <p-header class="custom-label-lobHeader"> All Business </p-header>
+                    </p-multiSelect>
+                    <label class="custom-all-label"><span class="required-field-color">*</span>Line of Business</label>
+                </div>
+                <div id="selectStateID" class="search-item-box">
+                    <p-multiSelect class="state-search" [options]="states" [style]="{'width':'140px'}" [filter]="false"
+                         [(ngModel)]="selectedStates" name="selectedStates"
+                        [disabled]="disableState || readOnlyView">
+                        <p-header> All States </p-header>
+                    </p-multiSelect>
+
+                    <label class="custom-all-label"><span *ngIf="selectedLobs != undefined && selectedLobs.includes(1)" class="required-field-color">*</span>States</label>
+                </div>
+                <div id="selectJurisdictionID" class="search-item-box-jur">
+                     <p-multiSelect class="jur-search" [options]="jurisdictions" [disabled]="disableJurisdiction || readOnlyView"
+                        [style]="{'width':'136px'}" [filter]="false" name="selectedJur"
+                        [(ngModel)]="selectedJurs">
+                        <p-header> All Jurisdictions </p-header>
+                    </p-multiSelect>
+                    <label class="custom-all-label"><span *ngIf="selectedLobs != undefined && selectedLobs.includes(2)" class="required-field-color">*</span>Jurisdictions</label>
+                </div>
+            </div>
+
+            <div class="search-item button">
+                <button id="search-btn" type="button" name="provButton" class="search-item btn btn-primary"
+                    (click)="showProvisionalDialog(true)" [disabled]='provisionalBtnDisable || readOnlyView'>Provisional Rule</button>
+            </div>
+        </div>
+            <div class="group-item-switch">
+                <label id="toggleAdvLabel" class="less-more-label"> More Details </label>
+                <a (click)="displayInfo()"><img [src]="checkboxPlus" id="checkboxImg" class="custom-checkbox"></a>
+            </div>
+
+            <div id="toggleAdvSH" class="hide-show">
+                <div class='search-item-status'>
+                    <label class="custom-label-status">Status</label>
+                    <input pInputText class="input-control-status" type="text" name="statusType" [disabled]="true"
+                        [(ngModel)]="displayIdea.status">
+                </div>
+
+                <div class='search-item-name'>
+                    <label id="ruleChangeName" class="custom-label-ideaName">Idea Name</label>
+                    <input pInputText class="input-control-ideaName" type="text" name="irName"
+                        [(ngModel)]="displayIdea.ideaName" [disabled]="true">
+                </div>
+
+                <div class='search-item'>
+                    <label id="ruleChangeDesc" class="custom-label-ideaDesc">Idea Description</label>
+                    <textarea pInputTextarea class="input-control-ideaDesc" name="irDesc" [readonly]="true" [disabled]="readOnlyView"
+                        [(ngModel)]="displayIdea.ideaDescription" style="color: #797979; background-color: #F5F5F5 !important; opacity: .95;"></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

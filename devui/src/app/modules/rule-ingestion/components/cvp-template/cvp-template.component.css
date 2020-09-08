@@ -1,0 +1,32 @@
+.cvp-template {
+    padding-right: 5%;
+    padding-left: 5%;
+}
+
+.cvp-template label {
+    display: block !important;
+    margin-top: 5px !important;
+}
+
+.cvp-template button.btn-opc {
+    width: 70px;
+    font-size: 11px;
+    height: 25px;
+}
+
+.cvp-template button.btn-sm {
+    font-size: 11px;
+    height: 25px;
+}
+
+.cvp-template table tr td > input {
+    width: 100%;
+}
+
+.cvp-template table tr td > button {
+    width: 46%;
+}
+
+.cvp-template textarea {
+    padding: 6px !important;
+}

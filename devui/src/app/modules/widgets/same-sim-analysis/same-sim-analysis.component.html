@@ -1,0 +1,76 @@
+<div class="widget-container same-sim-analysis-widget">
+
+
+  <div class="card">
+
+
+    <!---------------------HEADER---------------------------->
+    <div class="card-header text-uppercase">
+      <div class="title-header">&nbsp;</div>
+      <span>{{title}}</span>
+      &nbsp;&nbsp;
+      <div class="float-right">
+        <a nghref="#" *ngIf="cardsFlag" style="font-size: 11px !important;">ROLE: {{cards[activeIndex].role}}</a>
+        <a nghref="#" class="icon-link" pTooltip="Refresh" tooltipPosition="left" (click)="refreshData()"><i
+            class="fa fa-refresh"></i></a>
+      </div>
+    </div>
+
+
+
+    <!---------------------------BODY------------------------->
+    <div class="card-body" style="min-height: 150px; padding : 12px !important; padding-top : 0px !important">
+      <div class="container-fluid" *ngIf="typeView == 'card' && pageLoad">
+        <br>
+
+        <!-----------DROP-DOWN--------------->
+        <p-dropdown [options]="instances" [(ngModel)]="selectedInstance" placeholder="Select Instance"
+          optionLabel="name" [showClear]="true" [filter]="true" [style]="{'width':'100%'}" (onChange)="onInstanceChange($event)" *ngIf=dropdownFlag>
+        </p-dropdown>
+
+        <br><br>
+
+        <div class="container-fluid" style="padding: 0px;" *ngIf="activeIndex == -1">
+            <div class="row">
+              <div class="div-no-data">
+                <img src="assets/img/no-data.png" class="img-no-data" />
+                <p class="no-data">NO DATA FOUND</p>
+              </div>
+            </div>
+          </div>
+
+        <p-card *ngFor="let card of cards; let i = index" [hidden]="i != activeIndex" [header]="card.title"
+          styleClass="ui-card-shadow">
+          <p-header>
+            <div style="padding: 8px;">
+              <p-chart type="bar" *ngIf="card.data != null" [data]="card.data" [options]="options" [height]="'100px'"
+                [responsive]="true">
+              </p-chart>
+            </div>
+            <hr style="margin: 0px !important;">
+          </p-header>
+          <div class="row">
+            <div [ngClass]="card.classColumn" *ngFor="let badge of card.badges" (click)="clickItem(badge.path)" style="cursor: pointer;">              
+                <div class="badge-same-sim"
+                  [ngStyle]="{'background-color': badge.color, 'min-height': '120px', 'display': 'flex'}">
+                  <div style="margin: auto;">
+                    <h5>{{badge.count}}</h5>
+                    <p>{{badge.name}}</p>
+                  </div>
+                </div>              
+            </div>
+          </div>
+        </p-card>
+        <p-paginator *ngIf="cards.length > 1" [rows]="1" [totalRecords]="cards.length"
+          (onPageChange)="paginate($event)"></p-paginator>
+        <br>
+      </div>
+
+      
+    </div>
+
+
+  </div>
+
+
+</div>

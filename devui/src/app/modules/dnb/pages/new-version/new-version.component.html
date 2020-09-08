@@ -1,0 +1,180 @@
+<div
+  class="content dnb-page"
+  [ngClass]="{
+    'is-fullscreen': isFullScreen,
+    'show-current': shouldShowCurrent,
+    'navigation-closed': !isNavigationOpen
+  }"
+>
+  <div class="row" *ngIf="sections$ | async">
+    <div class="dnb-section-navigation">
+      <app-dnb-section-navigation
+        [isFullScreen]="isFullScreen"
+        [(isNavigationOpen)]="isNavigationOpen"
+        [navigationItems]="navigationItems"
+      ></app-dnb-section-navigation>
+    </div>
+    <div class="page-content">
+      <div class="sentinal"></div>
+      <div class="dnb-page-header sticky-header">
+        <h1 class="dnb-title">
+          Drug:
+
+          <span class="drug-name">
+            <app-cell-editor
+              [attr.slm-id]="'drug_name_text'"
+              [column]="drugNameColumn"
+              [searchInfo]="drugNameColumn.searchData"
+              [highLight]="drugNameColumn.highlight"
+              [isReadOnly]="showFindAndReplace"
+            ></app-cell-editor>
+          </span>
+        </h1>
+        <div class="dnb-header-buttons">
+          <span class="dnb-toggle">
+            <button
+              [attr.slm-id]="'toggle_find_replace_btn'"
+              (click)="showFindAndReplace = !showFindAndReplace"
+            >
+              Find & Replace
+            </button>
+          </span>
+          <span class="dnb-toggle">
+            <button [attr.slm-id]="'clear_all_btn'" (click)="confirmClearAll()">
+              Clear All Sections
+            </button>
+          </span>
+          <span class="dnb-toggle" *ngIf="undoCopySectionFlag">
+            <button
+              (click)="confirmUndoCopyAll()"
+              [attr.slm-id]="'undo_copy_sections_btn'"
+            >
+            {{ shouldShowUndo ? "Undo Copy to All" : "Redo Copy to All" }}
+            </button>
+          </span>
+          <span class="dnb-toggle">
+            <button
+              [attr.slm-id]="'copy_sections_btn'"
+              (click)="openSectionSelect($event)"
+              [disabled]="showFindAndReplace"
+            >
+              Copy Sections
+            </button>
+            <p-overlayPanel #sectionsOverlay [dismissable]="true">
+              <p-listbox
+                [options]="selectedSectionsOptions"
+                [(ngModel)]="selectedSections"
+                checkbox="true"
+                multiple="true"
+              >
+              </p-listbox>
+              <button
+                class="dnb-btn"
+                [attr.slm-id]="'copy_selected_sections_btn'"
+                (click)="copyAll($event)"
+              >
+                Copy Selected
+              </button>
+            </p-overlayPanel>
+          </span>
+          <span class="dnb-toggle">
+            <p-inputSwitch
+              [(ngModel)]="shouldCompare"
+              [attr.slm-id]="'should_compare_btn'"
+              [disabled]="!shouldShowCurrent"
+              (onChange)="onSwitchChange($event)"
+            ></p-inputSwitch>
+            <label>{{ toggleLabel }}</label>
+          </span>
+          <span class="dnb-toggle">
+            <p-inputSwitch
+              [(ngModel)]="isFullScreen"
+              [attr.slm-id]="'is_full_screen_btn'"
+              (onChange)="onSwitchFullChange($event)"
+            ></p-inputSwitch>
+            <label>{{ toggleFullLabel }}</label>
+          </span>
+          <span class="dnb-toggle current-toggle">
+            <p-inputSwitch
+              [(ngModel)]="shouldShowCurrent"
+              [attr.slm-id]="'show_current_btn'"
+              [disabled]="shouldCompare"
+            ></p-inputSwitch>
+            <label
+              ><span>{{ shouldShowCurrent ? "Show" : "Hide" }}</span>
+              Current</label
+            >
+          </span>
+        </div>
+        <app-find
+          [sections]="sections"
+          [shouldShowCurrent]="shouldShowCurrent"
+          [drugNameColumn]="drugNameColumn"
+          [(showFindAndReplace)]="showFindAndReplace"
+          [showButtonReplace]="true"
+        ></app-find>
+      </div>
+      <div class="sortable_list">
+        <div class="row">
+          <div class="col-6 dnb-btn" *ngIf="shouldShowCurrent">
+            Current Drug Version: {{ versionA }}
+          </div>
+          <div class="col-6">{{ versionB }}</div>
+        </div>
+        <div *ngFor="let section of sections; trackBy: trackBySections">
+          <ng-container *ngIf="!section.grouped; else groupedSection">
+            <app-dnb-sections-container
+              [id]="section.id"
+              [attr.slm-id]="section.id"
+              [currentVersion]="section.current"
+              [(newVersion)]="section.new"
+              [hasRowHeading]="section.hasRowHeading"
+              [isComparing]="shouldCompare"
+              [enableEditing]="!showFindAndReplace"
+              [showCurrent]="shouldShowCurrent"
+              (stickySection)="stickySection($event)"
+              (toggleSectionCopy)="toggleSectionCopy($event)"
+            >
+            </app-dnb-sections-container>
+          </ng-container>
+          <ng-template #groupedSection>
+            <app-dnb-grouped-sections-container
+              [id]="section.id"
+              [attr.slm-id]="section.id"
+              [currentVersion]="section.current"
+              [(newVersion)]="section.new"
+              [isComparing]="shouldCompare"
+              [enableEditing]="!showFindAndReplace"
+              [showCurrent]="shouldShowCurrent"
+              (stickySection)="stickySection($event)"
+              (toggleSectionCopy)="toggleSectionCopy($event)"
+            ></app-dnb-grouped-sections-container>
+          </ng-template>
+        </div>
+      </div>
+      <div class="dnb-page-btns">
+        <button [disabled]="saveDisabled" (click)="confirmSaveData()">
+          Save
+        </button>
+        <button (click)="openDialogSubmit()" [disabled]="submitReviewDisable">
+          Submit
+        </button>
+      </div>
+
+      <div class="row sticky-sections" *ngIf="stickySections.length > 0">
+        <app-sections-sticky
+          [stickySection]="stickySections"
+          (behaviorEvnt)="undoStickSection($event)"
+        >
+        </app-sections-sticky>
+      </div>
+    </div>
+  </div>
+  <dnb-app-dialog
+    [(openDialog)]="openDialog"
+    [setUpDialog]="setUpDialog"
+    (selectionSet)="submitReviewButton($event)"
+  >
+  </dnb-app-dialog>
+</div>
+<p-confirmDialog class="dnb-modal"></p-confirmDialog>

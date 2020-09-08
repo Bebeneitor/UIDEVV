@@ -1,0 +1,234 @@
+.ui-multiselect {
+  min-width: 100% !important;
+  width: 100% !important;
+  border: 1px solid #31006F !important;
+  display: block;
+}
+
+.confirmDialog {
+  z-index: 1002;
+  left: 550px;
+  top: 350px;
+  transform: none;
+  opacity: 1;
+}
+
+:host>>>.ui-tooltip-right {
+  min-width: 400px;
+  min-height: 400px;
+  overflow: auto;
+  background-color: red;
+}
+
+#fieldset {
+  border: 1px solid #707070;
+  margin-right: 1px;
+}
+
+.container {
+  max-width: 1400px;
+}
+
+fieldset.field-set-custom {
+  border: 1.5px ridge #ececec;
+  border-image: initial;
+  padding: 0 5px 5px 5px;
+  width: 60%;
+}
+.field-set-custom legend {
+  width: 25%;
+  font-size: 16px;
+  padding-left: 10px;
+  margin: 0;
+  color: #969696;
+}
+
+.provisionalRule {
+  margin: 0 20px 0 20px;
+  margin-top: 0px !important;
+}
+
+.whitebg {
+  -moz-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+  -webkit-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+  box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+  padding: 10px;
+  background-color: white;
+  height: 100%;
+  min-width: 1080px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(161, 161, 161, 1);
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+
+#tabView {
+  display: flow-root;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.ui-tabview-selected {
+  background-color: #31006F !important;
+  border: 1px solid #31006F !important;
+}
+
+.ui-tabview {
+  padding: 0px !important;
+}
+
+input {
+  background-color: #FFFFFF;
+  color: #333333;
+  height: 31px;
+  border-radius: 2px;
+}
+
+label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  color: #707070;
+  margin-left: 0px;
+  margin-bottom: 0px !important;
+}
+
+select {
+  background-color: #FFFFFF;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  color: #333333;
+}
+
+option:hover {
+  background-color: #CDD2EB;
+  font-family: 'Montserrat', sans-serif, medium;
+  font-size: 12px;
+  color: #333333;
+}
+
+textarea {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  overflow: auto;
+  resize: none;
+}
+
+.disable {
+  opacity: .95;
+  color: #797979;
+  background-color: #F5F5F5;
+  border-color: #A6A6A6
+}
+
+.widthSet {
+  width: 100%;
+}
+
+.full-size {
+  width: 100%;
+  height: 100%;
+  padding: 0 5px 0px 5px;
+}
+
+.btn-size {
+  width: 100%;
+  height: 35px;
+  border-radius: 2px;
+  padding: 0;
+}
+
+.no-pad {
+  padding: 0;
+}
+.button-bar-engine {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 20px 20px 20px
+}
+
+.template {
+  display: flex;
+  padding-bottom: 2px;
+  padding-top: 2px;
+  flex-direction: row-reverse;
+}
+
+.pad-bottom {
+  padding-bottom: 10px;
+}
+
+.provisionalRule .row {
+  margin: 0;
+}
+
+.top-section-sticky {
+  position: sticky;
+  background-color: white;
+  top: 0;
+  z-index: 999999;
+}
+
+.bottom-section-sticky {
+  position: sticky;
+  background-color: white;
+  bottom: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* * * * * * * * * * * * * * * * *
+ * OVER-RIDING OF BOOTSTRAP CSS  *
+ * * * * * * * * * * * * * * * * */
+.col-md-1,
+.col-md-2,
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6 {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:host ::ng-deep.ui-multiselect {
+  font-size: 12px !important;
+}
+
+/* * * * * * * * * * * *
+ * Disabling of fields *
+ * * * * * * * * * * * */
+
+.template ::ng-deep.ui-fileupload-content.ui-widget-content {
+  overflow-x: scroll;
+}
+
+::ng-deep.ng-tns-c7-11.ui-dropdown-label.ui-inputtext.ui-corner-all.ng-star-inserted {
+  color: #797979;
+  background-color: #F5F5F5;
+}
+
+:host ::ng-deep.ui-dropdown-trigger.ui-state-default.ui-corner-right,
+:host ::ng-deep.ui-multiselect-trigger.ui-state-default.ui-corner-right {
+  background-color: transparent;
+}
+
+::ng-deep div.provisionalRule li.ui-state-default.ui-corner-top.ui-state-disabled.ng-star-inserted {
+  display: none !important;
+}
+
+::ng-deep div.provisionalRule p-dropdown.dropdown-status {
+  width: 90% !important;
+}
+
+.block-img-loading {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  width: 120px
+}
+
+.adjust-margin {
+  margin-left: -1em;
+  margin-right: -1em;
+}

@@ -1,0 +1,4 @@
+:host ::ng-deep .ui-button-text {
+    background-color: #31006F !important;
+    border: 1px solid #31006F !important;
+}

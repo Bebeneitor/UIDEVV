@@ -1,0 +1,19 @@
+.btn-default-height{
+    width: 200px;
+    height: 40px;
+}
+::ng-deep .ui-tooltip.ui-widget.ui-tooltip-right {
+    max-width: 400px;
+    word-break: break-all;
+}
+
+::ng-deep body .ui-dropdown-panel {
+    z-index: 999999 !important
+}
+.col-md-3 {
+  max-width: 20%;
+}
+
+::ng-deep .rule-for-impact-analysis .ui-table-tbody td {
+    text-align: center;
+}

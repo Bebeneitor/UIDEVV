@@ -1,0 +1,63 @@
+.page-content {
+  margin-left: auto;
+  width: calc(100% - 150px);
+  padding: 15px;
+}
+.navigation-closed .page-content {
+  width: calc(100% - 50px);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.navigation-toggle {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 95vh;
+  border: 0;
+}
+
+.dnb-modal {
+  width: 50vh;
+  max-width: 500px;
+}
+
+.dnb-toggle {
+  position: relative;
+}
+
+.sections-container {
+  padding-top: 20px !important;
+}
+
+.sticky-header {
+  background-color: #f2f3f7 !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 10px 0 5px;
+}
+
+.has-sticky-header .sticky-header {
+  border-bottom: 1px solid #31006f;
+}
+
+.drug-name {
+  border: 0;
+  display: inline-block;
+  font-weight: normal;
+  position: relative;
+  top: 4px;
+}
+
+.drug-name .ql-container {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #31006f;
+}
+
+:host >>> .new-version td {
+  background: transparent;
+}

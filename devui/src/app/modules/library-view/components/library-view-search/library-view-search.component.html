@@ -1,0 +1,57 @@
+<form class="search-box" [formGroup]="searchForm">
+    <div class="wrapper">
+        <h5 class="search-title">Search Criteria</h5>
+        <div class='search-item'>
+            <label>Line of business</label>
+            <p-dropdown class="lob-search" append="body" [options]="business" [style]="{'width':'200px'}" formControlName="lobControl" (onChange)="lobInput($event)"></p-dropdown>
+        </div>
+
+        <div class='search-item'>
+            <label>Jurisdiction</label>
+            <p-dropdown class="jur-search" [options]="jurisdictions" [style]="{'width':'140px'}" formControlName="jurControl" (onChange)="jurInput($event)"></p-dropdown>
+        </div>
+
+        <div class="search-item">
+            <label>State</label>
+            <p-dropdown class="state-search" [options]="states" [style]="{'width':'140px'}" formControlName="stateControl" (onChange)="stateInput($event)"></p-dropdown>
+        </div>
+
+        <div class="search-item">
+            <label>Category</label>
+            <p-dropdown class="cat-search" [options]="categories" [style]="{'width':'200px'}" formControlName="catControl" (onChange)="catInput($event)"></p-dropdown>
+        </div>
+
+        <div class="search-item">
+            <label>Reference Source</label>
+            <p-dropdown class="ref-search" [options]="references" [style]="{'width':'200px'}" formControlName="refControl" (onChange)="refSrcInput($event)"></p-dropdown>
+        </div>
+
+        <div class="search-item doc">
+            <label>Reference Document</label>
+            <input pInputtext class="form-control in-doc" type="text" (input)="refDocInput($event.target.value)">
+        </div>
+
+        <div class="search-item desc">
+            <label>Rule Description</label>
+            <input pInputtext class="in-desc" type="text" (input)="ruleDescInput($event.target.value)">
+        </div>
+
+        <div class="search-item logic">
+            <label>Rule Logic</label>
+            <input pInputtext class="in-logic" type="text" (input)="ruleLogicInput($event.target.value)">
+        </div>
+
+        <div class="search-item date">
+            <label>Logic Effective date</label>
+            <input pInputtext class="in-date" type="date" (input)="beginInput($event.target.value)">
+        </div>
+        <div class="search-item date">
+            <label>To</label>
+            <input pInputtext class="in-date" type="date" (input)="endInput($event.target.value)">
+        </div>
+        <div class="search-item button">
+            <button id="search-btn" type="button" class="btn btn-primary btn-default-height small-td" (click)="searchSubmit()">Search</button>
+            <button id="search-btn" type="reset" class="btn btn-primary btn-default-height small-td" (click)="clear()">Clear</button>
+        </div>
+    </div>
+</form>

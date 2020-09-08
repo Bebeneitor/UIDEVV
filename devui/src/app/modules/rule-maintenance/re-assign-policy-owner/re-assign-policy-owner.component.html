@@ -1,0 +1,58 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<p-tabView (onChange)="handleTabViewChange($event)" [activeIndex]="tabIndex">
+    <p-tabPanel header="Assigned">
+
+        <ecl-table *ngIf="tabIndex == 0" #tableAssigned [tableModel]="assignedTableConfig" (onAcctionLink)="handleLinkAction($event)"
+        (onSelectRecord)="handleSelectionAssigned($event)" (onUnSelectRecord)="handleSelectionAssigned($event)"></ecl-table>
+
+        <div>
+            <br>
+
+            <label class="float-left required-field-color">*</label>
+            <p-dropdown #userDD1 required [options]="users" (onChange)="this.userDD1.resetFilter();" [disabled]="!this.selectedRules || this.selectedRules.length < 1"
+                [(ngModel)]="selectedUser" [filter]="true" filterBy="label,value" [style]="{'width':'150px', 'margin-right': '15px'}"
+                class="float-left small-td"></p-dropdown>
+            <label class="float-left required-field-color">*</label>
+            <p-dropdown required [(ngModel)]="selectedComment" [disabled]="!this.selectedRules || this.selectedRules.length < 1"
+            [options]="comments" [style]="{'width':'150px'}" class="no-print float-left small-td"></p-dropdown>
+
+            <button type="submit" value="Reassign" (click)="reassignIdeas()"
+                [disabled]="!this.selectedUser || !this.selectedRules || !selectedComment || this.selectedRules.length < 1"
+                class="btn btn-primary btn-default-height  small-td">Reassign</button>
+
+            <button (click)="resethDataTable();" style="display: inherit"
+                class="btn btn-primary btn-default-height float-right small-td" type="button"
+                value="refreshAssignIdea">Refresh</button>
+
+        </div>
+    </p-tabPanel>
+    <p-tabPanel header="Returned">
+
+        <ecl-table *ngIf="tabIndex == 1" #tableReturned [tableModel]="returnedTableConfig" (onAcctionLink)="handleLinkAction($event)"
+        (onSelectRecord)="handleSelectionReturned($event)" (onUnSelectRecord)="handleSelectionReturned($event)"></ecl-table>
+
+        <div>            
+            <br>
+
+            <label class="float-left required-field-color">*</label>
+            <p-dropdown #userDD required [options]="users" (onChange)="this.userDD.resetFilter();" [disabled]="!this.selectedRulesReturned || this.selectedRulesReturned.length < 1"
+            [(ngModel)]="selectedUserReturned" [filter]="true" filterBy="label,value" [style]="{'width':'150px', 'margin-right': '15px'}"
+            class="float-left small-td"></p-dropdown>
+
+            <label class="float-left required-field-color">*</label>
+            <p-dropdown required [(ngModel)]="selectedCommentReturned" [disabled]="!this.selectedRulesReturned || this.selectedRulesReturned.length < 1"
+            [options]="comments" [style]="{'width':'150px'}" class="no-print float-left small-td"></p-dropdown>
+
+            <button type="submit" value="Reassign" (click)="reassignRulesReturned()"
+            [disabled]="!this.selectedUserReturned || !this.selectedRulesReturned || !selectedCommentReturned || this.selectedRulesReturned.length < 1"
+            class="btn btn-primary btn-default-height  small-td">Reassign</button>
+
+            <button (click)="resethDataTableReturned();" style="display: inherit"
+            class="btn btn-primary btn-default-height float-right small-td" type="button"
+            value="refreshAssignRule">Refresh</button>
+
+        </div>
+    </p-tabPanel>
+</p-tabView>
+<p-toast [baseZIndex]="999999"></p-toast>
+

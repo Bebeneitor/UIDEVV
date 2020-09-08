@@ -1,0 +1,28 @@
+<div class='container'>
+  <div>
+    <label>Original Rule Description</label>
+  </div>
+  <div>
+      <textarea style="width: 100%;height: 100px;" pInputTextarea [(ngModel)]="ruleInfo.ruleLogicOriginal" 
+      readonly [disabled]="provDialogDisable"></textarea>
+  </div>
+  <div>
+    <label>New Rule Description (With Markup)</label>
+  </div>
+  <div>
+    <div #edScrollCont style="height: '100px';overflow-y: 'scroll'">
+      <app-dif-markups-editor #markpupEd class="textarea" [(ngModel)]="ruleInfo.ruleLogicModified" 
+      [originalText]="ruleInfo.ruleLogicOriginal" [provDialogDisable]="provDialogDisable"></app-dif-markups-editor>
+    </div>
+  </div>
+  <div  style="margin-top: 20px">
+      <button class="btn btn-primary btn-default-height small-td" style="width: 150px!important"
+        (click)="getUpdatedDescription()" [disabled]="provDialogDisable">Update Rule Description</button>
+  </div>
+  <div style="margin-top: 25px">
+    <label>Updated Rule Description</label>
+  </div>
+  <div>
+      <textarea style="width: 100%;height: 100px;" [disabled]="provDialogDisable" [(ngModel)]="ruleInfo.ruleLogicFinal" readonly></textarea>
+  </div>
+</div>

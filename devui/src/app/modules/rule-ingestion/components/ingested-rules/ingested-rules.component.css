@@ -1,0 +1,39 @@
+.title {
+    font-size: 17px;
+    margin-bottom: 15px;
+}
+
+.remove-padding {
+    padding: 0;
+}
+
+.rule-dropdown {
+    padding-top: 25px;
+    float: left;
+    padding: 5px;
+    text-align: left;
+    height: 55.6px;
+}
+
+.rule-dropdown-span {
+    font-size: smaller;
+}
+
+i:hover {
+    cursor: pointer;
+}
+
+::ng-deep .ui-table-caption.ui-widget-header 
+{
+    padding-bottom: 37px !important;
+}
+
+.btn-transparent > i {
+    color : #31006F !important;
+}
+
+.btn-transparent {
+    border: none !important;
+    background: none !important;
+    cursor: pointer !important;
+}

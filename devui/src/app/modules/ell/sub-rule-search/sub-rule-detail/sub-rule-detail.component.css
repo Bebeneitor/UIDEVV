@@ -1,0 +1,29 @@
+.sub-rule-detail {
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.decision-point h4 {
+    font-size: 16px;
+}
+
+.sub-rule-detail table.change-type-table-detail {
+    width: 100%;
+}
+
+.sub-rule-detail table.change-type-table-detail > tbody > tr > td:first-child {
+    width: 20%;
+    color: #31006F;
+}
+
+.sub-rule-detail table.change-type-table-detail > tbody > tr > td:last-child {
+    background: #FFF;
+}
+
+.sub-rule-detail table.change-type-table-detail > tbody > tr > td {
+    padding: 10px;
+}
+
+.sub-rule-detail ul.accordion-list {
+    margin: 0px !important
+} 

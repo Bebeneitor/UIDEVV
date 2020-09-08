@@ -1,0 +1,87 @@
+.ell-sub-rule-search h4 {
+    font-size: 14px; 
+    margin-bottom: 0px;
+    font-weight: bold;
+}
+
+.ell-sub-rule-search .search-box-section {
+    width: 100%;
+    display: inline-block;
+}
+
+.ell-sub-rule-search label {
+    display: block;
+}
+
+.ell-sub-rule-search .label-indexeded {
+    position: absolute;
+     right: 15px; 
+     top: 0
+}
+
+.ell-sub-rule-search .search-box-section button {
+    border-radius: unset;
+    height: 28px;
+    min-width: 30px;
+}
+
+.ell-sub-rule-search .search-box-section .ui-inputgroup {
+    display: inline !important;
+}
+
+.ell-sub-rule-search .search-box-section input {
+    width: 96% !important;
+}
+
+.ell-sub-rule-search .ell-search-container { 
+    padding: 10px 0px 10px 0px; 
+}
+
+.ell-sub-rule-search .btn-ell-conditions {
+    background-color: #F4F4F4 !important;
+    border-color: lightgray !important;
+    border-radius: 3px;
+    margin-right: 7px;
+    font-size: 11px !important;
+}
+
+.ell-sub-rule-search .btn-ell-conditions:hover {
+    background-color: #DBDBDB !important;
+}
+
+.ell-sub-rule-search fieldset {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.ell-sub-rule-search fieldset > legend {
+    display: block;
+    width: auto;
+    padding: 0 5px;
+    margin-bottom: 0;
+    font-size: 12px;
+    line-height: inherit;
+    border-bottom: none;
+    color : #333333 !important;
+}
+
+.ell-sub-rule-search .indexed-bullet {
+    background-color: greenyellow;
+    border-color: green;
+    height: 10px;
+    width: 10px;
+    display: inline-block;
+    border-radius: 50%;
+}
+
+.ell-sub-rule-search .icon-float-left {
+    float: left;
+    color: red;
+}
+
+.ell-sub-rule-search i.icon-filters {
+    position: absolute;
+    right: 15px;
+    top: 0px;
+}

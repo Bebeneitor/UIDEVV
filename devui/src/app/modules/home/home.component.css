@@ -1,0 +1,14 @@
+@media(max-width : 450px) {
+    .items-header-home {
+        float: unset !important;
+        margin-top: 10px;
+    }
+}
+
+.breadcrumb-dashboard {
+    width: 100%;
+}
+
+.items-header-home > button {
+    margin-left: 5px;
+}

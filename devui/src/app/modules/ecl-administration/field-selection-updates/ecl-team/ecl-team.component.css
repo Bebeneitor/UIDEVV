@@ -1,0 +1,152 @@
+.fieldSelectionUpdatesForm {
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 20px;
+    left: 0px;
+    top: 0px;
+    background: inherit;
+    background-color: rgba(255, 255, 255, 1);
+    box-sizing: border-box;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(161, 161, 161, 1);
+    border-radius: 3px;
+    -moz-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    -webkit-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+  }
+  
+  .fieldSelectionUpdatestable {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .fieldSelectionUpdatestd,
+  th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .fieldSelectionUpdatestr:nth-child(even) {
+    background-color: #d6e8f2;
+  }
+  
+  
+  #fieldSelectionUpdateRow {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  
+  .filter-input {
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+    position: relative;
+    z-index: 0;
+  }
+  
+  .custom-input {
+    display: flex;
+    width: 152.5%;
+    height: 35px;
+  }
+  
+  .custom-input-header-filter {
+    display: flex;
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #707070;
+  }
+  
+  .set-input {
+    width: 100%;
+    display: flex;
+  }
+  .custom-input-filter {
+    display: flex;
+    width: 50.5%;
+    border: none;
+    border-bottom: 1px solid #707070;
+  }
+  
+  .rcuserAccordian {
+    /*  background-color: #31006F; */
+    color: #31006F;
+    width: 100%;
+    border-radius: 2px;
+    margin-bottom: 1px;
+    padding: 2px 3px;
+  }
+  
+  .list-box {
+    height: 420px;
+    max-height: 420px;
+    min-height: 420px;
+    color: #333333;
+    border: 1px solid #31006F;
+    border-radius: 3px;
+    overflow: auto;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+  }
+  
+  .list-box-head {
+    height: 35px;
+    max-height: 35px;
+    overflow: auto;
+    border-bottom: 1px solid #707070;
+  }
+  
+  .list-box-bottom {
+    height: 380px;
+    max-height: 380px;
+    min-height: 380px;
+    color: #333333;
+    overflow: auto;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+  }
+  
+  .search-box {
+    border: 1px solid #31006F;
+    margin: 3px;
+  }
+  
+  .list-head {
+    font-size: 12px;
+    width: 90%;
+    margin-right: 2%;
+    border: 0px;
+  }
+  
+  .input-box {
+    padding: .3em;
+  }
+  
+  .team-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #707070;
+  }
+  .team-input:hover {
+    border: none;
+    outline: none;
+    border-bottom: 1px solid #707070;
+  }
+  
+  .list-item {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    margin: 5px;
+  }
+  
+  :host::ng-deep.ui-state-disabled {
+    background-color: grey !important;
+  }
+
+  :host::ng-deep.ui-dialog-content {
+    text-align: center !important;
+  }
+  

@@ -1,0 +1,100 @@
+<p-blockUI [blocked]="loading">
+  <div class="block-img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div class="referenceDataForm">
+  <div class="row" style="margin-left: -15px">
+    <div class="col-md-2" style="text-align: left">
+      <label>Frequency</label>
+      <p-dropdown [style]="{'width':'100%'}" [options]="frequencies" [(ngModel)]="selectedFrequency"
+                  placeholder="Select" [disabled]="false" (onChange)="getReferenceSource()">
+      </p-dropdown>
+    </div>
+    <div class="col-md-2" style="text-align: left">
+      <label>Reference Source</label>
+      <p-dropdown [style]="{'width':'100%'}" [options]="referenceTypes" [(ngModel)]="selectedReferenceSource"
+                  placeholder="Select" [disabled]="false" (onChange)="getFilterData()">
+      </p-dropdown>
+    </div>
+    <div class="col-md-5"></div>
+    <div class="col-md-3 mt-4" style="margin-left:3em">
+      <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
+             (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+             style="width:182px; border-radius: 5px">
+      <span style="cursor: pointer"><i *ngIf="keywordSearch !== ''"
+                                       (click)="viewGrid.reset(); resethDataTable(viewGrid);"
+                                       style="cursor: pointer" class="fa fa-times-circle purple"
+                                       style="margin:4px 4px 4px 4px"></i></span>
+      <i *ngIf="keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+    </div>
+  </div>
+
+  <p-table #viewGrid [columns]="cols" [value]="filteredData" [paginator]="true" [(selection)]="selectedData" [resizableColumns]="true" columnResizeMode="fit"
+           [reorderableColumns]="true" [rows]="10" [rowsPerPageOptions]="eclConstantsService.ROWS_PER_PAGE_OPTIONS" [loading]="loading" [responsive]="true"
+           sortField="filePeriod" sortOrder="-1" [style]="{'margin-top': '15px'}">
+       <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+            [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+          {{col.header}}
+          <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                      ariaLabelDesc="Activate to sort in descending order"
+                      ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+      </tr>
+      <tr>
+        <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center" [ngStyle]="{'width': col.width}">
+           <input pInputText type="text" [(ngModel)]="filters[col.field]"
+                 style="width : 100%; padding : 5px; border-radius: 5px"
+                 (input)="customFilter($event.target.value, col.field)" [placeholder]="col.header">
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-rule let-columns="columns">
+
+      <tr>
+        <td class="small-td" *ngFor="let col of columns" >
+          <span *ngIf="col.field == 'filePeriod'" class="span-centered">{{rule.filePeriod}}</span>
+          <span *ngIf="col.field == 'sourceFileDate'" class="span-centered">{{rule.sourceFileDate | date:'MM/dd/yyyy'}}</span>
+          <span *ngIf="col.field == 'deltaPerformedOn'" class="span-centered">{{rule.deltaPerformedOn | date:'MM/dd/yyyy'}}</span>
+          <span *ngIf="col.field == 'deltaStatus'" class="span-centered">{{rule.deltaStatus}}</span>
+          <span *ngIf="col.field == 'currentFileName'" class="span-centered">
+            <a (click)="getDownloadFile(rule.currentFilePath, rule.currentFileName, rule.fileInfoId, col.field)" [ngStyle]="{'color': rule.cfColorLink}">{{rule.currentFileName}}</a>
+            <p-progressBar *ngIf="!rule.showCurrentFileProgressBar" [value]="rule.progress"  [style]="{'height': '2.5vh', 'font-size': '0.8em'}"></p-progressBar>
+          </span>
+          <span *ngIf="col.field == 'newFileName'" class="span-centered">
+            <a (click)="getDownloadFile(rule.newFilePath, rule.newFileName, rule.fileInfoId, col.field)" [ngStyle]="{'color': rule.nfColorLink}">{{rule.newFileName}}</a>
+            <p-progressBar *ngIf="!rule.showNewFileProgressBar"  [value]="rule.progress"  [style]="{'height': '2.5vh', 'font-size': '0.8em'}"></p-progressBar>
+          </span>
+          <span *ngIf="col.field == 'deltaFileName'" class="span-centered">
+            <a (click)="getDownloadFile(rule.deltaFilePath, rule.deltaFileName, rule.fileInfoId, col.field)" [ngStyle]="{'color': rule.dfColorLink}">{{rule.deltaFileName}}</a>
+            <p-progressBar *ngIf="!rule.showDeltaFileProgressBar"  [value]="rule.progress"  [style]="{'height': '2.5vh', 'font-size': '0.8em'}"></p-progressBar>
+          </span>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> - <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+        </span>
+      <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+    </ng-template>
+  </p-table>
+  <div class="space"></div>
+  <div class="float-right">
+    <button type="button" value="Refresh" style="width: 90%;"
+            class="btn btn-primary btn-default-height small-td"
+            style="margin-right:5px;"
+            (click)="viewGrid.reset(); refreshRdaData(viewGrid)">Refresh
+    </button>
+  </div>
+  <div class="space"></div>
+  <div class="space"></div>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>

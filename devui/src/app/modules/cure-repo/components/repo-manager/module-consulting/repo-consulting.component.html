@@ -1,0 +1,98 @@
+<p-card>
+  <div class="ui-fluid">
+    <form #repoForm novalidate [formGroup]="repoConsultingForm" (ngSubmit)="searchData()">
+      <div class="p-grid">
+
+        <div class="p-field p-col-6">
+          <label for="tableSource"><span class="text-danger">*</span> Data Source</label>
+          <p-dropdown #dataSourceDropdown id="tableSource" [options]="tables" formControlName="tableSource"
+            (onChange)="onDataSourceChange($event.value)" (onShow)="onDataSourceOpen()">
+          </p-dropdown>
+          <small class="text-danger" *ngIf="tableSourceControl.invalid && tableSourceControl.touched">Table Source is
+            <strong>Required</strong>.</small>
+        </div>
+
+        <div class="p-col-2" style="margin-top: auto;">
+          <p-triStateCheckbox formControlName="activeMatch" [label]="'Active match'">
+          </p-triStateCheckbox>
+        </div>
+        <div class="p-col-2" style="margin-top: auto;">
+          <p-triStateCheckbox formControlName="exactMatch" [label]="'Exact match'">
+          </p-triStateCheckbox>
+        </div>
+
+
+        <div class="p-col-2" style="text-align: right; padding-top: 25px;">
+          <button type="button" class="btn-transparent" (click)="clear()" title="Clear Criteria">
+            <em class="fa fa-eraser"></em>
+          </button>
+
+          <button [disabled]="repoConsultingForm.invalid" [ngClass]="{'invalid-button': repoConsultingForm.invalid}"
+            type="submit" class="btn-transparent" title="Search Data"><em class="fa fa-search"></em></button>
+
+        </div>
+
+      </div>
+
+      <div class="p-grid">
+        <div class="p-field p-col" formArrayName="searchCriteria"
+          *ngFor="let searchCriteriaElement of searchCriteriaElements; index as j">
+
+          <label for="attributes">
+            <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+            {{searchCriteriaElement.attributeName}}: </label>
+
+          <div [ngSwitch]="searchCriteriaElement.uiDataType">
+            <div *ngSwitchCase="'range_text'">
+              <input type="text" pInputText style="height: 30px; min-width: 150px;" [formControlName]="j">
+            </div>
+
+            <div *ngSwitchCase="'text'">
+              <input type="text" pInputText style="height: 30px; min-width: 150px;" [formControlName]="j">
+            </div>
+
+            <div *ngSwitchCase="'range_date'">
+              <p-calendar [style]="{'min-width': '150px'}" [yearRange]="yearValidRange" [monthNavigator]="true"
+                [yearNavigator]="true" [formControlName]="j">
+              </p-calendar>
+            </div>
+
+            <div *ngSwitchCase="'date'">
+              <p-calendar [style]="{'min-width': '150px'}" [yearRange]="yearValidRange" [monthNavigator]="true"
+                [yearNavigator]="true" [formControlName]="j">
+              </p-calendar>
+            </div>
+
+            <div *ngSwitchCase="'check_box'">
+              <p-triStateCheckbox [formControlName]="j" [label]="searchCriteriaElement.attributeName">
+              </p-triStateCheckbox>
+            </div>
+
+            <div *ngSwitchCase="'dropdown'">
+              <p-multiSelect id="dataset" [style]="{'height':'30px', 'min-width': '300px'}" [options]="dataSet"
+                [formControlName]="j" [maxSelectedLabels]="3">
+              </p-multiSelect>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </form>
+
+    <br *ngIf="submited">
+    <div class="p-grid" *ngIf="submited">
+      <div class="p-col">
+        <ecl-table #repoDataTable [tableModel]="dataTableConfiguration" (onServiceCall)="onServiceCall($event)">
+        </ecl-table>
+      </div>
+    </div>
+  </div>
+
+</p-card>
+
+<p-blockUI [blocked]="blocked">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">{{blockedMessage}}</p>
+  </div>
+</p-blockUI>

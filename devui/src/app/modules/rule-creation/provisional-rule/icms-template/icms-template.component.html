@@ -1,0 +1,571 @@
+<div class="form-container">
+    <div class="row">
+        <div class="col-lg-6 col-md-9 col-sm-12 col-xs-12">
+            <span><strong>
+                    {{ruleInfo?.ruleCode}}</strong></span>
+
+        </div>
+        <div class="col-lg-6 col-md-3 col-sm-12 col-xs-12" style="text-align: right;">
+            <span>
+                <strong> Template status:
+                    <span class="h5" style="color: #31006F">
+                        {{eclIcmsNotifiedRules.templateStatus !== undefined ? eclIcmsNotifiedRules.templateStatus : 'New'}}
+                    </span>
+                </strong>
+            </span>
+        </div>
+    </div>
+    <form #templateForm="ngForm" class="container">
+        <hr>
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label for="tempRuleNumber">ECL Rule Number</label>
+                    <input pInputText class="form-control form-control-sm" type="text" name="tempRuleNumber"
+                        id="tempRuleNumber" [(ngModel)]="eclIcmsNotifiedRules.tempRuleNumber"
+                        [disabled]="config.data.readOnlyView">
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label for="versionNumber">Version</label>
+                    <input disabled pInputText class="form-control form-control-sm" type="text" name="versionNumber"
+                        id="versionNumber" [(ngModel)]="eclIcmsNotifiedRules.versionNumber"
+                        [disabled]="config.data.readOnlyView">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label for="client" [ngClass]="{'required-field-color': setRequired('Client Required')}"><span
+                            class="required-field-color">*</span>Client</label>
+                    <p-multiSelect [disabled]="config.data.readOnlyView" [maxSelectedLabels]="0" [options]="clients"
+                        [(ngModel)]="eclIcmsNotifiedRules.clients" placeholder="Select" id="client"
+                        name="eclIcmsNotifiedRules.clients" [filter]="true" filterBy="label,value"
+                        (ngModelChange)="checkIsValid($event, 'Client Required')">
+                    </p-multiSelect>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label for="analyst">Analyst</label>
+                    <p-dropdown [options]="anlysts" [(ngModel)]="eclIcmsNotifiedRules.analyst" id="analyst"
+                        placeholder="Select" name="eclIcmsNotifiedRules.analyst" [disabled]="config.data.readOnlyView">
+                    </p-dropdown>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label for="writtenBy">Written By</label>
+                    <p-dropdown [options]="users" [(ngModel)]="eclIcmsNotifiedRules.writtenBy" id="writtenBy"
+                        placeholder="Select" name="eclIcmsNotifiedRules.writtenBy"
+                        disabled>
+                    </p-dropdown>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="row">
+                    <div [ngClass]="{'col-9': lotusNotesUrl, 'col': !lotusNotesUrl}">
+                        <div class="form-group nopadding">
+                            <label for="prid" [ngClass]="{'required-field-color': setRequired('PRID')}"><span
+                                    class="required-field-color">*</span>PRID</label>
+                            <div class="ui-inputgroup">
+                                <input #pridControl name="eclIcmsNotifiedRules.prid"
+                                    (ngModelChange)="checkIsValid($event, 'PRID')"
+                                    [(ngModel)]="eclIcmsNotifiedRules.prid" [disabled]="config.data.readOnlyView"
+                                    pattern="[A-Za-z0-9--]{0,200}" required id="prid" type="text" pInputText
+                                    placeholder="PRID" class="form-control form-control-sm remove-radius">
+                                <button (click)="showPridCreationForm()" pButton type="button" label="Create Project ID"
+                                    [disabled]="submitBtnDisable || config.data.readOnlyView"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col" *ngIf="lotusNotesUrl">
+                        <div class="form-group nopadding"
+                            style="padding-top: 30px !important; text-decoration: underline !important; cursor: pointer !important;">
+                            <a [href]="lotusNotesUrl">Lotus Notes Link</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label for="medicalPolicy" [ngClass]="{'required-field-color': setRequired('Medical Policy')}"><span
+                            class="required-field-color">*</span>Medical Policy</label>
+                    <p-dropdown id="medicalPolicy" [options]="medicalPolicies" required
+                        [(ngModel)]="eclIcmsNotifiedRules.medicalPolicy" placeholder="Select"
+                        name="eclIcmsNotifiedRules.medicalPolicy" [filter]="true" filterBy="label,value"
+                        [disabled]="config.data.readOnlyView" (ngModelChange)="checkIsValid($event, 'Medical Policy')">
+                    </p-dropdown>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label for="ruleDescription" [ngClass]="{'required-field-color': setRequired('Description')}"><span
+                            class="required-field-color">*</span>Description</label>
+                    <textarea name="description" class="form-control form-control-sm" required
+                        [(ngModel)]="eclIcmsNotifiedRules.description" id="ruleDescription" rows="3" cols="318"
+                        maxlength="4000" [disabled]="config.data.readOnlyView"
+                        (ngModelChange)="checkIsValid($event, 'Description')"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label id="toggleAdvLabel" [ngClass]="{'required-field-color': setRequired('Claim Type')}"><span
+                            class="required-field-color">*</span>Claim Type</label>
+                    <div class="group-item-checkbox">
+                        <div class="row">
+                            <div class="col">
+
+                                <div class='search-item-checkbox'>
+                                    <label class="custom-label" style="margin-left: 12px;"> ICM </label>
+                                    <p-listbox name="icmClaimType" [options]="icmClaimType" [(ngModel)]="icm"
+                                        [disabled]="config.data.readOnlyView" [multiple]="true" [checkbox]="true"
+                                        [filter]="false" optionLabel="name" (onChange)="onClaimTypeSelection($event)">
+                                    </p-listbox>
+                                </div>
+                            </div>
+                            <div class="col">
+
+                                <div class='search-item-checkbox'>
+                                    <label class="custom-label" style="margin-left: 12px;"> ICMO </label>
+                                    <p-listbox name="icmoClaimType" [options]="icmoClaimType" [(ngModel)]="icmo"
+                                        [disabled]="config.data.readOnlyView" [multiple]="true" [checkbox]="true"
+                                        [filter]="false" optionLabel="name" (onChange)="onClaimTypeSelection($event)">
+                                    </p-listbox>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label"
+                                [ngClass]="{'required-field-color': setRequired('Primary Reference')}"><span
+                                    class="required-field-color">*</span>Primary Reference
+                                Title</label>
+                            <p-dropdown [options]="refTitles" [(ngModel)]="eclIcmsNotifiedRules.primaryRefTitle"
+                                placeholder="Select" name="eclIcmsNotifiedRules.primaryRefTitle" required
+                                [filter]="true" [disabled]="config.data.readOnlyView" filterBy="label,value"
+                                (ngModelChange)="checkIsValid($event, 'Primary Reference')">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">Secondary Reference Title</label>
+                            <p-dropdown [options]="refTitles" [(ngModel)]="eclIcmsNotifiedRules.secondaryRefTitle"
+                                required placeholder="Select" name="eclIcmsNotifiedRules.secondaryRefTitle"
+                                [filter]="true" filterBy="label,value" [disabled]="config.data.readOnlyView"
+                                (ngModelChange)="checkIsValid($event, 'Secondary Reference')">
+                            </p-dropdown>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">Subrule DOS From</label>
+                            <p-calendar type="date" id="subRuleDosFrom" name="subRuleDosFrom" [minDate]="minDate"
+                                [maxDate]="maxDate" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+                                [(ngModel)]="eclIcmsNotifiedRules.subRuleDosFrom" [disabled]="config.data.readOnlyView">
+                            </p-calendar>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">Subrule DOS To</label>
+                            <p-calendar type="date" id="subRuleDosTo" name="subRuleDosTo" [minDate]="minDate"
+                                [maxDate]="maxDate" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+                                [(ngModel)]="eclIcmsNotifiedRules.subRuleDosTo" [disabled]="config.data.readOnlyView">
+                            </p-calendar>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Claim Type Link</label>
+                    <p-dropdown [disabled]="config.data.readOnlyView" [options]="claimTypeLinks"
+                        [(ngModel)]="eclIcmsNotifiedRules.claimTypeLink" placeholder="Select"
+                        name="eclIcmsNotifiedRules.claimTypeLink" [filter]="true" filterBy="label,value"></p-dropdown>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Reference Details</label>
+                    <textarea name="referenceDetails" class="form-control form-control-sm"
+                        [(ngModel)]="eclIcmsNotifiedRules.referenceDetails" id="referenceDetails" rows="3" cols="318"
+                        maxlength="4000" [disabled]="config.data.readOnlyView"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Line of Business</label>
+                    <p-multiSelect [options]="lobs" [disabled]="config.data.readOnlyView" [maxSelectedLabels]="0"
+                        name="eclIcmsNotifiedRules.lob" id="lob" [(ngModel)]="eclIcmsNotifiedRules.lob" [filter]="true"
+                        filterBy="label, value"></p-multiSelect>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label"
+                        [ngClass]="{'required-field-color': setRequired('Industry Update Required')}"><span
+                            class="required-field-color">*</span>Industry Update Required</label>
+                    <p-dropdown [disabled]="config.data.readOnlyView" [options]="industrialUpdates"
+                        [(ngModel)]="eclIcmsNotifiedRules.industryUpdateReqd" placeholder="Select"
+                        name="eclIcmsNotifiedRules.industryUpdateReqd" required [filter]="true" filterBy="label,value"
+                        (ngModelChange)="checkIsValid($event, 'Industry Update Required')">
+                    </p-dropdown>
+                </div>
+            </div>           
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Library Status</label>
+                    <p-dropdown [disabled]="config.data.readOnlyView" [options]="libraryStatus"
+                        [(ngModel)]="eclIcmsNotifiedRules.libraryStatus" placeholder="Select"
+                        name="eclIcmsNotifiedRules.libraryStatus" [filter]="true" filterBy="label,value"></p-dropdown>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label" [ngClass]="{'required-field-color': setRequired('Reason Codes')}" 
+                    for="reasonCodes"><span class="required-field-color">*</span>Reason Codes</label>
+                    <p-dropdown id="reasonCodes"
+                     [options]="reasonCodes" overlayVisible="true" 
+                        [(ngModel)]="eclIcmsNotifiedRules.reasonCodes" placeholder="Select"
+                        name="eclIcmsNotifiedRules.reasonCodes" [filter]="true" filterBy="label,value" 
+                        (ngModelChange)="checkIsValid($event, 'Reason Codes')"
+                        [disabled]="config.data.readOnlyView">
+                    </p-dropdown>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label"
+                        [ngClass]="{'required-field-color': setRequired('CV Code (Edit Flag)')}"><span
+                            class="required-field-color">*</span>CV Code (Edit Flag)</label>
+                    <p-dropdown [disabled]="config.data.readOnlyView" [options]="cvCodes"
+                        [(ngModel)]="eclIcmsNotifiedRules.cvCode" placeholder="Select"
+                        name="eclIcmsNotifiedRules.cvCode" (onChange)="onCvCodeChange($event)" required [filter]="true"
+                        filterBy="label,value" (ngModelChange)="checkIsValid($event, 'CV Code (Edit Flag)')">
+                    </p-dropdown>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">CV Source</label>
+                    <p-dropdown [disabled]="config.data.readOnlyView || disableCvSource" [options]="cvSources"
+                        [(ngModel)]="eclIcmsNotifiedRules.cvSource" placeholder="Select"
+                        name="eclIcmsNotifiedRules.cvSource" [filter]="true" filterBy="label,value"></p-dropdown>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">OOS</label>
+                    <p-dropdown [disabled]="config.data.readOnlyView" [options]="OOSs"
+                        [(ngModel)]="eclIcmsNotifiedRules.oss" placeholder="Select" name="eclIcmsNotifiedRules.oss"
+                        [filter]="true" filterBy="label,value">
+                    </p-dropdown>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">CIT Remarks</label>
+                    <input [disabled]="config.data.readOnlyView" pInputText class="form-control form-control-sm"
+                        type="text" name="citRemarks" [(ngModel)]="eclIcmsNotifiedRules.citRemarks">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Script</label>
+                    <input [disabled]="config.data.readOnlyView" pInputText class="form-control form-control-sm"
+                        type="text" name="script" [(ngModel)]="eclIcmsNotifiedRules.script">
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Rationale</label>
+                    <input [disabled]="config.data.readOnlyView" pInputText class="form-control form-control-sm"
+                        type="text" name="rationale" [(ngModel)]="eclIcmsNotifiedRules.rationale">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Notes</label>
+                    <textarea [disabled]="config.data.readOnlyView" name="notes" class="form-control form-control-sm"
+                        [(ngModel)]="eclIcmsNotifiedRules.notes" id="ruleNotes" rows="3" cols="318"
+                        maxlength="4000"></textarea>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label">Mother/Baby Issue</label>
+                    <p-radioButton [disabled]="config.data.readOnlyView" name="motherbabyIssue" value="-1" label="Apply"
+                        [(ngModel)]="eclIcmsNotifiedRules.motherBabyFlag" inputId="motherbabyIssue1">
+                    </p-radioButton>
+                    <p-radioButton [disabled]="config.data.readOnlyView" name="motherbabyIssue" value="0"
+                        label="Does Not Apply" [(ngModel)]="eclIcmsNotifiedRules.motherBabyFlag"
+                        inputId="motherbabyIssue2">
+                    </p-radioButton>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            
+
+            
+
+            
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label class="custom-label" [ngClass]="{'required-field-color': setRequired('Duplicate Checking')}">
+                        <span class="required-field-color">*</span>Duplicate Checking</label>
+                    <div class="group-item-checkbox">
+                        <p-listbox [disabled]="config.data.readOnlyView" [options]="duplicateChecking"
+                            [(ngModel)]="eclIcmsNotifiedRules.duplicateChecking" [ngModelOptions]="{standalone: true}" 
+                            multiple="multiple" checkbox="checkbox" optionLabel="name" (onChange)="onDuplicateCheckingSelection($event)">
+                        </p-listbox>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">Only Defined Diags</label>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="onlydefDiag" value="-1" label="Yes"
+                                [(ngModel)]="eclIcmsNotifiedRules.onlyDefinedFlag" inputId="onlydefDiag1"></p-radioButton>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="onlydefDiag" value="0" label="No"
+                                [(ngModel)]="eclIcmsNotifiedRules.onlyDefinedFlag" inputId="onlydefDiag2"></p-radioButton>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">POD Eligible</label>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="pod" value="-1" label="Yes"
+                                [(ngModel)]="eclIcmsNotifiedRules.podEligible" inputId="pod1"></p-radioButton>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="pod" value="0" label="No"
+                                [(ngModel)]="eclIcmsNotifiedRules.podEligible" inputId="pod2"></p-radioButton>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">Real Time Eligible</label>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="rte" value="-1" label="Yes"
+                                [(ngModel)]="eclIcmsNotifiedRules.realTimeEligible" inputId="rte1"></p-radioButton>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="rte" value="0" label="No"
+                                [(ngModel)]="eclIcmsNotifiedRules.realTimeEligible" inputId="rte2"></p-radioButton>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">Under Review</label>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="uReview" value="Yes" label="Yes"
+                                [(ngModel)]="eclIcmsNotifiedRules.underReview" inputId="uReview1"></p-radioButton>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="uReview" value="No" label="No"
+                                [(ngModel)]="eclIcmsNotifiedRules.underReview" inputId="uReview2"></p-radioButton>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="row">
+            <div class="col">
+                        <div class="form-group nopadding">
+                            <label class="custom-label">Lag Policy Applies</label>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="Lag" value="yes" label="Yes"
+                                [(ngModel)]="eclIcmsNotifiedRules.lagPolicyApplies" inputId="lag1"></p-radioButton>
+                            <p-radioButton [disabled]="config.data.readOnlyView" name="Lag" value="no" label="No"
+                                [(ngModel)]="eclIcmsNotifiedRules.lagPolicyApplies" inputId="lag2"></p-radioButton>
+                        </div>
+                    </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label>Lag Policy Comments</label>
+                    <textarea [disabled]="config.data.readOnlyView" name="lagPolicyComments"
+                        class="form-control form-control-sm"
+                        [(ngModel)]="eclIcmsNotifiedRules.lagPolicyComments" id="ruleLagPolicyComments" rows="3"
+                        cols="318" maxlength="4000"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label>Peer Reviewer</label>
+                    <p-dropdown [disabled]="config.data.readOnlyView" [options]="medicalDirectors"
+                        [(ngModel)]="eclIcmsNotifiedRules.medicalDirector" placeholder="Select"
+                        name="eclIcmsNotifiedRules.medicalDirector" [filter]="true" filterBy="label,value"></p-dropdown>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label>Peer Reviewer Comments</label>
+                    <textarea [disabled]="config.data.readOnlyView" name="mdComments"
+                        class="form-control form-control-sm" [(ngModel)]="eclIcmsNotifiedRules.mdComments"
+                        id="ruleMdComments" rows="3" cols="318" maxlength="4000"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="form-group nopadding">
+                    <label>Comments</label>
+                    <textarea [disabled]="config.data.readOnlyView" name="comments" class="form-control form-control-sm"
+                        [(ngModel)]="eclIcmsNotifiedRules.comments" id="ruleComments" rows="3" cols="318"
+                        maxlength="4000"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+        <div class="col" style="margin-bottom: 10px; margin-top:10px" Id="provisonalRows">
+                <div class="float-right">
+                    <button class="btn btn-primary" [disabled]="saveBtnDisable || config.data.readOnlyView"
+                        (click)="saveIcmsRule(templateForm)">
+                        <i class="fa fa-save"></i> Save
+                    </button> &nbsp;
+                    <button class="btn btn-primary" (click)="submitTemplate(templateForm)"
+                        [disabled]="submitBtnDisable || config.data.readOnlyView">
+                        <i class="fa fa-check"></i> Submit
+                    </button> &nbsp;
+                    <button class="btn btn-primary" [disabled]="!saveBtnDisable || config.data.readOnlyView"
+                        (click)="exportAsCSV()" title="Export to Excel">
+                        <i class="fa fa-file"></i> Export
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<p-dialog [header]="headerText" [(visible)]="saveDisplay" appendTo="body">
+    <p>{{Message}}</p>
+    <p-footer>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+                        (click)="saveDialog()" label="OK"></button>
+                </div>
+            </div>
+        </div>
+    </p-footer>
+</p-dialog>
+
+
+<p-dialog header="Create Project ID" (onHide)="onHide($event)" [(visible)]="projectCreationModal"
+    [style]="{width: '45vw'}" [modal]="true" appendTo="body" [baseZIndex]="10000" [draggable]="false"
+    [resizable]="false">
+    <form [formGroup]="createProjectForm">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group nopadding">
+                        <label class="custom-label" [ngClass]="{'required-field-color': creationName.invalid}"><span
+                                class="required-field-color">*</span>User Name (This must be a valid Notes user name)
+                        </label>
+                        <input pInputText class="form-control form-control-sm" type="text"
+                            placeholder="Valid Notes User Name" formControlName="name">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+
+                    <div class="form-group nopadding">
+                        <label class="custom-label" [ngClass]="{'required-field-color': creationSummary.invalid }"><span
+                                class="required-field-color">*</span>Summary</label>
+                        <input pInputText class="form-control form-control-sm" type="text" formControlName="summary">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group nopadding">
+                        <label class="custom-label" [ngClass]="{'required-field-color': creationDescription.invalid }"><span
+                            class="required-field-color">*</span>Description</label>
+                        <input pInputText class="form-control form-control-sm" type="text" formControlName="description">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p-messages [closable]="false" [style]="{'background-color': '#9579D3'}"
+                        [showTransitionOptions]="'1000ms ease-out'" [hideTransitionOptions]="'1000ms ease-in'"
+                        [value]="arrayMessage" severity="info"></p-messages>
+                </div>
+            </div>
+        </div>
+    </form>
+    <p-footer>
+        <button type="submit" [disabled]="createProjectForm.invalid" pButton icon="pi pi-check"
+            (click)="submitProjectCreation()" label="Submit"></button>
+    </p-footer>
+</p-dialog>

@@ -1,0 +1,24 @@
+<div *ngIf="typeOfChange">
+  <div class="wrapper">
+    <div class="row section-top">
+      <div class="col-md-12">
+        <label style="text-align: right; ">Add</label>
+        <input class="form-control" [readonly]="readOnly"  maxlength="500" style="width: 100%" type="text" [(ngModel)]="ruleImpactAnalysisRun.typeOfChanges[typeOfChange].ruleChangeAddNotes">
+      </div>
+
+      <div class="col-md-12">
+        <label style="text-align: right; ">Delete</label>
+        <input class="form-control" [readonly]="readOnly" maxlength="500" style="width: 100%" type="text" [(ngModel)]="ruleImpactAnalysisRun.typeOfChanges[typeOfChange].ruleChangeDelNotes">
+      </div>
+
+      <div class="col-md-12">
+        <label style="text-align: right; ">Modify</label>
+        <input class="form-control" [readonly]="readOnly" maxlength="500" style="width: 100%" type="text" [(ngModel)]="ruleImpactAnalysisRun.typeOfChanges[typeOfChange].ruleChangeModNotes">
+      </div>
+    </div> 
+    
+    <div class="row">
+      <div class="col-12">&nbsp;</div>
+    </div>
+  </div>
+</div>

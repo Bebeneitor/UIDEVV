@@ -1,0 +1,48 @@
+<h5>New Idea Research</h5>
+
+<form #parentDiv class="form-container">
+    <NirSearchForm [ideaId]="ideaId" [ruleId]="ruleId" [ruleCreationStatus]="ruleCreationStatus"
+        [(provisionalBtnDisable)]="provisionalBtnDisable" [readOnlyView]="readOnlyView">
+    </NirSearchForm>
+    <p-tabView [activeIndex]="index" (onChange)="indexShift($event)">
+        <!------------------ Duplicate & Valid Check ------------------->
+        <p-tabPanel class="tab-panel-container" header="Duplicate & Valid Check" [disabled]="readyOnlyView">
+            <NirDuplicateChk [readOnlyView]="readOnlyView"></NirDuplicateChk>
+        </p-tabPanel>
+        <!-------------------- Reference Detail ------------------------>
+        <p-tabPanel header="Reference Detail">
+            <nirReferenceDetail [(ruleCreationStatus)]="ruleCreationStatus" [ideaId]="ideaId"
+                [readOnlyView]="readOnlyView"></nirReferenceDetail>
+        </p-tabPanel>
+    </p-tabView>
+
+    <div class="button-container">
+        <button *ngIf="!readOnlyView" class="basic-cot btn btn-primary" type="button" name="save" (click)="save('save')"
+            [disabled]='saveDisabled'>Save</button>
+        <button *ngIf="!readOnlyView" class="basic-cot btn btn-primary" type="button" name="submit"
+            (click)="save('submit')" [disabled]='submitDisabled'>Submit</button>
+        <button *ngIf="!readOnlyView && clear" class="basic-cot btn btn-primary" type="button" name="action"
+            (click)="onClear()" [disabled]="clearDisabled" value="Clear">Clear</button>
+        <button *ngIf="!readOnlyView && refresh" class="basic-cot btn btn-primary" type="button" name="refresh"
+            (click)="onRefresh()" [disabled]="refreshDisabled" value="Refresh">Refresh</button>
+        <button class="basic-cot btn btn-primary" type="button" name="action" (click)="exit()"
+            value="Exit">Exit</button>
+        <button *ngIf="!readOnlyView" class="basic-cot btn btn-primary" type="button" name="return"
+            [disabled]='returnDisabled' (click)="showReturnDialog()">Return</button>
+    </div>
+
+    <!--   Confirmation Dialog -->
+    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+    <p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
+        <p>{{message}}</p>
+        <p-footer>
+            <div class="row">
+                <div class="col-md-9">
+                    <button name="cancelDialogbtn" class="btn submit-btn btn-section" (click)="saveDisplay=false"
+                        value="OK">OK</button>
+                </div>
+            </div>
+        </p-footer>
+    </p-dialog>
+</form>
+<p-toast [baseZIndex]="999999"></p-toast>

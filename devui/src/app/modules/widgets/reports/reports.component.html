@@ -1,0 +1,63 @@
+<div class="widget-container">
+  <div class="card">
+    <div class="card-header text-uppercase">
+      <div class="title-header">&nbsp;</div>
+      <span>{{title}}</span>
+      <div class="float-right">
+        <a nghref="#" class="icon-link" pTooltip="Refresh" tooltipPosition="left" (click)="refresh()"><i
+            class="fa fa-refresh"></i></a>
+      </div>
+    </div>
+    <div class="card-body" style="padding: 12px !important;">
+
+      <div class="container-fluid" style="padding: 0px;">
+        <div class="row" style="padding-left: 12px; padding-right: 12px;">
+          <div *ngIf="reports.length == 0" class="div-no-data">
+            <img src="assets/img/no-data.png" class="img-no-data" />
+            <p class="no-data">NO REPORTS FOUND</p>
+          </div>
+
+          <p-table [hidden]="reports.length == 0" #dt [columns]="cols" [responsive]="true" [value]="reports" [paginator]="true" [rows]="15">
+            <ng-template pTemplate="header" let-columns>
+              <tr>
+                <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                  [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}">
+                  {{col.header}}
+                  <p-sortIcon [field]="col.field" *ngIf="col.field != 'options'" ariaLabel="Activate to sort"
+                    ariaLabelDesc="Activate to sort in descending order"
+                    ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+                </th>
+              </tr>
+              <tr>
+                <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center"
+                  [ngStyle]="{'width': col.width}">
+                  <input *ngIf="col.field == 'date' || col.field == 'name'" pInputText type="text"
+                    style="width : 100%; padding : 5px; border-radius: 5px"
+                    (input)="dt.filter($event.target.value, col.field, 'contains')"
+                    [placeholder]="'Search by ' + col.header">
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+              <tr [pSelectableRow]="rowData">
+                <td class="small-td" *ngFor="let col of columns">
+                  <span class="ui-column-title">{{col.header}}</span>
+                  <span *ngIf="col.field == 'name' || col.field == 'date'">                    
+                    {{rowData[col.field]}}
+                  </span>
+                  <span *ngIf="col.field == 'options'" style="display: block; text-align: center;">
+                    <a [href]="rowData.url" target="_blank" pTooltip="Download" tooltipPosition="left">
+                      <i class="fa fa-file-pdf-o" style="color : #C82333; font-size: 16px;"></i>
+                    </a>
+                  </span>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

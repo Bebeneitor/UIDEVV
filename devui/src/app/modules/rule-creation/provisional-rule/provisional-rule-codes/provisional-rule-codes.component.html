@@ -1,0 +1,277 @@
+<fieldset class="container provisional-rule-codes" [disabled]="provDialogDisable">
+  <div class="row">
+    <div class="col-md-12">
+      <fieldset id="fieldset" style="height: 320px;margin-bottom: 15px; overflow-y: auto; overflow-x: hidden;">
+
+        <div class="row" Id="provisonalRows">
+          <div class="col-md-6" >
+            <label class="row">Procedure Codes (HCPCS/CPT)</label>
+          </div>
+          <div class="col-md-6 codes-header">
+            <button type="button" class="btn btn-primary btn-sm header-buttons" 
+            (click)="validateAllCodeBoxes()" [hidden]="readOnlyView || provDialogDisable"><i class="fa fa-check"></i> Validate All</button>
+          </div>
+        </div>
+        <div class="row" Id="provisonalRows">
+          <div class="col-md-6">
+            <app-procedure-code-box boxTitle='Deny' [procCodeType]="procCodeType" 
+            [compareToOriginal]="showMarkups"
+            [readOnly]="readOnlyView || provDialogDisable"
+            [(procedureCodes)]="_ruleInfo.procedureCodeDto.denyCodes" 
+            [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.denyCodes"
+            ></app-procedure-code-box>
+          </div>
+          <div class="col-md-6">
+            <!--
+            <app-procedure-code-box boxTitle='Override' [procCodeType]="procCodeType" 
+            [codeAndOption] = true
+            [compareToOriginal]="showMarkups"
+            [readOnly]="readOnlyView || provDialogDisable"
+            [(procedureCodes)]="_ruleInfo.procedureCodeDto.denyOrCodes" 
+            [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.denyOrCodes"
+            ></app-procedure-code-box>
+            -->
+            <div class="row">
+              <label for="procedureCodeDto.denyOrCodes" label class="code-label">Override</label>
+            </div>
+            <div class="row" *ngIf="!showMarkups">
+              <textarea class="code-text-area diff-markup" [(ngModel)]="_ruleInfo.procedureCodeDto.denyOrCodes"
+                ></textarea>
+            </div>
+            <div class="row" *ngIf="showMarkups">
+              <app-dif-markups-editor name="recode-markups" class="code-text-area diff-markup" [(ngModel)]="_ruleInfo.procedureCodeDto.denyOrCodes"
+              [saveAsDelta]="false" [originalText]="parentRuleInfo.procedureCodeDto.denyOrCodes"  [provDialogDisable]="readOnlyView  || provDialogDisable"></app-dif-markups-editor>
+            </div>
+          
+          </div>
+        </div>
+        <div class="row" Id="provisonalRows">
+          <div class="col-md-6">
+            <app-procedure-code-box boxTitle='Billed With(Or)' [procCodeType]="procCodeType" 
+            [compareToOriginal]="showMarkups"
+            [readOnly]="readOnlyView || provDialogDisable"
+            [(procedureCodes)]="_ruleInfo.procedureCodeDto.billedWithOR" 
+            [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.billedWithOR"
+            ></app-procedure-code-box>
+          </div>
+          <div class="col-md-6">
+            <app-procedure-code-box boxTitle='Billed With(And)' [procCodeType]="procCodeType" 
+            [compareToOriginal]="showMarkups"
+            [readOnly]="readOnlyView || provDialogDisable"
+            [(procedureCodes)]="_ruleInfo.procedureCodeDto.billeWithAnd" 
+            [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.billeWithAnd"
+            ></app-procedure-code-box>
+          </div>
+        </div>
+        <div class="row" Id="provisonalRows">
+          <div class="col-md-6">
+            <app-procedure-code-box boxTitle='Billed Without(Or)' [procCodeType]="procCodeType" 
+            [compareToOriginal]="showMarkups"
+            [readOnly]="readOnlyView || provDialogDisable"
+            [(procedureCodes)]="_ruleInfo.procedureCodeDto.billedWithOutOr" 
+            [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.billedWithOutOr"
+            ></app-procedure-code-box>
+          </div>
+          <div class="col-md-6">
+            <app-procedure-code-box boxTitle='Billed Without(And)' [procCodeType]="procCodeType" 
+            [compareToOriginal]="showMarkups"
+            [readOnly]="readOnlyView || provDialogDisable"
+            [(procedureCodes)]="_ruleInfo.procedureCodeDto.billedWithOutAnd" 
+            [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.billedWithOutAnd"
+            ></app-procedure-code-box>
+          </div>
+        </div>
+        <div class="row" Id="provisonalRows">
+          <div class="col-md-6">
+            <app-procedure-code-box boxTitle='Pending Procedure Codes' [procCodeType]="procCodeType" 
+            [compareToOriginal]="showMarkups"
+            [readOnly]="readOnlyView || provDialogDisable"
+            [(procedureCodes)]="_ruleInfo.procedureCodeDto.pendingProcedureCodes" 
+            [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.pendingProcedureCodes"
+            ></app-procedure-code-box>
+          </div>
+            <div class="col-md-6">
+              <app-procedure-code-box boxTitle='Include Codes' [procCodeType]="procCodeType" 
+              [compareToOriginal]="showMarkups"
+              [readOnly]="readOnlyView || provDialogDisable"
+              [(procedureCodes)]="_ruleInfo.procedureCodeDto.includeCodes" 
+              [originalProcedureCodes]="parentRuleInfo.procedureCodeDto.includeCodes"
+              ></app-procedure-code-box>
+            </div>
+        </div>
+      </fieldset>
+      <div class="row">
+        <div class="col-md-12">
+          <fieldset id="fieldset" style="margin-bottom: 15px; overflow-y: auto; overflow-x: hidden;">
+            <div class="row" Id="provisonalRows">
+              <div class="col-md-6">
+                <div class="row">
+                  <label for="reduceToProcedureCode" label class="code-label">Recode to Another Procedure
+                    Code</label>
+                </div>
+                <div class="row" *ngIf="!showMarkups">
+                  <textarea class="code-text-area" [(ngModel)]="_ruleInfo.reduceProcedureCodes"
+                    ></textarea>
+                </div>
+                <div class="row" *ngIf="showMarkups">
+                  <app-dif-markups-editor name="recode-markups" class="code-text-area" [(ngModel)]="_ruleInfo.reduceProcedureCodes"
+                  [saveAsDelta]="false" [originalText]="parentRuleInfo.reduceProcedureCodes"  [provDialogDisable]="readOnlyView  || provDialogDisable"></app-dif-markups-editor>
+                </div>
+              </div>
+            </div>
+
+            <div class="row" Id="provisonalRows">
+              <div class="col-md-6">
+                <div class="row">
+                  <label for="reduceUnits" label class="code-label">Adjust Units</label>
+                </div>
+                <div class="row" *ngIf="!showMarkups">
+                  <textarea class="code-text-area" [(ngModel)]="_ruleInfo.reduceUnits"
+                    ></textarea>
+                </div>
+                <div class="row" *ngIf="showMarkups">
+                  <app-dif-markups-editor name="reduce-markups" class="code-text-area" [(ngModel)]="_ruleInfo.reduceUnits"
+                  [saveAsDelta]="false" [originalText]="parentRuleInfo.reduceUnits"  [provDialogDisable]="readOnlyView  || provDialogDisable"></app-dif-markups-editor>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="row">
+                  <label for="applyPercReduction" class="code-label">Apply a Percentage
+                    Reduction</label>
+                </div>
+                <div class="row"  *ngIf="!showMarkups">
+                  <textarea class="code-text-area" [(ngModel)]="_ruleInfo.applyPercReduction"
+                    title="{{_ruleInfo.applyPercReduction}}" ></textarea>
+                </div>
+                <div class="row" *ngIf="showMarkups">
+                  <app-dif-markups-editor name="apply-perc-markups" class="code-text-area" [(ngModel)]="_ruleInfo.applyPercReduction"
+                  [saveAsDelta]="false" [originalText]="parentRuleInfo.applyPercReduction"  [provDialogDisable]="readOnlyView  || provDialogDisable"></app-dif-markups-editor>
+                </div>
+              </div>
+            </div>
+
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-12">
+          <label class="commentsLabel">Other Applicable Exceptions or Limitations</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12" *ngIf="!showMarkups">
+          <textarea id="comments" rows="3" cols="100%" style="width:100%; height: 100%;" name="comments" tabindex="6"
+            [(ngModel)]="_ruleInfo.otherExceptions" title="{{_ruleInfo.otherExceptions}}" tabindex="16"></textarea>
+        </div>
+        <div class="col-md-12" *ngIf="showMarkups">
+          <app-dif-markups-editor name="comments-markups" [(ngModel)]="_ruleInfo.otherExceptions"
+          [saveAsDelta]="false" [originalText]="parentRuleInfo.otherExceptions"  [provDialogDisable]="readOnlyView  || provDialogDisable"></app-dif-markups-editor>
+        </div>
+</div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="fromMaintenanceProcess">
+    <div class="col-md-12">
+      <label >Attachments</label>
+    </div>
+  </div>
+
+  <div class="row"  *ngIf="fromMaintenanceProcess">
+    <div class="col-md-12">
+      <p-dataView #dv1  class="grey-box" filterBy="fileName" [value]="codesFilesOld" [paginator]="false" [rows]="5"  >
+        <ng-template let-CodesFilesOld pTemplate="listItem">
+          <div class="row">
+                    <span style="cursor: pointer; margin-left: 35px;"><i
+                      style="cursor: pointer" [ngClass]="getFileIcon(CodesFilesOld)"
+                      style="margin:4px 4px 4px 8px"></i>{{CodesFilesOld.fileName}}</span>
+
+          </div>
+        </ng-template>
+      </p-dataView>
+    </div>
+  </div>
+
+
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="row" *ngIf="fromMaintenanceProcess">
+        <div class="col-md-12">
+          <label class="commentsLabel" style="font-size: 13px;"><b>Attachments Updates</b></label>
+          <hr style="margin-top: 5px !important;"/>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <br>
+          <label class="commentsLabel" style="position: absolute;top: 5px;">Attachments</label>
+          <p-fileUpload [disabled]="provDialogDisable" #uploadControl multiple="true" customUpload="true"
+            id="UploadElements" (onSelect)="onFileSelected($event)" (onClear)="onClearFiles()"
+            (onRemove)="onRemoveFile($event)"
+            [accept]="'.txt, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel,
+                                                application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/msword'"
+            [invalidFileTypeMessageSummary]="'Invalid file type'"
+            [invalidFileTypeMessageDetail]="'Only allow *.txt, *.docx or *.xls files'" [showUploadButton]="false"
+            [chooseLabel]="chooseLabel">
+          </p-fileUpload>
+        </div>
+      </div>
+
+    <div class="row" *ngIf="codesFiles.length > 0">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <p-dataView #dv filterBy="fileName" [value]="codesFiles" [paginator]="false" [rows]="5">
+              <ng-template let-CodesFile pTemplate="listItem">
+                <div class="row">
+                  <div class="col-10">
+                    <div class="row">
+                    <span style="cursor: pointer; margin-left: 35px;" (click)="downloadFile(CodesFile)"><i
+                      style="cursor: pointer" [ngClass]="getFileIcon(CodesFile)"
+                      style="margin:4px 4px 4px 8px"></i>{{CodesFile.fileName}}</span>
+
+                    </div>
+
+                  </div>
+                  <div class="col-2">
+                    <div class="pull-right" style="position: absolute; right: -3px;"><button type="button" pButton
+                                                                                             style="height: 22px;" icon="pi pi-times" (click)="removeFile(CodesFile)"></button>
+                    </div>
+
+                  </div>
+                </div>
+              </ng-template>
+            </p-dataView>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </div>
+  </div>
+
+</fieldset>
+<p-dialog header="Are you sure?" [class]="confirmDialog" [(visible)]="removeAttachmentDisplay">
+  <p class="message-bold"> <span class="icon-float-left">
+      <i class="pi pi-exclamation-triangle"></i>
+    </span>
+    <span>Are you sure you want to delete this attachment?</span> </p>
+  <p class="message-center">This action cannot be undone.</p>
+  <p-footer>
+    <div class="row">
+      <div class="col-md-5">
+        <button name="removeAttachmentCancelBtn" class="btn btn-primary" pButton (click)="removeAttachmentCancel()"
+          label="Cancel"></button>
+      </div>
+      <div class="col-md-6">
+        <button name="removeAttachmentDeletebtn" class="btn btn-primary" pButton (click)="removeAttachmentDelete()"
+          label="Delete"></button>
+      </div>
+    </div>
+  </p-footer>
+</p-dialog>

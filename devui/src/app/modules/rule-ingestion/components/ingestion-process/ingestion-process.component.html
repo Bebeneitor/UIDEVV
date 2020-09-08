@@ -1,0 +1,36 @@
+<div class="container">
+  <div class="row">
+    <h5 class="title">{{pageTitle}}</h5>
+  </div>
+  <div class="row">
+    <span class="rule-dropdown-span">Please select template type</span>
+  </div>
+  <div class="row">
+    <div class="col remove-padding">
+      <p-dropdown class="rule-dropdown" [options]=ruleEngines [style]="{'width':'200px'}"
+        [(ngModel)]="selecteRuleEngine"></p-dropdown>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col remove-padding">
+      <p-fileUpload #uploadControl multiple="false" fileLimit="1" customUpload="true"
+        (uploadHandler)="onFileUpload($event)"
+        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+        [invalidFileTypeMessageSummary]="ruleIngestionService.invalidFileTypeMessageSummary"
+        [invalidFileTypeMessageDetail]="ruleIngestionService.fileTypeMessageDetail">
+        <ng-template let-file pTemplate="file">
+          <div>{{file.name}}</div>
+        </ng-template>
+      </p-fileUpload>
+    </div>
+  </div>
+  <br>
+  <div class="row" *ngIf="uploadProgress > 0">
+    <div class="col remove-padding">
+      <p-progressBar [value]="uploadProgress"></p-progressBar>
+    </div>
+  </div>
+</div>
+
+<p-toast [baseZIndex]="999999"></p-toast>

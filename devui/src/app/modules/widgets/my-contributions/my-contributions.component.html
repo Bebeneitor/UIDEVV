@@ -1,0 +1,183 @@
+<div class="widget-container">
+  <div class="card">
+    <div class="card-header text-uppercase">
+      <div class="title-header">&nbsp;</div>
+      <span>{{title}}</span>
+
+
+      <span style="font-size : 12px; font-weight: 400;" *ngIf="dt2 != undefined && dt3 != undefined && typeView == 'chart'">({{dt2.filteredValue != null && dt2.filteredValue != undefined ? dt2.filteredValue.length : dt2.value.length}} IDEAS, {{dt3.filteredValue != null && dt3.filteredValue != undefined ? dt3.filteredValue.length : dt3.value.length}} RULES)</span>
+      <span style="font-size : 12px; font-weight: 400;" *ngIf="dt2 != undefined && (typeView == 'table' || typeView == 'tablex') && selectedTab == 'ideas'">({{dt2.filteredValue != null && dt2.filteredValue != undefined ? dt2.filteredValue.length : dt2.value.length}} IDEAS)</span>
+      <span style="font-size : 12px; font-weight: 400;" *ngIf="dt3 != undefined && (typeView == 'table' || typeView == 'tablex') && selectedTab == 'rules'">({{dt3.filteredValue != null && dt3.filteredValue != undefined ? dt3.filteredValue.length : dt3.value.length}} RULES)</span>
+
+      <div class="float-right">
+        <a nghref="#" class="icon-link" (click)="changeView('chart')" pTooltip="Chart View" tooltipPosition="left"
+          [ngClass]="typeView == 'chart' ? 'active' : ''"><i class="fa fa-line-chart"></i></a>
+        <a nghref="#" class="icon-link" (click)="changeView('table')" pTooltip="Table View" tooltipPosition="left"
+          [ngClass]="typeView == 'table' ? 'active' : ''"><i class="fa fa-table"></i></a>
+        <a nghref="#" class="icon-link" pTooltip="Refresh" tooltipPosition="left" (click)="refresh()"><i
+            class="fa fa-refresh"></i></a>
+      </div>
+    </div>
+    <div class="card-body" style="min-height: 150px; padding : 12px !important; padding-top : 0px !important">
+
+      <div class="container-fluid" style="padding: 0px;">
+        <div class="row">
+          <div class="col-md-6 col-sm-12">
+            <label>From</label>
+            <p-calendar #start [(ngModel)]="startDate" (onSelect)="saveDate('START')" [defaultDate]='startDate' [readonlyInput]="true"
+              [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft" [minDate]="minDate"
+              [maxDate]="endDate" placeholder="Start Date" dateFormat="mm/dd/yy"></p-calendar>
+          </div>
+          <div class="col-md-6 col-sm-12">
+            <label>To</label>
+            <div class="input-group">
+              <p-calendar [(ngModel)]="endDate" (onSelect)="saveDate('END')" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
+              [yearRange]="yearValidRangeEft" [minDate]="startDate" [maxDate]="maxDate" placeholder="End Date"
+                dateFormat="mm/dd/yy"></p-calendar>
+              <div class="input-group-append group-absolute">
+                <button class="btn btn-secondary btn-sm" type="button"><i class="fa fa-search"
+                    (click)="refresh()"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+
+      <div class="container-fluid" style="padding: 0px;" [hidden]="typeView != 'table' && typeView != 'tablex'">
+        <div class="row">
+          <div class=""
+            style="width : 100%; padding : 12px; padding-top : 0px;">
+            <p-tabView (onChange)="handleChange($event)">
+              <p-tabPanel header="Rules" [selected]="selectedTab == 'rules'">
+                <div *ngIf="dataRules.length == 0" class="div-no-data" style="margin-top: 0px;">
+                  <img src="assets/img/no-data.png" class="img-no-data" />
+                  <p class="no-data">NO DATA FOUND</p>
+                </div>
+
+                <p-table [hidden]="dataRules.length == 0" #dt3 [columns]="colsRules" [value]="dataRules"
+                  [paginator]="true" [rows]="15">
+                  <ng-template pTemplate="header" let-columns>
+                    <tr>
+                      <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                        [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}">
+                        {{col.header}}
+                        <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                          ariaLabelDesc="Activate to sort in descending order"
+                          ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+                      </th>
+                    </tr>
+                    <tr>
+                      <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center"
+                        [ngStyle]="{'width': col.width}">
+                        <input *ngIf="col.field != 'category'" pInputText
+                          type="text" style="width : 100%; padding : 5px; border-radius: 5px"
+                          (input)="dt3.filter($event.target.value, col.field, 'contains')"
+                          [placeholder]="'Search by ' + col.header">
+
+                        <p-dropdown *ngIf="col.field == 'category'" appendTo='body' [options]="categories"
+                          [style]="{'width':'100%'}" (onChange)="dt3.filter($event.value, col.field, 'equals')">
+                        </p-dropdown>
+                      </th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+                    <tr [pSelectableRow]="rowData">
+                      <td class="small-td" *ngFor="let col of columns">
+                        <span *ngIf="col.field == 'id'">
+                          <a style="text-decoration: underline; cursor: pointer;color:inherit" nghref="#" (click)="redirect(rowData.ruleId, 'RULE')">{{rowData.id}}</a>
+                        </span>
+                        <span *ngIf="col.field == 'name' || col.field == 'date' || col.field == 'eclStageShort' || col.field == 'eclStatusDesc'">
+                          {{rowData[col.field]}}
+                        </span>
+                        <span *ngIf="col.field == 'category'">
+                          {{rowData.category}}
+                        </span>
+                        <span *ngIf="col.field == 'ideaCode'">
+                          <a *ngIf="rowData.ideaCode != ''" style="text-decoration: underline; cursor: pointer; color:inherit" nghref="#"
+                            (click)="redirect(rowData.ideaId, 'IDEA')">{{rowData.ideaCode}}</a>
+                        </span>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </p-tabPanel>
+              <p-tabPanel header="Ideas" [selected]="selectedTab == 'ideas'">
+                <div *ngIf="dataIdeas.length == 0" class="div-no-data" style="margin-top: 0px;">
+                  <img src="assets/img/no-data.png" class="img-no-data" />
+                  <p class="no-data">NO DATA FOUND</p>
+                </div>
+
+                <p-table [hidden]="dataIdeas.length == 0" #dt2 [columns]="colsIdeas" [value]="dataIdeas"
+                  [paginator]="true" [rows]="15">
+                  <ng-template pTemplate="header" let-columns>
+                    <tr>
+                      <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                        [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}">
+                        {{col.header}}
+                        <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                          ariaLabelDesc="Activate to sort in descending order"
+                          ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+                      </th>
+                    </tr>
+                    <tr>
+                      <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center"
+                        [ngStyle]="{'width': col.width}">
+                        <input *ngIf="col.field == 'id' || col.field == 'eclStageShort' || col.field == 'name' || col.field == 'date' || col.field == 'eclStatusDesc'" pInputText
+                          type="text" style="width : 100%; padding : 5px; border-radius: 5px"
+                          (input)="dt2.filter($event.target.value, col.field, 'contains')"
+                          [placeholder]="'Search by ' + col.header">
+
+                        <p-dropdown *ngIf="col.field == 'category'" appendTo='body' [options]="categories"
+                          [style]="{'width':'100%'}" (onChange)="dt2.filter($event.value, col.field, 'equals')">
+                        </p-dropdown>
+                      </th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+                    <tr [pSelectableRow]="rowData">
+                      <td class="small-td" *ngFor="let col of columns">
+                        <span *ngIf="col.field == 'id'">
+                          <a style="text-decoration: underline; cursor: pointer;color:inherit" nghref="#" (click)="redirect(rowData.ideaId, 'IDEA')">{{rowData.id}}</a>
+                        </span>
+                        <span *ngIf="col.field == 'name' || col.field == 'date' || col.field == 'eclStageShort' || col.field == 'eclStatusDesc'">
+                          {{rowData[col.field]}}
+                        </span>
+                        <span *ngIf="col.field == 'category'">
+                          {{rowData.category}}
+                        </span>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </p-tabPanel>
+            </p-tabView>
+
+            <button style="margin-top: 10px;" *ngIf="typeView == 'tablex'" class="btn btn-sm btn-block btn-primary"
+              (click)="changeView('chart')"><i class="fa fa-arrow-left" aria-hidden="true"></i> Back</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid" style="padding: 0px;" *ngIf="typeView == 'chart'">
+        <div class="row">
+
+          <div *ngIf="dataIdeas.length == 0 && dataRules.length == 0" class="div-no-data">
+            <img src="assets/img/no-data.png" class="img-no-data" />
+            <p class="no-data">NO DATA FOUND</p>
+          </div>
+
+          <p-chart [hidden]="dataIdeas.length == 0 && dataRules.length == 0" type="line" [data]="data"
+            [options]="options" (onDataSelect)="selectData($event)"></p-chart>
+          <div [hidden]="dataIdeas.length == 0 && dataRules.length == 0" style="padding-left: 12px; padding-right: 12px; width: 100%;" class="text-center">
+            <div class="marker" style="background: rgb(149, 121, 211) !important"></div> <span
+              class="marker-text">Rules</span>
+            <div class="marker" style="background: rgb(51, 51, 51) !important"></div> <span
+              class="marker-text">Ideas</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,489 @@
+<div>
+    <div class="container-fluid" style="overflow: auto; max-height: 50vh;">
+        <p-tabView>
+            <p-tabPanel header="Seconds">
+                <div class="container-fluid">
+                    <div class="row margin-row">
+                        <div class="col-3">
+                            <p-radioButton name="secondsRadioGroup" value="Option 1" label="Every second"
+                                [(ngModel)]="selectedSecondsRadio" (click)="updateCronSeconds(1)"></p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="secondsRadioGroup" value="Option 2" label="Every"
+                                [(ngModel)]="selectedSecondsRadio" (click)="updateCronSeconds(2)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="oneDigit" [(ngModel)]="everySecond" (onChange)="updateCronSeconds(2)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>second(s) starting at second</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="startingSecond" (onChange)="updateCronSeconds(2)"></p-dropdown>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col">
+                            <p-radioButton name="secondsRadioGroup" value="Option 3"
+                                label="Specific second (choose one or many)" [(ngModel)]="selectedSecondsRadio"
+                                (click)="updateCronSeconds(3)"></p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row" *ngFor="let ten of tens">
+                        <div class="col-1"></div>
+                        <div class="col-1" *ngFor="let unit of units">
+                            <p-checkbox name="secondsCheckBoxGroup{{ten}}{{unit}}" value="{{ten}}{{unit}}"
+                                label="{{ten}}{{unit}}" [(ngModel)]="selectedSecondsCheckBox"
+                                (click)="updateCronSeconds(3)">
+                            </p-checkbox>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="secondsRadioGroup" value="Option 4" label="Every second between second"
+                                [(ngModel)]="selectedSecondsRadio" (click)="updateCronSeconds(4)"></p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="secondBetween1" (onChange)="updateCronSeconds(4)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>and second</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="secondBetween2" (onChange)="updateCronSeconds(4)"></p-dropdown>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Minutes">
+                <div class="container-fluid">
+                    <div class="row margin-row">
+                        <div class="col-3">
+                            <p-radioButton name="minutesRadioGroup" value="Option 1" label="Every minute"
+                                [(ngModel)]="selectedMinutesRadio" (click)="updateCronMinutes(1)"></p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="minutesRadioGroup" value="Option 2" label="Every"
+                                [(ngModel)]="selectedMinutesRadio" (click)="updateCronMinutes(2)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="oneDigit" [(ngModel)]="everyMinute" (onChange)="updateCronMinutes(2)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>minute(s) starting at minute</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="startingMinute" (onChange)="updateCronMinutes(2)"></p-dropdown>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col">
+                            <p-radioButton name="minutesRadioGroup" value="Option 3"
+                                label="Specific minute (choose one or many)" [(ngModel)]="selectedMinutesRadio" (click)="updateCronMinutes(3)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class=row *ngFor="let ten of tens">
+                        <div class="col-1"></div>
+                        <div class="col-1" *ngFor="let unit of units">
+                            <p-checkbox name="minutesCheckBoxGroup{{ten}}{{unit}}" value="{{ten}}{{unit}}"
+                                label="{{ten}}{{unit}}" [(ngModel)]="selectedMinutesCheckBox" (click)="updateCronMinutes(3)"></p-checkbox>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="minutesRadioGroup" value="Option 4" label="Every minute between second"
+                                [(ngModel)]="selectedMinutesRadio" (click)="updateCronMinutes(4)"></p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="minuteBetween1" (onChange)="updateCronMinutes(4)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>and second</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="minuteBetween2" (onChange)="updateCronMinutes(4)"></p-dropdown>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Hours">
+                <div class="container-fluid">
+                    <div class="row margin-row">
+                        <div class="col-2">
+                            <p-radioButton name="hoursRadioGroup" value="Option 1" label="Every hour"
+                                [(ngModel)]="selectedHoursRadio" (click)="updateCronHours(1)"></p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="hoursRadioGroup" value="Option 2" label="Every"
+                                [(ngModel)]="selectedHoursRadio" (click)="updateCronHours(2)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="oneDigit" [(ngModel)]="everyHour" (onChange)="updateCronHours(2)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>hour(s) starting at hour</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="startingHour" (onChange)="updateCronHours(2)"></p-dropdown>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col">
+                            <p-radioButton name="hoursRadioGroup" value="Option 3"
+                                label="Specific hour (choose one or many)" [(ngModel)]="selectedHoursRadio" (click)="updateCronHours(3)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class=row *ngFor="let ten of tens">
+                        <div class="col-1"></div>
+                        <div class="col-1" *ngFor="let unit of units">
+                            <div *ngIf="checkBoxHoursBoundary(ten, unit)">
+                                <p-checkbox name="hoursCheckBoxGroup{{ten}}{{unit}}" value="{{ten}}{{unit}}"
+                                    label="{{ten}}{{unit}}" [(ngModel)]="selectedHoursCheckBox" (onChange)="updateCronHours(3)"></p-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="hoursRadioGroup" value="Option 4" label="Every hour between hour"
+                                [(ngModel)]="selectedHoursRadio" (click)="updateCronHours(4)"></p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="hourBetween1" (onChange)="updateCronHours(4)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>and hour</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="timeOptions" optionLabel="twoDigits" [(ngModel)]="hourBetween2" (onChange)="updateCronHours(4)"></p-dropdown>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Day">
+                <div class="container-fluid">
+                    <div class="row margin-row">
+                        <div class="col-2">
+                            <p-radioButton name="daysRadioGroup" value="Option 1" label="Every day"
+                                [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(1)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="daysRadioGroup" value="Option 2" label="Every"
+                                [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(2)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfWeekOptions" optionLabel="number" [(ngModel)]="everyDayOfWeek" (onChange)="updateCronDays(2)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>day(s) starting on</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfWeekOptions" optionLabel="name" [(ngModel)]="startingDayOfWeek" (onChange)="updateCronDays(2)"></p-dropdown>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="daysRadioGroup" value="Option 3" label="Every"
+                                [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(3)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfMonthOptions" optionLabel="number" [(ngModel)]="everyDayOfMonth" (onChange)="updateCronDays(3)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>day(s) starting on the</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfMonthOptions" optionLabel="ordinal" [(ngModel)]="startingDayOfMonth" (onChange)="updateCronDays(3)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>of the month</label>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-8">
+                            <p-radioButton name="daysRadioGroup" value="Option 4"
+                                label="Specific day of the week (choose one or many)" [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(4)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <div class="col-md-auto" *ngFor="let dayOfWeek of daysOfWeekOptions">
+                            <p-checkbox name="daysCheckBoxGroup{{dayOfWeek.value.index}}" value="{{dayOfWeek.value.index}}"
+                                label="{{dayOfWeek.name}}" [(ngModel)]="selectedDaysOfWeekCheckBox" (click)="updateCronDays(4)"></p-checkbox>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-8">
+                            <p-radioButton name="daysRadioGroup" value="Option 5"
+                                label="Specific day of month (choose one or many)" [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(5)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class=row *ngFor="let ten of tens">
+                        <div class="col-1"></div>
+                        <div class="col-1" *ngFor="let unit of units">
+                            <div *ngIf="checkBoxDaysOfMonthBoundary(ten, unit)">
+                                <p-checkbox
+                                    name="hoursCheckBoxGroup{{checkTen(ten, checkUnit(unit))}}{{checkUnit(unit)}}"
+                                    value="{{checkTen(ten, checkUnit(unit))}}{{checkUnit(unit)}}"
+                                    label="{{checkTen(ten, checkUnit(unit))}}{{checkUnit(unit)}}"
+                                    [(ngModel)]="selectedDaysOfMonthCheckBox" (click)="updateCronDays(5)"></p-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-6">
+                            <p-radioButton name="daysRadioGroup" value="Option 6" label="On the last day of the month"
+                                [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(6)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-6">
+                            <p-radioButton name="daysRadioGroup" value="Option 7"
+                                label="On the last weekday of the month" [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(7)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="daysRadioGroup" value="Option 8" label="On the last"
+                                [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(8)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfWeekOptions" optionLabel="name" [(ngModel)]="lastDayOfWeekOfMonth" (onChange)="updateCronDays(8)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>of the month</label>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="daysRadioGroup" value="Option 9" label="Day(s)"
+                                [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(9)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfMonthOptions" optionLabel="number" [(ngModel)]="daysBeforeEndOfMonth" (onChange)="updateCronDays(9)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>before the end of the month</label>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="daysRadioGroup" value="Option 10"
+                                label="Nearest weekday (Monday to Friday) to the" [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(10)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfMonthOptions" optionLabel="ordinal" [(ngModel)]="limitDayOfMonth" (onChange)="updateCronDays(10)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>of the month</label>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="daysRadioGroup" value="Option 11" label="On the"
+                                [(ngModel)]="selectedDaysRadio" (click)="updateCronDays(11)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="weeksInMonthOptions" [(ngModel)]="ordinalWeekDayOfMonth" (onChange)="updateCronDays(11)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="daysOfWeekOptions" optionLabel="name" [(ngModel)]="weekDayOfMonth" (onChange)="updateCronDays(11)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>of the month</label>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Month">
+                <div class="container-fluid">
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="monthsRadioGroup" value="Option 1" label="Every month"
+                                [(ngModel)]="selectedMonthsRadio" (click)="updateCronMonths(1)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="monthsRadioGroup" value="Option 2" label="Every"
+                                [(ngModel)]="selectedMonthsRadio" (click)="updateCronMonths(2)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="monthsOptions" optionLabel="number" [(ngModel)]="everyMonth" (onChange)="updateCronMonths(2)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>month(s) starting in</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="monthsOptions" optionLabel="name" [(ngModel)]="startingMonth" (onChange)="updateCronMonths(2)"></p-dropdown>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-8">
+                            <p-radioButton name="monthsRadioGroup" value="Option 3"
+                                label="Specific month (choose one or many)" [(ngModel)]="selectedMonthsRadio" (click)="updateCronMonths(3)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <div *ngFor="let month of monthsOptions">
+                            <div class="col-md-auto" *ngIf="month.value.index <= 6">
+                                <p-checkbox name="monthsCheckBoxGroup{{month.value.index}}" value="{{month.value.index}}"
+                                    label="{{month.name}}" [(ngModel)]="selectedMonthsCheckBox" (onChange)="updateCronMonths(3)">
+                                </p-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <div *ngFor="let month of monthsOptions">
+                            <div class="col-md-auto" *ngIf="month.value.index > 6">
+                                <p-checkbox name="monthsCheckBoxGroup{{month.value.index}}" value="{{month.value.index}}"
+                                    label="{{month.name}}" [(ngModel)]="selectedMonthsCheckBox" (onChange)="updateCronMonths(3)">
+                                </p-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="monthsRadioGroup" value="Option 4" label="Every month between"
+                                [(ngModel)]="selectedMonthsRadio" (click)="updateCronMonths(4)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="monthsOptions" optionLabel="name" [(ngModel)]="monthBetween1" (onChange)="updateCronMonths(4)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>and</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="monthsOptions" optionLabel="name" [(ngModel)]="monthBetween2" (onChange)="updateCronMonths(4)"></p-dropdown>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+            <p-tabPanel header="Year">
+                <div class="container-fluid">
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="yearsRadioGroup" value="Option 1" label="Every year"
+                                [(ngModel)]="selectedYearsRadio" (click)="updateCronYears(1)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="yearsRadioGroup" value="Option 2" label="Every"
+                                [(ngModel)]="selectedYearsRadio" (click)="updateCronYears(2)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="yearsRangeOptions" [(ngModel)]="everyYear" (onChange)="updateCronYears(2)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>years(s) starting in</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="followingYearsOptions" [(ngModel)]="startingYear" (onChange)="updateCronYears(2)"></p-dropdown>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-8">
+                            <p-radioButton name="yearsRadioGroup" value="Option 3"
+                                label="Specific year (choose one or many)" [(ngModel)]="selectedYearsRadio" (click)="updateCronYears(3)">
+                            </p-radioButton>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div *ngFor="let comingYear of followingYearsOptions">
+                            <div class="col-1" *ngIf="comingYear || comingYear + 10"></div>
+                            <div class="col-md-auto">
+                                <p-checkbox name="monthsCheckBoxGroup{{comingYear.value}}" value="{{comingYear.value}}"
+                                    label="{{comingYear.value}}" [(ngModel)]="selectedYearsCheckBox" (onChange)="updateCronYears(3)">
+                                </p-checkbox>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin-row">
+                        <div class="col-md-auto">
+                            <p-radioButton name="yearsRadioGroup" value="Option 4" label="Every year between"
+                                [(ngModel)]="selectedYearsRadio" (click)="updateCronYears(4)">
+                            </p-radioButton>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="followingYearsOptions" [(ngModel)]="yearBetween1" (onChange)="updateCronYears(4)"></p-dropdown>
+                        </div>
+                        <div class="col-md-auto">
+                            <label>and</label>
+                        </div>
+                        <div class="col-md-auto">
+                            <p-dropdown [options]="followingYearsOptions" [(ngModel)]="yearBetween2" (onChange)="updateCronYears(4)"></p-dropdown>
+                        </div>
+                    </div>
+                </div>
+            </p-tabPanel>
+        </p-tabView>
+    </div>
+    <div class="container">
+        <div style="padding-top: 10px;">
+            <h4 style="padding-bottom: 10px; text-align: center;">Resulting Cron Expression:
+                <span id="cronResult" style="color:#9C9C9C">{{cronExpression}}</span>
+            </h4>
+            <p-table [columns]="cols" [value]="cronExpressionParts">
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th *ngFor="let col of columns" style="text-align: center;">
+                            {{col.header}}
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-cronExpressionPart let-columns="columns">
+                    <tr>
+                        <td *ngFor="let col of columns" style="text-align: center;">
+                            {{cronExpressionPart[col.field]}}
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-8 text-right">
+                <button type="button" value="Remove" 
+                    class="btn btn-primary btn-default-height small-td" (click)="cancelJobScheduler()">Cancel</button>
+            </div>
+            <div class="col text-center">
+                <button type="button" value="New Job" class="btn btn-primary small-td"
+                    (click)="updateCronExpression()">{{jobSchedulerButtonName}}</button>
+            </div>
+        </div>
+    </div>
+</div>

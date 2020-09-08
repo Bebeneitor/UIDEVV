@@ -1,0 +1,145 @@
+<div class="row">
+  <div class="old-version col-6" *ngIf="showCurrent">
+    <div class="table-header">
+      <ng-container *ngIf="isDailyMaxUnits; else simpleCurrentTitle">
+        <h3>
+          {{ currentVersion.section.name }}
+          <span class="codes-input input-read-only">
+            <app-cell-editor
+              [attr.slm-id]="'daily_max_codes_text'"
+              [column]="currentVersion.codesColumn"
+              [searchInfo]="currentVersion.codesColumn.searchData"
+              [highLight]="currentVersion.codesColumn.highlight"
+              [isReadOnly]="true"
+            ></app-cell-editor>
+          </span>
+        </h3>
+      </ng-container>
+      <ng-template #simpleCurrentTitle>
+        <h3>{{ currentVersion.section.name }}</h3>
+      </ng-template>
+      <div class="title-buttons" *ngIf="expandSection">
+        <button
+          class="button is-text undo"
+          (click)="confirmUndoCopySection()"
+          *ngIf="_enableEditing && copyToNew.undoCopySectionFlag"
+          [attr.slm-id]="'undo_section_copy_btn'"
+          data-toggle="tooltip"
+          data-placement="top"
+          title="Undo Copy to New For This Section Only"
+        >
+        {{ shouldShowUndo ? "Undo Copy to New" : "Redo Copy to New" }}
+        </button>
+        <button
+          class="button is-text"
+          [attr.slm-id]="'section_copy_btn'"
+          (click)="confirmCopySection()"
+          *ngIf="_enableEditing"
+          [disabled]="currentVersion.rows.length == 0"
+        >
+          Copy To New
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="new-version" [ngClass]="showCurrent ? 'col-6' : 'col-12'">
+    <div class="table-header">
+      <ng-container *ngIf="isDailyMaxUnits; else simpleTitle">
+        <h3 (click)="consoleResponse()">
+          {{ newVersion.section.name }}
+          <span class="codes-input">
+            <app-cell-editor
+              [attr.slm-id]="'daily_max_codes_text'"
+              [column]="newVersion.codesColumn"
+              [searchInfo]="newVersion.codesColumn.searchData"
+              [highLight]="newVersion.codesColumn.highlight"
+              [isReadOnly]="!_enableEditing"
+            ></app-cell-editor>
+          </span>
+        </h3>
+      </ng-container>
+      <ng-template #simpleTitle>
+        <h3 (click)="consoleResponse()">{{ newVersion.section.name }}</h3>
+      </ng-template>
+
+      <ul class="table-options">
+        <ng-container *ngIf="_enableEditing">
+          <li class="padli">
+            <button
+              class="button is-text"
+              (click)="collapseSection()"
+              [ngClass]="{ 'arrow-rotate': expandSection }"
+              [attr.slm-id]="'section_copy_btn'"
+            >
+              <i class="fa fa-chevron-right"></i>
+            </button>
+          </li>
+          <li class="padli" *ngIf="!isReadOnly">
+            <button
+              (click)="stickSection()"
+              class="button is-text pin is-pulled-right"
+              [attr.slm-id]="'page_section_pin_toggle_btn'"
+            >
+              <i class="fa fa-map-pin"></i>
+            </button>
+          </li>
+          <li>
+            <span class="handle" [attr.slm-id]="'section_drag_handle_btn'"
+              ><i class="fa fa-arrows-alt"></i
+            ></span>
+          </li>
+        </ng-container>
+        <li class="disable-section" *ngIf="hideDisableToggle" >
+          <p-inputSwitch
+            (onChange)="disableChange($event)"
+            [(ngModel)]="shouldDisableSection"
+            [attr.slm-id]="'disable_section_btn'"
+          ></p-inputSwitch>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div
+    class="old-version col-6"
+    [attr.slm-id]="'old_version'"
+    *ngIf="showCurrent"
+  >
+    <ng-container *ngIf="currentVersion.rows.length == 0; else section">
+      <div><h4 class="section-not-found">Section Not Found</h4></div>
+    </ng-container>
+    <ng-template #section>
+      <app-dnb-section
+        *ngIf="expandSection"
+        [section]="currentVersion"
+        [isComparing]="isComparing"
+        (behaviorEvnt)="behavior($event)"
+        [isReadOnly]="true"
+        [enableEditing]="_enableEditing"
+        [undoCopyRowFlag]="undoCopyRowFlag"
+      ></app-dnb-section>
+    </ng-template>
+  </div>
+  <div
+    class="new-version"
+    [attr.slm-id]="'new_version'"
+    [ngClass]="showCurrent ? 'col-6' : 'col-12'"
+  >
+    <ng-container *ngIf="newVersion.rows.length === 0; else section">
+      <div><h4 class="section-not-found">Section Not Found</h4></div>
+    </ng-container>
+    <ng-template #section>
+      <app-dnb-section
+        #editSection
+        *ngIf="expandSection"
+        [(section)]="newVersion"
+        [isComparing]="isComparing"
+        (behaviorEvnt)="behavior($event)"
+        [isReadOnly]="false"
+        [enableEditing]="_enableEditing"
+        [disabled]="shouldDisableSection"
+      ></app-dnb-section>
+    </ng-template>
+  </div>
+</div>

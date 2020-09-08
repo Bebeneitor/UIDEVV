@@ -1,0 +1,67 @@
+<div class="widget-container">
+  <div class="card">
+    <div class="card-header text-uppercase">
+      <div class="title-header">&nbsp;</div>
+      <span>{{title}}</span>
+      <div class="float-right">
+        <a nghref="#" class="icon-link" (click)="changeView('list')" pTooltip="Badges View" tooltipPosition="left"
+          [ngClass]="typeView == 'list' ? 'active' : ''"><i class="fa fa-th"></i></a>
+        <a nghref="#" class="icon-link" (click)="changeView('table')" pTooltip="Table View" tooltipPosition="left"
+          [ngClass]="typeView == 'table' ? 'active' : ''"><i class="fa fa-table"></i></a>
+        <a nghref="#" class="icon-link" (click)="changeView('chart')" pTooltip="Chart View" tooltipPosition="left"
+          [ngClass]="typeView == 'chart' ? 'active' : ''"><i class="fa fa-bar-chart"></i></a>
+        <a nghref="#" class="icon-link" pTooltip="Refresh" tooltipPosition="left" (click)="refresh()"><i
+            class="fa fa-refresh"></i></a>
+      </div>
+    </div>
+    <div class="card-body" style="padding-top: 15px !important; padding-bottom: 10px !important;">
+
+      <div class="container-fluid" style="padding: 0px;" *ngIf="tasks.length == 0">
+        <div class="row">
+          <div class="div-no-data">
+            <img src="assets/img/no-data.png" class="img-no-data" />
+            <p class="no-data">NO DATA FOUND</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid" style="padding: 0px;"
+        *ngIf="typeView == 'list' && tasks.length > 0">
+        <div class="row">
+          <div class="container-text col-md-4 col-lg-3 col-sm-12" *ngFor="let t of tasks"
+            (click)="clickItem(t.id)">
+            <div style="margin : auto; width: 100%;">
+              <span class="number"><span class="badge" [ngClass]="'badge-' + t.color">
+                  <span style="margin-top: 5px; display: block;">{{t.count}}</span>
+                  <span class="text">{{t.name}}</span></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid" style="padding: 0px;"
+        *ngIf="typeView == 'table' && tasks.length > 0">
+        <div class="row">
+          <table class="table table-hover table-striped">
+            <tbody>
+              <tr *ngFor="let t of tasks" (click)="clickItem(t.id)" style="cursor: pointer;">
+                <td>{{t.name}}</td>
+                <td class="text-right"><span class="badge small-badge" [ngClass]="'badge-' + t.color">{{t.count}}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="container-fluid" style="padding: 0px;"
+        *ngIf="typeView == 'chart' && tasks.length > 0">
+        <div class="row">
+          <p-chart type="bar" [data]="data" [options]="options" responsive="true" style="width: 100%"
+            (onDataSelect)="selectData($event)"></p-chart>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

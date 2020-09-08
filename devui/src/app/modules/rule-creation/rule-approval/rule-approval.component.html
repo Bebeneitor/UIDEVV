@@ -1,0 +1,86 @@
+ <h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+  <div>
+    <ecl-table #poApprovalTable [tableModel]="poApprovalTableConfig"
+    (onAcctionLink)="viewProvisionalModal($event)"
+    (onSelectRecord)="selectedData=$event" (onUnSelectRecord)="selectedData=$event">
+    </ecl-table>
+    <br>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-3">
+              <button type="button" value="Save" style="width:90%;"
+                      [disabled]="!this.selectedData || this.selectedData.length < 1" (click)="saveRuleApproval()"
+                      class="btn btn-primary btn-default-height small-td">Save
+              </button>
+            </div>
+            <div class="col-md-3">
+              <button type="button" value="Submit" style="width:90%;"
+                      [disabled]="!this.selectedData || this.selectedData.length < 1" (click)="submitRuleApproval()"
+                      class="btn btn-primary btn-default-height small-td">Submit
+              </button>
+            </div>
+            <div class="col-md-3">
+              <button type="button" value="Refresh" style="width:90%;" (click)="refreshRuleApproval()"
+              class="btn btn-primary btn-default-height small-td">Refresh
+              </button>
+            </div>
+            <div class="col-md-3">
+
+                    <div class="col">
+                        <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+                        <p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
+                          <p>{{message}}</p>
+                          <p-footer>
+                            <div class="row">
+                              <div class="col-md-9">
+                                <button name="cancelDialogbtn" class="confirmation-btn btn submit-btn"
+                                (click)="saveDisplay=false"
+                                value="OK"></button>
+                              </div>
+                      </div>
+                          </p-footer>
+                        </p-dialog>
+                        <p-dialog header="File Removal Message" [class]="saveDisplay2" [(visible)]="saveDisplay2">
+                            <p>{{message}}</p>
+                          </p-dialog>
+                        ​<button type="button" name="action" class="btn btn-primary btn-default-height small-td" (click)="exit()"
+                          value="Exit" >​Exit
+                          </button>
+                      </div>
+                  </div>
+                  <div class="col-md-3">
+                    <button type="button" value="Refresh"  (click)="showReturnDialog()"
+                        class="btn btn-primary btn-default-height small-td"
+                        [disabled]="!this.selectedData || this.selectedData.length < 1" >Return
+                    </button>
+                  </div>
+
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+
+    <p-dialog header="{{msgTitle}}" [class]="confirmDialog" [(visible)]="saveDisplay">
+			<p>{{Message}}</p>
+			<p-footer>
+				<div class="row">
+					<div class="col-md-9">
+						<button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+							(click)="saveDialog()" label="OK"></button>
+					</div>
+				</div>
+			</p-footer>
+    </p-dialog>
+
+    <p-dialog header="Good Ideas" [class]="confirmDialog"  [closable]="false" *ngIf="saveGoodIdeas"  [visible]="saveGoodIdeas" modal="true">
+        <app-good-ideas  typeTable = "provisional" [goodIdeasBody] = "selectedShelved"  (statusGoodIdeasSaved) = "goodIdeasEvent($event)"></app-good-ideas>
+    </p-dialog>
+  </div>
+  <p-toast [baseZIndex]="999999"></p-toast>

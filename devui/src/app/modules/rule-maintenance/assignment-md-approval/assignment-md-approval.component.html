@@ -1,0 +1,55 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<p-tabView (onChange)="handleTabViewChange($event)" [activeIndex]="tabIndex">
+  <p-tabPanel header="Not Assigned">
+    <div *ngIf="tabIndex == 0">
+        <ecl-table #notAssignedTable [tableModel]='notAssignedTableConfig' (onAcctionLink)="viewRuleModal($event)"
+        (onSelectRecord)="setSelectRules($event, 'notAssigned')" (onUnSelectRecord)="setSelectRules($event, 'notAssigned')">
+      </ecl-table>
+      <br>
+      <button type="button" class="btn btn-primary btn-default-height small-td" (click)="claimRules()"
+        [disabled]="!this.selectedRulesNotAssigned || this.selectedRulesNotAssigned.length < 1">Claim</button>
+      <button type="button" class="no-print btn btn-primary btn-default-height float-right small-td "
+        (click)="refreshEclTable('notAssigned')">Refresh</button>
+    </div>
+  </p-tabPanel>
+  <p-tabPanel header="Assigned">
+    <div *ngIf="tabIndex == 1">
+      <ecl-table #assignedTable [tableModel]='assignedTableConfig' (onAcctionLink)="viewRuleModal($event)"
+        (onSelectRecord)="setSelectRules($event, 'assigned')" (onUnSelectRecord)="setSelectRules($event, 'assigned')">
+      </ecl-table>
+      <br>
+      <label class="float-left required-field-color">*</label>
+      <p-dropdown #userDD class="float-left small-td" [options]="users" [(ngModel)]="selectedUserAssigned" 
+        [filter]="true" filterBy="label,value" [disabled]="!selectedRulesAssigned || selectedRulesAssigned.length < 1"
+        (onChange)="this.userDD.resetFilter();" [style]="{'width':'150px', 'margin-right': '15px'}"></p-dropdown>
+      <label class="float-left required-field-color">*</label>
+      <p-dropdown class="no-print float-left small-td" [options]="comments" [(ngModel)]="selectedCommentAssigned"
+        [disabled]="!selectedRulesAssigned || selectedRulesAssigned.length < 1" [style]="{'width':'150px'}" ></p-dropdown>
+      <button type="button" class="btn btn-primary btn-default-height small-td ml-3" (click)="reassignIdeasAssigned()" 
+        [disabled]="!selectedRulesAssigned || selectedRulesAssigned.length < 1 || !selectedUserAssigned || !selectedCommentAssigned">
+        Reassign</button>
+      <button type="button" class="no-print btn btn-primary btn-default-height float-right small-td" 
+        (click)="refreshEclTable('assigned')">Refresh</button>
+    </div>
+  </p-tabPanel>
+  <p-tabPanel header="Returned">
+    <div *ngIf="tabIndex == 2">
+      <ecl-table #returnedTable [tableModel]='returnedTableConfig' (onAcctionLink)="viewRuleModal($event)"
+        (onSelectRecord)="setSelectRules($event, 'returned')" (onUnSelectRecord)="setSelectRules($event, 'returned')">
+      </ecl-table>
+      <br>
+      <label class="float-left required-field-color">*</label>
+      <p-dropdown #userDD1 class="float-left small-td" [options]="users" [(ngModel)]="selectedUserReturned" 
+        [disabled]="!selectedRulesReturned || selectedRulesReturned.length < 1" [filter]="true" filterBy="label,value"
+        (onChange)="this.userDD1.resetFilter();" [style]="{'width':'150px', 'margin-right': '15px'}"></p-dropdown>
+      <label class="float-left required-field-color">*</label>
+      <p-dropdown class="no-print float-left small-td" [options]="comments" [(ngModel)]="selectedCommentReturned"
+        [disabled]="!selectedRulesReturned || selectedRulesReturned.length < 1" [style]="{'width':'150px'}" ></p-dropdown>
+      <button type="button" class="btn btn-primary btn-default-height small-td ml-3" (click)="reassignIdeasReturned()"
+        [disabled]="!selectedUserReturned || !selectedRulesReturned || !selectedCommentReturned || selectedRulesReturned.length < 1">
+        Reassign</button>
+      <button type="button" class="no-print btn btn-primary btn-default-height float-right small-td" 
+        (click)="refreshEclTable('returned')">Refresh</button>
+    </div>
+  </p-tabPanel>
+</p-tabView>

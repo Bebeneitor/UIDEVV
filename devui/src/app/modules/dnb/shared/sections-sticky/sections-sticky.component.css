@@ -1,0 +1,85 @@
+.table th {
+  background: #c0afea;
+}
+
+.table th,
+.table td {
+  font-size: 12px;
+}
+
+.table {
+  background-color: #eaeaea;
+  margin: 0;
+}
+
+table tr td {
+  position: relative;
+  line-height: 1.42;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.table td,
+.table th {
+  vertical-align: top;
+  border-top: 1px solid #dee2e6;
+  border-left: 1px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.readonly-table {
+  min-height: 17px;
+  white-space: pre-wrap;
+}
+
+.readonly-table ::ng-deep p {
+  margin: 0;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 14px;
+  color: #ffffff;
+  flex: 1 0 0;
+  margin-bottom: 0;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.button.pin {
+  background-color: #ffffff;
+  border: 0;
+  font-size: 12px;
+}
+
+.tableContainer:first-child {
+  margin-top: 0;
+}
+
+.tableContainer {
+  margin-top: 10px;
+}
+
+.table-overflow {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.border {
+  border-bottom: 10px solid #c0afea;
+}
+
+table tr.border td:not([rowspan]),
+tbody.border td[rowspan]{
+  border-bottom: 10px solid #c0afea;
+}

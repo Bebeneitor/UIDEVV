@@ -1,0 +1,801 @@
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<div class="container-fluid" style="padding: 0px" id="containerWhitePaper" #containerWhitePaper>
+
+  <p-sidebar [style]="{height: '300px', 'overflow-y': 'auto', 'overflow-x': 'hidden'}" *ngIf="showSavedWhitePapers"
+    [(visible)]="showSavedWhitePapers" position="top" [baseZIndex]="999999">
+    <div class="row">
+      <div class="col-12" style="margin-top: 10px; padding: 0px;">
+        <a nghref="#" class="whitePaperTabOption" (click)="changeTabWhitePapers('MY')" [ngClass]="{'active': whitePapersTab == 'MY'}">
+          My white papers
+        </a>
+
+        <a nghref="#" class="whitePaperTabOption" (click)="changeTabWhitePapers('SHARED')" [ngClass]="{'active': whitePapersTab == 'SHARED'}">
+          Shared with me
+        </a>
+        <hr>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="whitePapersTab == 'MY'">
+      <div *ngFor="let w of whitePapers" class="col-2">
+        <div class="text-center"
+          style="width: 100%; height: 108px; border: 1px solid lightgray; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <p style="max-height: 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: pointer;"
+            [title]="w.whitePaperName"><small *ngIf="w.draft">(Draft)</small> {{w.whitePaperName}}</p>
+
+          <p>{{dashboardService.parseDate(w.creationDate)}}</p>
+          <button class="btn btn-primary btn-xs btn-block" (click)="openWhitePaper(w)"
+            style="font-size: 11px; margin-top: 10px; height: 18px; display: inline-block;">Open</button>
+          <button class="btn btn-primary btn-xs btn-block" [disabled]="w.draft" (click)="openSharedModal(w.whitePaperId)"
+            style="font-size: 11px; margin-top: 5px; height: 18px; display: inline-block;">Share</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="whitePapersTab == 'SHARED'">
+      <div *ngFor="let w of whitePapersShared" class="col-2">
+        <div class="text-center"
+          style="width: 100%; border: 1px solid lightgray; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          <p style="max-height: 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: pointer;"
+            [title]="w.whitePaperName">{{w.whitePaperName}}</p>
+
+          <p>Shared by: {{w.createdBy.firstName + ' ' + w.createdBy.lastName}}</p>
+          <p>{{dashboardService.parseDate(w.creationDate)}}</p>
+          <button class="btn btn-primary btn-xs" (click)="openSharedWhitePaper(w)"
+            style="font-size: 11px; margin-top: 10px; height: 18px; display: inline-block; width: 100%;">Open</button>
+          <button class="btn btn-primary btn-xs btn-block" [disabled]="w.draft" (click)="openSharedModal(w.whitePaperId)"
+            style="font-size: 11px; margin-top: 5px; height: 18px; display: inline-block;">Share</button>
+        </div>
+      </div>
+    </div>
+  </p-sidebar>
+
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="row">
+    <div class="col-12">
+      <div id="containerPreview" class="container-fluid"
+        style="padding : 0px;position: absolute; top: 0; left : 0;z-index:-10000;">
+
+        <div class="row" *ngFor="let p of preview">
+          <div *ngFor="let item of p" [ngClass]="'col-' + (item.cols * 2)">
+            <div *ngIf="item.type == 'SPACE'">
+              &nbsp;
+            </div>
+
+            <div *ngIf="item.type == 'TEXT'">
+              <div [ngStyle]="item.style" [ngClass]="item.preloadedClass" style="display: block; margin-top: 10px;"
+                [innerHTML]="item.text"></div>
+            </div>
+
+            <div *ngIf="item.type == 'IMAGE'" [ngStyle]="item.divStyle"
+              style="padding-top: 5px;position: relative;height: 100%">
+              <img [src]="item.source" style="width: 100%;height: 100%" [ngStyle]="item.style" />
+            </div>
+
+            <div *ngIf="item.type == 'TABLE'">
+              <table style="width: 100%; table-layout: fixed;"
+                [ngClass]="'table table-bordered table-striped table-condensed ' + item.preloadedClass">
+                <thead>
+                  <tr>
+                    <th *ngFor="let d of item.columns">{{d.name}}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of item.data">
+                    <td *ngFor="let c of item.columns" style="word-break: break-all;">{{r[c.value]}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div *ngIf="item.type == 'CHART'">
+              <div *ngIf="item.noDataMessage">
+                <div style="margin-top: 10px;" class="div-no-data">
+                  <img src="assets/img/no-data.png" class="img-no-data" />
+                  <p class="no-data">NO DATA TO DISPLAY</p>
+                </div>
+              </div>
+              <div *ngIf="!item.noDataMessage">
+                <p-chart [type]="item.typeChart" [data]="item.data" [options]="item.options" [responsive]="true"
+                  style="width: 100%; max-height: 450px;" height="450px"></p-chart>
+                <div class="row" style="margin-top: 10px"
+                  *ngIf="item.typeChart == 'doughnut' || item.typeChart == 'pie'">
+                  <div [ngClass]="item.classColumnLabels" *ngFor="let l of item.data.labels; let i = index">
+                    <div
+                      [ngStyle]="{'background-color': item.data.datasets[0].backgroundColor[i], 'width': '10px', 'height': '10px', 'display': 'inline-block'}">
+                    </div>&nbsp;<span>{{l}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row fixed-header" [ngClass]="scrollPosition == 0 ? 'put-on-back' : 'put-on-top'">
+    <div class="col-sm-12 word-header">
+      <div id="toolbarWhitePaper" style="display: block; width: 100%;background-color:#F4F1FA; padding: 0px;">
+        <button type="button" class="btn-toolbar-whitepaper" (click)="reset()"><i class="fa fa-file"
+            title="New White Paper"></i></button>
+        <button type="button" [disabled]="dashboard.length == 0 || (currentWhitePaper.whitePaperId > 0 && !currentWhitePaper.draft) || !editable"
+          class="btn-toolbar-whitepaper" (click)="saveSection.toggle($event)" title="Save White Paper"><i
+            class="fa fa-save"></i></button>
+        <button type="button" class="btn-toolbar-whitepaper" (click)="pdf()" title="Download PDF"><i
+            class="fa fa-download"></i></button>
+        <button type="button" class="btn-toolbar-whitepaper" (click)="reset()"><i class="fa fa-refresh"
+            title="Reset document"></i></button>
+        <button type="button" class="btn-toolbar-whitepaper" (click)="showSaved()"><i class="fa fa-folder"
+            title="My White Papers"></i></button>
+            
+        <button *ngIf="originalWhitePaper.whitePaperId > 0 && !originalWhitePaper.draft" type="button"
+          class="btn-toolbar-whitepaper" (click)="openSharedModal(currentWhitePaper.whitePaperId)"><i
+            class="fa fa-share-alt" title="Share"></i></button>
+            
+          <div>{{currentWhitePaper.whitePaperName}}</div>
+      </div>
+      <p-tabView id="tabWhitePaper">
+
+        <!--TAB RULES-->
+        <p-tabPanel header="Rules" leftIcon="fa fa-archive">
+          <div class="container-fluid">
+            <div class="row responsive-panel">
+
+              <button [disabled]="!editable" class="square-button inline" (click)="openModalTableRules()">
+                <img class="big-img" src="assets/img/button-icons/table.png" />
+                <span class="button-text">Table Rules</span>
+              </button>
+
+              <div class="separator"></div>
+
+              <div class="inline scroll-preloaded preloaded-rules">
+                <fieldset [ngStyle]="{'opacity': !editable ? '0.7' : '1' }">
+                  <legend>Preloaded Styles</legend>
+                  <div>
+                    <div class="container-table-preload inline" *ngFor="let pt of preloadedTables"
+                      (click)="changePreloadTableStyle(pt.tableClass)"
+                      [ngStyle]="{'cursor': !editable ? 'not-allowed' : 'pointer' }">
+                      <table class="table-example" [ngClass]="pt.tableClass" border="1">
+                        <thead>
+                          <tr>
+                            <th colspan="3">{{pt.title}}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                          </tr>
+                          <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                          </tr>
+                          <tr>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <button [disabled]="!editable" class="square-button inline" (click)="trash()">
+                <img class="big-img" src="assets/img/button-icons/trash.png" />
+                <span class="button-text">Remove</span>
+              </button>
+
+            </div>
+          </div>
+        </p-tabPanel>
+
+        <!--TAB TEXT-->
+        <p-tabPanel class="tabText" header="Text" leftIcon="fa fa-file-text" [selected]="true">
+          <div class="container-fluid">
+            <div class="row responsive-panel">
+              <button [disabled]="!editable" class="square-button inline" (click)="addText()">
+                <img class="big-img" src="assets/img/button-icons/text.png" />
+                <span class="button-text">Add Text</span>
+              </button>
+
+              <!--FONTS SECTION-->
+              <div class="inline">
+                <fieldset>
+                  <legend>Font</legend>
+
+                  <table style="margin-bottom: 5px;">
+                    <tr>
+                      <td>
+                        <select [disabled]="!editable" [(ngModel)]="textObject.family" (change)="changeFontFamily()">
+                          <option *ngFor="let font of fonts" [value]="font.value">{{font.label}}</option>
+                        </select>
+
+                        <select [disabled]="!editable" [(ngModel)]="textObject.size" (change)="changeFontSize()"
+                          style="padding-right: 5px !important;">
+                          <option *ngFor="let size of sizes" [value]="size + 'px'">{{size}}</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <p-selectButton [disabled]="!editable" (onChange)="changeFontModes($event)" [options]="modes"
+                          [(ngModel)]="textObject.modes" multiple="multiple">
+                        </p-selectButton>
+
+                        <p-colorPicker [disabled]="!editable" (onChange)="changeBackgroundColor($event)"
+                          [(ngModel)]="textObject.background" class="float-right" title="Background Color">
+                        </p-colorPicker>
+
+                        <p-colorPicker [disabled]="!editable" (onChange)="changeFontColor($event)"
+                          [(ngModel)]="textObject.color" class="float-right" title="Text Color"></p-colorPicker>
+                      </td>
+                    </tr>
+                  </table>
+                </fieldset>
+              </div>
+
+              <!--PARAGRAPH SECTION-->
+              <div class="inline">
+                <fieldset>
+                  <legend>Paragraph</legend>
+
+                  <table style="margin-bottom: 5px;">
+                    <tr>
+                      <td>
+                        <button [disabled]="!editable" type="button" title="Increase font size 2px" class="btn-toolbar"
+                          (click)="increaseFontSize()"><i class="fa fa-chevron-up"></i></button>
+
+                        <button [disabled]="!editable" type="button" title="Decrease font size 2px" class="btn-toolbar"
+                          (click)="decreaseFontSize()"><i class="fa fa-chevron-down"></i></button>
+
+                        <button [disabled]="!editable" type="button" title="Copy" class="btn-toolbar"
+                          (click)="copy()"><i class="fa fa-copy"></i></button>
+
+                        <button [disabled]="!editable" type="button" title="Paste" class="btn-toolbar"
+                          (click)="paste()"><i class="fa fa-paste"></i></button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <p-selectButton [disabled]="!editable" (onChange)="changeFontAlignment($event)"
+                          [options]="alignments" [(ngModel)]="textObject.alignment">
+                        </p-selectButton>
+                      </td>
+                    </tr>
+                  </table>
+                </fieldset>
+              </div>
+
+              <!--PRELOADED STLES SECTION-->
+              <div class="inline scroll-preloaded preloaded-texts">
+                <fieldset [ngStyle]="{'opacity': !editable ? '0.7' : '1' }">
+                  <legend>Preloaded Styles</legend>
+                  <div>
+                    <div class="container-text-preload inline" *ngFor="let pt of preloadedTexts"
+                      (click)="changePreloadTextStyle(pt.textClass)"
+                      [ngStyle]="{'cursor': !editable ? 'not-allowed' : 'pointer' }">
+                      <span [ngClass]="pt.textClass + ' text-center'">AaBbCcDdEe</span>
+                      <p>{{pt.title}}</p>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <button [disabled]="!editable" class="square-button inline" (click)="trash()">
+                <img class="big-img" src="assets/img/button-icons/trash.png" />
+                <span class="button-text">Remove</span>
+              </button>
+            </div>
+          </div>
+        </p-tabPanel>
+
+        <!--TAB IMAGES-->
+        <p-tabPanel header="Images" leftIcon="fa fa-picture-o">
+          <div class="container-fluid">
+            <div class="row responsive-panel">
+              <button [disabled]="!editable" class="square-button inline" (click)="openImageSelector()">
+                <img class="big-img" src="assets/img/button-icons/images.png" />
+                <span class="button-text">Add Image</span>
+              </button>
+
+              <div class="separator"></div>
+
+              <input id="fileImage" type="file" accept="image/x-png,image/gif,image/jpeg"
+                (change)="onFileChange($event)" style="display: none" />
+
+              <div class="inline scroll-preloaded preloaded-images">
+                <fieldset [ngStyle]="{'opacity': !editable ? '0.7' : '1' }">
+                  <legend>Preloaded Styles</legend>
+                  <div>
+                    <div class="container-table-preload inline" *ngFor="let pt of preloadedImages"
+                      (click)="changePreloadImageStyle(pt.style, pt.divStyle)"
+                      [ngStyle]="{'cursor': !editable ? 'not-allowed' : 'pointer' }"
+                      style="max-width: 60px;margin-left: 8px; margin-right: 8px;">
+                      <img src="assets/img/img-demo.png" [ngStyle]="pt.style" style="width: 100% !important;"
+                        class="img-demo" [title]="pt.title" />
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+
+              <button [disabled]="!editable" class="square-button inline" (click)="trash()">
+                <img class="big-img" src="assets/img/button-icons/trash.png" />
+                <span class="button-text">Remove</span>
+              </button>
+            </div>
+          </div>
+        </p-tabPanel>
+
+        <!--TAB CHARTS-->
+        <p-tabPanel header="Charts" leftIcon="fa fa-line-chart">
+          <div class="container-fluid">
+            <div class="row responsive-panel">
+              <button [disabled]="!editable" class="square-button inline" (click)="openModalChartRules()">
+                <img class="big-img" src="assets/img/button-icons/chart.png" />
+                <span class="button-text">Add Chart</span>
+              </button>
+
+              <div class="separator"></div>
+
+              <button [disabled]="!editable" class="square-button inline" (click)="trash()">
+                <img class="big-img" src="assets/img/button-icons/trash.png" />
+                <span class="button-text">Remove</span>
+              </button>
+            </div>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+  </div>
+
+  <!--GRIDSTER (DOCUMENT)-->
+  <div class="row" style="margin-top: 160px;">
+    <div class="col-sm-12 word-body">
+      <div id="print">
+        <gridster [options]="options" class="gray">
+          <gridster-item [item]="item" *ngFor="let item of dashboard; let i = index"
+            (click)="selectItem(item.id, item.type, i)" [ngClass]="item.selected ? 'gridster-selected-item' : ''">
+
+            <!--BUTTONS REMOVE AND MOVE ITEM IN DOCUMENT-->
+            <button *ngIf="editable" type="button" class="close drag-icon" style="right: 17px;" title="Move"><i
+                class="fa fa-arrows"></i></button>
+            <button *ngIf="editable" type="button" class="close" (click)="removeItem($event, i)" title="Remove"><i
+                class="fa fa-trash"></i></button>
+
+            <div class="button-holder" *ngIf="item.type == 'TEXT'" style="height: 100%;">
+              <div [ngStyle]="item.style" [ngClass]="item.preloadedClass" [contentEditable]="editable"
+                [attr.data-text]="'Change your text here...'"
+                style="display: block; margin-top: 10px; word-wrap: break-word; height: 90%;" [innerHTML]="item.text"
+                (blur)="changeText($event, item)">
+              </div>
+            </div>
+
+            <div *ngIf="item.type == 'IMAGE'" [ngStyle]="item.divStyle"
+              style="height: 100%;padding-top: 5px;position: relative;" class="button-holder">
+              <img [src]="item.source" [ngStyle]="item.style" style="width: 100%; height: 100%;position: absolute;" />
+            </div>
+
+            <div *ngIf="item.type == 'TABLE'" class="button-holder">
+              <table style="width: 100%; table-layout: fixed;"
+                [ngClass]="'table table-bordered table-striped table-condensed ' + item.preloadedClass">
+                <thead>
+                  <tr>
+                    <th *ngFor="let d of item.columns">{{d.name}}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of item.data">
+                    <td *ngFor="let c of item.columns" (blur)="changeTextTable($event, r, c)"
+                      style="word-break: break-all;"
+                      [attr.contenteditable]="(c.value == 'ruleLogic' || c.value == 'clientRationale' || c.value == 'scriptRationale') && editable"
+                      [innerHTML]="r[c.value]"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="button-holder" *ngIf="item.type == 'CHART'">
+              <div *ngIf="item.noDataMessage">
+                <div style="margin-top: 10px;" class="div-no-data">
+                  <img src="assets/img/no-data.png" class="img-no-data" />
+                  <p class="no-data">NO DATA TO DISPLAY</p>
+                </div>
+              </div>
+              <div *ngIf="!item.noDataMessage">
+                <p-chart [type]="item.typeChart" [data]="item.data" [options]="item.options" [responsive]="true"
+                  style="width: 100%; max-height: 450px;" height="450px"></p-chart>
+                <div class="row" style="margin-top: 10px"
+                  *ngIf="item.typeChart == 'doughnut' || item.typeChart == 'pie'">
+                  <div [ngClass]="item.classColumnLabels" *ngFor="let l of item.data.labels; let i = index">
+                    <div
+                      [ngStyle]="{'background-color': item.data.datasets[0].backgroundColor[i], 'width': '10px', 'height': '10px', 'display': 'inline-block'}">
+                    </div>&nbsp;<span>{{l}}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </gridster-item>
+        </gridster>
+      </div>
+    </div>
+  </div>
+
+  <p-dialog [header]="'Share with'" [(visible)]="displaySharedModal" [modal]="true" [responsive]="true"
+    [maximizable]="false" [baseZIndex]="10000">
+    <label>Enter users to share:</label>
+    <p-autoComplete *ngIf="displaySharedModal" [style]="{'max-width': '500px', 'width': '500px'}" appendTo="body" [(ngModel)]="usersToShare" [suggestions]="userSuggestionsFiltered"
+      (completeMethod)="filterUsersToShare($event)" placeholder="Users to share"
+      field="firstName" [multiple]="true">
+    </p-autoComplete>
+    <hr>
+    <div class="text-right" style="margin-bottom: 10px;">
+      <button [disabled]="usersToShare.length == 0" type="button" class="btn btn-xs btn-primary" (click)="shareWhitePaper()"><i class="fa fa-share-alt"></i> Share</button>
+    </div>
+  </p-dialog>
+
+  <!-- Modal for add table of rules -->
+  <p-dialog [header]="titleDialog" [(visible)]="displayTableRules" [modal]="true" [responsive]="true"
+    [maximizable]="false" [baseZIndex]="10000" [style]="{width: '80%'}">
+
+    <p-steps [model]="items" [(activeIndex)]="activeIndex" [readonly]="true"></p-steps>
+
+    <hr>
+
+    <!--STEP 1 SELECT FILTERS-->
+    <div [hidden]="activeIndex != 0" class="section-step" style="min-height: 300px;">
+
+      <div class="container-fluid" style="padding: 0px">
+        <div class="row">
+          <div class="col-md-3 col-sm-12">
+            <label>Line of Business</label>
+            <p-multiSelect [options]="lobs" [(ngModel)]="selectedLobs" defaultLabel="Select item"
+              [maxSelectedLabels]="1" (onChange)="changeLob()">
+            </p-multiSelect>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <label>State</label>
+            <p-multiSelect [disabled]="checkMedicaid()" [options]="states" [(ngModel)]="selectedStates"
+              defaultLabel="Select item" [maxSelectedLabels]="1" [selectionLimit]="getSelectionLimit()"
+              showToggleAll='false'>
+            </p-multiSelect>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <label>Jurisdiction</label>
+            <p-multiSelect [disabled]="checkMedicare()" [options]="jurisdictions" [(ngModel)]="selectedJurisdictions"
+              defaultLabel="Select item" [maxSelectedLabels]="1" [selectionLimit]="getSelectionLimit()"
+              showToggleAll='false'></p-multiSelect>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <label>Category</label>
+            <p-multiSelect [options]="categories" appendTo="body" [(ngModel)]="selectedCategories"
+              defaultLabel="Select item" [maxSelectedLabels]="0" [selectionLimit]="getSelectionLimit()"
+              showToggleAll='false'></p-multiSelect>
+          </div>
+
+          <!--<div class="col-md-3 col-sm-12" *ngIf="type == 'internal'">
+            <label>Implemented In</label>
+            <p-multiSelect [options]="engines" appendTo="body" [(ngModel)]="selectedImplementeds"
+              defaultLabel="Select item" [maxSelectedLabels]="1" (onChange)="changeImplemented($event)"></p-multiSelect>
+          </div>
+          <div class="col-md-3 col-sm-12" *ngIf="type == 'internal'">
+            <label>Not Implemented In</label>
+            <p-multiSelect [options]="notEngines" appendTo="body" [(ngModel)]="selectedNotImplementeds"
+              defaultLabel="Select item" [maxSelectedLabels]="1" (onChange)="changeNotImplemented($event)">
+            </p-multiSelect>
+          </div>-->
+          <div class="col-md-3 col-sm-12">
+            <label>Reference Source</label>
+            <p-multiSelect [options]="references" appendTo="body" [(ngModel)]="selectedReferences"
+              defaultLabel="Select item" [maxSelectedLabels]="1"></p-multiSelect>
+          </div>
+          <div class="col-md-3 col-sm-12" *ngIf="type == 'internal'">
+            <label>Reference Document</label>
+            <input type="text" maxlength="500" class="form-control" [(ngModel)]="referenceDocument"
+              placeholder="Reference Document" />
+          </div>
+
+          <div class="col-md-3 col-sm-12" *ngIf="type == 'internal'">
+            <label>Rule Description</label>
+            <input type="text" maxlength="500" class="form-control" [(ngModel)]="ruleDescription"
+              placeholder="Description" />
+          </div>
+          <div class="col-md-3 col-sm-12" *ngIf="type == 'internal'">
+            <label>Rule Logic</label>
+            <input type="text" maxlength="500" class="form-control" [(ngModel)]="ruleLogic" placeholder="Rule Logic" />
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <label>Logic Effective Date, From</label>
+            <p-calendar [(ngModel)]="startDate" appendTo="body" [readonlyInput]="true" [monthNavigator]="true"
+              [yearNavigator]="true" [yearRange]="yearValidRange" [minDate]="minDate" [maxDate]="endDate"
+              placeholder="Start Date" dateFormat="mm/dd/yy">
+            </p-calendar>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <label>Logic Effective Date, To</label>
+            <p-calendar [(ngModel)]="endDate" appendTo="body" [readonlyInput]="true" [monthNavigator]="true"
+              [yearNavigator]="true" [yearRange]="yearValidRange" [minDate]="startDate" placeholder="End Date"
+              dateFormat="mm/dd/yy">
+            </p-calendar>
+          </div>
+
+          <div class="col-md-3 col-sm-12">
+            <label>Client Rationale</label>
+            <input type="text" maxlength="500" class="form-control" [(ngModel)]="clientRationale" placeholder="" />
+          </div>
+
+          <div class="col-md-3 col-sm-12" *ngIf="type == 'internal'">
+            <label>Internal Rationale</label>
+            <input type="text" maxlength="500" class="form-control" [(ngModel)]="scriptRationale" placeholder="" />
+          </div>
+
+          <div class="col-md-3 col-sm-12">
+            <label>Opportunity Value</label>
+            <input type="text" onkeypress='return event.charCode >= 48 && event.charCode <= 57' onlyNumbers
+              maxlength="10" class="form-control" [(ngModel)]="opportunityValue" placeholder="" />
+          </div>
+
+          <div class="col-12">
+
+            <table style="margin-top: 10px;">
+              <tr>
+                <td><label style="display: inline-block;">Savings</label></td>
+                <td>
+                  <p-checkbox [style]="{'display' : 'inline-block'}" [(ngModel)]="addSavings" binary="true">
+                  </p-checkbox>
+                </td>
+              </tr>
+            </table>
+
+
+            <input *ngIf="addSavings" type="text" (input)="checkSavings(0, $event.value)"
+              onkeypress='return event.charCode >= 48 && event.charCode <= 57' class="form-control"
+              [(ngModel)]="rangeValues[0]" style="width:80px; display: inline-block;" />
+            <p-slider
+              [style]="{'display' : 'inline-block', 'width' : '80%', 'margin-left' : '15px', 'margin-right' : '15px'}"
+              *ngIf="showSlider && addSavings" [(ngModel)]="rangeValues" [min]="0" [max]="maxSlider" [range]="true">
+            </p-slider>
+            <input *ngIf="addSavings" type="text" (input)="checkSavings(1, $event.value)"
+              onkeypress='return event.charCode >= 48 && event.charCode <= 57' class="form-control"
+              [(ngModel)]="rangeValues[1]" style="width:80px; display: inline-block;" />
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <div class="alert alert-info">
+        In this section please enter a filter search to find rules.
+        <span *ngIf="typeDialog == 'CHART'"><br>The maximum number of (states, jurisdictions and categories) is 20
+          items.<br></span>
+        <b>{{messageError}}</b>
+      </div>
+
+      <hr>
+      <button type="button" class="btn btn-primary btn-sm float-right navigation" (click)="loadRulesToAdd()"
+        [disabled]="selectedLobs.length == 0 && selectedStates.length == 0 && selectedJurisdictions.length == 0 && selectedCategories.length == 0 && selectedImplementeds.length == 0 && selectedNotImplementeds.length == 0 && selectedReferences.length == 0 && referenceDocument == ''">Next</button>
+    </div>
+
+    <!--STEP 2 SELECT RULES-->
+    <div [hidden]="activeIndex != 1 || typeDialog == 'CHART'" class="section-step">
+
+      <p-table #dt [columns]="colsRulesAdd" [value]="dataRulesAdd" [paginator]="true" [rows]="5"
+        [(selection)]="selectedRulesAdd" dataKey="index" [responsive]="true">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th style="width: 4em">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
+              [ngStyle]="{'width': col.width}">
+              {{col.header}}
+              <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">
+              </p-sortIcon>
+            </th>
+          </tr>
+          <tr>
+            <th></th>
+            <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center" [ngStyle]="{'width': col.width}">
+              <input pInputText type="text" style="width : 100%; padding : 5px; border-radius: 5px"
+                (input)="dt.filter($event.target.value, col.field, 'contains')"
+                [placeholder]="'Search by ' + col.header">
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-i="rowIndex" let-rowData let-columns="columns" let-rowIndex="rowIndex">
+          <tr [pSelectableRow]="rowData">
+            <td>
+              <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+            </td>
+            <td class="small-td truncate" style="display: table-cell !important;" *ngFor="let col of columns">
+              <span class="ui-column-title">{{col.header}}</span>
+              {{ (rowData[col.field] != null && rowData[col.field].length > 100) ? (rowData[col.field] | slice:0:100) + '...' : (rowData[col.field]) }}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <br>
+
+      <div class="alert alert-info">Select the rules that you need in the document.</div>
+
+      <hr>
+      <div class="float-right">
+        <button type="button" class="btn btn-primary btn-sm navigation" (click)="activeIndex = 0">Prev</button>
+        <button type="button" class="btn btn-primary btn-sm navigation" [disabled]="selectedRulesAdd.length == 0"
+          (click)="activeIndex = 2">Next</button>
+      </div>
+    </div>
+
+    <!--STEP 3 SELECT COLUMNS-->
+    <div [hidden]="activeIndex != 2 || typeDialog == 'CHART'" class="section-step">
+
+      <p-pickList [source]="sourceColumns" [target]="targetColumns" sourceHeader="Available" targetHeader="Selected"
+        [responsive]="true" filterBy="name" dragdrop="true" sourceFilterPlaceholder="Search by name"
+        targetFilterPlaceholder="Search by name" [sourceStyle]="{'height':'180px'}" [targetStyle]="{'height':'180px'}">
+        <ng-template let-col pTemplate="item">
+          <div class="ui-helper-clearfix">
+            {{col.name}}
+          </div>
+        </ng-template>
+      </p-pickList>
+
+      <br />
+
+      <div class="alert alert-info">Select the columns that you need in the table of rules.</div>
+
+      <hr>
+      <div class="float-right">
+        <button type="button" class="btn btn-primary btn-sm navigation" (click)="activeIndex = 1">Prev</button>
+        <button type="button" [disabled]="targetColumns.length == 0" class="btn btn-primary btn-sm navigation"
+          (click)="activeIndex = 3">Next</button>
+      </div>
+    </div>
+
+    <!--STEP 4 FINISH-->
+    <div [hidden]="activeIndex != 3 || typeDialog == 'CHART'" class="section-step">
+      <div class="text-center">
+        <br>
+        <img src="assets/img/success.png" style="width: 105px;" />
+        <br><br>
+        <p class="text-finish">Your table is ready to be added in the document, click finish to add.</p>
+        <br>
+      </div>
+
+      <hr>
+      <div class="float-right">
+        <button type="button" class="btn btn-primary btn-sm navigation" (click)="activeIndex = 2">Prev</button>
+        <button type="button" class="btn btn-primary btn-sm navigation" [disabled]="!displayTableRules"
+          (click)="finishRulesAdd()">Finish</button>
+      </div>
+    </div>
+
+    <!--CHARTS SECTION-->
+
+    <!--STEP 2 SELECT TYPE CHART-->
+    <div [hidden]="activeIndex != 1 || typeDialog == 'TABLE'" class="section-step">
+
+      <div class="container" style="padding: 0px;">
+        <div class="row">
+          <div class="col-md-3 col-sm-12">
+            <div class="item-chart" [ngClass]="typeChartSelected == 'BAR' ? 'active' : ''"
+              (click)="changeTypeChart('BAR')">
+              <img src="assets/img/charts/bar.svg" class="img-item-chart" />
+              <p class="text-item-chart">Bar chart</p>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <div class="item-chart" [ngClass]="typeChartSelected == 'LINE' ? 'active' : ''"
+              (click)="changeTypeChart('LINE')">
+              <img src="assets/img/charts/line.svg" class="img-item-chart" />
+              <p class="text-item-chart">Line chart</p>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <div class="item-chart" [ngClass]="typeChartSelected == 'PIE' ? 'active' : ''"
+              (click)="changeTypeChart('PIE')">
+              <img src="assets/img/charts/pie.svg" class="img-item-chart" />
+              <p class="text-item-chart">Pie chart</p>
+            </div>
+          </div>
+          <div class="col-md-3 col-sm-12">
+            <div class="item-chart" [ngClass]="typeChartSelected == 'DONUT' ? 'active' : ''"
+              (click)="changeTypeChart('DONUT')">
+              <img src="assets/img/charts/donut.svg" class="img-item-chart" />
+              <p class="text-item-chart">Donut chart</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-info">Select the type of chart that you need in the document.</div>
+
+      <hr>
+      <div class="float-right">
+        <button type="button" class="btn btn-primary btn-sm navigation" (click)="activeIndex = 0">Prev</button>
+        <button type="button" [disabled]="typeChartSelected == ''" class="btn btn-primary btn-sm navigation"
+          (click)="activeIndex = 2">Next</button>
+      </div>
+    </div>
+
+    <!--STEP 3 SELECT GROUP-->
+    <div [hidden]="activeIndex != 2 || typeDialog == 'TABLE'" class="section-step">
+
+      <div class="container-fluid" style="padding: 0px">
+        <div class="row">
+          <div class="col-md-3 col-sm-6">
+            <label>Axis X or Area:</label>
+
+            <p-radioButton name="axisx" label="Category" value="category" [(ngModel)]="selectedAxisX"></p-radioButton>
+            <p-radioButton name="axisx" label="Jurisdiction" value="jurisdiction" [(ngModel)]="selectedAxisX">
+            </p-radioButton>
+            <p-radioButton name="axisx" label="LOB" value="lob" [(ngModel)]="selectedAxisX"></p-radioButton>
+            <p-radioButton name="axisx" label="State" value="state" [(ngModel)]="selectedAxisX"></p-radioButton>
+          </div>
+
+          <div class="col-md-3 col-sm-6">
+            <label>Axis Y or Amount:</label>
+
+            <p-radioButton name="axisy" label="Amount" value="amount" [(ngModel)]="selectedAxisY"></p-radioButton>
+            <p-radioButton name="axisy" label="Revenue" value="revenue" [(ngModel)]="selectedAxisY"></p-radioButton>
+          </div>
+        </div>
+      </div>
+      <br>
+
+      <div class="alert alert-info">
+        Select the group in Axis X and Y.
+        <br><b>{{messageError}}</b>
+      </div>
+
+      <hr>
+      <div class="float-right">
+        <button type="button" class="btn btn-primary btn-sm navigation" (click)="selectGroupPrev()">Prev</button>
+        <button type="button" class="btn btn-primary btn-sm navigation" (click)="selectGroupNext()">Next</button>
+      </div>
+    </div>
+
+    <!--STEP 4 FINISH-->
+    <div [hidden]="activeIndex != 3 || typeDialog == 'TABLE'" class="section-step">
+      <div class="text-center">
+        <br>
+        <img src="assets/img/success-chart.svg" style="width: 105px;" />
+        <br><br>
+        <p class="text-finish">Your chart is ready to be added in the document, click finish to add.</p>
+        <br>
+      </div>
+
+      <hr>
+      <div class="float-right">
+        <button type="button" class="btn btn-primary btn-sm navigation" (click)="activeIndex = 2">Prev</button>
+        <button type="button" class="btn btn-primary btn-sm navigation" [disabled]="!displayTableRules"
+          (click)="finishChartRulesAdd()">Finish</button>
+      </div>
+    </div>
+
+  </p-dialog>
+
+  <p-overlayPanel #saveSection [baseZIndex]="999999">
+    <p-radioButton name="type" [value]="true" [(ngModel)]="currentWhitePaper.draft" label="Draft"></p-radioButton>
+    <p-radioButton name="type" [value]="false" [(ngModel)]="currentWhitePaper.draft" label="Final copy"></p-radioButton>
+    <hr>
+    <label>Name:</label>
+    <input type="text" class="form-control" pInputText [(ngModel)]="currentWhitePaper.whitePaperName"
+      placeholder="Enter a name..." maxlength="50" />
+    <hr>
+    <div class="text-right">
+      <button type="button" [disabled]="currentWhitePaper.whitePaperName == ''" class="btn btn-primary btn-xs f-11"
+        (click)="save(saveSection)"><i class="fa fa-save"></i> Save</button>
+    </div>
+  </p-overlayPanel>
+</div>

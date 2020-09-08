@@ -1,0 +1,184 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div *ngIf="impactAnalysisRules">
+  <p-tabView (onChange)="handleTabViewChange($event)" [activeIndex]="tabIndex">
+    <p-tabPanel header="Assigned">
+      <div class="rule-for-impact-analysis" *ngIf="tabIndex == 0">
+        <ecl-table #assignedTableLRIA  [tableModel]='assignedTableConfigInLRIA'
+        (onSelectRecord)= "setSelectRecord($event)"  (onUnSelectRecord)= "setSelectRecord($event)"  
+        (onAcctionLink)="showRuleDialog($event.row)" >
+        </ecl-table>
+      </div>
+      <br>
+      <br>
+
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="row">
+              <div class="col-md-4" style="text-align:center;">
+                <button type="submit" value="Submit" (click)="submit()"
+                  [disabled]="!this.selectedAssignedRules || this.selectedAssignedRules.length < 1"
+                  class="btn btn-primary btn-default-height small-td">Submit
+                </button>
+              </div>
+              <div class="col-md-4" style="text-align:center;">
+                <button type="button" (click)="refreshDataTableLRIA();"
+                  class="btn btn-primary btn-default-height small-td" value="refreshImpactedRule">Refresh
+                </button>
+              </div>
+              <div class="col-md-4" style="text-align:center;">
+                <div class="col">
+                  <p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
+                    <p>{{message}}</p>
+                    <p-footer>
+                      <div class="row">
+                        <div class="col-md-9">
+                          <button name="cancelDialogbtn" class="confirmation-btn btn submit-btn"
+                            (click)="saveDisplay=false" value="OK">OK
+                          </button>
+                        </div>
+                      </div>
+                    </p-footer>
+                  </p-dialog>
+                  <p-dialog header="File Removal Message" [class]="saveDisplay2" [(visible)]="saveDisplay2">
+                    <p>{{message}}</p>
+                  </p-dialog>
+                  ​
+                  <button type="button" name="action" class="btn btn-primary btn-default-height small-td"
+                    (click)="exit()" value="Exit">​Exit
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="Returned">
+    
+      <div class="rule-for-impact-analysis" *ngIf="tabIndex == 1">
+        <ecl-table #returnedTableLRIA  [tableModel]='returnedTableConfigInLRIA'
+        (onSelectRecord)= "setSelectRecord($event)" (onUnSelectRecord)= "setSelectRecord($event)"  
+        (onAcctionLink)="showRuleDialog($event.row)">
+        </ecl-table>
+      </div>
+    <br>
+    <br>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-4" style="text-align:center;">
+              <button type="submit" value="Submit" (click)="submit()"
+                [disabled]="!this.selectedReturnedRules || this.selectedReturnedRules.length < 1"
+                class="btn btn-primary btn-default-height small-td">Submit
+              </button>
+            </div>
+            <div class="col-md-4" style="text-align:center;">
+              <button type="button" (click)="refreshDataTableLRIA();"
+                class="btn btn-primary btn-default-height small-td" value="refreshImpactedRule">Refresh
+              </button>
+            </div>
+            <div class="col-md-4" style="text-align:center;">
+              <div class="col">
+                <p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
+                  <p>{{message}}</p>
+                  <p-footer>
+                    <div class="row">
+                      <div class="col-md-9">
+                        <button name="cancelDialogbtn" class="confirmation-btn btn submit-btn"
+                          (click)="saveDisplay=false" value="OK">OK
+                        </button>
+                      </div>
+                    </div>
+                  </p-footer>
+                </p-dialog>
+                <p-dialog header="File Removal Message" [class]="saveDisplay2" [(visible)]="saveDisplay2">
+                  <p>{{message}}</p>
+                </p-dialog>
+                ​
+                <button type="button" name="action" class="btn btn-primary btn-default-height small-td"
+                  (click)="exit()" value="Exit">​Exit
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </p-tabPanel>
+  </p-tabView>
+</div>
+
+<div *ngIf="ruleApprovalMaintenance">
+    <div class="rule-for-impact-analysis">
+      <ecl-table #approvalMaintenance  [tableModel]='policyOnwerApprovalTableConfig'
+      (onSelectRecord)  = "setSelectRecordForPO($event)"
+      (onUnSelectRecord)= "setSelectRecordForPO($event)"             
+      (onAcctionLink)="showRuleDialog($event.row)"
+      (onServiceCall)="assingReviewStatus($event)" >
+      </ecl-table>
+    </div> 
+  <br>
+  <br>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-3">
+            <button *ngIf="showHideBtn()" type="submit" value="Submit" (click)="save()"
+              [disabled]="!this.selectedRules || this.selectedRules.length < 1"
+              class="btn btn-primary btn-default-height small-td">Save
+            </button>
+          </div>
+          <div class="col-md-3">
+            <button type="submit" value="Submit" (click)="submit()"
+              [disabled]="!this.selectedRules || this.selectedRules.length < 1"
+              class="btn btn-primary btn-default-height small-td">Submit
+            </button>
+          </div>
+          <div class="col-md-3">
+            <button type="button" (click)="refreshDataTableLPOApproval();"
+              class="btn btn-primary btn-default-height small-td" value="refreshImpactedRule">Refresh
+            </button>
+          </div>
+          <div class="col-md-3">
+
+            <div class="col">
+              <p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
+                <p>{{message}}</p>
+                <p-footer>
+                  <div class="row">
+                    <div class="col-md-9">
+                      <button name="cancelDialogbtn" class="confirmation-btn btn submit-btn" (click)="saveDisplay=false"
+                        value="OK">OK
+                      </button>
+                    </div>
+                  </div>
+                </p-footer>
+              </p-dialog>
+              <p-dialog header="File Removal Message" [class]="saveDisplay2" [(visible)]="saveDisplay2">
+                <p>{{message}}</p>
+              </p-dialog>
+              ​
+              <button type="button" name="action" class="btn btn-primary btn-default-height small-td" (click)="exit()"
+                value="Exit">​Exit
+              </button>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <button type="return" value="Return" *ngIf="showHideBtn()" (click)="showReturnDialog()"
+              class="btn btn-primary btn-default-height small-td"
+              [disabled]="!this.selectedRules || this.selectedRules.length < 1">Return
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p-confirmDialog [style]="{width: '50vw'}" ></p-confirmDialog>
+<p-toast [baseZIndex]="999999"></p-toast>

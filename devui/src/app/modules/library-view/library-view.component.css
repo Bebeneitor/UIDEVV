@@ -1,0 +1,19 @@
+.library-view-container {
+    max-width: 1280px;
+    min-height: 210px;
+    min-width: 960px;
+    margin: 0 auto;
+    background-color: white;
+    height: 100%;
+    border: .5px solid grey;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    justify-content: flex-end;
+    justify-items: flex-end;
+}
+
+/*** Shadow DOM Override ***/
+
+:host>>>.ui-table.ui-widget.ui-table-responsive.ui-table-resizable.ui-table-resizable-fit {
+    margin: 30px 20px 20px 20px;
+}

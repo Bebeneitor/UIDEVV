@@ -1,0 +1,10 @@
+::ng-deep .selectedPOCheck .ui-chkbox .ui-chkbox-box.ui-state-active {
+    border-color: #E9008B !important;
+    background-color: #E9008B !important;
+}
+
+::ng-deep .selectedPOCheck .ui-chkbox .ui-chkbox-box.ui-state-disabled {
+    border-color: #9179B7 !important;
+    background-color: #9179B7 !important;
+}
+

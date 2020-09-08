@@ -1,0 +1,64 @@
+.list-box {
+  height: 420px;
+  max-height: 420px;
+  min-height: 420px;
+  color: #333333;
+  border: 1px solid #31006F;
+  border-radius: 3px;
+  overflow: auto;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+}
+
+.list-box-head {
+  height: 35px;
+  max-height: 35px;
+  overflow: auto;
+  border-bottom: 1px solid #707070;
+}
+
+.list-box-bottom {
+  height: 380px;
+  max-height: 380px;
+  min-height: 380px;
+  color: #333333;
+  overflow: auto;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+}
+
+.search-box {
+  border: 1px solid #31006F;
+  margin: 3px;
+}
+
+.list-head {
+  font-size: 12px;
+  width: 90%;
+  margin-right: 2%;
+  border: 0px;
+}
+
+.input-box {
+  padding: .3em;
+}
+
+.ref-input {
+  height: 30px;
+  max-height: 30px;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #31006F;
+}
+
+.ref-input:hover {
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #31006F;
+}
+
+.list-item {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  margin: 5px;
+}

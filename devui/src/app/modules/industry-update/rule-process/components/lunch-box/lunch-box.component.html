@@ -1,0 +1,5 @@
+<p-accordion [multiple]="true">
+  <p-accordionTab [header]="tableConfig.tabHeader" [selected]="tableConfig.selected" *ngFor="let tableConfig of codesTablesConfig">
+    <ecl-table [tableModel]="tableConfig.model"></ecl-table>
+  </p-accordionTab>
+</p-accordion>

@@ -1,0 +1,13 @@
+<p-messages [value]="msgs"></p-messages>
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div>
+    <ecl-table #usersTable [tableModel]='usersTableConfig' (onAcctionIcon)="onClickIcon($event)"></ecl-table>
+    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+    <p-dialog header="{{successHeader}}" [(visible)]="display" [modal]="true" [responsive]="true"
+        [style]="{width: '350px', minWidth: '200px'}" [minY]="70" [maximizable]="true" [baseZIndex]="10000">
+        <p>{{message}}</p>
+        <p-footer>
+            <button type="button" pButton icon="pi pi-check" (click)="display=false" label="Ok"></button>
+        </p-footer>
+    </p-dialog>
+</div>

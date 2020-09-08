@@ -1,0 +1,11 @@
+<h5 class='title-header' style="position: relative; font-size: 16px;">
+  EMAIL NOTIFICATION LIST
+
+  <button type="button" class="btn btn-primary btn-sm" (click)="create()" style="position: absolute; right: 0px; font-size: 11px;"><i
+      class="fa fa-plus" ></i> Add
+    New</button>
+</h5>
+
+<hr>
+
+<ecl-table (onAcctionIcon)="onClicIcon($event)" [tableModel]='tableConfig'></ecl-table>

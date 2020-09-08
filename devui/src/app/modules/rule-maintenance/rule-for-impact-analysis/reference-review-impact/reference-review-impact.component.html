@@ -1,0 +1,218 @@
+<p-confirmDialog [style]="{width: '50vw'}" appendTo="body"></p-confirmDialog>
+<div class="wrapper">
+  <div class="flex-section">
+    <div class="col-md-2">
+      <label>ID</label>
+      <input class="rule-box" type="text" value="{{rule.ruleCode}}" disabled>
+    </div>
+
+    <div class="col-md-4">
+      <label>Category</label>
+      <input class="rule-box" type="text" value="{{rule.category ? rule.category.categoryDesc : rule.category}}"
+        disabled>
+    </div>
+
+    <div class="col-md-6">
+      <label>Rule Name</label>
+      <input class="rule-box" type="text" value="{{rule.ruleName}}" disabled>
+    </div>
+
+    <div class="col-md-12">
+      <label>Rule Logic</label>
+      <textarea rows="4" class="rule-box" type="text" value="{{rule.ruleLogicOriginal}}" disabled></textarea>
+    </div>
+  </div>
+
+  <h6 class="flex-item">Reference Details</h6>
+
+  <div class="flex-section">
+    <p-table class="flex-item" #viewGrid [columns]="cols" [value]="ruleReferences" [paginator]="true" [(selection)]="selectedReference"
+      [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10" [loading]="loading"
+      [responsive]="true" sortField="daysold" sortOrder="-1">
+
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
+            [ngStyle]="{'width': col.width}" pResizableColumn>
+            <span *ngIf="col.field === 'changedStatus' || col.field === 'changedDetails'"
+              class="required-field-color">*</span>
+            {{col.header}}
+            <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+              ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">
+            </p-sortIcon>
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-reference let-columns="columns">
+        <tr [pSelectableRow]="reference">
+          <td class="small-td" *ngFor="let col of columns">
+
+            <span *ngIf="col.field == 'refId'" class="span-centered">{{reference.referenceId}}</span>
+
+            <span *ngIf="col.field == 'source'" class="span-centered">{{reference.source}}</span>
+
+            <span *ngIf="col.field == 'name'" class="span-centered">{{reference.name}}</span>
+
+            <span *ngIf="col.field == 'chapter'" class="span-centered"> 
+              <span style="display: inline-block;">{{reference.chapter}}</span>                 
+              <input type="text" [(ngModel)]="reference.chapterCopy" class="form-control resize-responsive" class="set-in-line"/>                  
+            </span>
+
+            <span *ngIf="col.field == 'page'" class="span-centered">
+              <span style="display: inline-block;">{{reference.page}}</span>
+              <input type="text" [(ngModel)]="reference.pageCopy" class="form-control resize-responsive" class="set-in-line"/>
+            </span>
+
+            <span *ngIf="col.field == 'section'" class="span-centered">
+              <span style="display: inline-block;">{{reference.section}}</span>
+              <input type="text" [(ngModel)]="reference.sectionCopy" class="form-control resize-responsive" class="set-in-line"/>
+            </span>
+
+            <span *ngIf="col.field == 'edition'" class="span-centered">
+                <span style="display: inline-block;">{{reference.edition}}</span>
+              <input type="text" [(ngModel)]="reference.editionCopy" class="form-control resize-responsive" class="set-in-line"/>
+            </span>
+
+            <span *ngIf="col.field == 'url'" class="span-centered">
+              <a style="text-decoration: underline; cursor: pointer" href="{{reference.url}}"
+                target="_blank">{{reference.url}}</a>
+            </span>
+
+            <span *ngIf="col.field == 'changedStatus'" class="span-centered">
+              <p-dropdown [(ngModel)]="reference.changedStatus" [options]="docChangedStatus"
+                (onChange)="checkChangeDetail(reference, saveBtn)" appendTo='body' [style]="{'width':'100%'}">
+              </p-dropdown>
+            </span>
+
+            <span *ngIf="col.field == 'changedDetails'" class="span-centered">
+              <input type="text" [(ngModel)]="reference.changedDetail" (blur)="checkChangeDetail(reference, saveBtn)"
+                class="form-control resize-responsive" placeholder="Type your comments here" />
+              <span
+                *ngIf="reference.changedStatus > 0 && (reference.changedDetail == null || reference.changedDetail.length < 1)"
+                style="color: red;">Change Details is mandatory.</span>
+            </span>
+
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="paginatorright" let-state>
+        <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+          Showing <b>{{(state.page * state.rows) + 1}}</b> -
+          <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+          of <b>{{state.totalRecords}}</b>
+        </span>
+        <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+      </ng-template>
+    </p-table>
+  </div>
+  <br>
+
+  <div class="flex-section">
+
+    <div class="col-md-2">
+      <div>
+        <label><span class="required-field-color">*</span>Rule Impacted?</label>
+        <p-dropdown [options]="impactInd" (onChange)="disableImpactType($event)" [style]="{'width':'100%'}"
+          [(ngModel)]="ruleImpactAnalysisRun.ruleImpactedInd"></p-dropdown>
+      </div>
+
+      <div>
+        <label><span class="required-field-color">*</span>Impact Type</label>
+        <p-dropdown #ruleImpactedInd [options]="impactType" [required]="ruleImpactAnalysisRun.ruleImpactedInd"
+          [disabled]="!ruleImpactAnalysisRun.ruleImpactedInd" [style]="{'width':'100%'}"
+          [(ngModel)]="ruleImpactAnalysisRun.ruleImpactTypeId"></p-dropdown>
+      </div>
+
+      <div *ngIf="ruleImpactAnalysisRun.ruleImpactedInd && ruleImpactAnalysisRun.ruleImpactTypeId == null">
+        <span style="color: red;">Impact Type is required.</span>
+      </div>
+
+    </div>
+
+    <div class="col-md-5">
+      <div>
+        <label><span class="required-field-color">*</span>Rule Impact Description</label>
+        <span *ngIf="ruleImpactAnalysisRun.ruleImpactAnalysis"
+          style="color: lightgray; float: right">{{ruleImpactAnalysisRun.ruleImpactAnalysis.length}}/500</span>
+      </div>
+      <div>
+        <textarea maxlength="500" [disabled]="!ruleImpactAnalysisRun.ruleImpactedInd"
+          [required]="ruleImpactAnalysisRun.ruleImpactedInd" rows="4" style="width: 100%;"
+          [(ngModel)]="ruleImpactAnalysisRun.ruleImpactAnalysis"></textarea>
+      </div>
+      <div
+        *ngIf="ruleImpactAnalysisRun.ruleImpactedInd && (ruleImpactAnalysisRun.ruleImpactAnalysis == '' || ruleImpactAnalysisRun.ruleImpactAnalysis == null)">
+        <span style="color: red;">Rule Impact Description is required.</span>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-11">
+          <label>Rule Change Notes</label>
+        </div>
+        <p-tabView id="tabView" [(activeIndex)]="indexVal" *ngIf="objLoaded">
+          <p-tabPanel header="Procedure Codes/HCPS">
+            <app-type-rule-change typeOfChange="hcps" [readOnly]="!ruleImpactAnalysisRun.ruleImpactedInd > 0"
+              [data]="ruleImpactAnalysisRun.typeOfChanges['hcps']" (output)="checkTypeOfChanges($event, 'hcps')">
+            </app-type-rule-change>
+          </p-tabPanel>
+          <p-tabPanel header="ICD">
+            <app-type-rule-change typeOfChange="icd" [readOnly]="!ruleImpactAnalysisRun.ruleImpactedInd > 0"
+              [data]="ruleImpactAnalysisRun.typeOfChanges['icd']" (output)="checkTypeOfChanges($event, 'icd')">
+            </app-type-rule-change>
+          </p-tabPanel>
+          <p-tabPanel header="Modifiers">
+            <app-type-rule-change typeOfChange="modifiers" [readOnly]="!ruleImpactAnalysisRun.ruleImpactedInd > 0"
+              [data]="ruleImpactAnalysisRun.typeOfChanges['modifiers']"
+              (output)="checkTypeOfChanges($event, 'modifiers')"></app-type-rule-change>
+          </p-tabPanel>
+          <p-tabPanel header="Place of Service">
+            <app-type-rule-change typeOfChange="placeServices" [readOnly]="!ruleImpactAnalysisRun.ruleImpactedInd > 0"
+              [data]="ruleImpactAnalysisRun.typeOfChanges['placeServices']"
+              (output)="checkTypeOfChanges($event, 'placeServices')"></app-type-rule-change>
+          </p-tabPanel>
+        </p-tabView>
+
+        <div class="col-md-12">
+        </div>
+        <div class="col-md-11" *ngIf="enableChangesNotes()">
+          <span style="color: red;">Impacted Rule Codes is required.</span>
+        </div>
+
+      </div>
+
+  </div>
+
+  <div class="flex-buttons">
+
+    <div>
+      <button style="display: inherit" #saveBtn class="btn btn-primary btn-default-height  small-td"
+        [disabled]="isSaveDisabled()" (click)="saveImpactAnalysis();" type="button">Save</button>
+    </div>
+
+    <div>
+      <button style="display: inherit" class="btn btn-primary btn-default-height  small-td"
+        (click)="refreshImpactAnalysis();" type="button">Refresh</button>
+    </div>
+
+    <div>
+      <button style="display: inherit" class="btn btn-primary btn-default-height small-td"
+        (click)="exitImpactAnalysis();" type="button">Exit</button>
+    </div>
+
+  </div>
+</div>
+
+<p-dialog [header]="confirmationHeaderMsg" [(visible)]="showConfirmationMsg">
+  <p>{{saveMessage}}</p>
+  <p-footer>
+    <div class="row">
+      <div class="col-md-9">
+        <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+          (click)="hideConfirmationMsg()" label="OK"></button>
+      </div>
+    </div>
+  </p-footer>
+</p-dialog>

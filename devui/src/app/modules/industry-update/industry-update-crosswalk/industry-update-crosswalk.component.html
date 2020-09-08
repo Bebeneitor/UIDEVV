@@ -1,0 +1,90 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div>
+
+  <p-table #viewGrid [columns]="cols" [value]="filteredRules" [paginator]="true" [(selection)]="selectedData" [resizableColumns]="true" columnResizeMode="fit"
+           [reorderableColumns]="true" [rows]="10" [rowsPerPageOptions]="eclConstantsService.ROWS_PER_PAGE_OPTIONS" [loading]="loading" [responsive]="true" sortField="ruleId" sortOrder="-1"
+           (sortFunction)="customSort($event)" [customSort]="true">
+    <ng-template pTemplate="caption">
+      <app-grid-tools [primeTableLocalReference]="viewGrid"
+        [pageTitle]="pageTitle">
+      </app-grid-tools>
+      <div style="text-align: right">
+        <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
+               (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+               style="width:150px; border-radius: 5px">
+        <span style="cursor: pointer"><i *ngIf = "keywordSearch !== ''" (click)="viewGrid.reset(); resethDataTable(viewGrid);" style="cursor: pointer" class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
+        <i *ngIf = "keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+      </div>
+    </ng-template>
+
+
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+            [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+          {{col.header}}
+          <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                      ariaLabelDesc="Activate to sort in descending order"
+                      ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+      </tr>
+      <tr>
+        <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center" [ngStyle]="{'width': col.width}">
+
+          <input pInputText type="text" [(ngModel)]="filters[col.field]"
+                 style="width : 100%; padding : 5px; border-radius: 5px"
+                 (input)="viewGrid.filter($event.target.value, col.field, 'contains')" [placeholder]="col.header">
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-rule let-columns="columns">
+
+      <tr>
+        <td class="small-td" *ngFor="let col of columns">
+          <span *ngIf="col.field == 'mapId'" class="span-centered">{{rule.mapId}}</span>
+          <span *ngIf="col.field == 'ruleId'" class="span-centered">{{rule.ruleId}}</span>
+          <span *ngIf="col.field == 'subRule'" class="span-centered">{{rule.subRule}}</span>
+          <span *ngIf="col.field == 'ruleCode'" class="span-centered">
+             <a style="text-decoration: underline; cursor: pointer"
+                (click)="viewProvisionalModal(rule.eclId)">{{rule.ruleCode}}</a></span>
+          <span *ngIf="col.field == 'ruleDesc'" class="span-centered" (mouseover)="showDescription($event, rule.ruleDesc, op)">
+            {{rule.ruleDesc && rule.ruleDesc.length > 100 ? rule.ruleDesc.substring(0, 99)+'... ' : rule.ruleDesc}}
+          </span>
+          <span *ngIf="col.field == 'currentStatus'" class="span-centered">{{rule.currentStatus}}</span>
+          <span *ngIf="col.field == 'workOrderNumber'" class="span-centered">{{rule.workOrderNumber}}</span>
+          <span *ngIf="col.field == 'implementationDate'" class="span-centered">{{rule.implementationDate}}</span>
+          <span *ngIf="col.field == 'createdOn'" class="span-centered">{{rule.createdOn}}</span>
+          <span *ngIf="col.field == 'updatedOn'" class="span-centered">{{rule.updatedOn}}</span>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> - <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+        </span>
+      <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+    </ng-template>
+  </p-table>
+  <div class="space"></div>
+  <div class="float-right">
+    <button type="button" value="Refresh" style="width: 90%;"
+            class="btn btn-primary btn-default-height small-td"
+            style="margin-right:5px;"
+            (click)="viewGrid.reset(); refreshRuleApproval(viewGrid)">Refresh
+    </button>
+    <button type="button" name="action" class="btn btn-primary btn-default-height small-td"
+            (click)="exit()">Exit
+    </button>
+  </div>
+  <div class="space"></div>
+  <div class="space"></div>
+  <div>
+    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+  </div>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>
+<p-overlayPanel #op>
+  {{this.customToolTip}}
+</p-overlayPanel>

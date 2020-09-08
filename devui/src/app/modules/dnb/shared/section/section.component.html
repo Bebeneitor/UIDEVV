@@ -1,0 +1,77 @@
+<div class="dnb-table-container">
+  <table
+    class="table"
+    [ngClass]="{ 'new-version-table': !isReadOnly, disabled: disabled }"
+  >
+    <thead>
+      <tr>
+        <th *ngFor="let header of section.headers" class="overflow">
+          {{ header }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        *ngFor="let row of section.rows; let lastR = last; index as rowIndex"
+        [ngClass]="{
+          'has-border': row.hasBorder,
+          'row-selected': selectedRowIndex === rowIndex && contextMenuOpen
+        }"
+      >
+        <td
+          *ngFor="
+            let column of row.columns;
+            let first = first;
+            let last = last;
+            index as columnIndex
+          "
+          class="overflow2"
+          (contextmenu)="
+            open($event, rowIndex, columnIndex); $event.preventDefault()
+          "
+        >
+          <ng-container *ngIf="isReadOnly; else editor">
+            <app-cell-editor
+              [column]="column"
+              [negativeDiff]="column.diff"
+              [isComparing]="isComparing"
+              [searchInfo]="column.searchData"
+              [highLight]="column.highlight"
+              [isReadOnly]="column.isReadOnly"
+            ></app-cell-editor>
+          </ng-container>
+          <ng-template #editor>
+            <app-cell-editor
+              [column]="column"
+              [isComparing]="isComparing"
+              [searchInfo]="column.searchData"
+              [highLight]="column.highlight"
+              [isReadOnly]="!enableEditing"
+              [isLastSectionColumn]="last && lastR"
+              [sectionId]="section.section.name"
+            ></app-cell-editor>
+          </ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div
+  class="context-menu"
+  *ngIf="enableEditing && contextMenuOpen"
+  [style.top.px]="top"
+  [style.left.px]="left"
+>
+  <div class="options">
+    <app-dnb-row-menu
+      [section]="section"
+      [rowIndex]="selectedRowIndex"
+      [undoItems]="undoItems"
+      [visible]="enableEditing"
+      (undoItemsBack)="undoItems = $event"
+      [menuPermissions]="menuPermissions"
+      (behaviorEvent)="behavior($event)"
+    >
+    </app-dnb-row-menu>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+.decision-point-rule-detail {
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.decision-point h4 {
+    font-size: 16px;
+}
+
+.decision-point-rule-detail table.decision-point-table-detail {
+    width: 100%;
+}
+
+.decision-point-rule-detail table.decision-point-table-detail > tbody > tr > td:first-child {
+    width: 20%;
+    color: #31006F;
+}
+
+.decision-point-rule-detail table.decision-point-table-detail > tbody > tr > td:last-child {
+    background: #FFF;
+}
+
+.decision-point-rule-detail table.decision-point-table-detail > tbody > tr > td {
+    padding: 10px;
+}
+
+.decision-point-rule-detail ul.accordion-list {
+    margin: 0px !important
+} 

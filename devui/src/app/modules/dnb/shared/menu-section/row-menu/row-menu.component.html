@@ -1,0 +1,219 @@
+<ul *ngIf="visible">
+  <li *ngIf="menuPermissions.separation && !isGrouped">
+    <button
+      class="button is-text"
+      [attr.slm-id]="'toggle_row_separation_btn'"
+      (click)="toggleSeparation(section.rows[rowIndex])"
+    >
+      {{ section.rows[rowIndex].hasBorder ? "Remove" : "Add" }}
+      Separation
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.separation && isGrouped">
+    <button
+      class="button is-text"
+      [attr.slm-id]="'toggle_row_separation_btn'"
+      (click)="toggleSeparationGroup(section.groups[groupIndex],section.groups[groupIndex].rows[rowIndex],rowIndex)"
+    >
+      {{ section.groups[groupIndex].rows[rowIndex].hasBorder ? "Remove" : "Add" }}
+      Separation
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.addRow">
+    <button
+      class="button is-text"
+      (click)="addRow()"
+      [attr.slm-id]="'add_row_btn'"
+    >
+      Add Row
+    </button>
+  </li>
+  <li *ngIf="menuPermissions.addGroupRow.visible">
+    <button
+      class="button is-text"
+      (click)="addGroupRow()"
+      [attr.slm-id]="'add_dosing_btn'"
+    >
+      {{ menuPermissions.addGroupRow.label }}
+    </button>
+  </li>
+  <li *ngIf="menuPermissions.duplicateDosing">
+    <button
+      class="button is-text"
+      (click)="duplicateDosing()"
+      [attr.slm-id]="'duplicate_dosing_btn'"
+    >
+      Duplicate Dosing
+    </button>
+  </li>
+  <li *ngIf="menuPermissions.removeRow">
+    <button
+      class="button is-text"
+      (click)="removeRow()"
+      [attr.slm-id]="'remove_row_btn'"
+    >
+      Remove Row
+    </button>
+  </li>
+  <li *ngIf="undoRemoveRowFlagChild && menuPermissions.undoRemoveRow">
+    <button
+      class="button is-text"
+      (click)="undoRemoveRow()"
+      [attr.slm-id]="'undo_remove_row_btn'"
+    >
+      Undo
+    </button>
+  </li>
+  <li *ngIf="shouldMoveUp && menuPermissions.moveUp">
+    <button
+      class="button is-text"
+      (click)="moveItem(-1)"
+      [attr.slm-id]="'move_row_up_btn'"
+    >
+      Move Up
+    </button>
+  </li>
+  <li *ngIf="shouldMoveDown && menuPermissions.moveDown">
+    <button
+      class="button is-text"
+      (click)="moveItem(1)"
+      [attr.slm-id]="'move_row_down_btn'"
+    >
+      Move Down
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.copyRow">
+    <button
+      class="button is-text"
+      (click)="copyRow()"
+      [attr.slm-id]="'copy_row_btn'"
+    >
+      Copy Row
+    </button>
+  </li>
+
+  <li *ngIf="undoCopyRowFlag && menuPermissions.undoCopyRow">
+    <button
+      class="button is-text"
+      (click)="undoCopyRow()"
+      [attr.slm-id]="'undo_copy_row_btn'"
+    >
+      Undo
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.copyGroup">
+    <button
+      class="button is-text"
+      (click)="copyGroup()"
+      [attr.slm-id]="'copy_group_btn'"
+    >
+      Copy Group
+    </button>
+  </li>
+
+  <li *ngIf="undoCopyGroupFlag && menuPermissions.undoCopyGroup">
+    <button
+      class="button is-text"
+      (click)="undoCopyGroup()"
+      [attr.slm-id]="'undo_copy_group_btn'"
+    >
+      Undo
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.copyRowGroup">
+    <button
+      class="button is-text"
+      (click)="copyGroupRow()"
+      [attr.slm-id]="'copy_group_row_btn'"
+    >
+      Copy Row
+    </button>
+  </li>
+
+  <li *ngIf="undoCopyRowGroupFlag && menuPermissions.undoCopyRowGroup">
+    <button
+      class="button is-text"
+      (click)="undoCopyGroupRow()"
+      [attr.slm-id]="'undo_copy_group_row_btn'"
+    >
+      Undo
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.addGroup">
+    <button
+      class="button is-text"
+      (click)="addGroup()"
+      [attr.slm-id]="'add_group_btn'"
+    >
+      Add Group
+    </button>
+  </li>
+  <li *ngIf="menuPermissions.removeGroup">
+    <button
+      class="button is-text"
+      (click)="removeGroup()"
+      [attr.slm-id]="'remove_group_btn'"
+    >
+      Remove Group
+    </button>
+  </li>
+  <li *ngIf="undoRemoveGroupFlagChild && menuPermissions.undoRemoveGroup">
+    <button
+      class="button is-text"
+      (click)="undoRemoveGroup()"
+      [attr.slm-id]="'undo_group_remove_column_btn'"
+    >
+      Undo
+    </button>
+  </li>
+  <li *ngIf="groupIndex > 0 && menuPermissions.moveGroupUp">
+    <button
+      class="button is-text"
+      (click)="moveGroup(-1)"
+      [attr.slm-id]="'move_group_up_btn'"
+    >
+      Move Up
+    </button>
+  </li>
+  <li
+    *ngIf="
+      section.groups &&
+      groupIndex < section.groups.length - 1 &&
+      menuPermissions.moveGroupDown
+    "
+  >
+    <button
+      class="button is-text"
+      (click)="moveGroup(1)"
+      [attr.slm-id]="'move_group_down_btn'"
+    >
+      Move Down
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.copyColumn">
+    <button
+      class="button is-text"
+      (click)="copyColumn()"
+      [attr.slm-id]="'copy_column_btn'"
+    >
+      Copy
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.pasteColumn">
+    <button
+      class="button is-text"
+      (click)="pasteColumn()"
+      [attr.slm-id]="'paste_column_btn'"
+    >
+      Paste
+    </button>
+  </li>
+</ul>

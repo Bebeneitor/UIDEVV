@@ -1,0 +1,28 @@
+::ng-deep.ui-inputtext {
+    width: 100%;
+}
+
+::ng-deep.ui-chips-input-token {
+    width: 100%;
+}
+
+::ng-deep.ui-chips-input-token > input[type="text"] {
+    border: none;
+    width: 100%;
+}
+
+.excel-button {
+    background-color: green !important;
+    color: white !important;
+    border: none !important;
+    height: 30px;
+}
+
+.excel-button:hover {
+    background-color: rgb(3, 110, 3) !important;
+}
+
+.file-description {
+    font-weight: bold;
+    padding-top: 3px;
+}

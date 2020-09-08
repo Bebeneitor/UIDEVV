@@ -1,0 +1,121 @@
+.container{
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 20px;
+    left: 0px;
+    top: 0px;
+    max-height: 660px;
+    min-height: 600px;
+    background: inherit;
+    background-color: rgba(255, 255, 255, 1);
+    box-sizing: border-box;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(161, 161, 161, 1);
+    border-radius: 3px;
+    -moz-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    -webkit-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+}
+
+#savingsReport {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left:10px;
+}
+
+.ui-multiselect {
+    min-width: 100% !important;
+    width: 100% !important;
+    border: 1px solid #31006F !important;
+    display: block;
+  }
+
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+ }
+
+.confirmDialog {
+    z-index: 1002;
+    left: 550px;
+    top: 350px;
+    transform: none;
+    opacity: 1;
+}
+
+.form-container {
+    max-height: 500px;
+    min-height: 210px;
+    min-width: 80px;
+    margin: 0 auto;
+    background-color: white;
+    height: 60%;
+    justify-content: flex-end;
+    justify-items: flex-end;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.engine-item {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dropdownSavings{
+    display: grid;
+}
+
+.button:disabled {
+    opacity: .65;
+}
+
+::ng-deep.ui-monthpicker-month.ui-state-disabled {
+    pointer-events: none;
+    color: -internal-light-dark-color(rgba(16, 16, 16, 0.3), rgb(170, 170, 170));
+}
+
+::ng-deep.ui-inputtext {
+    text-align: center;
+    padding: 0px !important;
+}
+
+::ng-deep.ui-calendar > input {
+    margin-right: 27px;
+    width: 80% !important;
+}
+
+::ng-deep.ui-calendar > button {
+    left: 80% !important;
+}
+
+::ng-deep input.ui-inputtext.ui-widget {
+    height: 28px !important;
+}
+
+::ng-deep.ui-calendar-button {
+    margin-bottom: 10px !important;
+    height: 28px !important;
+    position: absolute;
+}
+
+::ng-deep body .ui-radiobutton .ui-radiobutton-box.ui-state-active {
+    border-color: #31006F !important;
+    background-color: #31006F !important;
+}
+
+::ng-deep.ui-fieldset-legend {
+    width: 7em;
+}
+
+.col-2-5 {
+    width: 20.83333% !important;
+} /* = 16,6666 + 4,16667*/
+
+.col-1-5 {
+    width: 12.5% !important;
+} /* = 8,3333 + 4,16667*/
+
+::ng-deep body .ui-multiselect-panel .ui-multiselect-header .ui-multiselect-filter-container {
+    width: calc(100% - 30px) !important;
+}

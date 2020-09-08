@@ -1,0 +1,16 @@
+.leftMargin{
+  margin-left: 15px;
+}
+
+:host>>> input.ui-inputtext.ui-widget  {
+ width: 180px;
+}
+.cols{
+  margin: 5px;
+}
+.row{
+  padding-left: 10px;
+}
+::ng-deep .dialog-type-change > .ui-dialog {
+  text-align: left;
+}

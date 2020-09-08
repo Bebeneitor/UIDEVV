@@ -1,0 +1,45 @@
+<p-dialog [(visible)]="display" [header]="pageHeader" class="user-team-category-view-dialog" (onHide)="onClose()" [responsive]="true">
+  <ng-container *ngIf="display">
+    <p-treeTable #treeTable [value]="treeData" [columns]="cols" class="user-team-category-view-treedata"
+                 [scrollable]="true" scrollHeight="500px" sortField="name" autoLayout="true" columnResizeMode="true"
+                 [loading]="loading">
+
+      <ng-template pTemplate="colgroup" let-columns>
+        <colgroup>
+          <col [width]="col.width" *ngFor="let col of cols">
+        </colgroup>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th class="text-center tree-table-header" *ngFor="let col of cols" [ttSortableColumn]="col.field">
+            {{col.header}}
+            <p-treeTableSortIcon [field]="col.field"></p-treeTableSortIcon>
+          </th>
+        </tr>
+        <tr>
+          <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center" [ngStyle]="{'width': col.width}">
+
+            <input *ngIf="col.field == 'name'" pInputText type="text" [(ngModel)]="keywordSearchReturned" style="width : 100%; padding : 5px; border-radius: 5px"
+                   (input)="treeTable.filter($event.target.value, col.field, 'contains')" [placeholder]="col.header">
+          </th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+        <tr class="treeTable-no-border" [ngClass]="{'treeTable-row': rowData.ccaFlag || rowData.poFlag}"
+            [ttRow]="rowNode">
+          <td>
+            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+            <a *ngIf="rowNode.node.children && rowNode.node.children.length < 1 && rowNode.level < 1" class="ui-treetable-toggler ui-unselectable-text" style="visibility: hidden;">
+              <i class="pi pi-fw pi-chevron-right" ng-reflect-ng-class="pi pi-fw pi-chevron-right"></i>
+            </a>
+            {{rowData.name}}
+          </td>
+          <td *ngIf="rowData.ccaFlag" class="text-center"><i class="pi pi-check"></i></td>
+          <td *ngIf="!rowData.ccaFlag"></td>
+          <td *ngIf="rowData.poFlag" class="text-center"><i class="pi pi-check"></i></td>
+          <td *ngIf="!rowData.poFlag"></td>
+        </tr>
+      </ng-template>
+    </p-treeTable>
+  </ng-container>
+</p-dialog>

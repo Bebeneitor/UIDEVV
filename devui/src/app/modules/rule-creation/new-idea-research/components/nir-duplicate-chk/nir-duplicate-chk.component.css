@@ -1,0 +1,98 @@
+/******* CONTAINERS *************/
+.keyword-box {
+    width: 100%;
+}
+
+.comment-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.custom-label-ideaComment {
+    display: block;
+    margin-top: 10px;
+}
+
+.comment-item {
+    width: 100%;
+    padding-right: 50px;
+}
+
+.comment-item-last {
+    width: 100%;
+}
+
+.less-more-label {
+    font-size: 14px;
+    padding: 5px;
+}
+
+.cat-search {
+    font-size: 12px;
+    height: 100%;
+    width: 100%;
+}
+
+.keyword-search {
+    width: 100%;
+    height: 40px;
+    margin: 20px 0px 20px;
+}
+
+.basic-cot.btn {
+    width: 150px;
+    margin: 12px;
+    border-radius: 1px;
+}
+
+.magnify {
+    margin-left: -30px;
+}
+
+.cancel-x {
+    margin-left: -30px;
+    font-weight: 700;
+}
+#warningMsg {
+    color: red;
+    margin: 0;
+    padding: 0;
+    font-size: 11px;
+    position: fixed;
+}
+
+/** OVERRIDES **/
+::ng-deep.ng-tns-c15-4.ng-star-inserted.ui-dropdown-label.ui-inputtext.ui-corner-all,
+::ng-deep.ng-tns-c15-8.ng-star-inserted.ui-dropdown-label.ui-inputtext.ui-corner-all,
+::ng-deep.ng-tns-c15-9.ng-star-inserted.ui-dropdown-label.ui-inputtext.ui-corner-all,
+::ng-deep.ng-tns-c15-10.ng-star-inserted.ui-dropdown-label.ui-inputtext.ui-corner-all {
+    padding-top: 8px;
+}
+
+::ng-deep.ng-tns-c15-8.ui-dropdown.ui-widget.ui-state-default.ui-corner-all.ui-helper-clearfix,
+::ng-deep.ng-tns-c15-10.ui-dropdown.ui-widget.ui-state-default.ui-corner-all.ui-helper-clearfix,
+::ng-deep.ng-tns-c15-9.ui-dropdown.ui-widget.ui-state-default.ui-corner-all.ui-helper-clearfix {
+    height: 31px;
+    width: 100%;
+}
+
+::ng-deep.ui-fileupload-content.ui-widget-content {
+    overflow-x: scroll;
+}
+
+::ng-deep.ui-overlaypanel-content {
+    max-width: 660px;
+    max-height: 240px;
+    word-wrap: break-word;
+    font-size: 12px;
+    overflow: scroll;
+}
+
+:host>>>.small-td .ng-star-inserted {
+    word-wrap: break-word;
+}
+
+:host>>>.span-centered .ng-star-inserted {
+    font-size: 15px;
+}

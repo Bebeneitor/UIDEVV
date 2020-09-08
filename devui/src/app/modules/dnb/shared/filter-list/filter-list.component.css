@@ -1,0 +1,24 @@
+.letters-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+.letters-links li {
+  margin: 2px;
+}
+
+.letters-links li a {
+  color: #31006f;
+  text-decoration: underline;
+}
+
+.letters-links li a:hover {
+  color: purple;
+}
+
+.highlight {
+  background-color: rgba(224, 223, 223, 0.938) !important;
+  height: fit-content !important;
+}

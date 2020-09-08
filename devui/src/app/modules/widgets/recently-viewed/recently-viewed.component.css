@@ -1,0 +1,31 @@
+.favorite-card {
+    height: 167px;
+    border: 0px solid transparent; 
+    border-radius: 3px; 
+    padding : 15px;
+    opacity: 0.8; 
+    cursor: pointer;
+    -webkit-box-shadow: 0 7px 2px -3px rgba(143,143,143,0.56);
+    -moz-box-shadow: 0 7px 2px -3px rgba(143,143,143,0.56);
+    box-shadow: 0 7px 2px -3px rgba(143,143,143,0.56);
+    display: flex;
+    align-items: center;
+}
+
+.favorite-card:hover {
+    opacity: 1;
+}
+
+::ng-deep .ui-dataview-header {
+    display: none;
+}
+
+::ng-deep .ui-dataview-content.ui-widget-content {
+    padding: 0px !important;
+    border: unset !important;
+}
+
+::ng-deep p-dataView .ui-paginator-bottom {
+    border: unset !important;
+    margin-top: 10px;
+}

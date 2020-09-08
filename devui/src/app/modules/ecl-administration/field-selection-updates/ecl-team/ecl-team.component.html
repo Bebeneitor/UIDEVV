@@ -1,0 +1,106 @@
+<div class="row">
+  <div class="col-md-4">
+    <div>Selections
+      <span style="float: right">
+        <a (click)="showTeamChange()">
+          <i class="fa fa-plus-circle" style="color: #007ad9;"></i>Add
+        </a>
+      </span>
+    </div>
+    <div>
+      <div class="list-box">
+        <div class="list-box-head">
+          <div class="search-box">
+            <input class="list-head" type="text" (keyup)="filterTeam.next($event.target.value)" [(ngModel)]="temFilterField"/>
+            <span class="fa fa-search"></span>
+          </div>
+        </div>
+        <div class="input-box" *ngIf="showTeam">
+          <input class="team-input" type="text" [(ngModel)]="newTeamField" (keyup)="onTypeNewTeamName()"/>
+        </div>
+        <div>
+          <div class="list-item" *ngFor="let team of teamList; let i = index">
+            <span>{{team.label}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="row" id="fieldSelectionUpdateRow" *ngIf="showRuleCreation">
+      <div>Rule Creation</div>
+      <p-table #dt [columns]="cols" [value]="rcUsers" [resizableColumns]="true" columnResizeMode="fit"
+        [reorderableColumns]="true" [loading]="loading" [responsive]="true" dataKey="categoryName"
+        [style]="{'overflow':'auto', 'height':'390px', 'border':'1px solid grey', 'border-radius': '2px'}"
+        (sortFunction)="customSort($event)" [customSort]="true">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th class="header-item" class="small-th" style="text-align: center; background-color: white;"
+              *ngFor="let col of columns" [ngStyle]="{'width': col.width}" pResizableColumn 
+              [pSortableColumn]="col.field">
+              {{col.header}}
+              <p-sortIcon *ngIf="col.field !== 'CCA' && col.field !== 'PO'" [field]="col.field"
+                ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order"
+                ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+            </th>
+          </tr>
+          <tr class=custom-input>
+            <th class="custom-input-header-filter">
+              <span class="set-input"><input class="filter-input" pInputText type="text"
+                  (input)="customFilterHeaders($event.target.value)">
+                <i class="fa fa-search purple" style="z-index: 2; margin:6px 0px 0px -20px"></i>
+              </span>
+            </th>
+            <th class="custom-input-filter">
+              <span class="set-input"><input class="filter-input" pInputText type="text"
+                  (input)="customFilter($event.target.value)">
+                <i class="fa fa-search purple" style="z-index: 2; margin:6px 0px 0px -20px"></i>
+              </span>
+            </th>
+          </tr>
+          <tr class="ui-widget-header">
+            <th class="remove-barrier">
+              <a (click)="expandingRows()">
+                <i [ngClass]="rowExpand ? 'fa fa-minus fa_pad' : 'fa fa-plus fa_pad'"></i>
+                <span>  Expand/Collapse All</span>
+              </a>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex" let-expanded="expanded" let-columns="columns">
+          <tr class="ui-widget-header" *ngIf="rowCategoryMetadata[rowData.categoryName].index === rowIndex">
+            <td colspan="11">
+              <a href="#" [pRowToggler]="rowData">
+                <i [ngClass]="expanded ? 'fa fa-minus fa_pad' : 'fa fa-plus fa_pad'"></i>
+                <span>  {{rowData.categoryName}}</span>
+              </a>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="rowexpansion" let-rowData let-rowIndex="rowIndex">
+          <tr>
+            <td>{{rowData.firstName}}</td>
+            <td>
+              <p-checkbox [value]="rowData.checkedCCA" [(ngModel)]="rowData.checkedCCA" id="ruleCreationCCAChkBx"
+                name="ruleCreationCCA" binary="true" [disabled]=!rowData.enabledCCA (click)="checkUncheckUserRol(rowData,'CCA')">
+              </p-checkbox>
+            </td>
+            <td>
+              <p-checkbox [value]="rowData.checkedPO" [(ngModel)]="rowData.checkedPO" id="ruleCreationPOChkBx" 
+                name="ruleCreationPO" binary="true" [disabled]=!rowData.enabledPO (click)="checkUncheckUserRol(rowData,'PO')">
+              </p-checkbox>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>
+<p-confirmDialog header="Confirm Team Creation" key="confirmCreateTeam"></p-confirmDialog>
+<p-confirmDialog #cd header="Confirmation" key="newTeamSuccessfully">
+  <p-footer>
+    <div class="text-center">
+      <button type="button" pButton icon="pi pi-check" label="OK" (click)="cd.accept()"></button>
+    </div>
+  </p-footer>
+</p-confirmDialog>

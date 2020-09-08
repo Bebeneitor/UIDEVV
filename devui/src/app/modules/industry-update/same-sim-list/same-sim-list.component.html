@@ -1,0 +1,23 @@
+
+<h5 style="font-size : 17px;margin-bottom: 15px; display: inline-block;">{{sameSimTitle}}</h5>
+
+<div class="text-right" style="display: inline-block;position: absolute;right: 15px;">
+  <a nghref="#" style="margin-bottom: 10px;" routerLink="/same-sim-setup/0" class="btn btn-sm btn-primary f-11"><i
+      class="fa fa-plus"></i> Generate new execution</a>
+</div>
+<br>
+<div class="float-left" >
+  This process uses a spreadsheet template, You can download the file from
+  <a nghref="#" style="text-decoration: underline; cursor: pointer"
+  (click)="downloadFile()"> here</a>
+</div>
+<br>
+
+<p-tabView [activeIndex]="tabIndex" (onChange)="handleTabViewChange($event)">
+  <p-tabPanel header="Analyses">
+    <ecl-table #analysesTable *ngIf="tabIndex == 0" [tableModel]='tableAnalyses' (onAcctionIcon)="redirect($event)"></ecl-table>
+  </p-tabPanel>
+  <p-tabPanel header="My Analyses">
+    <ecl-table #myAnalysesTable *ngIf="tabIndex == 1" [tableModel]='tableMyAnalyses' (onAcctionIcon)="redirect($event)"></ecl-table>
+  </p-tabPanel>
+</p-tabView>

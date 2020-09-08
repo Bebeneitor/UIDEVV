@@ -1,0 +1,15 @@
+::ng-deep .timeline-me-shortcontent,
+::ng-deep .timeline-me-fullcontent {
+    background-color: #9579D3 !important;
+    color : #fff !important;
+    font-size: 11px !important;
+}
+
+::ng-deep .timeline-me-label {
+    font-size: 11px !important;
+}
+
+::ng-deep .timeline-me-picto > i {
+    font-size: 20px !important;
+    color : #5B5B5B !important;
+}

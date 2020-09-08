@@ -1,0 +1,53 @@
+.topic-detail {
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.topic-detail h4 {
+    font-size: 16px;
+}
+
+.topic-detail p.subtitle {
+    margin-bottom: 3px;
+    margin-top: 0px;
+    font-size: 11px;
+    position: absolute;
+    top: 0;
+    right: 15px;
+}
+
+.topic-detail table.topic-detail-table-detail {
+    width: 100%;
+}
+
+.topic-detail table.topic-detail-table-detail > tbody > tr > td:first-child {
+    width: 20%;
+    color: #31006F;
+}
+
+.topic-detail table.topic-detail-table-detail > tbody > tr > td:last-child {
+    background: #FFF;
+}
+
+.topic-detail table.topic-detail-table-detail > tbody > tr > td {
+    padding: 3px;
+}
+
+.topic-detail label {
+    display: block;
+    margin-bottom: 10px !important;
+}
+
+.topic-detail .label-title {
+    font-weight: bold;
+    color: navy;
+}
+
+.topic-detail .no-margin {
+    margin: 0px !important;
+}
+
+.topic-detail .label-detail {
+    color: black;
+    font-size: 12px;
+}

@@ -1,0 +1,305 @@
+<div class="cvp-template" *ngIf="cvp">
+  <h5 style="font-size: 17px; margin-bottom: 0px; display: inline-block;">CVP Ingestion Template</h5>
+  <hr>
+
+  <!-- Start Row -->
+  <div class="row">
+
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.moduleName }">Module Name <span class="text-danger">(*)</span></label>
+      <p-dropdown #moduleName [style]="{'width' : '100%'}" [options]="moduleNames" [disabled]="readOnly" [(ngModel)]="cvp.moduleName" [editable]="true" placeholder="Select a module name"></p-dropdown>
+    </div>
+
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.productCode}">Product Code <span class="text-danger">(*)</span></label>
+      <p-dropdown [style]="{'width' : '100%'}" [disabled]="readOnly" [options]="productCodes" [(ngModel)]="cvp.productCode"
+        optionLabel="name"></p-dropdown>
+    </div>
+
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.ruleName }">Rule Name <span class="text-danger">(*)</span></label>
+      <input type="text" class="form-control" [disabled]="readOnly" [(ngModel)]="cvp.ruleName" placeholder="Rule Name"
+        (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)" />
+    </div>
+
+  </div>
+  <!-- End Row -->
+
+  <!-- Start Row -->
+  <div class="row">
+    <div class="col-4">
+      <label>Rule Description</label>
+      <textarea class="form-control"  [disabled]="readOnly" style="height: 70px !important; width: 100%;" placeholder="Rule Description"
+        (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)" [(ngModel)]="cvp.ruleDescription"></textarea>
+    </div>
+
+    <div class="col-8">
+      <label [ngClass]="{ 'error-label': validationErrors.ruleCategory }">Rule Category <span class="text-danger">(*)</span></label>
+      <input type="text" class="form-control" maxlength="10" onlyNumbers [disabled]="readOnly" placeholder="Rule Category" (focus)="setTextToCopy($event)"
+        (input)="setTextToCopy($event)" [(ngModel)]="cvp.ruleCategory" onkeypress="return event.charCode >= 48 && event.charCode <= 57" />
+    </div>
+
+  </div>
+  <!-- End Row -->
+  <hr>
+  <!-- Start Row -->
+  <div class="row">
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.ruleCategoryEffectiveDate }">Rule Category Effective Date (VT Begin) <span class="text-danger">(*)</span></label>
+      <p-calendar [readonlyInput]="true"  [disabled]="readOnly" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRange"
+        placeholder="mm/dd/yy" dateFormat="mm/dd/yy" [(ngModel)]="cvp.ruleCategoryEffectiveDate"></p-calendar>
+    </div>
+    <div class="col-4">
+      <label>Rule Category Delete Date (TT Stop)</label>
+      <p-calendar [readonlyInput]="true" [disabled]="readOnly" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+        placeholder="mm/dd/yy" dateFormat="mm/dd/yy" [(ngModel)]="cvp.ruleCategoryDeleteDate"></p-calendar>
+    </div>
+    <div class="col-4">
+      <label>Rule Category Inactivation Date (VT End)</label>
+      <p-calendar [readonlyInput]="true" [disabled]="readOnly" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+        placeholder="mm/dd/yy" dateFormat="mm/dd/yy" [(ngModel)]="cvp.ruleCategoryInactivationDate"></p-calendar>
+    </div>
+
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <label [ngClass]="{ 'error-label': validationErrors.editText }">Edit Text <span class="text-danger">(*)</span></label>
+      <textarea class="form-control" [disabled]="readOnly" style="height: 70px !important; width: 100%;" placeholder="Edit Text"
+        (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)" [(ngModel)]="cvp.editText"></textarea>
+    </div>
+  </div>
+  <hr>
+  <!-- End Row -->
+
+  <!-- Start Row -->
+  <div class="row">
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.claimType }">Claim Type <span class="text-danger">(*)</span></label>
+      <p-dropdown [style]="{'width' : '100%'}" [disabled]="readOnly" [options]="claimTypes" [(ngModel)]="cvp.claimType" optionLabel="name">
+      </p-dropdown>
+    </div>
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.professionalProviderType }">Professional Provider Type <span class="text-danger">(*)</span></label>
+      <p-multiSelect [style]="{'width' : '100%'}" [disabled]="(cvp.claimType != null && cvp.claimType.code == 'F') || readOnly" [options]="providerTypes" [(ngModel)]="cvp.professionalProviderType"
+        optionLabel="name" defaultLabel="Select professional type"></p-multiSelect>
+    </div>
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.facilityProviderType }">Facility Provider Type <span class="text-danger">(*)</span></label>
+      <p-multiSelect [style]="{'width' : '100%'}" [disabled]="(cvp.claimType != null && cvp.claimType.code == 'P') || readOnly" [options]="providerFacilityTypes" [(ngModel)]="cvp.facilityProviderType"
+        optionLabel="name" defaultLabel="Select facility type"></p-multiSelect>
+    </div>
+  </div>
+  <!-- End Row -->
+  <hr>
+  <!-- Start Row -->
+  <div class="row">
+    <div class="col-4">
+      <label [ngClass]="{ 'error-label': validationErrors.recodeUnits }">Enter at least one value. <span class="text-danger">(*)</span></label>
+      <div class="ui-g" style="width:100%;margin-bottom:10px;">
+        <div class="ui-g-12" style="padding:0px !important;">
+          <p-checkbox name="recodeunits" [disabled]="readOnly" value="intraline" label="Intraline" [(ngModel)]="cvp.recodeUnits"></p-checkbox>
+        </div>
+        <div class="ui-g-12" style="padding:0px !important;">
+          <p-checkbox name="recodeunits" [disabled]="readOnly" value="intraclaim" label="Intraclaim" [(ngModel)]="cvp.recodeUnits"
+            inputId="sf"></p-checkbox>
+        </div>
+        <div class="ui-g-12" style="padding:0px !important;">
+          <p-checkbox name="recodeunits" [disabled]="readOnly" value="interclaim" label="Interclaim" [(ngModel)]="cvp.recodeUnits"
+            inputId="la"></p-checkbox>
+        </div>
+        <div class="ui-g-12" style="padding:0px !important;">
+          <p-checkbox name="recodeunits" [disabled]="readOnly" value="cross" label="Cross Claim Type Editing" [(ngModel)]="cvp.recodeUnits"
+            inputId="css"></p-checkbox>
+        </div>
+        <div class="ui-g-12" style="padding:0px !important;">
+          <p-checkbox name="recodeunits" [disabled]="readOnly" value="edithistory" label="Edit on History" [(ngModel)]="cvp.recodeUnits"
+            inputId="la"></p-checkbox>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <file-uploader #placeOfService [disabled]="(cvp.claimType != null && cvp.claimType.code == 'F') || readOnly"
+        label="Place of Service (Limit by POS)" (onDeleteFile)="deleteFile($event, 'placeOfService')" (onSetData)="setTextToCopy($event)"></file-uploader>
+    </div>
+    <div class="col-4">
+      <file-uploader #billTypes [disabled]="(cvp.claimType != null && cvp.claimType.code == 'P') || readOnly"
+        label="Bill types, (Limit by bill type)" (onDeleteFile)="deleteFile($event, 'billTypes')" (onSetData)="setTextToCopy($event)"></file-uploader>
+    </div>
+  </div>
+  <!-- End Row -->
+  <hr>
+  <!-- Start Row -->
+  <div class="row">
+    <div class="col-4">
+      <file-uploader #revenueCodes [disabled]="(cvp.claimType != null && cvp.claimType.code == 'P') || readOnly"
+        label="Revenue Codes (Limit By Revenue Code)" (onDeleteFile)="deleteFile($event, 'revenueCodes')" (onSetData)="setTextToCopy($event)"></file-uploader>
+    </div>
+    <div class="col-4">
+      <file-uploader #conditionCodes [disabled]="(cvp.claimType != null && cvp.claimType.code == 'P') || readOnly"
+        label="Condition Codes (Limit By Condition Code)" (onDeleteFile)="deleteFile($event, 'conditionCodes')" (onSetData)="setTextToCopy($event)"></file-uploader>
+    </div>
+    <div class="col-4">
+      <file-uploader #specialities [disabled]="readOnly" (onDeleteFile)="deleteFile($event, 'specialities')" label="Specialties (Limit by Specialty)" (onSetData)="setTextToCopy($event)">
+      </file-uploader>
+    </div>
+  </div>
+  <!-- End Row -->
+  <hr>
+  <!-- Start Row -->
+  <div class="row">
+    <div class="col-4">
+      <label>Gender (Limit by Gender)</label>
+      <textarea class="form-control" [disabled]="readOnly" style="height: 70px !important; width: 100%;" placeholder="Gender"
+        (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)" [(ngModel)]="cvp.gender"></textarea>
+    </div>
+    <div class="col-4">
+      <label>Age (Limit by Age)</label>
+      <textarea class="form-control" [disabled]="readOnly" style="height: 70px !important; width: 100%;" (focus)="setTextToCopy($event)"
+        (input)="setTextToCopy($event)" placeholder="Age" [(ngModel)]="cvp.age"></textarea>
+    </div>
+    <div class="col-4">
+      <file-uploader #diagnoses [disabled]="readOnly" label="Diagnoses" (onDeleteFile)="deleteFile($event, 'diagnoses')" [showRadioButtons]="false" (onSetData)="setTextToCopy($event)">
+      </file-uploader>
+    </div>
+  </div>
+  <!-- End Row -->
+
+  <!-- Start Row -->
+  <div class="row">
+    <div class="col-12">
+      <label [ngClass]="{ 'error-label': validationErrors.editAction }">Edit Action/Exception Logic <span class="text-danger">(*)</span></label>
+      <textarea class="form-control" style="height: 70px !important; width: 100%;"
+        placeholder="Edit Action/Exception Logic" (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)"
+        [(ngModel)]="cvp.editAction" [disabled]="readOnly"></textarea>
+    </div>
+
+    <div class="col-4">
+      <file-uploader #logicExceptions label="Logic Exceptions" [showInputFile]="false"
+        (onSetData)="setTextToCopy($event)" [disabled]="readOnly" [isRequired]="true" (onDeleteFile)="deleteFile($event, 'logicExceptions')"></file-uploader>
+    </div>
+
+    <div class="col-4">
+      <file-uploader #procedureCodes [isTextArea]="true" [isRequired]="true" label="Procedure Codes" (onDeleteFile)="deleteFile($event, 'procedureCodes')" (onSetData)="setTextToCopy($event)" [disabled]="readOnly"></file-uploader>
+    </div>
+
+    <div class="col-4">
+      <file-uploader #denyAction label="Deny Action" [isRequired]="true" (onSetData)="setTextToCopy($event)" (onDeleteFile)="deleteFile($event, 'denyAction')" [disabled]="readOnly"></file-uploader>
+    </div>
+  </div>
+  <!-- End Row -->
+  <hr>
+
+  <div class="row">
+    <div class="col-4">
+      <label>Recode Units</label>
+      <input type="text" class="form-control" placeholder="Recode Units" (focus)="setTextToCopy($event)"
+        (input)="setTextToCopy($event)" [(ngModel)]="cvp.recodeUnit" [disabled]="readOnly" />
+    </div>
+
+    <div class="col-4">
+      <label>Percentage Reduction</label>
+      <input type="text" class="form-control" placeholder="Percentage Reduction" (focus)="setTextToCopy($event)"
+        (input)="setTextToCopy($event)" [(ngModel)]="cvp.percentageReduction" [disabled]="readOnly" />
+    </div>
+    <div class="col-12">
+      <file-uploader #modifiers [isRequired]="true" (onDeleteFile)="deleteFile($event, 'modifiers')" [isTextArea]="true" [disabled]="readOnly" label="Modifiers" [showRadioButtons]="false" (onSetData)="setTextToCopy($event)">
+      </file-uploader>
+    </div>
+  </div>
+
+  <hr>
+  <div class="row">
+
+    <div class="col-12">
+      <label [ngClass]="{ 'error-label': validationErrors.sources }"><b>References</b></label>
+      <table style="width: 100%;">
+        <tr>
+          <td>
+            <label>Defense Code <span class="text-danger">(*)</span></label>
+          </td>
+          <td>
+            <label>Defense Text <span class="text-danger">(*)</span></label>
+          </td>
+          <td>
+            <label>Source Authority <span class="text-danger">(*)</span></label>
+          </td>
+          <td></td>
+        </tr>
+        <tr *ngFor="let s of cvp.sources; let i = index">
+          <td>
+            <textarea [disabled]="readOnly" class="form-control" style="height: 45px !important; width: 100%;" placeholder="Defense Code"
+              [(ngModel)]="s.code" (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)"></textarea>
+          </td>
+          <td>
+            <textarea [disabled]="readOnly" class="form-control" style="height: 45px !important; width: 100%;" placeholder="Defense Text"
+              [(ngModel)]="s.description" (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)"></textarea>
+          </td>
+          <td>
+            <textarea [disabled]="readOnly" class="form-control" style="height: 45px !important; width: 100%;" placeholder="Source Authority"
+              [(ngModel)]="s.security" (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)"></textarea>
+          </td>
+          <td style="width: 80px;">
+            <div style="margin-top: 0px;">
+              &nbsp;
+              <button [disabled]="readOnly" type="button" class="btn btn-sm btn-danger" title="Remove" *ngIf="cvp.sources.length > 1"
+                (click)="removeSource(i)"><i class="fa fa-trash"></i></button>
+              &nbsp;
+              <button [disabled]="readOnly" type="button" class="btn btn-sm btn-primary" title="Add" (click)="addSource()"
+                *ngIf="i + 1 == cvp.sources.length"><i class="fa fa-plus"></i></button>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-4">
+      <file-uploader #cvRule label="CV Rule" (onDeleteFile)="deleteFile($event, 'cvRule')" [showInputText]="false" [showInputFile]="false"
+        (onSetData)="setTextToCopy($event)" [disabled]="readOnly"></file-uploader>
+    </div>
+    <div class="col-8">
+      <label>Edit Flag</label>
+      <input type="text" class="form-control" placeholder="Edit Flag" maxlength="10" (focus)="setTextToCopy($event)"
+        (input)="setTextToCopy($event)" [(ngModel)]="cvp.editFlag" [disabled]="readOnly" />
+    </div>
+  </div>
+
+  <hr>
+  <div class="row">
+    <div class="col-12">
+      <div class="float-right" >
+        <button type="button" [disabled]="readOnly" class="btn btn-sm btn-primary btn-opc" (click)="newTemplate()"><i class="fa fa-magic"></i>
+          New</button>
+        &nbsp;
+        <button type="button" [disabled]="readOnly" class="btn btn-sm btn-primary btn-opc" (click)="saveTemplate()"><i class="fa fa-save"></i>
+          &nbsp;<span *ngIf="cvpIngestionId == 0">Save</span>  
+          <span *ngIf="cvpIngestionId > 0">Update</span>  
+        </button>
+        &nbsp;
+        <button style="width: 120px !important;" type="button" [disabled]="readOnly" class="btn btn-sm btn-primary btn-opc" (click)="saveTemplate(true)"><i class="fa fa-save"></i>
+          &nbsp;<span *ngIf="cvpIngestionId == 0">Save & Close</span>  
+          <span *ngIf="cvpIngestionId > 0">Update & Close</span>  
+        </button>
+      </div>
+    </div>
+  </div>
+  <br>
+  <p-sidebar [(visible)]="displayDetail" position="right">
+    <div class="float-left">
+      <button class="btn btn-sm btn-primary" (click)="copyMessage()"><i class="fa fa-copy"></i> Copy to
+        Clipboard</button>
+    </div>
+    <div
+      style="border-radius: 5px;width: 100%; height: 88vh; border: 1px dotted lightgray; overflow: auto; max-height: 88vh; margin-top: 40px; padding: 10px;">
+      <pre [innerHTML]="copyText"></pre>
+    </div>
+  </p-sidebar>
+</div>
+
+<p-blockUI [blocked]="blocked">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Saving data, please wait...</p>
+  </div>
+</p-blockUI>

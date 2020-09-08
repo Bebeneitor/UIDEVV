@@ -1,0 +1,61 @@
+<div id="mainBody">
+  <div class="fieldSelectionUpdatePage">
+    <h5>Field Selection Updates</h5>
+    <div class="fieldSelectionUpdatesForm">
+      <div class="row">
+        <div class="col-md-2 section-field">
+          <div class="flex-column">
+            <label>Available Fields</label>
+            <p-dropdown id="availablefield" [style]="{'width':'100%'}" [options]="availableFields"
+              [(ngModel)]="selectedField" (onChange)="showSelectedSource()" placeholder="Select" name="availablefield"
+              [disabled]="false">
+            </p-dropdown>
+          </div>
+          <div class="button-group">
+            <button class="btn btn-primary size" [disabled]="fieldSaveButton" style="margin-right: 4px"
+              (click)="saveFieldSelection()" name="action" type="submit" value="Save">Save</button>
+            <button [disabled]="fieldRefreshButton" class="btn btn-primary size" name="action" type="button"
+              value="Refresh" (click)="refreshFieldSelection()">Refresh</button>
+          </div>
+        </div>
+
+        <div class="col-md-3 section-selection" id="fieldSelectionUpdateRow" *ngIf="default">
+          <div>Selections <span style="float: right"><i class="fa fa-plus-circle" style="color: #007ad9;"></i>Add</span>
+          </div>
+          <div class="list-box">
+            <div class="list-box-head">
+              <div class="search-box">
+                <input class="list-head" type="text" /><span class="fa fa-search"></span>
+              </div>
+            </div>
+            <div class="list-box-bottom">
+              <div>
+                <div class="list-item">
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-10">
+          <div *ngIf="ifReference">
+            <app-reference-source [fieldSaveButton]="fieldSaveButton" (saveButtonChange)="saveButtonEvent($event)">
+            </app-reference-source>
+          </div>
+          <div *ngIf="ifTeam">
+            <app-ecl-team [fieldSaveButton]="fieldSaveButton" [default]="default"
+              (saveButtonChange)="saveButtonEvent($event)" (saveTeams)="saveFieldSelection($event)"
+              (defaultEmit)="defaultPage($event)"></app-ecl-team>
+          </div>
+          <div *ngIf="ifCategory">
+            <app-ecl-category [fieldSaveButton]="fieldSaveButton" [default]="default"
+              (defaultEmit)="defaultPage($event)" (saveCategory)="saveButtonEvent($event)"
+              (isNewCategoryDuplicated)="isNewCategoryDuplicated($event)">
+            </app-ecl-category>
+          </div>
+        </div>
+      </div>
+    </div> <!-- ROW DIV-->
+  </div>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>

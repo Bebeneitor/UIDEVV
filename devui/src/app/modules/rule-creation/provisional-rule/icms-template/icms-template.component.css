@@ -1,0 +1,188 @@
+.form-container {
+    max-height: 500px;
+    min-height: 210px;
+    min-width: 80px;
+    margin: 0 auto;
+    background-color: white;
+    height: 60%;
+    justify-content: flex-end;
+    justify-items: flex-end;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.confirmDialogTemplate {
+    z-index: 1002;
+    left: 50%;
+    top: 50%;
+    transform: none;
+    opacity: 1;
+}
+
+.row-bottom-margin {
+    margin-bottom: 0px !important;
+    padding-bottom: 0px !important;
+    margin-bottom: 0px !important;
+}
+
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.wrapper {
+    margin: 9px;
+    min-height: 50px;
+    min-width: 840px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.group-item-search {
+    display: flex;
+    width: 100%;
+}
+
+.group-item-checkbox {
+    border: 1px solid #31006F;
+    padding: 1px;
+}
+
+.group-item-switch {
+    width: 52%;
+    margin-left: 10px;
+    display: flex;
+}
+
+.search-item {
+    width: 50%;
+    height: 60px;
+    border-radius: 1px;
+}
+
+.search-label {
+    width: 50%;
+}
+
+.search-item-checkbox {
+    background: #FFFFFF;
+    margin: 0px 15px 0px 0px;
+    display: grid;
+}
+
+.search-item-calender {
+    width: 45%;
+    height: 60px;
+    border-radius: 1px;
+    margin-right: 10px;
+}
+
+.input-control-Desc {
+    width: 90%;
+    height: 70px;
+    text-align: top;
+    border: 2px solid rgba(48, 0, 111, 0.829);
+    background: #FFFFFF;
+    font-family: Montserrat;
+    font-size: 12px;
+}
+
+.sel-dropdown {
+    height: 27px;
+    margin-right: 10px;
+    border-radius: 3px;
+}
+
+.cat-search {
+    height: 40px;
+    width: 320px;
+}
+
+.col-md-12 {
+    max-width: 100%;
+}
+
+.custom-label {
+    display: block;
+    color: gray;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: normal;
+    font-family: "Open Sans", "Helvetica Neue", sans-serif;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+:host>>>.ui-dropdown {
+    border: 1px solid rgba(48, 0, 111, 0.829);
+    background: #FFFFFF;
+    height: 30px;
+    font-size: 12px;
+    font-style: italic;
+    width: 100%;
+}
+
+:host>>>.ui-multiselect {
+    border: 1px solid rgba(48, 0, 111, 0.829);
+    background: #FFFFFF;
+    height: 30px;
+    font-size: 12px;
+    font-style: italic;
+    width: 100%;
+}
+
+.footer {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10px;
+}
+
+ui-chkbox ui-widget {
+    margin: 5px;
+}
+
+:host>>>.ui-listbox-header {
+    display: none;
+}
+
+:host>>>.ui-listbox {
+    border: none;
+}
+
+:host>>>input.ui-inputtext.ui-widget {
+    border: 1px solid rgba(48, 0, 111, 0.829);
+    background: #FFFFFF;
+}
+
+:host>>>.ui-radiobutton-label {
+    width: 30%;
+}
+
+:host>>>.ui-button-text.ui-clickable {
+    width: max-content !important;
+    padding: 4px !important;
+}
+
+:host>>>.ui-button .ui-widget.ui-state-default.ui-corner-all.ui-button-text-only {
+    height: 30px !important;
+}
+
+.col-button {
+    margin-top: 23px;
+    text-align: center;
+}
+
+.remove-radius {
+    border-top-right-radius: 0% !important; 
+    border-bottom-right-radius: 0% !important;
+}
+
+:host>>>.ui-multiselect-panel .ui-multiselect-header .ui-multiselect-filter-container{
+    width: 90% !important;
+}
+
+:host>>>.ui-multiselect-panel .ui-multiselect-item span{
+    white-space: break-spaces !important;
+    width: 100% !important;
+}

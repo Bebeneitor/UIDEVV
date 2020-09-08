@@ -1,0 +1,37 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+
+<div class="md-approval">
+	<ecl-table *ngIf="(ruleStatus > 2) && isEclTableCharged" #eclTable (onServiceCall)="afterServiceCall($event)" [tableModel]='tableConfig' 
+		(onSelectRecord)= "setSelectRules($event)" (onUnSelectRecord)= "setSelectRules($event)" (onAcctionLink)="callRuleDetailScreen($event.row)" >
+	</ecl-table>
+
+	<ecl-table *ngIf="(ruleStatus < 3) && isDtEclTableCharged" #dt (onServiceCall)="afterServiceCallDt($event)" [tableModel]='dtTableConfig' 
+		(onSelectRecord)= "setSelectRules($event)" (onUnSelectRecord)= "setSelectRules($event)" (onAcctionLink)="callRuleDetailScreen($event.row)" >
+	</ecl-table>
+	
+	<div class="btn-container" *ngIf="this.ruleStatus === this.PROVISIONAL_RULE_STAGE || this.ruleStatus === this.LIBRARY_RULE_STAGE">
+		<button type="button" value="Save" [disabled]="disableBtn()" (click)="save()"
+			class="btn btn-primary small-td">Save</button>
+		<button type="button" value="Submit" [disabled]="disableBtn()" (click)="submit()"
+			class="btn btn-primary small-td">Submit</button>
+		<button type="button" value="Refresh" (click)="refreshEclTable()"
+			class="btn btn-primary small-td">Refresh</button>
+		<button type="button" class="btn btn-primary small-td" (click)="exit()" value="Exit">​Exit</button>
+		<button type="button" value="Return" (click)="showReturnDialog()" class="btn btn-primary small-td"
+			[disabled]="disableBtn()">Return</button>
+	</div>
+</div>
+
+<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+
+<p-dialog header="File Removal Message" [class]="saveDisplay2" [(visible)]="saveDisplay2">
+	<p>{{message}}</p>
+</p-dialog>
+
+<p-dialog header="Good Ideas" [class]="confirmDialog" [closable]="false" *ngIf="saveGoodIdeas" [visible]="saveGoodIdeas"
+	modal="true">
+	<app-good-ideas [typeTable]="typeTable" [goodIdeasBody]="selectedShelved"
+		(statusGoodIdeasSaved)="goodIdeasEvent($event)"></app-good-ideas>
+</p-dialog>
+
+<p-toast [baseZIndex]="999999"></p-toast>

@@ -1,0 +1,61 @@
+<div class="ell-sub-rule-search">
+  <div class="row">
+    <div class="col-12">
+      <h4>Sub Rules Search</h4>
+      <i *ngIf="expandedFilters" class="fa fa-chevron-up icon-filters" (click)="expandFilters()"></i>
+      <i *ngIf="!expandedFilters" class="fa fa-chevron-down icon-filters" (click)="expandFilters()"></i>
+      <hr *ngIf="expandedFilters">
+      <div class="container-fluid" *ngIf="expandedFilters">
+        <div class="row">
+          <div class="col-md-4 col-sm-12">
+            <div class="row">
+              <table>
+                <tr>
+                  <td>
+                    <label><span class="icon-float-left">*</span>By: </label>
+                    <p-dropdown [options]="subRuleTypes" [(ngModel)]="selectedSubRuleType" (onChange)="changeSubRuleType()"
+                      [style]="{'width': '130px', 'max-width': '130px'}" placeholder="Select Item"></p-dropdown>
+                  </td>
+                  <td *ngIf="isVisibleSubRuleSecondary">
+                    <label><span class="icon-float-left">*</span>{{subRuleSecondaryLabel}}</label>
+                    <p-dropdown [options]="subRuleSecondaryTypes" [(ngModel)]="selectedSubRuleSecondaryType"
+                      (onChange)="changeSubRuleSecondaryType()" [style]="{'width': '150px', 'max-width': '150px'}" placeholder="Select Item"></p-dropdown>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr *ngIf="isVisibleSearchComponent && expandedFilters">
+      <div class="ell-search-container" *ngIf="isVisibleSearchComponent && expandedFilters">
+        <div class="global-search-ell">
+          <div class="search-box-section">
+            <div class="ui-inputgroup">
+              <input type="text" pInputText placeholder="Type here..." [(ngModel)]="keywordSearch"
+                (keyup.enter)="searchSubRules(selectedScreen, localConstants.KEYWORD_TYPE_SEARCH)" />
+              <button type="button" [disabled]="!selectedScreen" (click)="searchSubRules(selectedScreen,localConstants.KEYWORD_TYPE_SEARCH)"
+                class="btn btn-primary btn-sm" pButton><i class="fa fa-search"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-12" [ngSwitch]="selectedScreen">
+          <!--Data / Sub Rule Components -->
+          <app-mid-rule-key          #midRulesKey         *ngSwitchCase="localConstants.MID_RULES_KEY_ID"         ></app-mid-rule-key>
+          <app-library-rule          #libraryRule         *ngSwitchCase="localConstants.LIBRARY_RULES_ID"         ></app-library-rule>
+          <app-mid-rule              #midRules            *ngSwitchCase="localConstants.MID_RULE_ID"              ></app-mid-rule>
+          <app-payer-rule            #payerRules          *ngSwitchCase="localConstants.PAYER_ID"                 ></app-payer-rule>    
+          <ecl-change-log-groups     #changeLogGroup      *ngSwitchCase="localConstants.CHANGE_LOG_GROUPS_ID"     ></ecl-change-log-groups>   
+          <app-change-types          #changeTypes         *ngSwitchCase="localConstants.CHANGE_TYPES_ID"          ></app-change-types>   
+          <app-change-sources        #changeSources       *ngSwitchCase="localConstants.CHANGE_SOURCES_ID"        ></app-change-sources>           
+          <app-cpt-code              #cptCode             *ngSwitchCase="localConstants.CPT_CODES_ELL"            ></app-cpt-code>  
+          <app-icd-code              #icdCode             *ngSwitchCase="localConstants.ICD_CODES_ELL"            ></app-icd-code>  
+          <app-library-status-codes  #libraryStatusCodes  *ngSwitchCase="localConstants.LIBRARY_STATUS_CODES_ID"  ></app-library-status-codes>  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

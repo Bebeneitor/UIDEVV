@@ -1,0 +1,73 @@
+<div class="topic-detail">
+  <div class="row">
+    <div class="col-12">
+      <h4>Topic</h4>
+      <p class="subtitle"> &nbsp; Release #{{topicDto.releaseLogKey}}</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <table border="1" class="topic-detail-table-detail">
+        <tbody>
+          <tr>
+            <td>Policy Type</td>
+            <td>{{topicDto.ellPolicyDto.policyType}}</td>
+          </tr>
+          <tr>
+            <td>Medical Policy</td>
+            <td>{{topicDto.ellPolicyDto.medPolTitle}}</td>
+          </tr>
+          <tr>
+            <td>Topic</td>
+            <td>{{topicDto.topicTitle}}</td>
+          </tr>
+          <tr>
+            <td>Topic Key</td>
+            <td>{{topicDto.topicKey}}</td>
+          </tr>
+          <tr>
+            <td>Topic Type</td>
+            <td>{{topicDto.topicType}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-12">
+      <label class="label-title">Description:</label>
+      <p class="label-detail" [innerHTML]="topicDto.topicDescHtml != null ? topicDto.topicDescHtml : ''"> </p>
+      <label class="label-title">Example:</label>
+      <p class="label-detail" [innerHTML]="topicDto.topicExampleHtml != null ? topicDto.topicExampleHtml : ''"> </p>
+      <table border="1" class="topic-detail-table-detail">
+        <tr>
+          <td [attr.rowspan]="topicDto.decisionPoints ? topicDto.decisionPoints.length + 1 : 0">Decision Points</td>
+        </tr>
+        <tr *ngFor="let d of topicDto.decisionPoints">
+          <td class="label-deicision">{{d.dpDesc}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="text-right">
+        <button type="button" (click)="returnPreviousScreen()"
+          class="btn btn-primary btn-sm btn-sm f-11"><i class="fa fa-reply"></i> Return </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>

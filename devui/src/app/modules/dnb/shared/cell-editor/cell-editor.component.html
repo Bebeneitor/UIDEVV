@@ -1,0 +1,10 @@
+<quill-editor
+  #editor
+  class="quill-editor"
+  [readOnly]="isReadOnly" 
+  [ngModel]="startValue"
+  (onContentChanged)="editorChanged($event)"
+  (onEditorCreated)="editorStarted($event)"
+  (onSelectionChanged)="selectionChanged($event)"
+>
+</quill-editor>

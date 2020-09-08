@@ -1,0 +1,61 @@
+.table-container {
+  margin-bottom: 15px;
+}
+
+/* remove after the table is replaced with ecl component */
+.icon-column {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  display: inline-block;
+  width: auto;
+}
+
+.icon-item {
+  cursor: pointer;
+  font-size: 19px;
+  color: #31006f;
+}
+
+.ui-table .ui-table-thead > tr > th {
+  background-color: #fff;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+table tr td {
+  vertical-align: top;
+}
+.display {
+  display: block;
+}
+
+.hyperlink {
+  color: #3273dc;
+  cursor: pointer;
+  text-decoration: underline #3273dc;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hyperlink:hover {
+  text-decoration: none;
+}
+
+:host ::ng-deep p-table.eclTable tr:hover td,
+tbody:hover td {
+  background-color: #f3f0fd;
+}
+/* remove after the table is replaced with ecl component */
+
+.dnb-title .drug-version-name {
+  display: block;
+  font-size: 14px;
+  line-height: 20px;
+}

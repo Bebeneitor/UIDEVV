@@ -1,0 +1,603 @@
+<fieldset class="container" [disabled]="(provDialogDisable || addButtonDisable || readOnlyView) && !isSameSim">
+
+  <div class="row" Id="provisonalRows">
+    <div class="col-md-12">
+      <h6>References</h6>
+      <p-table #viewGrid [columns]="cols" [value]="ruleReferencesArray" [paginator]="true" selectionMode="single"
+        (onRowSelect)="onRowSelect($event)" [(selection)]="selectedReference" [resizableColumns]="true"
+        columnResizeMode="fit" (onRowUnselect)="onRowUnselect($event)" [rows]="5" [rowsPerPageOptions]="[3,5,10]"
+        [loading]="loading" [responsive]="true">
+
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
+              [ngStyle]="{'width': col.width}" pResizableColumn>
+              <span *ngIf="col.field === 'changedStatus' || col.field === 'changedDetails'"
+                class="required-field-color">*</span>
+              {{col.header}}
+              <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">
+              </p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-references let-columns="columns">
+          <tr [pSelectableRow]="references">
+            <td class="small-td" *ngFor="let col of columns">
+              <span *ngIf="col.field == 'source'" class="span-centered">{{references.source}}</span>
+              <span *ngIf="col.field == 'title'" class="span-centered">{{references.title}}</span>
+              <span
+                *ngIf="col.field == 'changedDetails' && references.changeDetailsDisplayFlag === true && references.changedStatus != 2"
+                class="span-centered">
+                <input type="text" [(ngModel)]="references.changedDetail" class="form-control resize-responsive"
+                  placeholder="Type your comments here" />
+                <span
+                  *ngIf="references.changedStatus > 0 && (references.changedDetail == null || references.changedDetail.length < 1)"
+                  style="color: red;">Change Details is mandatory.</span>
+              </span>
+              <span
+                *ngIf="col.field == 'changedDetails' && references.changeDetailsDisplayFlag === true && references.changedStatus == 2"
+                class="span-centered">
+                <input type="text" [(ngModel)]="references.changedDetail" value=""
+                  class="form-control resize-responsive" [disabled]="true" />
+                <span
+                  *ngIf="references.changedStatus > 0 && (references.changedDetail == null || references.changedDetail.length < 1)"></span>
+              </span>
+
+              <span *ngIf="col.field == 'changedStatus' && references.changedStatus == 2" class="span-centered">
+                <p-dropdown [(ngModel)]="references.changedStatus" [options]="docChangedStatus" [disabled]="true"
+                  appendTo='body' [style]="{'width':'100%'}">
+                </p-dropdown>
+              </span>
+              <span
+                *ngIf="col.field == 'changedStatus' && references.changeDetailsDisplayFlag === true && references.changedStatus != 2"
+                class="span-centered">
+                <p-dropdown [(ngModel)]="references.changedStatus" [options]="docChangedStatus" appendTo='body'
+                  [style]="{'width':'100%'}">
+                </p-dropdown>
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="paginatorright" let-state>
+          <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+            Showing <b>{{(state.page * state.rows) + 1}}</b> -
+            <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+            of <b>{{state.totalRecords}}</b>
+          </span>
+          <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+  <div class="ref-form" *ngIf="fromMaintenanceProcess === true">
+    <fieldset id="fieldset">
+      <h6>Reference Details</h6>
+
+      <div class="flex-container">
+        <div class="flex-row">
+          <div class="flex-item-small right-pad">
+            <label class="ref-label">Reference Source:</label>
+            <input pInputText class="ref-input" maxlength="50" type="text" [(ngModel)]="reference.referenceName"
+              name="selectSource" [disabled]="true" />
+          </div>
+
+          <div class="flex-item">
+            <label class="ref-label">Title:</label>
+            <input pInputText class="ref-input" type="text" [(ngModel)]="reference.referenceTitle" name="refTitle"
+              [disabled]="true" />
+          </div>
+        </div>
+
+        <div class="flex-row">
+          <div class="flex-item right-pad">
+            <label class="ref-label">URL:</label>
+            <input pInputText class="ref-input" type="text" [(ngModel)]="reference.referenceURL" name="refUrl"
+              [disabled]="true" />
+          </div>
+          <div class="flex-item">
+            <label class="ref-label">Reference(s)</label>
+            <input class="ref-input" type="text" title="{{eclRef.referenceIngested}}" [(ngModel)]="eclRef.referenceIngested" name="referenceIngested"
+              [disabled]="true" />
+          </div>
+        </div>
+        <div class="flex-row">
+          <div class="flex-item-date">
+            <label class="ref-label">Effective From:</label>
+            <p-calendar type="date" name="refEffeFromDate" [(ngModel)]="reference.refEffectiveFromDt"
+              dateFormat="mm/dd/yy" [disabled]="true"></p-calendar>
+          </div>
+
+          <div class="flex-item-date">
+            <label class="ref-label">Effective To:</label>
+            <p-calendar type="date" name="refEffeToDate" [(ngModel)]="reference.refEffectiveToDt" dateFormat="mm/dd/yy"
+              [disabled]="true"></p-calendar>
+          </div>
+
+          <div class="flex-item-date">
+            <label class="ref-label">Publication Date:</label>
+            <p-calendar type="date" name="refPubDate" [(ngModel)]="reference.refUrlPublicationDt" dateFormat="mm/dd/yy"
+              [disabled]="true"></p-calendar>
+          </div>
+
+          <div class="flex-item-small">
+            <label class="ref-label">Edition:</label>
+            <input class="ref-input" type="text" [(ngModel)]="eclRef.edition" name="refEdition" [disabled]="true" />
+          </div>
+
+          <div class="flex-item-small">
+            <label class="ref-label">Chapter:</label>
+            <input maxlength="50" class="ref-input" type="text" [(ngModel)]="eclRef.chapter" name="refChapter"
+              [disabled]="true" />
+          </div>
+
+          <div class="flex-item-small">
+            <label class="ref-label">Page#:</label>
+            <input maxlength="10" class="ref-input" type="text" [(ngModel)]="eclRef.page" name="refPage"
+              [disabled]="true" />
+          </div>
+
+          <div class="flex-item-small no-pad">
+            <label class="ref-label">Section:</label>
+            <input maxlength="50" class="ref-input" type="text" [(ngModel)]="eclRef.section" name="refSection"
+              [disabled]="true" />
+          </div>
+
+        </div>
+
+        <div class="flex-row">
+          <div class="flex-3 pad-right">
+            <label class="ref-label">URL Attachment:</label>
+            <input pInputText type="text" class="ref-input" [(ngModel)]="reference.refUrlFileName" name="urlAttachment"
+              [disabled]="true" />
+          </div>
+
+          <div class="flex-3 pad-right">
+            <label class="ref-label">Reference Document 1:</label>
+            <input pInputText type="text" class="ref-input" [(ngModel)]="reference.refDocFileName1"
+              name="refAttachment1" [disabled]="true" />
+          </div>
+
+          <div class="flex-3 no-pad">
+            <label class="ref-label">Reference Document 2:</label>
+            <input pInputText type="text" class="ref-input" [(ngModel)]="reference.refDocFileName2"
+              name="refAttachment2" [disabled]="true" />
+          </div>
+        </div>
+
+        <div class="flex-row">
+          <div class="flex-column comment">
+            <div class="flex-item">
+              <label>Comment Document 1:</label>
+              <span *ngIf="eclRef.eclAttachmentList === undefined || eclRef.commentsFile1 === false">
+                <input pInputText type="text" class="ref-input" name="commentAttachment1" [disabled]="true" />
+              </span>
+              <span *ngIf="eclRef.eclAttachmentList !== undefined && eclRef.commentsFile1 === true">
+                <input pInputText type="text" class="ref-input"
+                  [(ngModel)]="eclRef.eclAttachmentList[0].attachmentFileName" name="commentAttachment1"
+                  [disabled]="true" />
+              </span>
+            </div>
+
+            <div class="flex-item flex-section">
+              <label>Comment Document 2:</label>
+              <span *ngIf="eclRef.eclAttachmentList === undefined || eclRef.commentsFile2 === false">
+                <input pInputText type="text" class="ref-input" name="commentAttachment2" [disabled]="true" />
+              </span>
+              <span *ngIf="eclRef.eclAttachmentList !== undefined && eclRef.commentsFile2 === true && eclRef.commentsFile1 === true">
+                <input pInputText type="text" class="ref-input"
+                  [(ngModel)]="eclRef.eclAttachmentList[1].attachmentFileName" name="commentAttachment2"
+                  [disabled]="true" />
+              </span>
+              <span *ngIf="eclRef.eclAttachmentList !== undefined && eclRef.commentsFile2 === true && eclRef.commentsFile1 === false">
+                <input pInputText type="text" class="ref-input"
+                  [(ngModel)]="eclRef.eclAttachmentList[0].attachmentFileName" name="commentAttachment2"
+                  [disabled]="true" />
+              </span>
+
+            </div>
+          </div>
+
+          <div class="flex-item">
+            <label>Comments</label>
+            <textarea rows="5" style="width: 100%; background-color: #ffffff;" [(ngModel)]="eclRef.comments"
+              name="refDetailsComments" [disabled]="true"></textarea>
+          </div>
+        </div>
+
+      </div>
+    </fieldset>
+  </div>
+
+  <!-- REFERENCE UPDATE SECTION !-->
+  <div class="ref-form" *ngIf="!isSameSim">
+    <fieldset id="fieldset">
+      <span *ngIf="fromMaintenanceProcess === true">
+        <legend>Reference Updates</legend>
+      </span>
+      <span *ngIf="!fromMaintenanceProcess">
+        <h6>Reference Details</h6>
+      </span>
+
+      <div class="flex-container">
+
+        <div class="flex-row">
+          <div class="flex-item-small right-pad">
+            <label class="ref-label">Reference Source:</label>
+            <p-dropdown id="selectionSourceId" class="ref-search" [options]="newRefSource" name="selectSource"
+              [style]="{width: '100%','height': '24px','line-height': '.8'}" [(ngModel)]="selectedSource"
+              [disabled]="provDialogDisable || isSameSim || isReferenceDisableObject !== null || readOnlyView"
+              (onChange)="showRefSourceName($event)">
+            </p-dropdown>
+          </div>
+
+          <div class="flex-item">
+            <label class="ref-label"><span style="color: #E72B8A;">*</span>Title:</label>
+            <input pInputText class="ref-input" type="text" [(ngModel)]="reference.referenceTitle" name="refTitle"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null" />
+          </div>
+        </div>
+
+        <div class="flex-row">
+          <div class="flex-item right-pad">
+            <label class="ref-label">URL:</label>
+            <input pInputText class="ref-input" type="text" [(ngModel)]="reference.referenceURL" pattern="https?://.+"
+              #url="ngModel" name="refUrl" [disabled]="provDialogDisable || isReferenceDisableObject !== null"
+              placeholder="Type or Paste Reference URL..." [readonly]="refValuesEditable" />
+            <div *ngIf="url.invalid && (url.dirty || url.touched)" class="alert alert-danger">
+              <div *ngIf="url.errors.pattern">
+                Must start with http:// or https:// and one or more characters
+              </div>
+            </div>
+          </div>
+          <!-- Adding the condition to disable the field when their is no value in the object,
+          but will be enabled for ingested rules if the value is present, user cannot empty this field -->
+          <div class="flex-item">
+            <label class="ref-label">Reference(s)</label>
+            <input class="ref-input" type="text" title="{{eclRef.referenceIngested}}" [(ngModel)]="eclRef.referenceIngested" name="referenceIngested"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null || !fromMaintenanceProcess || !eclRef.referenceIngested" />
+          </div>
+        </div>
+        <div class="flex-row">
+
+          <div class="flex-item-date">
+            <label class="ref-label">Effective From:</label>
+            <p-calendar type="date" name="refEffeFromDate" [monthNavigator]="true" [yearNavigator]="true"
+            [yearRange]="yearValidRangeEft" [(ngModel)]="reference.refEffectiveFromDt" dateFormat="mm/dd/yy"
+              placeholder="mm/dd/yyyy" [disabled]="provDialogDisable || isReferenceDisableObject !== null">
+            </p-calendar>
+          </div>
+
+          <div class="flex-item-date">
+            <label class="ref-label">Effective To:</label>
+            <p-calendar type="date" name="refEffeToDate" [minDate]="reference.refEffectiveFromDt"
+              [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+              [(ngModel)]="reference.refEffectiveToDt" dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null"
+              (onSelect)="onEffectiveToDtSelected($event)">
+            </p-calendar>
+          </div>
+
+          <div class="flex-item-date">
+            <label class="ref-label">Publication Date:</label>
+            <p-calendar type="date" name="refPubDate" [minDate]="minDate" [maxDate]="maxDate" [monthNavigator]="true"
+              [yearNavigator]="true" [yearRange]="yearValidRangeEft" [(ngModel)]="reference.refUrlPublicationDt"
+              dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null">
+            </p-calendar>
+          </div>
+
+          <div class="flex-item-small">
+            <label class="ref-label">Edition:</label>
+            <input class="ref-input" type="text" [(ngModel)]="eclRef.edition" name="refEdition"
+              [readonly]="refValuesEditable" [disabled]="provDialogDisable || isReferenceDisableObject !== null" />
+          </div>
+          <div class="flex-item-small">
+            <label class="ref-label">Chapter:</label>
+            <input maxlength="50" class="ref-input" type="text" [(ngModel)]="eclRef.chapter" name="refChapter"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null" />
+          </div>
+          <div class="flex-item-small">
+            <label class="ref-label">Page#:</label>
+            <input maxlength="10" class="ref-input" type="text" [(ngModel)]="eclRef.page" name="refPage"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null" />
+          </div>
+          <div class="flex-item-small no-pad">
+            <label class="ref-label">Section:</label>
+            <input maxlength="50" class="ref-input" type="text" [(ngModel)]="eclRef.section" name="refSection"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null" />
+          </div>
+        </div>
+
+        <div class="flex-row">
+          <div class="flex-3 pad-right">
+            <label class="ref-label">URL Attachment:</label>
+            <p-fileUpload #uploadControl class="custom-upload" (onClear)="onClearFile(1)"
+              (onRemove)="onRemove($event, 1)" (onSelect)="onSelect($event, 1)" customUpload="true"
+              maxFileSize="10245760" [showUploadButton]="false"
+              [disabled]="isReferenceDisableObject !== null || eclRef.refFile"
+              invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB" [fileLimit]="1" [multiple]="false"
+              [chooseLabel]="chooseLabel">
+            </p-fileUpload>
+            <span *ngIf="eclRef.refFile === true">
+              <span (click)="referenceFileDownload1(refFileDownload,reference.refUrlFileName,reference.refUrlFileType)">
+                <span id="refAttach" class="file-name-display">{{reference.refUrlFileName}}</span>
+                <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+              </span>
+              <span *ngIf="!provDialogDisable && !readOnlyView && eclRef.refInfo.referenceURLFileDelete" (click)="deleteReferenceFile(1) ">
+                <a>
+                  <i class="fa fa-times" aria-hidden="true"
+                    style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em;"></i>
+                </a>
+              </span>
+            </span>
+          </div>
+          <div class="flex-3 pad-right">
+            <label class="ref-label">Reference Document 1:</label>
+            <p-fileUpload #uploadControl1 class="custom-upload" (onClear)="onClearFile(2)"
+              (onRemove)="onRemove($event, 2)" (onSelect)="onSelect($event, 2)" customUpload="true"
+              maxFileSize="10245760" [showUploadButton]="false"
+              invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB" [fileLimit]="1" [multiple]="false"
+              [disabled]="isReferenceDisableObject !== null || eclRef.refFile1" [chooseLabel]="chooseLabel">
+            </p-fileUpload>
+            <span *ngIf="eclRef.refFile1 === true">
+              <span
+                (click)="referenceFileDownload2(refFileDownload1,reference.refDocFileName1,reference.refDocFileType1)">
+                <span id="refAttach" class="file-name-display">{{reference.refDocFileName1}}</span>
+                <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+              </span>
+              <span *ngIf="!provDialogDisable && !readOnlyView && eclRef.refInfo.referenceDoc1Delete" (click)="deleteReferenceFile(2)">
+                <a>
+                  <i class="fa fa-times" aria-hidden="true"
+                    style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em;"></i>
+                </a>
+              </span>
+            </span>
+          </div>
+          <div class="flex-3">
+            <label class="ref-label">Reference Document 2:</label>
+            <p-fileUpload #uploadControl2 class="custom-upload" (onClear)="onClearFile(3)"
+              (onRemove)="onRemove($event, 3)" (onSelect)="onSelect($event, 3)" customUpload="true"
+              maxFileSize="10245760" [showUploadButton]="false"
+              invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB" [fileLimit]="1" [multiple]="false"
+              [disabled]="isReferenceDisableObject !== null || eclRef.refFile2" [chooseLabel]="chooseLabel">
+            </p-fileUpload>
+            <span *ngIf="eclRef.refFile2 === true">
+              <span
+                (click)="referenceFileDownload3(refFileDownload2,reference.refDocFileName2,reference.refDocFileType2)">
+                <span id="refAttach" class="file-name-display">{{reference.refDocFileName2}}</span>
+                <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+              </span>
+              <span *ngIf="!provDialogDisable && !readOnlyView && eclRef.refInfo.referenceDoc2Delete" (click)="deleteReferenceFile(3)">
+                <a>
+                  <i class="fa fa-times" aria-hidden="true"
+                    style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em;"></i>
+                </a>
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="flex-row">
+          <div class="flex-column comment">
+            <div class="flex-item">
+              <label>Comment Document 1:</label>
+              <p-fileUpload #commentUpload1 class="custom-upload" (onClear)="onClearFile(4)"
+                (onRemove)="onRemove($event, 4)" (onSelect)="onSelect($event, 4)" customUpload="true"
+                maxFileSize="10245760" [showUploadButton]="false"
+                invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB" [fileLimit]="1" [multiple]="false"
+                [disabled]="isReferenceDisableObject !== null || eclRef.commentsFile1" [chooseLabel]="chooseLabel">
+              </p-fileUpload>
+              <span *ngIf="eclRef.commentsFile1 === true">
+                <span
+                  (click)="referenceFileDownload4(refCommentsFileDownload1, eclRef.eclAttachmentList[0].attachmentFileName, null)">
+                  <span id="refAttach"
+                    class="file-name-display">{{eclRef.eclAttachmentList[0].attachmentFileName}}</span>
+                  <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                </span>
+                <span *ngIf="!provDialogDisable && !readOnlyView && eclRef.removeComments1Attachment" (click)="deleteCommentsFile(1) ">
+                  <a>
+                    <i class="fa fa-times" aria-hidden="true"
+                      style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em;"></i>
+                  </a>
+                </span>
+              </span>
+            </div>
+
+            <div class="flex-item">
+              <label>Comment Document 2:</label>
+              <p-fileUpload #commentUpload2 class="custom-upload" (onClear)="onClearFile(5)"
+                (onRemove)="onRemove($event, 5)" (onSelect)="onSelect($event, 5)" customUpload="true"
+                maxFileSize="10245760" [showUploadButton]="false"
+                invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB" [fileLimit]="1" [multiple]="false"
+                [disabled]="isReferenceDisableObject !== null || eclRef.commentsFile2" [chooseLabel]="chooseLabel">
+                <ng-template pTemplate="toolbar">
+                </ng-template>
+              </p-fileUpload>
+              <span *ngIf="eclRef.commentsFile2 === true">
+                <span *ngIf="eclRef.commentsFile2 === true && eclRef.commentsFile1 === true"
+                  (click)="referenceFileDownload5(refCommentsFileDownload2,eclRef.eclAttachmentList[1].attachmentFileName,null)">
+                  <span id="refAttach"
+                    class="file-name-display">{{eclRef.eclAttachmentList[1].attachmentFileName}}</span>
+                  <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                </span>
+
+
+                <span *ngIf="eclRef.commentsFile2 === true && eclRef.commentsFile1 === false"
+                  (click)="referenceFileDownload5(refCommentsFileDownload2,eclRef.eclAttachmentList[0].attachmentFileName,null)">
+                  <span id="refAttach"
+                    class="file-name-display">{{eclRef.eclAttachmentList[0].attachmentFileName}}</span>
+                  <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                </span>
+
+                
+                <span *ngIf= "eclRef.commentsFile2 === true && eclRef.commentsFile1 === false && !provDialogDisable && !readOnlyView && eclRef.removeComments2Attachment" (click)="deleteCommentsFile(1)">
+                  <a>
+                    <i class="fa fa-times" aria-hidden="true"
+                      style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em;"></i>
+                  </a>
+                </span>
+
+                <span *ngIf= "eclRef.commentsFile2 === true && eclRef.commentsFile1 === true && !provDialogDisable && !readOnlyView && eclRef.removeComments2Attachment" (click)="deleteCommentsFile(2)">
+                  <a>
+                    <i class="fa fa-times" aria-hidden="true"
+                      style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em;"></i>
+                  </a>
+                </span>
+
+
+              </span>
+            </div>
+          </div>
+
+          <div class="flex-item">
+            <label>Comments</label>
+            <textarea rows="5" placeholder="Add Comments..." style="width: 100%; background-color: #ffffff;"
+              [(ngModel)]="eclRef.comments" name="refDetailsComments" (input)="keylimitset($event.target.value)"
+              [disabled]="provDialogDisable || isReferenceDisableObject !== null"></textarea>
+          </div>
+
+          <div class="button-group">
+            <div class=flex-column>
+              <button type="button" class="btn btn-primary" [disabled]="isAddingObject === null"
+                (click)="addReference()">Add</button>
+              <button type="button" class="btn btn-primary" [disabled]="isRemovableObject !== null"
+                (click)="removeReference()">Remove</button>
+            </div>
+            <div class=flex-column>
+              <button type="button" class="btn btn-primary" name="refDetailSave" value="Save"
+                [disabled]="isSavableObject !== null" (click)="saveEclReferenceDetails(true)">Save</button>
+              <button type="button" class="btn btn-primary" [disabled]="isAddingObject !== null"
+                (click)="cancelAddingReference()" name="refDetailCancel" value="Cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <p-dialog header="Confirmation" [class]="confirmDialog" [(visible)]="removeDisplay">
+      <p>{{Message}}</p>
+      <p-footer>
+        <button name="deleteCancelDialogbtn" class="btn btn-primary" icon="pi pi-check" (click)="removeDialogYes()"
+          style="background-color: #31006F !important; color: white !important;">Yes</button>
+        <button name="deleteConfirmDialogbtn" class="btn btn-primary" icon="pi pi-close" (click)="removeDialogNo()"
+          style="background-color: #31006F !important; color: white !important;">No</button>
+      </p-footer>
+    </p-dialog>
+
+    <p-dialog header="Are you sure?" [class]="confirmDialog" [(visible)]="removeAttachmentDisplay">
+      <p class="message-bold">
+        <span class="icon-float-left">
+          <i class="pi pi-exclamation-triangle"></i>
+        </span>
+        <span>Are you sure you want to delete this attachment?</span>
+      </p>
+      <p class="message-center">This action cannot be undone.</p>
+      <p-footer>
+        <div class="row">
+          <div class="col-md-5">
+            <button name="removeAttachmentCancelBtn" class="btn btn-primary" pButton (click)="removeAttachmentCancel()"
+              label="Cancel"></button>
+          </div>
+          <div class="col-md-6">
+            <button name="removeAttachmentDeletebtn" class="btn btn-primary" pButton (click)="removeAttachmentDelete()"
+              label="Delete"></button>
+          </div>
+        </div>
+      </p-footer>
+    </p-dialog>
+
+    <p-dialog header="Confirmation" [class]="confirmDialog" [(visible)]="cancelDisplay">
+      <p>{{Message}}</p>
+      <p-footer>
+        <button name="cancelDialogbtn" class="btn btn-primary" icon="pi pi-check" (click)="cancelDialogYes()"
+          style="background-color: #31006F !important; color: white !important;">Yes</button>
+        <button name="cancelConfirmDialogbtn" class="btn btn-primary" icon="pi pi-close" (click)="cancelDialogNo()"
+          style="background-color: #31006F !important; color: white !important;">No</button>
+      </p-footer>
+    </p-dialog>
+  </div>
+
+  <div class="flex-section" *ngIf="fromMaintenanceProcess === true">
+    <div class="row">
+      <div class="col-sm">
+        <div>
+          <label><span class="required-field-color">*</span>Rule Impacted?</label>
+          <p-dropdown [options]="impactInd" (onChange)="disableImpactType($event)" [style]="{'width':'100%'}"
+            [(ngModel)]="ruleImpactAnalysisRun.ruleImpactedInd" [disabled]="!isSameSim && (retireStatus || readOnlyView)"></p-dropdown>
+        </div>
+
+        <div>
+          <label><span class="required-field-color">*</span>Impact Type</label>
+          <p-dropdown #ruleImpactedInd [options]="impactType" [required]="ruleImpactAnalysisRun.ruleImpactedInd"
+            [disabled]="!ruleImpactAnalysisRun.ruleImpactedInd || !isSameSim && (retireStatus || readOnlyView)"
+            [style]="{'width':'100%'}" [(ngModel)]="ruleImpactAnalysisRun.ruleImpactTypeId"
+            (onChange)="refreshApprovalValues()"></p-dropdown>
+        </div>
+
+        <div *ngIf="ruleImpactAnalysisRun.ruleImpactedInd && ruleImpactAnalysisRun.ruleImpactTypeId == null">
+          <span style="color: red;">Impact Type is required.</span>
+        </div>
+      </div>
+
+      <div class="col-sm">
+        <div>
+          <label><span class="required-field-color">*</span>Rule Impact Description</label>
+          <span *ngIf="ruleImpactAnalysisRun.ruleImpactAnalysis"
+            style="color: lightgray; float: right">{{ruleImpactAnalysisRun.ruleImpactAnalysis.length}}/500</span>
+        </div>
+        <div>
+          <textarea maxlength="500" [disabled]="!ruleImpactAnalysisRun.ruleImpactedInd || retireStatus || (!isSameSim && readOnlyView)"
+          [required]="ruleImpactAnalysisRun.ruleImpactedInd" rows="4" style="width: 100%;"
+            [(ngModel)]="ruleImpactAnalysisRun.ruleImpactAnalysis"></textarea>
+        </div>
+        <div
+          *ngIf="ruleImpactAnalysisRun.ruleImpactedInd && (ruleImpactAnalysisRun.ruleImpactAnalysis == '' || ruleImpactAnalysisRun.ruleImpactAnalysis == null)">
+          <span style="color: red;">Rule Impact Description is required.</span>
+        </div>
+      </div>
+
+      <div class="col-sm">
+        <div>
+          <label>Comments</label>
+          <span *ngIf="ruleImpactAnalysisRun.comments"
+            style="color: lightgray; float: right">{{ruleImpactAnalysisRun.comments.length}}/500</span>
+          <textarea maxlength="500" rows="4" style="width: 100%;" [(ngModel)]="ruleImpactAnalysisRun.comments"
+          [disabled]="!isSameSim && readOnlyView"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</fieldset>
+
+<div class="dialog-container">
+  <p-dialog header="Are You sure?" [(visible)]="showDialog" [width]="600" [height]="100" [draggable]="false" [responsive]="true">
+  <p class="message-bold">
+    <span class="icon-float-left">
+      <i class="pi pi-exclamation-triangle"></i>
+    </span>
+
+    <span *ngIf="!showDialogRetire">The date that You have selected will remove this reference from "Retired" status.</span>
+    <span *ngIf="showDialogRetire">You have selected a date that is in the past. Proceeding with this date will retire this reference for this rule.</span>
+  </p>
+  <p class="message-center">Do you want to proceed?</p>
+
+  <div class="float-left" style="margin-bottom: 10px; padding-left: 190px;">
+    <button style="font-size: 11px; width: 85px; height: 50px;" type="button" class="btn btn-primary btn-sm" (click)="closeDialog()"><i
+        class="fa fa-remove"></i> Cancel</button>
+        &nbsp;
+    <span *ngIf="!showDialogRetire">
+    <button style="font-size: 11px; width: 85px; height: 50px;" type="button" class="btn btn-primary btn-sm" (click)="reInstateRef()"><i
+        class="fa fa-submit"></i>
+      Reinstate <br>Reference</button>
+    </span>
+    <span *ngIf="showDialogRetire">
+      <button style="font-size: 11px; width: 85px; height: 50px;" type="button" class="btn btn-primary btn-sm" (click)="reInstateRef()"><i
+        class="fa fa-submit"></i>
+      Retire <br>Reference</button>
+    </span>
+  </div>
+
+  </p-dialog>
+</div>

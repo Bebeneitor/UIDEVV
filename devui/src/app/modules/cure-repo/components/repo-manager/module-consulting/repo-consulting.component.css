@@ -1,0 +1,8 @@
+::ng-deep  .ui-fieldset .ui-fieldset-legend {
+    width: auto;
+    font-size: 12px;
+}
+
+.invalid-button{
+    color: lightgrey !important;
+}

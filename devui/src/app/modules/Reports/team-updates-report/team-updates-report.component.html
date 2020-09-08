@@ -1,0 +1,97 @@
+<div class='team-updates-report'>
+    <h5 class='title-header' style="position: relative; font-size: 16px;">
+      Team Updates Report
+    </h5>
+    <hr>
+    <p-panel header="Filters" [toggleable]="true">
+      <div class="row">
+        <div class="col-md-2 col-sm-12">
+  
+          <div class="container-of-dropdown">
+            <label class="label-of-dropdown"><span class="icon-float-left">*</span>Team:</label>
+            <p-dropdown [options]="teams" [(ngModel)]="selectedTeam" (onChange)="fillUsersByTeam()"
+              placeholder="Select item">
+            </p-dropdown>
+          </div>
+  
+          <div class="container-of-dropdown">
+            <label class="label-of-dropdown"><span class="icon-float-left">*</span>Team Member:</label>
+            <p-dropdown [options]="teamMembers" [(ngModel)]="selectedTeamMember" placeholder="Select item">
+            </p-dropdown>
+          </div>
+  
+          <div class="container-of-dropdown">
+            <label class="label-of-dropdown">Category:</label>
+            <p-dropdown [options]="categories" [(ngModel)]="selectedCategory" placeholder="Select item">
+            </p-dropdown>
+          </div>
+  
+          <div class="container-of-dropdown">
+            <label class="label-of-dropdown"><span class="icon-float-left">*</span>Status:</label>
+            <p-dropdown [options]="statuses" [(ngModel)]="selectedStatus" placeholder="Select item">
+            </p-dropdown>
+          </div>
+  
+          <div class="container-of-dropdown">
+            <label class="label-of-dropdown">Date:</label>
+            <p-calendar #calendar [(ngModel)]="selectedDates" (onSelect)="onSelect()" selectionMode="range" [readonlyInput]="false" [monthNavigator]="true"
+              [yearNavigator]="true"  [yearRange]="yearValidRangeEft" [maxDate]="maxDate" dateFormat="mm/dd/yy" 
+              placeholder="Start Date - End Date"></p-calendar>
+          </div>
+  
+          <div class="container-of-button">
+            <button class="btn btn-primary btn-sm float-right btn-of-dropdown" (click)="searchDataTable()" type="button"
+              [disabled]="(selectedTeamMember===undefined || selectedStatus===undefined)">
+              <i class="fa fa-search"></i> Search</button>
+          </div>
+        </div>
+  
+        <div class="col-md-5 col-sm-12 container-of-chart">
+          <p-chart *ngIf = "dataChartTeam" type="pie" [data]="dataChartTeam" [options]="optionsCharTeam"></p-chart>
+        </div>
+  
+        <div *ngIf="isSelectedTeamMember" class="col-md-5 col-sm-12 container-of-chart">
+          <p-chart *ngIf = "dataChartTeamMember" type="pie" [data]="dataChartTeamMember" [options]="optionsChartTeamMember"></p-chart>
+        </div>
+  
+      </div>
+    </p-panel>
+    <hr>
+  
+    <div class="team-updates-report">
+      <div *ngIf="enabledEclTable === localConstants.ALL_STATUSES" class="col">
+        <ecl-table #eclTableAllStatuses [tableModel]='tableConfig'></ecl-table>
+      </div>
+      <div *ngIf="enabledEclTable === localConstants.IDEAS_GENERATED" class="col">
+        <ecl-table #eclTableIdeasGenerated [tableModel]='tableConfig'></ecl-table>
+      </div>
+      <div *ngIf="enabledEclTable === localConstants.PROVISIONAL_RULES_GENERATED" class="col">
+        <ecl-table #eclTableProvisionalRulesGenerated [tableModel]='tableConfig'>
+        </ecl-table>
+      </div>
+      <div *ngIf="enabledEclTable === localConstants.PROVISIONAL_RULES_ASSIGNED" class="col">
+        <ecl-table #eclTableProvisionalRulesAssigned [tableModel]='tableConfig'>
+        </ecl-table>
+      </div>
+      <div *ngIf="enabledEclTable === localConstants.RULES_GENERATED" class="col">
+        <ecl-table #eclTableRulesGenerated [tableModel]='tableConfig'></ecl-table>
+      </div>
+      <div *ngIf="enabledEclTable === localConstants.SHELVED" class="col">
+        <ecl-table #eclTableShelved [tableModel]='tableConfig'></ecl-table>
+      </div>
+      <div *ngIf="enabledEclTable === localConstants.INVALID" class="col">
+        <ecl-table #eclTableInvalid [tableModel]='tableConfig'></ecl-table>
+      </div>
+      <div *ngIf="enabledEclTable === localConstants.DUPLICATED" class="col">
+        <ecl-table #eclTableDuplicated [tableModel]='tableConfig'></ecl-table>
+      </div>
+  
+    </div>
+  
+  </div>
+  <p-blockUI [blocked]="blockedDocument">
+    <div class="img-loading text-center">
+      <img src="assets/img/loading.gif" style="width: 60%" />
+      <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+    </div>
+  </p-blockUI>

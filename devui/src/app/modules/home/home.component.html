@@ -1,0 +1,182 @@
+<h5 class='text-center title-header'>
+    <div class="breadcrumb-dashboard">
+        <app-breadcrumb *ngIf="pageTitle != ''" [path]="'Home>' + pageTitle"></app-breadcrumb>
+    </div>
+</h5>
+
+<div class="text-right items-header-home">
+    <button pTooltip="You have interests, your widgets will filter the information." tooltipPosition="left"
+        *ngIf="interests.length > 0" type="button" class="btn btn-sm btn-primary-pink" style="font-size: 11px;"
+        (click)="openInterests()">
+        Interests <span class="badge badge-light">{{interests.length}}</span>
+    </button>
+
+    <!--
+    <button pTooltip="Videos / Tutorials" tooltipPosition="left" type="button" class="btn btn-sm btn-primary"
+        (click)="visibleSidebar2 = true" style="font-size: 11px;"><i class="fa fa-video-camera"></i> Video
+        Tutorials</button>-->
+</div>
+
+<hr>
+
+<p-toast key="settingsDash" [baseZIndex]="99999"></p-toast>
+
+<p-sidebar [(visible)]="visibleSidebar2" position="right" [baseZIndex]="10000">
+
+    <div class="container-fluid" style="padding: 0px;">
+        <div class="row">
+            <div class="col-12">
+                <p style="font-size: 11px; text-align: justify">Now to ECL? Need guidance? Check the links below for a
+                    quick functionality overview.</p>
+            </div>
+        </div>
+        <br>
+        <ng-container *ngFor="let v of videos">
+            <div class="row">
+                <div class="col-12">
+                    <a target="_blank" [href]="v.url">
+                        <img [src]="v.image" style="width: 100%; height: 150px; object-fit: cover;" />
+                        <p style="font-size: 11px;margin-top: 10px; color : #31006F;">{{v.title}}</p>
+                        <p style="font-size: 11px; color : black">{{v.description}}</p>
+                    </a>
+                </div>
+            </div>
+            <hr style="color : #31006F;">
+        </ng-container>
+    </div>
+</p-sidebar>
+
+<div class="container-fluid" style="padding: 0px">
+    <div class="row">
+
+        <div class="col-sm-12 col-md-6">
+            <!--column 1-->
+            <div class="container-fluid" style="padding: 0px">
+                <div class="row">
+                    <div *ngFor="let w of widgets1" style="width: 100%;">
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-ideas-generated'">
+                            <app-ideas-generated [title]="w.title"></app-ideas-generated>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-tasks'">
+                            <app-my-tasks [title]="w.title"></app-my-tasks>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-recently-viewed'">
+                            <app-recently-viewed [title]="w.title"></app-recently-viewed>
+                        </div>
+                        <!--
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-rules-implemented'">
+                            <app-rules-implemented [title]="w.title"></app-rules-implemented>
+                        </div>
+                        -->
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-updated-rules'">
+                            <app-updated-rules [title]="w.title"></app-updated-rules>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-whats-new'">
+                            <app-whats-new [title]="w.title"></app-whats-new>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-top-ten'">
+                            <app-top-ten [title]="w.title"></app-top-ten>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-contributions'">
+                            <app-my-contributions [title]="w.title"></app-my-contributions>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-deprecated-rules'">
+                            <app-deprecated-rules [title]="w.title"></app-deprecated-rules>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-same-sim-analysis'">
+                            <app-same-sim-analysis [title]="w.title"></app-same-sim-analysis>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-team-updates'">
+                            <app-team-updates [title]="w.title"></app-team-updates>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6">
+            <!--column 2-->
+            <div class="container-fluid" style="padding: 0px">
+                <div class="row">
+                    <div *ngFor="let w of widgets2" style="width: 100%;">
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-ideas-generated'">
+                            <app-ideas-generated [title]="w.title"></app-ideas-generated>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-tasks'">
+                            <app-my-tasks [title]="w.title"></app-my-tasks>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-recently-viewed'">
+                            <app-recently-viewed [title]="w.title"></app-recently-viewed>
+                        </div>
+
+                        <!--
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-rules-implemented'">
+                            <app-rules-implemented [title]="w.title"></app-rules-implemented>
+                        </div>-->
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-updated-rules'">
+                            <app-updated-rules [title]="w.title"></app-updated-rules>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-whats-new'">
+                            <app-whats-new [title]="w.title"></app-whats-new>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-top-ten'">
+                            <app-top-ten [title]="w.title"></app-top-ten>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-contributions'">
+                            <app-my-contributions [title]="w.title"></app-my-contributions>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-deprecated-rules'">
+                            <app-deprecated-rules [title]="w.title"></app-deprecated-rules>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-same-sim-analysis'">
+                            <app-same-sim-analysis [title]="w.title"></app-same-sim-analysis>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-team-updates'">
+                            <app-team-updates [title]="w.title"></app-team-updates>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

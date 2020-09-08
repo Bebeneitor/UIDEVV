@@ -1,0 +1,82 @@
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageName}}</h5>
+<div>
+
+  <p-table #viewGrid [columns]="cols" [value]="jobInfo" [paginator]="true" [(selection)]="selectedJobs"
+    [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+    [rowsPerPageOptions]="[10,20,30]" [loading]="loading" [responsive]="true" [responsive]="true" sortField="id"
+    sortOrder="-1">
+
+    <ng-template pTemplate="caption">
+      <div style="text-align: right">
+        <input type="text" pInputText size="50" placeholder="Global Filter"
+          (input)="viewGrid.filterGlobal($event.target.value, 'contains')" style="width:150px; border-radius: 5px">
+        <i class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th class="small-th" style="width:25px; text-align: center;">
+          Check
+        </th>
+        <th class="small-th" style="text-align: center" *ngFor="let col of columns" [ngStyle]="{'width': col.width}">
+          {{col.header}}
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-job let-columns="columns">
+      <tr [pSelectableRow]="job">
+        <td class="checkbox-center">
+          <p-tableCheckbox [value]="job"></p-tableCheckbox>
+        </td>
+        <td *ngFor="let col of columns">
+          <span *ngIf="col.field == 'jobGroup'" class="span-centered">{{job.jobGroup}}</span>
+          <span *ngIf="col.field == 'jobName'" class="span-centered">{{job.jobName}}</span>
+          <span *ngIf="col.field == 'jobCronExpression'" class="span-centered">
+            <div class="container-fluid">
+              <div class="row">
+                <div class=col-8>
+                  <input type="text" name="jobCronExpression" style="width:130%; border-radius: 5px; text-align: center;"
+                    [(ngModel)]="job.jobCronExpression" readonly>
+                </div>
+                <div class="col-4">
+                  <button type="button" value="changeCronExpression" class="btn btn-primary small-td" [ngStyle]="{'width': '10px!important', 'min-width': 'unset!important'}"
+                    (click)="updateCronExpression(job)">...</button>
+                </div>
+              </div>
+            </div>
+          </span>
+          <span *ngIf="col.field == 'jobStatus'" class="span-centered" style="font-weight: bold;">
+            {{job.jobStatus}}
+          </span>
+          <span *ngIf="col.field == 'jobLastExecution'" class="span-centered">
+            {{job.jobLastExecution | date :'EEEE MMMM dd hh:mm:ss a zzzz yyyy'}}
+          </span>
+          <span *ngIf="col.field == 'jobNextExecution'" class="span-centered">
+            {{job.jobNextExecution | date :'EEEE MMMM dd hh:mm:ss a zzzz yyyy'}}
+          </span>
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+  <br>
+  <div class="container">
+    <div class="row">
+      <div class="col text-center">
+        <button type="button" value="Trigger" style="width:100% !important;" class="btn btn-primary btn-default-height small-td" (click)="executeJob()">Trigger Now</button>
+      </div>
+      <div class="col text-center">
+        <button type="button" value="Remove" style="width:100% !important;" class="btn btn-primary btn-default-height small-td" (click)="deleteJob()">Remove Schedule(s)</button>
+      </div>
+      <div class="col text-center">
+        <button type="button" value="New Job" style="width:100% !important;" class="btn btn-primary btn-default-height small-td" (click)="createJob()">New Schedule</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-job-creation [(jobCreationDisplay)]="jobCreationDisplay" [(jobTitle)]="jobModalTitle" [(jobModalCron)]="jobModalCron" [(ref)]="ref" (onClose)="closeModal($event)"></app-job-creation>
+
+<p-toast [baseZIndex]="999999"></p-toast>

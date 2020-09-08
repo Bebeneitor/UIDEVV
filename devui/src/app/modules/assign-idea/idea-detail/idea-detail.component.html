@@ -1,0 +1,232 @@
+<div class="row">
+
+  <div class="col-md-6">
+
+    <div class="row">
+      <div class="col-md-3">
+        <div>
+          <label>ID</label>
+        </div>
+        <div>
+          <input style="width: 100%" type="text" value="{{rule.ruleCode}}" readonly>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div>
+          <label>Line of Business</label>
+        </div>
+        <div>
+          <input style="width: 100%" type="text" value="{{rule.lob.lobDesc}}" readonly>
+        </div>
+      </div>
+
+      <div *ngIf="rule.lob.lobDesc != 'Medicare'" class="col-md-3">
+        <div>
+          <label>State</label>
+        </div>
+        <div>
+          <input style="width: 100%" type="text" value="{{rule.state != null ? rule.state.stateDesc : rule.state}}" readonly>
+        </div>
+      </div>
+
+      <div *ngIf="rule.lob.lobDesc == 'Medicare'" class="col-md-3">
+        <div>
+          <label>Jurisdiction</label>
+        </div>
+        <div>
+          <input style="width: 100%" type="text" value="{{rule.jurisdiction != null ? rule.jurisdiction.jurisdictionDesc : rule.jurisdiction}}" readonly>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-md-12">
+        <div>
+          <label>Idea Name</label>
+        </div>
+        <div>
+          <textarea rows="4" style="width: 100%" type="text" value="{{rule.ruleName}}" readonly></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="row">
+      <div class="col-md-8">
+        <div>
+          <label>Category</label>
+        </div>
+        <div>
+          <input style="width: 100%" type="text" value="{{rule.category.categoryDesc}}" readonly>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div>
+          <label>Status</label>
+        </div>
+        <div>
+          <input style="width: 100%" type="text" value="{{rule.ruleStatus.ruleStatusDisplayName}}" readonly>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-md-12">
+        <div>
+          <label>Idea Description</label>
+        </div>
+        <div>
+          <textarea rows="4" style="width: 100%" type="text" value="{{rule.ruleDescription}}" readonly></textarea>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+<br>
+<h4>Reference Details</h4>
+<br>
+
+
+<div>
+  <p-table #viewGrid [columns]="cols" [value]="ruleReferences" [paginator]="true" [(selection)]="selectedReference"
+           [resizableColumns]="true" columnResizeMode="fit"
+           [reorderableColumns]="true" [rows]="10" [rowsPerPageOptions]="[3,5,10]" [loading]="loading"
+           [responsive]="true" sortField="daysold" sortOrder="-1">
+    <!--<ng-template pTemplate="caption">
+
+      <div style="text-align: right">
+        <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
+               (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+               style="width:150px; border-radius: 5px">
+        <i class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+      </div>
+    </ng-template>-->
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+            [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+          {{col.header}}
+          <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                      ariaLabelDesc="Activate to sort in descending order"
+                      ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-references let-columns="columns">
+      <tr [pSelectableRow]="references">
+        <td class="small-td" *ngFor="let col of columns">
+
+          <span *ngIf="col.field == 'source'" class="span-centered">{{references.source}}</span>
+
+          <span *ngIf="col.field == 'name'">{{references.name}}</span>
+
+          <span *ngIf="col.field == 'title'" class="span-centered">{{references.title}}</span>
+
+          <span *ngIf="col.field == 'details'" class="span-centered" style="text-decoration: underline; cursor: pointer"
+          (click)="showReferenceInfo(references.refId)">select</span>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> - <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+        </span>
+      <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+    </ng-template>
+  </p-table>
+</div>
+<br>
+<span *ngIf="refObj != null">
+  <div class="col-md-8">
+     <div class="row">
+        <div class="col-md-2">
+           <label>URL:</label>
+        </div>
+        <div class="col-md-6" style="font-weight: bold">
+           <label>{{refObj.refInfo.referenceURL}}</label>
+        </div>
+        <div class="col-md-4"><span style="font-size: 8pt;font-weight: bold"
+           (click)="getPdf(refObj.refInfo.referenceId)">Attachment <img src="assets/img/downloadIcon.png" alt="download"
+           ></span></div>
+     </div>
+     <br/>
+     <div class="row"  style="width: 800px">
+        <div class="col-md-2">
+           <label>Publication Date:</label>
+        </div>
+        <div class="col-md-2" style="font-weight: bold">
+           <label>{{refObj.refInfo.refUrlPublicationDt | date:'MM/dd/yyyy'}}</label>
+        </div>
+        <div class="col-md-1">
+           <label>Edition:</label>
+        </div>
+        <div class="col-md-1" style="font-weight: bold">
+           <label>{{refObj.refInfo.refurlEdition}}</label>
+        </div>
+        <div class="col-md-1">
+           <label>Chapter:</label>
+        </div>
+        <div class="col-md-1" style="font-weight: bold">
+           <label>{{refObj.ruleRefChapter}}</label>
+        </div>
+        <div class="col-md-1"> 
+           <label>Page#</label>
+        </div>
+        <div class="col-md-1" style="font-weight: bold">
+           <label>{{refObj.ruleRefPage}}</label>
+        </div>
+        <div class="col-md-1"> 
+           <label>Section:</label>
+        </div>
+        <div class="col-md-1" style="font-weight: bold">
+           <label>{{refObj.ruleRefSection}}</label>
+        </div>
+     </div>
+     <br>
+     <div class="row">
+        <div class="col-md-8">
+           <label>Additional Attachments:</label>
+                   <span *ngIf="refObj.refInfo.refDocFile1 != null" style="padding-right: 10px; padding-left: 10px;font-size: 8pt;font-weight: bold"
+                       (click)="getFile(refObj.refInfo.referenceId, 'additional2')">Attachment<img src="assets/img/downloadIcon.png" alt="download"
+                       ></span>
+                    <span *ngIf="refObj.refInfo.refDocFile2 != null" style="padding-right: 10px; font-size: 8pt; font-weight: bold"
+                       (click)="getFile(refObj.refInfo.referenceId, 'additional2')">Attachment1<img src="assets/img/downloadIcon.png" alt="download"
+                       >
+                    </span>
+        </div>
+     </div>
+     
+     <br/>
+     <div class="row" style="width: 1000px">
+        <div class="col-md-1">
+           <label>Comments:</label>
+        </div>
+        <br/>
+        <div class="col-md-4">
+           <textarea *ngIf="refObj != null"  style="width: 100%; font-weight: bold" type="text" value="{{refObj.ruleRefcomments}}" readonly></textarea>
+        </div>
+        <div class="col-md-6">
+           <div class="col-md-12">
+              <label>Creator:</label>
+              <label style="font-weight: bold">{{refObj.ruleRefCreatedBy.firstName}} {{refObj.ruleRefCreatedBy.lastName}}</label> 
+           </div>
+           <div class="col-md-10">
+              <label>Date Created:</label>
+              <label style="font-weight: bold">{{refObj.ruleRefCreationDt | date:'MM/dd/yyyy'}}</label>
+           </div>
+        </div>
+     </div>
+  </div>
+</span>
+
+
+

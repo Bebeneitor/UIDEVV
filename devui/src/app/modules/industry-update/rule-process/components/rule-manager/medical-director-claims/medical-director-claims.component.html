@@ -1,0 +1,55 @@
+<p-tabView (onChange)="handleTabViewChange($event)" [activeIndex]="activeTab">
+  <p-tabPanel header="Assigned">
+    <ng-template pTemplate="content">
+      <div class="row">
+        <div class="col">
+          <ecl-table #assignedTable [tableModel]='assignedTableConfig' (onAcctionLink)="redirect($event)"
+          (onAcctionIcon)="showLunchBox($event.row.ruleId, $event.row.instanceId)" (onSelectRecord)="setSelectRules($event, 'assigned')"
+          (onUnSelectRecord)="setSelectRules($event, 'assigned')"></ecl-table>
+          <br>
+          <div class="clearfix">
+            <div class="float-left">
+              <button type="button" name="action" class="btn btn-primary btn-sm f-11" appThrottleTimeClick
+                (throttleTimeClick)="resetDataTable('assignedTable', 'selectedRules')" 
+                [throttleTime]="2500">
+                <i class="pi pi-refresh" style="font-size: 1em"></i> Refresh
+              </button>
+            </div>
+            <div class="float-right">
+              <button type="button" class="btn btn-primary btn-sm f-11" (click)="claim()"
+                [disabled]="selectedRules.length == 0"><i class="fa fa-hand-o-up"></i> Claim</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </ng-template>
+  </p-tabPanel>
+  <p-tabPanel header="Returned">
+    <ng-template pTemplate="content">
+      <div class="row">
+        <div class="col">
+          <ecl-table #returnedTable [tableModel]='returnedTableConfig' (onAcctionLink)="redirect($event)"
+          (onAcctionIcon)="showLunchBox($event.row.ruleId, $event.row.instanceId)" 
+          (onSelectRecord)="setSelectRules($event, 'returned')"
+          (onUnSelectRecord)="setSelectRules($event, 'returned')"></ecl-table>
+          <br>
+          <div class="clearfix">
+            <div class="float-left">
+              <button type="button" name="action" class="btn btn-primary btn-sm f-11" appThrottleTimeClick
+                (throttleTimeClick)="resetDataTable('returnedTable', 'selectedRulesReturned')" 
+                [throttleTime]="2500">
+                <i class="pi pi-refresh" style="font-size: 1em"></i> Refresh
+              </button>
+            </div>
+            <div class="float-right">
+              <button type="button" class="btn btn-primary btn-sm f-11" (click)="claimReturned()"
+                [disabled]="selectedRulesReturned.length == 0"><i class="fa fa-hand-o-up"></i> Claim</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </ng-template>
+  </p-tabPanel>
+</p-tabView>

@@ -1,0 +1,33 @@
+::ng-deep .same-sim-analysis-widget .ui-card {
+    border: 1px solid #c8c8c8 !important;
+    box-shadow: unset !important;
+    border-radius: unset !important;
+    border-bottom: 0px !important;
+}
+
+.badge-same-sim {
+    width: 100%; 
+    border-radius: 3px; 
+    border: 1px solid #c8c8c8; 
+    text-align: center; padding: 10px; 
+    color: #fff;
+    opacity: 0.8;
+}
+
+.badge-same-sim:hover {
+    opacity: 1 !important;
+}
+
+.badge-same-sim > div > h5 {
+    color : #fff !important;
+    font-size: 22px !important;
+}
+
+.badge-same-sim > div > p {
+    color : #fff !important;
+    font-size: 11px !important;
+}
+
+::ng-deep .ui-card-title {
+    font-size: 15px !important;
+}

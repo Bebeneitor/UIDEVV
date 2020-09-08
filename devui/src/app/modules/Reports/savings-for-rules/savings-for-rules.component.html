@@ -1,0 +1,112 @@
+<h5>Savings for Client Adopted Rules</h5>
+<div class="container" style="max-width: 120%;">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-2">
+        <p-fieldset *ngIf="loadingData">
+          <p-header>
+            <h6><strong>Rule Engine</strong></h6>
+          </p-header>
+          <div class="col" *ngFor="let engine of engines" style="padding-bottom: 1em;">
+            <p-radioButton name="enginesGroup" [value]="engine.value" label="{{engine.label}}" [(ngModel)]="radioEngine"
+              (onClick)="getAvailableFields(engine.value)" [disabled]="disabledRadioEngines"></p-radioButton>
+          </div>
+        </p-fieldset>
+      </div>
+      <div class="col-6">
+        <p-pickList [source]="availableFields" [target]="selectedFields" sourceHeader="Available"
+          targetHeader="Selected" [responsive]="true" dragdrop="true"
+          [sourceStyle]="{'height':'300px', 'font-size': '0.9em'}"
+          [targetStyle]="{'height':'300px', 'font-size': '0.9em'}"
+          (onSourceSelect)="onSelectItem('source', $event.items)"
+          (onTargetSelect)="onSelectItem('target', $event.items)"
+          (onMoveToTarget)="changeOrderAndMoveButtons('moveToTarget', $event.items)"
+          (onMoveToSource)="changeOrderAndMoveButtons('moveToSource', $event.items)"
+          (onSourceReorder)="enableDisableOrderButtons('source', $event.items)"
+          (onTargetReorder)="enableDisableOrderButtons('target', $event.items)">
+          <ng-template let-field pTemplate="item">{{field.label}}</ng-template>
+        </p-pickList>
+      </div>
+      <div class="col-4">
+        <p-fieldset>
+          <p-header>
+            <h6><strong>Generated Reports</strong></h6>
+          </p-header>
+          <div *ngFor="let report of savingReports; index as i" style="margin-bottom: 1vh">
+            <div class="ui-g-12">
+              <div class="ui-inputgroup">
+                <input type="text" class="text-center" pInputText
+                  value="{{engineName}}_Savings_{{currentDate}}.xlsx ({{i+1}})" [readonly]="true"
+                  style="width: 100%; font-weight: bold; font-size: 50px;">
+                <button pButton type="button" class="ui-button-success" style="background-color: green !important; color: white !important; 
+                  border: none !important; height: 30px;" [disabled]="report.notGenerated"
+                  (click)="downloadExcelReport(i)">
+                  <i class="pi pi-table" style="font-size: 25px; margin-top: 4px;"></i>
+                </button>
+              </div>
+              <p-progressBar [value]="report.progress" [style]="{'height': '2.5vh', 'font-size': '0.8em'}">
+              </p-progressBar>
+            </div>
+          </div>
+        </p-fieldset>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-12">
+        <p-fieldset>
+          <p-header>
+            <h6><strong>Included Fields</strong></h6>
+          </p-header>
+          <div class="row">
+            <ng-template ngFor let-field [ngForOf]="selectedFields" let-index="index">
+              <div class="text-center engine-item" *ngIf="!field.hidden">
+                <span>
+                  <strong>{{field.label}}</strong>
+                </span>
+                <div *ngIf="field.fieldType == 'multiselect'">
+                  <p-multiSelect [options]="field.options" [virtualScroll]="true" filter="true" [itemSize]="35"
+                    [resetFilterOnHide]="true" [style]="{'width': '100%'}"
+                    defaultLabel="{{field.defaultLabel}}" filterPlaceHolder="{{field.filterPlaceHolder}}"
+                    [(ngModel)]="field.ngModel" (onChange)="onSelectFieldOption($event, index, field.optionsName)">
+                  </p-multiSelect>
+                </div>
+                <div *ngIf="field.fieldType == 'calendar'">
+                  <p-calendar selectionMode="multiple" view="month" dateFormat="mm/yy"
+                    placeholder="{{field.filterPlaceHolder}}" [(ngModel)]="selectedMonths" [readonlyInput]="false"
+                    icon="pi pi-calendar" [showIcon]="true" (onFocus)="disableMonths(index)"></p-calendar>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </p-fieldset>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-4 text-right">
+        <button pButton type="button" label="Generate" [disabled]="disabledGenerate"
+          (click)="generateReport()"></button>
+      </div>
+      <div class="col-2 text-center">
+        <button pButton type="button" label="Refresh" [disabled]="false" (click)="refreshReports()"></button>
+      </div>
+      <div class="col-6 text-left">
+        <button pButton type="button" label="Add Report" [disabled]="disabledAddReport" (click)="addReport()"></button>
+      </div>
+    </div>
+  </div>
+</div>
+<p-toast [baseZIndex]="999999"></p-toast>
+<p-dialog [(visible)]="savingsMessage">
+  <p-header>
+    <strong>Savings not available</strong>
+  </p-header>
+  No savings available for selected search criteria
+  <p-footer>
+    <div class="text-center">
+      <button pButton type="button" label="OK" (click)="closeSavingMessage()"></button>
+    </div>
+  </p-footer>
+</p-dialog>
+<p-confirmDialog [style]="{width: '50vw'}" [baseZIndex]="10000"></p-confirmDialog>

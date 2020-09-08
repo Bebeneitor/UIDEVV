@@ -1,0 +1,22 @@
+.editor {
+    border: 1px solid #31006F; 
+    background-color: white;
+}
+
+::ng-deep .ql-container {
+    height: 100%;
+    min-height: 100%;
+    overflow-y: auto !important;
+  }
+  
+::ng-deep .ql-editor {
+    overflow-y: auto !important;
+    font-size: 12px;
+}
+
+.ql-disabled {
+    opacity: .95 !important;
+    color: #797979 !important;
+    background-color: #F5F5F5 !important;
+    border-color: #A6A6A6 !important;
+}

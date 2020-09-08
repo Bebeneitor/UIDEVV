@@ -1,0 +1,85 @@
+.ell-main-screen .search-box-section {
+    width: 100%;
+    display: inline-block;
+}
+
+.ell-main-screen .more-details-link-section {
+    width: 15%;
+    display: inline-block;
+    font-size: 11px;
+}
+
+.ell-main-screen .more-details-link-section a {
+    color: #31006F;
+    text-decoration: underline;
+}
+
+.ell-main-screen label {
+    display: block;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+}
+
+.ell-main-screen .search-box-section button {
+    border-radius: unset;
+    height: 28px;
+}
+
+.ell-main-screen .search-box-section .ui-inputgroup {
+    display: inline !important;
+}
+
+.ell-main-screen .search-box-section input {
+    width: 80% !important;
+}
+
+.ell-main-screen .ell-search-container { 
+    padding: 10px 0px 10px 0px; 
+}
+
+.ell-main-screen .btn-ell-conditions {
+    background-color: #F4F4F4 !important;
+    border-color: lightgray !important;
+    border-radius: 3px;
+    margin-right: 7px;
+    font-size: 11px !important;
+}
+
+.ell-main-screen .btn-ell-conditions:hover {
+    background-color: #DBDBDB !important;
+}
+
+.ell-main-screen fieldset {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.ell-main-screen fieldset > legend {
+    display: block;
+    width: auto;
+    padding: 0 5px;
+    margin-bottom: 0;
+    font-size: 12px;
+    line-height: inherit;
+    border-bottom: none;
+    color : #333333 !important;
+}
+
+.ell-main-screen .indexed-bullet {
+    background-color: greenyellow;
+    border-color: green;
+    height: 10px;
+    width: 10px;
+    display: inline-block;
+    border-radius: 50%;
+}
+
+::ng-deep .ell-main-screen span.highlightText {
+    background-color: greenyellow;
+}
+
+.container ::ng-deep p-calendar .ui-datepicker {
+    padding: 5px !important;
+    position: initial;
+}

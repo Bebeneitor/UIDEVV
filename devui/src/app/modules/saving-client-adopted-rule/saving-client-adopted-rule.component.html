@@ -1,0 +1,125 @@
+<h4>Saving Client Adopted Rule</h4>
+
+<div class="wrapper">
+  <div class="section-top">
+
+    <p-listbox class="list-box" [options]="eclRuleId" filter="filter" checkbox="checkbox" (onChange)="businessCheck()">
+      <p-header>
+        ECL Rule Id
+      </p-header>
+    </p-listbox>
+
+
+    <p-listbox class="list-box" [options]="client" [(ngModel)]="selectedEclRuleId" checkbox="checkbox"
+      (onChange)="stateCheck()">
+      <p-header>
+        Client
+      </p-header>
+      <p-footer>
+      </p-footer>
+    </p-listbox>
+
+    <p-listbox class="list-box" [options]="payerShort" [(ngModel)]="selectedPayerShort" checkbox="checkbox">
+      <p-header>
+        Payer Short
+      </p-header>
+      <p-footer>
+      </p-footer>
+    </p-listbox>
+
+    <p-listbox class="list-box" [options]="ruleEngine" [(ngModel)]="selectedRuleEngine" checkbox="checkbox">
+      <p-header>
+        Rule Engine
+      </p-header>
+      <p-footer>
+      </p-footer>
+    </p-listbox>
+
+    <p-listbox class="list-box" [options]="ruleEngineId" [(ngModel)]="selectedRuleEngineId">
+      <p-header>
+        RuleEngine ID
+      </p-header>
+      <p-footer>
+      </p-footer>
+    </p-listbox>
+  </div>
+
+  <div class="section-bottom">
+    <p-listbox class="list-box" [options]="business" [(ngModel)]="selectedBusiness" multiple="multiple" filter="filter"
+      checkbox="checkbox" (onChange)="businessCheck()">
+      <p-header>
+        Line of business
+      </p-header>
+    </p-listbox>
+
+    <p-listbox class="list-box" [options]="states" [(ngModel)]="selectedState" multiple="multiple" checkbox="checkbox"
+      filter="filter" (onChange)="stateCheck()">
+      <p-header>
+        States
+      </p-header>
+      <p-footer>
+      </p-footer>
+    </p-listbox>
+
+    <p-listbox class="list-box" [options]="jurisdictions" [(ngModel)]="selectedJurisdiction" [style]="{'width':'140px'}" multiple="multiple"
+      checkbox="checkbox" filter="filter" (onChange)="jurisdictionCheck()">
+      <p-header>
+        Jurisdictions
+      </p-header>
+      <p-footer>
+      </p-footer>
+    </p-listbox>
+
+    <p-listbox class="list-box" [options]="categories" [(ngModel)]="selectedCategory" multiple="multiple"
+      checkbox="checkbox" filter="filter" (onChange)="categoryCheck()">
+      <p-header>
+        Categories
+      </p-header>
+      <p-footer>
+      </p-footer>
+    </p-listbox>
+
+    <div class="master-date">
+      <div class="search-date">
+        <div class="search-item-date">
+          <label class="label-date">Start Date</label>
+          <input pInputtext class="in-date" type="date" (input)="beginInput($event.target.value)">
+        </div>
+
+        <div class="search-item-date">
+          <label class="label-date">End Date</label>
+          <input pInputtext class="in-date" type="date" (input)="endInput($event.target.value)">
+        </div>
+
+      </div>
+
+      <div class="search-item-button">
+        <button id="search-btn" type="button" class="btn btn-primary btn-default-height small-td"
+          (click)="searchSubmit()">Generated</button>
+        <button id="search-btn" type="reset" class="btn btn-primary btn-default-height small-td"
+          (click)="clear()">Clear</button>
+        <button id="search-btn" class="btn btn-primary btn-default-height small-td" (click)="clear()">Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    Current Selection:
+
+    <ng-container class="selection-box" *ngFor="let lob of displayLob; let isLast=Last">
+      {{ lob }}{{isLast ? '' : ', '}}
+    </ng-container>
+    <ng-container class="selection-box" *ngFor="let state of displayState; let isLast=Last">
+      {{ state }}{{isLast ? '' : ', '}}
+    </ng-container>
+    <ng-container class="selection-box" *ngFor="let category of displayCat; let isLast=Last">
+      {{ category }}{{isLast ? '' : ', '}}
+    </ng-container>
+    <ng-container class="selection-box" *ngFor="let jurisdiction of displayJur; let isLast=Last">
+      {{ jurisdiction }}{{isLast ? '' : ', '}}
+    </ng-container>
+
+  </div>
+
+
+</div>

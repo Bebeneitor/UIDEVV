@@ -1,0 +1,214 @@
+label {
+    font-size: 10px;
+    color: #949494;
+}
+
+.set-space { padding: 0px 5px 5px 0px; }
+
+.set-space-left { margin-left:2px; }
+
+.set-row-topmargin { margin-top:20px; }
+
+.library-code {
+    height: 84px !important;
+}
+
+.row {
+    margin-top: 10px;
+}
+
+@media (max-width: 780px)  {
+    .custom-flex-item {
+        flex: 0 0 100%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        flex-flow: column;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+@media (min-width: 781px) {
+    .custom-flex-item {
+        flex: 0 0 12.5%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        flex-flow: column;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+.custom-input-lib {
+    height: 28px!important;
+    margin-bottom: 4px;
+}
+
+.button-container {
+    padding: 15px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    padding-right: 30px;
+    padding-left: 30px;
+}
+
+.button-container .btn-primary {
+    border-radius: 2px;
+    width: 15%;
+    font-size: 12px;
+    height: 35px;
+}
+
+::ng-deep .btn-toolbar {
+    margin-left: 5px !important;
+    display: inline-block;
+    font-size: 11px !important;
+    width: 85px;
+}
+
+::ng-deep .rules-savings {
+    background-color: #fff !important;
+    width: 100%;
+    height: 205px;
+    max-height: 205px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-radius: 5px;
+    border: 1px solid #a6a6a6;
+}
+
+::ng-deep .ui-g-12 {
+    padding: 0px !important;
+}
+
+::ng-deep h3 {
+    color : #707070 !important;
+}
+
+::ng-deep table.table-selected-rows { 
+    font-size : 11px; 
+    margin-bottom: 0px !important;
+}
+
+::ng-deep i.icon-remove {
+    color : gray !important;
+    cursor : pointer;
+    margin-right: 5px;
+}
+
+::ng-deep .w-45 {
+    width: 45px;
+}
+
+::ng-deep body .ui-dropdown .ui-dropdown-label {
+    text-align: left !important;
+    color : gray !important;
+}
+
+::ng-deep .ui-accordion.ui-widget {
+    margin-top: -2px !important;
+}
+
+::ng-deep .truncate-rule {
+    max-width: 100%;
+    display: block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+::ng-deep .add-search-panel .ui-panel .ui-panel-titlebar, 
+::ng-deep .selection-panel .ui-panel .ui-panel-titlebar {
+    border : none!important;
+    line-height: 1.1;
+    padding-left: 0px;
+}
+
+::ng-deep .add-search-panel .ui-widget {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+::ng-deep .add-search-panel .ui-panel .ui-panel-titlebar .ui-panel-titlebar-icon,
+::ng-deep .selection-panel .ui-panel .ui-panel-titlebar .ui-panel-titlebar-icon {
+    float : left!important;
+}
+
+
+::ng-deep .filters-table label {
+    display: block !important;
+}
+
+::ng-deep .filters-div { 
+    position: absolute;
+    z-index: 999;
+    right: 0;
+    padding: 0px;
+    margin-top: 5px;
+    margin-right: 7px;
+    width: 90%;
+}
+
+::ng-deep .filters-div input {
+    font-size: 11px !important;
+}
+
+::ng-deep p-panel.panel-filters .ui-table-caption.ui-widget-header {
+    height: 60px !important; 
+    border: none !important;  
+}
+
+::ng-deep p-panel.panel-filters .ui-table-caption.ui-widget-header > div.row > div.col-6 > div.float-left {
+    margin-top: 20px !important;
+}   
+
+::ng-deep p-panel.panel-filters .ui-table-caption.ui-widget-header .ui-table-loading.ui-widget-overlay {
+    background-color: white !important;
+}
+
+::ng-deep .add-search-panel .ui-panel .ui-panel-content,
+::ng-deep .selection-panel .ui-panel .ui-panel-content {
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+}
+
+::ng-deep .selection-panel .ui-widget { margin-bottom : 10px !important; }
+
+::ng-deep .dpdownDiv .ui-dropdown {min-width: 100% !important;}
+.top-20 {margin-top: 20px;}
+.top-35 {margin-top: 35px;}
+.dropdown-full-width { width : 100%;}
+.padding-0 {padding: 0px;}
+.padding-20 {padding: 20px;}
+.relative-pos {position : relative;}
+.button-div-top {margin-top: 22px;}
+.scale-ui-g {width:250px;margin-bottom:10px;}
+.add-btn-font {font-size: 11px;}
+.save-margin-22 {margin : 22px;}
+.filterdpdown{min-width : 10%;}
+.hide-div {display : none;}
+.filters-div, .filters-div > div, .filters-div > div > div {height : 60px !important;}
+.btn.btn-primary:disabled {cursor : default;}
+:host>>>.ui-multiselect .ui-multiselect-panel { max-width:100%;}
+:host>>>.ui-multiselect-panel .ui-multiselect-item span{
+    white-space: break-spaces !important;
+    width: 90% !important;
+}
+.widget {
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .5rem;
+    box-shadow: 0 4px 14px 1px rgba(143,143,143,.56);
+    background-color : #fff;
+    margin-top: 10px;
+}
+.search-container { width: 100%; padding-left:0px; }
+.search-item { margin-left : 0px; }
+.search-item .default { font-style: italic; font-size:13px; font-weight: 600;}
+.select-list{display:flex; flex-wrap: wrap;}
+.selected-listitem { width:170px; min-width:170px; margin-right:10px; margin-left : 5px;}
+.icon-div {width:10%;margin-right:5px;}
+.sel-value-div {width:85%;}
+.sel-div {font-size:12px; font-weight: 900; color:gray;}
+.search-item label {margin-top:10px;}
+.wrap-text{ white-space: normal;word-break: break-word;}

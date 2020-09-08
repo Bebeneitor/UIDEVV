@@ -1,0 +1,216 @@
+#fieldset {
+  margin-top: 15px;
+}
+
+.flex-container {
+  border: 1px lightgray solid;
+  border-radius: 2px;
+  padding: 0px 10px 0px 10px;
+  background-color: #f7f7f7;
+}
+
+.flex-section {
+  margin-top: 10px;
+}
+
+.flex-row {
+  display: flex;
+  padding: 2.5px;
+}
+
+.ref-label {
+  display: block;
+  margin-top: 5px;
+}
+
+.ref-label-attach {
+  height: 100%;
+  width: 100%;
+}
+
+.flex-item {
+  width: 100%;
+}
+
+.flex-3 {
+  width: 33.3337%
+}
+
+.flex-column {
+  width: 33.337%;
+  padding-right: 10px;
+}
+
+.comment {
+  width: 33.337%;
+  min-width: 33.337%;
+  padding-right: 10px;
+}
+
+.flex-item-small {
+  width: 25%;
+  padding-right: 10px
+}
+
+.ref-input {
+  width: 100%;
+  height: 24px;
+  border-radius: 3px;
+}
+
+.pad-right {
+  padding-right: 10px;
+}
+
+.no-pad {
+  padding: 0;
+}
+
+.right-pad {
+  padding-right: 10px;
+}
+
+.flex-item-date {
+  width: 45%;
+  padding-right: 10px
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  height: 100%;
+  margin-top:25px;
+}
+
+button {
+  border-radius: 2px !important;
+  font-size: 10px;
+  margin: 5px;
+  height: 31px;
+  width: 70px;
+}
+
+/** Over-ride of PRIMENG css values */
+:host ::ng-deep input.ui-inputtext.ui-widget {
+  height: 24px !important;
+  background-color: white;
+}
+
+.custom-upload ::ng-deep .ui-button.ui-button-text-icon-left .ui-button-text {
+  background-color: transparent;
+  text-align: end;
+  font-size: 12px;
+  text-decoration: underline;
+  width: 80px;
+  padding: 0px 0px 5px 0px;
+}
+
+.custom-upload ::ng-deep .ui-dialog-footer.ui-widget-content.ng-star-inserted,
+.custom-upload ::ng-deep .ui-fileupload .ui-fileupload-buttonbar .ui-button {
+  background-color: transparent !important;
+  color: black !important;
+  margin-right: 0px;
+}
+
+.custom-upload ::ng-deep .ui-button {
+  background-color: transparent !important;
+  color: black !important;
+}
+
+.custom-upload ::ng-deep .ui-fileupload-buttonbar {
+  padding: 0;
+}
+
+.custom-upload ::ng-deep .ui-button-icon-left.ui-clickable.pi.pi-plus {
+  display: none;
+}
+
+.custom-upload ::ng-deep.ui-fileupload-content.ui-widget-content {
+  overflow-x: scroll;
+}
+
+.custom-upload ::ng-deep .ui-fileupload.ui-widget.ng-star-inserted {
+  margin-top: -20px;
+  width: 100%;
+}
+
+:host ::ng-deep .ui-dialog .ui-dialog-titlebar{
+  border: 1px solid #c8c8c8;
+  background-color: #3b1e7b;
+  color: #f8f9fa;
+  padding: 1em;
+  font-weight: 700;
+  border-bottom: 0 none;
+}
+
+.custom-upload ::ng-deep .ui-fileupload-buttonbar.ui-widget-header.ui-corner-top {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.custom-upload ::ng-deep .ui-fileupload-buttonbar button:nth-child(1) {
+  display: none;
+}
+
+.custom-upload ::ng-deep .ui-fileupload-files {
+  font-size: 12px;
+}
+
+.border {
+  border: 1px grey solid;
+}
+
+.ecl-pad {
+  margin: 5px 0px 5px 0px;
+  padding: 10px;
+}
+
+.set-space {
+  padding: 0px 15px 15px 15px;
+}
+
+legend {
+  display: flex;
+  font-size: 16px !important;
+  background: inherit;
+  align-items: center;
+}
+legend span {
+  background: #fff;
+  margin: 0 15px;
+}
+legend:after {
+  background: darkgrey;
+  height: 1px;
+  flex: 1;
+  content: '';
+  margin-top: 9px;
+  margin-left: 10px;
+}
+legend.right:before {
+  background: none;
+}
+
+/***File deletion warning dialog***/
+.message-bold {
+  font-weight: bold;
+}
+.message-center {
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+.icon-float-left {
+  float: left;
+  font-size: 2em;
+  color: red;
+}
+
+/***Attached file name***/
+.file-name-display {
+  overflow-wrap: break-word;
+}

@@ -1,0 +1,145 @@
+.codes-box .label-codes-box {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.codes-box .codes-box-area {
+    background: #FFF;
+    padding: 10px;
+    border: 1px solid #31006F;
+    height: 100px;
+    max-height: 100px;
+    overflow: auto;
+    font-size: 12px;
+    white-space: pre-wrap;
+}
+
+.codes-box .codes-box-footer {
+    background: transparent;
+}
+
+.codes-box .codes-box-footer .codes-box-buttons {
+    float: right;
+    margin-top: 5px;
+}
+
+.codes-box .codes-box-footer .codes-box-buttons>button {
+    height: 20px;
+    font-size: 10px;
+    line-height: 11px;
+}
+
+::ng-deep .codes-box p-panel .ui-panel-titlebar.ui-widget-header.ui-helper-clearfix.ui-corner-all {
+    display: none;
+}
+
+::ng-deep .codes-box p-panel .ui-panel-content.ui-widget-content {
+    padding: 0px;
+}
+
+span {
+    white-space: pre-wrap;
+}
+.codes-box .codes-box-footer .codes-box-error-message {
+    float: left;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.cb-disabled {
+    opacity: .95 !important;
+    color: #797979 !important;
+    background-color: #F5F5F5 !important;
+    border-color: #A6A6A6 !important;
+}
+
+
+::ng-deep span.valid-code {
+    color:green !important;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.item-code {
+    color: black !important;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.invalid-code {
+    color: gray !important;
+    text-decoration: line-through;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.badformat-code {
+    color: gray !important;
+    text-decoration: line-through;
+    font-style: italic;
+    font-weight: bold;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.deleted-code {
+    color: red !important;
+    text-decoration: line-through;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.deleted-sep {
+    color: red !important;
+    text-decoration: line-through;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.retained-code {
+    color: black !important;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.retained-bad-code {
+    color: black !important;
+    font-style: italic;
+    font-weight: bold;
+    text-decoration: line-through;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.inv-retained-code {
+    color: black !important;
+    text-decoration: line-through;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.inserted-code {
+    color: blue !important;
+    white-space: pre-wrap;
+}
+
+::ng-deep span.inserted-bad-code {
+    color: blue !important;
+    white-space: pre-wrap;
+    text-decoration: line-through;
+    font-weight: bold;
+}
+::ng-deep span.inv-inserted-code {
+    color: blue !important;
+    text-decoration: line-through;
+    white-space: pre-wrap;
+}
+::ng-deep span.valid-inserted-code {
+    color:green !important;
+    white-space: pre-wrap;
+}
+
+
+::ng-deep span.inserted-sep {
+    color: blue !important;
+    white-space: pre-wrap;
+}
+
+
+::ng-deep span.retained-invalid-code {
+    color: black !important;
+    text-decoration: line-through;
+    white-space: pre-wrap;
+}

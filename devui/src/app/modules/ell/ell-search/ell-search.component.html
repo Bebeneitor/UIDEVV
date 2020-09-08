@@ -1,0 +1,184 @@
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<div class="ell-main-screen">
+  <div class="row">
+    <div class="col-12">
+      <h4 style="font-size: 14px; margin-bottom: 0px;">ELL Library View</h4>
+      <label *ngIf="showAll" style="position: absolute; right: 15px; top: 0"><span class="indexed-bullet"></span>
+        Indexed</label>
+      <hr>
+      <div class="ell-search-container">
+        <div class="global-search-ell">
+          <div class="search-box-section">
+            <div class="ui-inputgroup">
+              <input type="text" pInputText placeholder="Type here..." [(ngModel)]="keywordSearch"
+                (keyup.enter)="filterPolicies();" />
+              <button type="button" (click)="filterPolicies();" class="btn btn-primary btn-sm" pButton><i
+                  class="fa fa-search"></i></button>
+            </div>
+
+            <div class="more-details-link-section text-right">
+              <a nghref="#" (click)="changeSearchExpanded()"><i *ngIf="!searchExpanded"
+                  class="fa fa-chevron-down"></i><i *ngIf="searchExpanded" class="fa fa-chevron-up"></i> More options to
+                search</a>
+            </div>
+          </div>
+          <hr *ngIf="searchExpanded">
+          <div class="ell-advanced-filters" *ngIf="searchExpanded">
+            <div class="ell-conditions-buttons">
+              <fieldset>
+                <legend>Conditions</legend>
+
+                <button type="button" class="btn btn-ell-conditions" (click)="dateFilters.toggle($event)"><i
+                    class="fa fa-calendar"></i> Date</button>
+                <button type="button" class="btn btn-ell-conditions" (click)="authorFilter.toggle($event)"><i
+                    class="fa fa-user"></i> Author</button>
+                <button *ngIf="showAll" type="button" class="btn btn-ell-conditions"><i class="fa fa-list"></i>
+                  Field</button>
+                <button *ngIf="showAll" type="button" class="btn btn-ell-conditions"><i class="fa fa-table"></i>
+                  Form...</button>
+                <button *ngIf="showAll" type="button" class="btn btn-ell-conditions"><i class="fa fa-align-justify"></i>
+                  Multiple
+                  words...</button>
+                <button *ngIf="showAll" type="button" class="btn btn-ell-conditions"><i class="fa fa-list-alt"></i>
+                  Fill out example
+                  from...</button>
+              </fieldset>
+            </div>
+
+            <div class="ell-options" *ngIf="showAll">
+              <div class="row">
+                <div class="col-6">
+                  <fieldset>
+                    <legend>Options</legend>
+
+                    <div class="ui-g">
+                      <div class="ui-g-12">
+                        <p-checkbox name="group1" value="VARIANTS"
+                          label="Use words variants ('cat' will also find 'cats')" [(ngModel)]="selectedOptions">
+                        </p-checkbox>
+                      </div>
+                      <div class="ui-g-12">
+                        <p-checkbox name="group1" value="FUZZY" label="Fuzzy search" [(ngModel)]="selectedOptions">
+                        </p-checkbox>
+                      </div>
+                      <div class="ui-g-12">
+                        <p-checkbox name="group1" value="SEARCH" label="Search in results"
+                          [(ngModel)]="selectedOptions">
+                        </p-checkbox>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+
+                <div class="col-6">
+                  <fieldset>
+                    <legend>Sort results by</legend>
+
+                    <p-dropdown [options]="sortOptions" [(ngModel)]="sortBy" [style]="{'width':'100%'}"></p-dropdown>
+                    <br>
+                    <label><span class="indexed-bullet"></span> Last indexed 05/27/2020</label>
+                    <label>1,269,230 documents</label>
+
+                    <div class="text-right">
+                      <button type="button" class="btn btn-ell-conditions">Update index</button>
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+
+              <div class="row" *ngIf="!showAll">
+                <div class="col-12">
+                  <br>
+                  <button type="button" class="btn btn-ell-conditions">Save search</button>
+                  <button type="button" class="btn btn-ell-conditions">Load search <i
+                      class="fa fa-chevron-down"></i></button>
+                  <button type="button" class="btn btn-ell-conditions">Max results</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p-overlayPanel #authorFilter [style]="{'width': '500px'}">
+      <label>Name:</label>
+      <input type="text" [(ngModel)]="userName" placeholder="Search by Author" pInputText style="width: 100%;" />
+      <hr>
+      <div class="alert alert-info f-11">Will find documents authored by the specified people. You may select more than
+        one person.</div>
+      <hr>
+      <div class="text-right" *ngIf="!showAll">
+        <button type="button" class="btn btn-xs btn-primary f-11" style="margin-right: 5px;" (click)="cleanAuthor();"><i
+            class="fa fa-trash"></i> Clean </button>
+        <button type="button" class="btn btn-xs btn-primary f-11" (click)="filterPolicies();"><i
+            class="fa fa-search"></i> Search</button>
+      </div>
+    </p-overlayPanel>
+
+    <p-overlayPanel #dateFilters [style]="{'width': '500px'}">
+      <div class="container">
+        <label>Initial Date:</label>
+        <p-calendar [(ngModel)]="initialDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
+          [yearRange]="yearValidRangeEft" [minDate]="minDate" [maxDate]="endDate" dateFormat="mm/dd/yy"></p-calendar>
+    
+        <label>Final Date:</label>
+        <p-calendar [(ngModel)]="finalDate" [readonlyInput]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+          [minDate]="minDate" [maxDate]="endDate" dateFormat="mm/dd/yy"></p-calendar>
+        <hr>
+        <div class="alert alert-info f-11">Will find documents created or modified on the date or between the dates
+          specified. Choose the kind of date range and select the date.</div>
+        <hr>
+        <div class="text-right" *ngIf="!showAll">
+          <button type="button" class="btn btn-xs btn-primary f-11" style="margin-right: 5px;"
+            (click)="cleanDataRange();"><i class="fa fa-trash"></i> Clean </button>
+          <button type="button" class="btn btn-xs btn-primary f-11" (click)="filterPolicies();"><i class="fa fa-search"></i>
+            Search</button>
+        </div>
+      </div>
+    </p-overlayPanel>
+  </div>
+  <hr>
+
+  <!--No data found-->
+  <div class="container-fluid" style="padding: 20px; background-color: #FFF;" *ngIf="!blockedDocument && totalRecords == 0">
+    <div class="row">
+      <div class="div-no-data">
+        <img src="assets/img/no-data.png" class="img-no-data" />
+        <p class="no-data">NO DATA FOUND</p>
+      </div>
+    </div>
+  </div>
+  <div class="row" [hidden]="totalRecords == 0">
+    <div class="col-12">
+      <!--Data-->
+      <p-treeTable [value]="data" (onNodeExpand)="expandNode($event)">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Policy/Topic/Decision</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+          <tr [ttRow]="rowNode">
+            <td>
+              <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+              <span *ngIf="rowData && rowData.typeLoad == undefined" [innerHTML]="highlight(rowData.medPolTitle)"></span>
+              <span *ngIf="rowData && rowData.typeLoad == 'TOPIC'"><a nghref="#"
+                  (click)="redirectToTopicDetail(rowData.topicKey)" [innerHTML]="rowData.topicTitle ? highlight(rowData.topicTitle) : 'Loading...'"></a></span>
+              <span *ngIf="rowData && rowData.typeLoad == 'DECISION'"><a nghref="#"
+                  (click)="redirectToDecisionPoint(rowData.dpKey)" [innerHTML]="rowData.dpDesc ? highlight(rowData.dpDesc) : 'Loading...'"></a></span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-treeTable>
+    </div>
+  </div>
+
+  <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+  <p-toast [baseZIndex]="999999"></p-toast>

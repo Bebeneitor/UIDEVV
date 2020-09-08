@@ -1,0 +1,13 @@
+<div class="modal-header">
+  <h4 class="modal-title f-11">{{ title }}</h4>
+  <button type="button" class="close" aria-label="Close" (click)="dismiss()" style="position: absolute; right: 10px; top: 5px">
+    <span aria-hidden="true" class="f-11">&times;</span>
+  </button>
+</div>
+<div class="modal-body f-11">
+  {{ message }}
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-danger f-11" (click)="decline()">{{ btnCancelText }}</button>
+  <button type="button" class="btn btn-primary f-11" (click)="accept()">{{ btnOkText }}</button>
+</div>

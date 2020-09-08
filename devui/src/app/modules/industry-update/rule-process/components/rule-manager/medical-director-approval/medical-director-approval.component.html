@@ -1,0 +1,30 @@
+<ecl-table #peerReviewTable [tableModel]="tablePeerReviewApproval" (onAcctionLink)="openDetails($event)"
+  (onAcctionIcon)="showLunchBox($event)" (onSelectRecord)="setSelectRules($event)" (onUnSelectRecord)="setSelectRules($event)">
+</ecl-table>
+
+<br>
+
+<div class="clearfix">
+  <div class="float-left">
+    <button type="button" name="action" class="btn btn-primary btn-sm f-11" appThrottleTimeClick
+      (throttleTimeClick)="refreshEclTable()" [throttleTime]="2500" [disabled]="rules?.length < 0">
+      <i class="pi pi-refresh" style="font-size: 1em"></i> Refresh
+    </button>
+  </div>
+  <div class="float-right">
+    <button style="padding-right: 10px;" type="button" name="action" class="btn btn-primary btn-sm f-11"
+    appThrottleTimeClick (throttleTimeClick)="processRules(constants.SAVE_ACTION)" [throttleTime]="2500"
+      [disabled]="selectedRules.length <= 0"><i class="fa fa-save"></i> Save
+    </button>
+    &nbsp;
+    <button type="button" name="action" class="btn btn-primary btn-sm f-11" appThrottleTimeClick
+      (throttleTimeClick)="processRules(constants.SUBMIT_ACTION)" [throttleTime]="2500"
+      [disabled]="selectedRules.length <= 0"><i class="fa fa-check"></i> Submit
+    </button>
+    &nbsp;
+    <button type="button" name="action" class="btn btn-primary btn-sm f-11" appThrottleTimeClick
+      (throttleTimeClick)="showReturnDialog()" [throttleTime]="2500" 
+      [disabled]="selectedRules.length <= 0"><i class="fa fa-reply"></i> Return
+    </button>
+  </div>
+</div>

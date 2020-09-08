@@ -1,0 +1,204 @@
+<div class='container'>
+  <div class="ui-float-label" *ngIf="!(cvpApplications.length < 1 && ccvApplications?.length < 1 && rpeApplications?.length < 1 
+      && rcaApplications?.length < 1 && icmsApplications?.length < 1) && showELLLink">
+    <a class="ell-link" (click)="redirectToELLRuleLongDetail()" style="color: rgb(36, 118, 241);">Go to ELL rule detail</a>
+  </div>
+  <p-tabView>
+    <p-tabPanel header="ICMS" *ngIf="icmsApplications?.length > 0 ">
+      <div>
+        <label>ICMS</label>
+        <p-table [columns]="ruleApplicationService.icmsCols" [value]="icmsApplications" [paginator]="true"
+          [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+          [rowsPerPageOptions]="[3,5,10]" [loading]="loading" [responsive]="true" sortOrder="-1">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn>
+                {{col.header}}
+                <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                  ariaLabelDesc="Activate to sort in descending order"
+                  ariaLabelAsc="Activate to sort in ascending order">
+                </p-sortIcon>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-data>
+            <tr [pSelectableRow]="data">
+              <td>{{data.eclRuleId}}</td>
+              <td>{{data.midRule}}</td>
+              <td>{{data.version}}</td>
+              <td>{{data.subRule}}</td>
+              <td>{{data.implementationDt}}</td>
+              <td>{{data.ruleDescription}}</td>
+              <td>{{data.workOrderNumber}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> -
+              <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+            </span>
+            <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records
+              found.</span>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="RCA" *ngIf="rcaApplications?.length > 0">
+      <div>
+        <label>RCA</label>
+        <p-table [columns]="ruleApplicationService.rcaCols" [value]="rcaApplications" [paginator]="true"
+          [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+          [rowsPerPageOptions]="[3,5,10]" [loading]="loading" [responsive]="true" sortOrder="-1">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn>
+                {{col.header}}
+                <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                  ariaLabelDesc="Activate to sort in descending order"
+                  ariaLabelAsc="Activate to sort in ascending order">
+                </p-sortIcon>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-data>
+            <tr [pSelectableRow]="data">
+              <td>{{data.eclRuleId}}</td>
+              <td>{{data.conceptName}}</td>
+              <td>{{data.startDt}}</td>
+              <td>{{data.endDt}}</td>
+              <td>{{data.implementationDt}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> -
+              <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+            </span>
+            <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records
+              found.</span>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+
+    <p-tabPanel header="RPE" *ngIf="rpeApplications?.length > 0">
+      <div>
+        <label>RPE</label>
+        <p-table [columns]="ruleApplicationService.rpeCols" [value]="rpeApplications" [paginator]="true"
+          [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+          [rowsPerPageOptions]="[3,5,10]" [loading]="loading" [responsive]="true" sortOrder="-1">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn>
+                {{col.header}}
+                <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                  ariaLabelDesc="Activate to sort in descending order"
+                  ariaLabelAsc="Activate to sort in ascending order">
+                </p-sortIcon>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-data>
+            <tr [pSelectableRow]="data">
+              <td>{{data.eclRuleId}}</td>
+              <td>{{data.ruleSequenceNum}}</td>
+              <td>{{data.startDt}}</td>
+              <td>{{data.endDt}}</td>
+              <td>{{data.implementationDt}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> -
+              <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+            </span>
+            <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records
+              found.</span>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="CCV" *ngIf="ccvApplications?.length > 0">
+      <div>
+        <label>CCV</label>
+        <p-table [columns]="ruleApplicationService.ccvCols" [value]="ccvApplications" [paginator]="true"
+          [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+          [rowsPerPageOptions]="[3,5,10]" [loading]="loading" [responsive]="true" sortOrder="-1">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn>
+                {{col.header}}
+                <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                  ariaLabelDesc="Activate to sort in descending order"
+                  ariaLabelAsc="Activate to sort in ascending order">
+                </p-sortIcon>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-data>
+            <tr [pSelectableRow]="data">
+              <td>{{data.eclRuleId}}</td>
+              <td>{{data.version}}</td>
+              <td>{{data.implementationDt}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> -
+              <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+            </span>
+            <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records
+              found.</span>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="CVP" *ngIf="cvpApplications?.length > 0">
+      <div>
+        <label>CVP</label>
+        <p-table [columns]="ruleApplicationService.cvpCols" [value]="cvpApplications" [paginator]="true"
+          [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+          [rowsPerPageOptions]="[3,5,10]" [loading]="loading" [responsive]="true" sortOrder="-1">
+          <ng-template pTemplate="header" let-columns>
+            <tr>
+              <th *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn>
+                {{col.header}}
+                <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                  ariaLabelDesc="Activate to sort in descending order"
+                  ariaLabelAsc="Activate to sort in ascending order">
+                </p-sortIcon>
+              </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-data>
+            <tr [pSelectableRow]="data">
+              <td>{{data.eclRuleId}}</td>
+              <td>{{data.ruleCategoryId}}</td>
+              <td>{{data.startDt}}</td>
+              <td>{{data.endDt}}</td>
+              <td>{{data.implementationDt}}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> -
+              <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+            </span>
+            <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records
+              found.</span>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-tabPanel>
+    <div class="rule-not-applicable"
+      *ngIf="cvpApplications.length < 1 && ccvApplications?.length < 1 && rpeApplications?.length < 1 && rcaApplications?.length < 1 && icmsApplications?.length < 1">
+      <span class="notApplicable">This rule has not been applied yet to any rule engine</span>
+    </div>
+  </p-tabView>
+
+</div>

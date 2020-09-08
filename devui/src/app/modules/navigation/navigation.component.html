@@ -1,0 +1,13 @@
+<div *ngIf="status != '' && readyToDisplay">
+  <div *ngIf="type == 'RULE'">
+    <provisionalRule-Root [selectorConfig]="configRule"></provisionalRule-Root>
+  </div>
+
+  <div *ngIf="type == 'IDEA' && status != 'DRAFT'">
+    <newIdeaResearch-Root [ideaIdInp]="id" [readOnlyView]="readOnlyView"></newIdeaResearch-Root>
+  </div>
+
+  <div *ngIf="type == 'IDEA' && status == 'DRAFT'">
+    <newidea [ideaIdInp]="id" [readOnlyView]="readOnlyView"></newidea>
+  </div>
+</div>

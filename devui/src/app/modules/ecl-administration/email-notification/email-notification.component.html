@@ -1,0 +1,35 @@
+<div id="emailNotification">
+  <h5 class='title-header' style="position: relative; font-size: 16px;">
+    EMAIL NOTIFICATION
+
+    <button type="button" class="btn btn-primary btn-sm" [routerLink]="['/email-notification']" routerLinkActive="active" style="position: absolute; right: 0px; font-size: 11px;"><i
+        class="fa fa-arrow-left"></i> Back</button>
+  </h5>
+
+  <hr>
+
+  <label>Name</label>
+  <input type="text" [(ngModel)]="emailNotification.emailNotificationConfigurationName" class="form-control" placeholder="Name" maxlength="250" style="height: 35px;"/>
+
+  <label>Subject</label>
+  <input type="text" [(ngModel)]="emailNotification.emailSubject" class="form-control" placeholder="Subject" maxlength="10240" style="height: 35px;"/>
+
+  <label>From</label>
+  <p-chips [(ngModel)]="from" (onAdd)="validateMail($event, from, 'from', false)" (onRemove)="validateMail($event, from, 'from', true)"></p-chips>
+
+  <p-checkbox binary="true" value="val1" label="Editable Recipients" (onChange)="clearRecipients()" [(ngModel)]="emailNotification.recipientEditable"></p-checkbox><br>
+
+  <label>To</label>
+  <p-chips [(ngModel)]="to" (onAdd)="validateMail($event, to, 'to', false)" (onRemove)="validateMail($event, to, 'to', true)" [disabled]="!emailNotification.recipientEditable"></p-chips>
+
+  <label>CC</label>
+  <p-chips [(ngModel)]="cc" (onAdd)="validateMail($event, cc, 'cc', false)" (onRemove)="validateMail($event, cc, 'cc', true)" [disabled]="!emailNotification.recipientEditable"></p-chips>
+
+  <label>BCC</label>
+  <p-chips [(ngModel)]="bcc" (onAdd)="validateMail($event, bcc, 'bcc', false)" (onRemove)="validateMail($event, bcc, 'bcc', true)" [disabled]="!emailNotification.recipientEditable"></p-chips>
+
+  <label>Email body</label>
+  <textarea class="from-control" [(ngModel)]="emailNotification.emailBody" maxlength="32767" style="width: 100%; height: 250px;"></textarea>
+
+  <button type="button" (click)="save()" class="btn btn-primary float-right" style="font-size: 14px;"><i class="fa fa-save"></i> Save</button>
+</div>

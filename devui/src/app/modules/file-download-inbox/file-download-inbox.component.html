@@ -1,0 +1,17 @@
+<h5 class="h5-header">{{title}}</h5>
+<p-card>
+    <ecl-table #fileInboxTable [tableModel]='fileInboxTableModel' (onAcctionIcon)="onClickActions($event)"></ecl-table>
+    <p-footer>
+      <button class="btn btn-primary" (click)="refreshTable()">
+        <em class="fa fa-refresh"></em> Refresh
+      </button> &nbsp;
+    </p-footer>
+    
+</p-card>
+
+<p-blockUI [blocked]="blocked">
+    <div class="img-loading text-center">
+      <img src="assets/img/loading.gif" class="img-width" />
+      <p class="p-font">{{blockedMessage}}</p>
+    </div>
+</p-blockUI>

@@ -1,0 +1,33 @@
+::ng-deep .ui-treenode-content {
+    box-shadow: unset !important;
+    outline: none !important;
+}
+
+::ng-deep .ui-tree {
+    width: 100% !important;
+}
+
+.category-name {
+    display: inline; 
+    margin-right: 15px;
+}
+
+.filter-field {
+    width: 100%;
+    height: 33px;
+    font-size: 20px;
+    border-radius: 5px;
+}
+
+.filter-field:hover {
+    border-color: black;
+}
+
+.filter-field:focus {
+    border-color: #007bff;;
+}
+
+.fa-adjust{
+    color: #31006F !important;
+    display: inline;
+}
