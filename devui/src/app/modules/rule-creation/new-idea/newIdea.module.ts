@@ -9,7 +9,7 @@ import { NewIdeaService } from 'src/app/services/new-idea.service';
 import { NewIdeaRoutingModule } from './newIdea.routing';
 import {NewIdeaComponent} from "./newIdea.component";
 import { ToastModule } from 'primeng/toast';
-import { MessageModule, DynamicDialogConfig, DynamicDialogRef } from 'primeng/primeng';
+import { MessageModule, DynamicDialogConfig, DynamicDialogRef, MultiSelectModule } from 'primeng/primeng';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { BlockUIModule } from 'primeng/primeng';
 
@@ -28,7 +28,8 @@ import { BlockUIModule } from 'primeng/primeng';
     ToastModule,
     MessageModule,
     DynamicDialogModule,
-    BlockUIModule
+    BlockUIModule,
+    MultiSelectModule
   ],
   providers: [
     NewIdeaService,

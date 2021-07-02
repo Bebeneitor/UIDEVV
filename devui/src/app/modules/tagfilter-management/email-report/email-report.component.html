@@ -1,0 +1,40 @@
+<div>
+    <label>Subject</label>
+    <input type="text" [(ngModel)]="subject" class="form-control" maxlength="10240"
+        style="height: 35px;" />
+
+    <label>TO</label><span class="required-field-color">*</span>
+    <p-chips class="to-list" [(ngModel)]="toList" (onAdd)="validateMail($event, 'to')"></p-chips>
+
+    <label>CC</label>
+    <p-chips class="cc-list" [(ngModel)]="ccList" (onAdd)="validateMail($event, 'cc')"></p-chips>
+
+    <label>BCC</label>
+    <p-chips class="bcc-list" [(ngModel)]="bccList" (onAdd)="validateMail($event, 'bcc')"></p-chips>
+
+    <label>Attachment</label>
+    <div class="ui-g-12">
+        <div class="ui-inputgroup">
+            <button pButton type="button" class="ui-button-success excel-button" (click)="downloadReport()">
+                <i class="pi pi-table" style="font-size: 25px; margin-top: 4px;"></i>
+            </button>
+            &nbsp;&nbsp;
+            <span class="p-inputgroup-addon file-description">{{reportName}}</span>
+        </div>
+    </div>
+    <br>
+
+    <label>Email body</label><span class="required-field-color">*</span>
+    <textarea class="from-control" [(ngModel)]="emailBody" maxlength="32767"
+        style="width: 100%; height: 150px;"></textarea>
+    <br><br>
+    <div class="row">
+        <div class="col-6 text-right">
+            <p-button label="Cancel" styleClass="p-button" (click)=close()></p-button>
+        </div>
+        <div class="col-6">
+            <p-button label="Send Email" styleClass="p-button" (click)="validateInformation()"></p-button>
+        </div>
+    </div>
+
+</div>

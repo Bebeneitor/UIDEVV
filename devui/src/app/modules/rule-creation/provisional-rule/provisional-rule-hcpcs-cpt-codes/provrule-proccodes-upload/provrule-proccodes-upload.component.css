@@ -1,0 +1,50 @@
+.file-template {
+    width: 100%;
+    height: 100px;
+    border: 1px dotted #9179B7;
+}
+
+.file-template > .no-files-legend {
+    line-height: 100px;
+    text-align: center;
+    width: 100%;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.file-template > .loaded-files {
+    margin-top: 25px;
+    text-align: center;
+    width: 100%;
+    font-size: 11px;
+    position: relative;
+}
+
+.file-template > .loaded-files > a.remove-button {
+    position: absolute;
+    top: -15px;
+    right: 35%;
+}
+
+.file-template > .loaded-files > i.fa.fa-file {
+    color: #31006F;
+    display: block;
+    font-size: 14px;
+}
+
+.file-template > .loaded-files > span.file-info {
+    display: block;
+    font-size: 14px;
+    height: 14px;
+    margin-bottom: 5px;
+}
+
+.file-template > .no-files-legend > a {
+    cursor: pointer;
+    color: #9179B7;
+    text-decoration: underline;
+}
+.error{
+    color:red;
+    font-size:12px;
+}

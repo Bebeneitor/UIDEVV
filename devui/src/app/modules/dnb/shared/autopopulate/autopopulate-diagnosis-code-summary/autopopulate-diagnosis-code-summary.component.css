@@ -1,0 +1,61 @@
+::ng-deep p-dialog .ui-dialog-content.ui-widget-content {
+    padding: 15px !important;
+    overflow: visible;
+  }
+  
+  .dialog-content {
+    overflow-y: auto;
+    max-height: 60vh;
+    max-width: 45vw;
+    margin: 0;
+  }
+  
+  table {
+    margin-right: 20vw;
+    font-size: 12px;
+  }
+  
+  table tr {
+    cursor: pointer;
+  }
+  
+  .table {
+    background-color: #ffffff;
+  }
+  
+  table tr:hover td,
+  table tr.row-selected td {
+    background-color: #f3f0fd;
+  }
+  
+  table tr:nth-child(even) {
+    background-color: #e1eaf2 !important;
+  }
+  
+  .table td,
+  .table th {
+    padding: 0.571em 0.857em !important;
+  }
+  
+  pre {
+    font-family: "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 12px;
+  }
+
+  .dnb-btn {
+    margin: 3px;
+  }
+
+  .icdCodePanel {
+    width: 200px !important;
+  }
+  
+  .dnb-dialog .ui-dialog-titlebar {
+  border: 1px solid #c8c8c8 !important;
+  background-color: #3b1e7b !important;
+  color: #f8f9fa !important;
+  padding: 1em !important;
+  font-weight: 700 !important;
+  border-bottom: 0 none !important;
+}
+  

@@ -1,0 +1,19 @@
+.fluid-font-size {
+    font-size: 12px;
+}
+
+.fluid-text-width {
+    width: 154%;
+}
+
+.fluid-error-text {
+    color: red;
+  }
+
+.fluid-button {
+    justify-content: space-evenly;
+}  
+
+.fluid-margin {
+   margin-top: 20px;
+}  

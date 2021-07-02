@@ -1,0 +1,247 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h3>Details</h3>
+    </div>
+  </div>
+
+  <div class="row p-2">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Request Type:</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="issueType" placeholder="Choose" [style]="dropDownStyles" [options]="issueList"
+        [(ngModel)]="request.issueType" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 2">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Project Request Category:</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="projectCategory" placeholder="Choose" [style]="dropDownStyles" [options]="projectCatList"
+        [(ngModel)]="request.projectCategoryId" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+
+  <div class="row p-2" *ngIf="pageSetup == 2">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Source of the Request:</label>
+    </div>
+    <div class="col-8">
+      <input name="sourceRequest" [(ngModel)]="request.requestSource" [disabled]="readOnly" />
+    </div>
+  </div>
+
+  <div class="row p-2" *ngIf="pageSetup == 2">
+    <div class="col-3">
+      <label>Source:</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="source" placeholder="Choose" [style]="dropDownStyles" [options]="sourceList"
+        [(ngModel)]="request.sourceId" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+
+  <div class="row p-2">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Client(s):</label>
+    </div>
+    <div class="col-8">
+      <p-multiSelect id="client" name="rrClients" placeholder="Choose" [style]="dropDownStyles" [options]="clientList"
+        [(ngModel)]="request.clientSelected" (onChange)="populateClientAndPayers(request);setClientToolTip()"
+        [disabled]="readOnly" pTooltip="{{clientToolTip}}" tooltipPosition="bottom" [style]="{height:'30px'}">
+      </p-multiSelect>
+    </div>
+  </div>
+
+  <div class="row p-2">
+    <div class="col-3">
+      <label>Super Payer(s):</label>
+    </div>
+    <div class="col-8">
+      <p-multiSelect name="rrSuperPayers" placeholder="Choose" [style]="dropDownStyles" [options]="superPayerList"
+        [(ngModel)]="request.superPayersSelected" (onChange)="setSuperPayersToolTip()" [disabled]="readOnly || isClient"
+        pTooltip="{{superPayerSelToolTip}}" tooltipPosition="bottom" [style]="{height:'30px'}">
+      </p-multiSelect>
+    </div>
+  </div>
+
+  <div class="row p-2" *ngIf="pageSetup == 1">
+    <div class="col-3">
+      <label>Payer Status:</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="rrPayers" placeholder="Choose" (onChange)="populatePayersByPayerStatus()"
+        [style]="dropDownStyles" [options]="payerStatusList" [(ngModel)]="request.selectedPayerStatus"
+        [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+
+  <div class="row p-2">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Payer(s):</label>
+    </div>
+    <div class="col-8">
+      <p-multiSelect name="rrPayers" placeholder="Choose" [style]="dropDownStyles" [options]="payerList"
+        [(ngModel)]="request.selectedPayerList" (onChange)="setPayersToolTip()" [disabled]="readOnly || isClient"
+        pTooltip="{{selPayListToolTip}}" tooltipPosition="bottom" [style]="{height:'30px'}">
+      </p-multiSelect>
+    </div>
+  </div>
+
+  <div class="row p-2" *ngIf="pageSetup == 1 && request.requestLink">
+    <div class="col-3">
+      <label>Link</label>
+    </div>
+    <div class="col-8">
+      <div *ngIf="readOnly">
+        <span class="link-read-wrap" *ngFor="let link of request.requestLink.split(' ')">
+          <a style="font-size:12px;color: #007ad9;" (click)="redirectToUrl(link)">
+            {{link}}</a>
+        </span>
+      </div>
+      <div *ngIf="!readOnly">
+        <div *ngIf="hoverEdit" (mouseleave)="changeLinkHover(false)">
+          <input class="form-control" [(ngModel)]="request.requestLink" type="text" name="refUrl1"
+            pattern="^[a-z0-9_-]{8,15}$" #url1="ngModel" maxlength="1000" />
+          <div *ngIf="url1.invalid && (url1.dirty || url1.touched)" class="alert alert-danger">
+            <div *ngIf="url1.errors.pattern">
+              Must start with http:// or https:// and one or more characters
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!hoverEdit" class="input-link">
+          <div class="link-overflow">
+            <span class="link-wrap" *ngFor="let link of request.requestLink.split(' ')">
+              <a style="font-size:12px;color: #007ad9;" (click)="redirectToUrl(link);changeLinkHover(true)">
+                {{link}}</a>
+            </span>
+          </div>
+          <span class="link-wrap-img">
+            <i class="fa fa-pencil" aria-hidden="true" (click)="changeLinkHover(true)"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1 && request.attachmentCategory">
+    <div class="col-3">
+      <label>Attachment Category</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="attachmentCategory" placeholder="Choose" [style]="dropDownStyles" [options]="attachCatList"
+        [(ngModel)]="request.attachmentCategory" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1 && request.labels">
+    <div class="col-3">
+      <label>Labels</label>
+    </div>
+    <div class="col-8">
+      <input type="text" maxlength="500" name="labels" [(ngModel)]="request.labels" [disabled]="readOnly" />
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1 && request.eLLCommittee">
+    <div class="col-3">
+      <label>eLL Committee QA Review Complete?(eLL Use Only)</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="eLLCommittee" placeholder="Choose" [style]="dropDownStyles" [options]="eLLComList"
+        [(ngModel)]="request.eLLCommittee" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1 && request.qaReason">
+    <div class="col-3">
+      <label>QA Result Reason(eLL Use Only)</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="QAResultReason" placeholder="Choose" [style]="dropDownStyles" [options]="QAReasonList"
+        [(ngModel)]="request.qaReason" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Team</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="teamName" placeholder="Choose" (onChange)="getTeamMembersList()" [style]="dropDownStyles"
+        [options]="teamsList" [(ngModel)]="request.team" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1">
+    <div class="col-3">
+      <label>Team Supervisor(s):</label>
+    </div>
+    <div class="col-8">
+      <div class="col-field-box">
+        <span class="span-supervisor" *ngFor="let user of teamSupervisors">
+          {{user.label}}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1">
+    <div class="col-3">
+      <label>Team Assignee:</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="teamAssignee" placeholder="Choose" [style]="dropDownStyles" [options]="teamAssigneeList"
+        [(ngModel)]="request.teamAssignee" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Policy Research Request Type:</label>
+    </div>
+    <div class="col-8">
+      <p-dropdown name="policyRRType" placeholder="Choose" [style]="dropDownStyles" [options]="policyList"
+        [(ngModel)]="request.policyType" [disabled]="readOnly">
+      </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 1">
+    <div class="col-3">
+      <label>Line Of Business</label>
+    </div>
+    <div class="col-8">
+      <p-multiSelect name="lineOfBusiness" [style]="dropDownStyles" [options]="lobList"
+        [(ngModel)]="request.lineOfBusiness" [disabled]="readOnly" pTooltip="{{lineOfBusinessTooltip}}"
+        tooltipPosition="bottom">
+      </p-multiSelect>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 2 && request.lnProjectNumber">
+    <div class="col-3">
+      <label>Project Number</label>
+    </div>
+    <div class="col-8">
+      <label>{{request.lnProjectNumber}}</label>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 2 && request.lnLink">
+    <div class="col-3">
+      <label>PR Link</label>
+    </div>
+    <div class="col-8">
+      <a class="active-link-blue" style="word-wrap: break-word;" (click)="openNewWindowTab()">{{request.lnLink}}</a>
+    </div>
+  </div>
+  <div class="row p-2" *ngIf="pageSetup == 2 && request.lnStatusCode">
+    <div class="col-3">
+      <label>PR Creation Status Code</label>
+    </div>
+    <div class="col-8">
+      <label>{{request.lnStatusCode}}</label>
+    </div>
+  </div>
+</div>

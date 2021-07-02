@@ -1,0 +1,11 @@
+<div class="mb-3">
+  <textarea class="copy-paste-text text-uppercase" [(ngModel)]="codeRanges" *ngIf="_errorMap === undefined || _errorMap === null"></textarea>
+  <div #qlcontainer class="ql-container copy-paste-text text-uppercase"  [hidden]="_errorMap === undefined || _errorMap === null">
+    <div #markuped class="editor"></div>
+  </div>
+</div>
+
+<div class="mb-4">
+  <app-provisional-rule-individual-codes #individuallyTag [ruleInfo]="ruleInfo"  [tabType] = "'copyPaste'" (rowToEdit)="rowToEdit"
+   (addRowToCodes) = "addRowToCodesTable($event)"  [procTypeOptions]="procTypeOptions" [posOptions]="posOptions" [modifierOptions]="modifierOptions" [revenueCodeOptions]="revenueCodeOptions"></app-provisional-rule-individual-codes>
+</div>

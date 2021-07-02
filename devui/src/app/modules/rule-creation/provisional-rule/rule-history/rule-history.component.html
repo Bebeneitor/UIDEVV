@@ -2,27 +2,30 @@
 
   
   <p-table #viewGrid [columns]="cols" [value]="filteredWorkflowList" [paginator]="true"  [resizableColumns]="true" columnResizeMode="fit"
-           [reorderableColumns]="true" [rows]="5" [rowsPerPageOptions]="[5,10,20]" [loading]="loading" [responsive]="true" sortField="dateTime" sortOrder="1">
+           [reorderableColumns]="true" [rows]="5" [rowsPerPageOptions]="[5,10,20]" [loading]="loading" [responsive]="true">
 
     <ng-template pTemplate="caption">
       <div class="row">
         <div class="leftMargin">
           Filter by :
         </div>
-        <div  class="leftMargin">
+        <div *ngIf = "includeCR" class="leftMargin">
+          <p-checkbox binary="true" label="Custom Rule" [(ngModel)]="selectedCR" (click)="filerDataTable()"></p-checkbox>
+        </div>
+        <div class="leftMargin">
           <p-checkbox binary="true" label="Library Rule" [(ngModel)]="selectedLR" (click)="filerDataTable()"></p-checkbox>
         </div>
-        <div  class="leftMargin">
+        <div class="leftMargin">
           <p-checkbox binary="true" label="Provisional Rule" [(ngModel)]="selectedPR" (click)="filerDataTable()"></p-checkbox>
         </div>
-        <div  class="leftMargin">
+        <div class="leftMargin">
           <p-checkbox binary="true" label="Idea" [(ngModel)]="selectedID" (click)="filerDataTable()"></p-checkbox>
         </div>
-        <div style="float: right;">
+        <div class="rightMargin">
           <input type="text" #pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
                  (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
                  style="width:150px; border-radius: 5px">
-          <span style="cursor: pointer"><i *ngIf = "keywordSearch !== ''" (click)="viewGrid.reset(); pInputText.value='';" style="cursor: pointer" class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
+          <span style="cursor: pointer"><i *ngIf = "keywordSearch !== ''" (click)="viewGrid.reset(); pInputText.value=''; keywordSearch=''" style="cursor: pointer" class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
           <i *ngIf = "keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
         </div>
       </div>
@@ -44,21 +47,22 @@
       <tr [pSelectableRow]="workflow">
         <td class="small-td;" *ngFor="let col of columns">
 
-          <span *ngIf="col.field == 'dateTime'" class="span-centered" style="text-align: left; ">{{workflow.dateTime | date:'MMM d, y, h:mm:ss a'}}</span>
+          <span *ngIf="col.field == 'eclCode'" class="span-centered" style="text-align: center; ">{{workflow.eclCode}}
+            <i *ngIf="workflow.sourceRule"
+            style="font-size: 13px; font-weight: bold; margin-left: 5px;" class="s-indicator"></i>
+          </span>
 
-          <span *ngIf="col.field == 'ruleCode'" class="span-centered" style="text-align: left; ">{{workflow.ruleCode}}</span>
+          <span *ngIf="col.field == 'status'" class="span-centered" style="text-align: center; ">{{workflow.status}}</span>
 
-          <span *ngIf="col.field == 'status'" class="span-centered" style="text-align: left; ">{{workflow.status}}</span>
+          <span *ngIf="col.field == 'assignedTo'" class="span-centered" style="text-align: center; ">{{workflow.assignedTo}}</span>
 
-          <span *ngIf="col.field == 'user'" class="span-centered" style="text-align: left; ">{{workflow.user}}</span>
+          <span *ngIf="col.field == 'assignedOn'" class="span-centered" style="text-align: center; ">{{workflow.assignedOn}}</span>
 
-<!--          <span *ngIf="col.field == 'role'" class="span-centered" style="text-align: left; ">{{workflow.role}}</span>-->
+          <span *ngIf="col.field == 'assignedBy'" class="span-centered" style="text-align: center; ">{{workflow.assignedBy}}</span>
 
-          <span *ngIf="col.field == 'action'" class="span-centered" style="text-align: left; ">{{workflow.action}}</span>
+          <span *ngIf="col.field == 'action'" class="span-centered" style="text-align: center; ">{{workflow.action}}</span>
 
-          <span *ngIf="col.field == 'comments'" class="span-centered" style="text-align: left; ">{{workflow.comments}}</span>
-
-
+          <span *ngIf="col.field == 'comments'" class="span-centered" style="text-align: center; ">{{workflow.comments}}</span>
 
         </td>
       </tr>

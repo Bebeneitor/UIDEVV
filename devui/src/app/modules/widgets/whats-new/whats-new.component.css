@@ -1,0 +1,5 @@
+.new-rule-table .rule-link{
+    text-decoration: underline; 
+    cursor: pointer; 
+    color:inherit
+}

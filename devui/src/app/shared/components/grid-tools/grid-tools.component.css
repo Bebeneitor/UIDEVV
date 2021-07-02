@@ -1,0 +1,8 @@
+i:hover {
+    cursor: pointer;
+}
+
+::ng-deep .ui-table-caption.ui-widget-header 
+{
+    padding-bottom: 37px !important;
+}

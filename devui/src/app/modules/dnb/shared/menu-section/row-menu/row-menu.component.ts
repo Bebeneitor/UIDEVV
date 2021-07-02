@@ -6,14 +6,30 @@ import {
   Output,
   SimpleChanges,
 } from "@angular/core";
+import { behaviors } from "../../../models/constants/behaviors.constants";
 import { defaultMenuPermissions } from "../../../models/constants/rowMenuPermissions.constants";
+import {
+  blockGroupedCheckBox,
+  SectionCode,
+} from "../../../models/constants/sectioncode.constant";
 import {
   GroupedSection,
   GroupRow,
   Row,
   Section,
 } from "../../../models/interfaces/uibase";
-import { behaviors } from "../../../models/constants/behaviors.constants";
+import {
+  cleanData,
+  clearIndication,
+  copyIndication,
+  createNewGroup,
+  createNewRow,
+  createNewRowGlobalReview,
+  guidGenerator,
+  isValueReadOnly,
+  moveDataInColumn,
+  valuesCorresponding,
+} from "../../../utils/tools.utils";
 
 @Component({
   selector: "app-dnb-row-menu",
@@ -30,31 +46,30 @@ export class RowMenuComponent implements OnChanges {
     undoFlag: false,
     backUpIndexRow: null,
     backUpIndexGroup: null,
-    wasGroupRemoved: false,
     backUpRow: null,
     backUpGroup: null,
     copyRow: false,
     undoCopyRow: false,
-    undoRemoveGroup: false,
     undoCopyRowGroup: false,
     undoCopyGroup: false,
+    undoMultiSelect: false,
   };
   @Input() menuPermissions = defaultMenuPermissions;
+  @Input() cancelMultiSelect: boolean = false;
+  @Input() typeRemoveMultiple: string = "";
+
   @Output() behaviorEvent: EventEmitter<any> = new EventEmitter();
   @Output() undoItemsBack: EventEmitter<any> = new EventEmitter();
 
-  undoRemoveRowFlagChild: boolean = false;
-  undoRemoveGroupFlagChild: boolean = false;
   undoCopyRowFlag: boolean = false;
   undoCopyRowGroupFlag: boolean = false;
   undoCopyGroupFlag: boolean = false;
   shouldMoveUp: boolean = false;
   shouldMoveDown: boolean = false;
+  blockGroupedCheckBox = blockGroupedCheckBox;
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes.undoItems) {
-      this.undoRemoveRowFlagChild = changes.undoItems.currentValue.undoFlag;
-      this.undoRemoveGroupFlagChild =
-        changes.undoItems.currentValue.undoRemoveGroup;
       this.undoCopyRowFlag = changes.undoItems.currentValue.undoCopyRow;
       this.undoCopyRowGroupFlag =
         changes.undoItems.currentValue.undoCopyRowGroup;
@@ -71,112 +86,26 @@ export class RowMenuComponent implements OnChanges {
   }
 
   removeRow(): void {
-    if (this.isGrouped) {
-      const groupedSection = (this.section as GroupedSection).groups;
-      if (groupedSection.length === 1 && groupedSection[0].rows.length === 1) {
-        this.addRow();
-      }
-      this.undoItemsBack.emit({
-        undoFlag: true,
-        backUpIndexRow: this.rowIndex,
-        backUpIndexGroup: this.groupIndex,
-        wasGroupRemoved: groupedSection[this.groupIndex].rows.length === 1,
-        backUpGroup: groupedSection[this.groupIndex],
-        backUpRow: groupedSection[this.groupIndex].rows.splice(
-          this.rowIndex,
-          1
-        )[0],
-      });
-      if (groupedSection[this.groupIndex].rows.length === 0) {
-        groupedSection.splice(this.groupIndex, 1)[0];
-      }
-    } else {
-      if ((this.section as Section).rows.length === 1) {
-        this.addRow();
-      }
-      this.undoItemsBack.emit({
-        undoFlag: true,
-        backUpIndexRow: this.rowIndex,
-        backUpRow: (this.section as Section).rows.splice(this.rowIndex, 1)[0],
-      });
-    }
-    this.behaviorEvent.emit({ behavior: behaviors.removeRow });
+    this.behaviorEvent.emit({
+      behavior: behaviors.removeRow,
+    });
   }
 
   removeGroup(): void {
-    if ((this.section as GroupedSection).groups.length === 1) {
-      this.addGroup();
-    }
-    this.undoItemsBack.emit({
-      undoRemoveGroup: true,
-      backUpIndexGroup: this.groupIndex,
-      wasGroupRemoved: true,
-      backUpGroup: (this.section as GroupedSection).groups.splice(
-        this.groupIndex,
-        1
-      )[0],
-    });
     this.behaviorEvent.emit({ behavior: behaviors.removeGroup });
   }
 
-  undoRemoveRow(): void {
-    if (this.isGrouped) {
-      const groupedSection = (this.section as GroupedSection).groups;
-      if (this.undoItems.wasGroupRemoved) {
-        groupedSection.splice(
-          this.undoItems.backUpIndexGroup,
-          0,
-          this.undoItems.backUpGroup
-        );
-        groupedSection[this.undoItems.backUpIndexGroup].rows.splice(
-          this.undoItems.backUpIndexRow,
-          0,
-          this.undoItems.backUpRow
-        );
-      } else {
-        groupedSection[this.undoItems.backUpIndexGroup].rows.splice(
-          this.undoItems.backUpIndexRow,
-          0,
-          this.undoItems.backUpRow
-        );
-      }
-    } else {
-      (this.section as Section).rows.splice(
-        this.undoItems.backUpIndexRow,
-        0,
-        this.undoItems.backUpRow
-      );
-    }
-    this.undoItemsBack.emit({
-      undoFlag: false,
-      backUpIndexRow: -1,
-      backUpIndexGroup: -1,
-      backUpRow: null,
-      backUpGroup: null,
-    });
-    this.behaviorEvent.emit({ behavior: behaviors.undoRemoveRow });
-  }
-
-  undoRemoveGroup(): void {
-    (this.section as GroupedSection).groups.splice(
-      this.undoItems.backUpIndexGroup,
-      0,
-      this.undoItems.backUpGroup
-    );
-    this.undoItemsBack.emit({
-      undoRemoveGroup: false,
-      backUpIndexRow: -1,
-      backUpIndexGroup: -1,
-      backUpRow: null,
-      backUpGroup: null,
-    });
-    this.behaviorEvent.emit({ behavior: behaviors.undoRemoveGroup });
-  }
-
   addRow(): void {
-    const newRow = this.createNewRow((this.section as Section).rows);
+    const newRow = createNewRow((this.section as Section).rows);
     (this.section as Section).rows.splice(this.rowIndex + 1, 0, newRow);
     this.behaviorEvent.emit({ behavior: behaviors.addRow });
+  }
+
+  addManyRows(): void {
+    this.behaviorEvent.emit({
+      behavior: behaviors.addManyRows,
+      rowIndex: this.rowIndex,
+    });
   }
 
   addGroup() {
@@ -223,16 +152,16 @@ export class RowMenuComponent implements OnChanges {
   }
 
   toggleSeparationGroup(group: GroupRow, row: Row, indexRow: number): void {
-    if (group.rows.length === indexRow + 1) {
-      if (group.hasOwnProperty("hasBorder")) {
-        group.hasBorder = !group.hasBorder;
-      } else {
-        group.hasBorder = !row.hasBorder;
-      }
-      row.hasBorder = !row.hasBorder;
-    } else {
-      row.hasBorder = !row.hasBorder;
-    }
+    row.hasBorder = !row.hasBorder;
+  }
+
+  toggleCompleteSeparationGroup(
+    group: GroupRow,
+    row: Row,
+    indexRow: number
+  ): void {
+    group.rows[group.rows.length - 1].hasBorder =
+      !group.rows[group.rows.length - 1].hasBorder;
   }
 
   copyRow(): void {
@@ -254,7 +183,13 @@ export class RowMenuComponent implements OnChanges {
 
   addGroupRow(): void {
     const groupedSection = (this.section as GroupedSection).groups;
-    const newRow = this.createNewRow(groupedSection[this.groupIndex].rows);
+    const newRow = createNewRow(groupedSection[this.groupIndex].rows);
+    if (this.section.section.code === SectionCode.DailyMaxUnits) {
+      newRow.columns[1].isReadOnly = isValueReadOnly(
+        cleanData(groupedSection[this.groupIndex].names[0].value),
+        valuesCorresponding
+      );
+    }
     if (
       this.controlBorderLastRow(
         groupedSection[this.groupIndex].rows.length,
@@ -291,41 +226,24 @@ export class RowMenuComponent implements OnChanges {
   }
 
   createNewRow(rows: Row[]): Row {
-    const newColumns = rows[0].columns.map((col) => {
-      const diff: [number, string][] = [[0, ""]];
-      return {
-        maxLength: col.maxLength,
-        isReadOnly: false,
-        value: "",
-        diff,
-      };
-    });
-    return { hasBorder: false, columns: newColumns };
+    return createNewRow(rows);
   }
 
   createNewGroup(groups: GroupRow[]): GroupRow {
-    const newGroupHeaders = groups[0].names.map(() => {
-      const diff: [number, string][] = [[0, ""]];
-      return {
-        isReadOnly: false,
-        value: "",
-        diff,
-      };
-    });
-    const newRow = this.createNewRow(
-      (this.section as GroupedSection).groups[this.groupIndex].rows
-    );
-    return { rows: [newRow], names: newGroupHeaders };
+    return createNewGroup(this.section as GroupedSection, this.groupIndex);
   }
 
   duplicateRow(rows: Row[], rowIndex: number): Row {
     const newColumns = rows[rowIndex].columns.map((column) => {
       return {
+        maxLength: column.maxLength,
         isReadOnly: false,
+        feedbackData: [],
+        feedbackLeft: 0,
         value: column.value,
       };
     });
-    return { hasBorder: false, columns: newColumns };
+    return { hasBorder: false, columns: newColumns, codeUI: guidGenerator() };
   }
 
   copyColumn() {
@@ -385,5 +303,50 @@ export class RowMenuComponent implements OnChanges {
       undoCopyRowGroup: false,
     });
     this.behaviorEvent.emit({ behavior: behaviors.undoCopyRowGroup });
+  }
+  addMidRule() {
+    this.behaviorEvent.emit({ behavior: behaviors.addMidRule });
+  }
+
+  detailEdit() {
+    this.behaviorEvent.emit({ behavior: behaviors.detailEdit });
+  }
+
+  addExistingMidRule() {
+    this.behaviorEvent.emit({ behavior: behaviors.addExistingMidRule });
+  }
+
+  checkFeedback() {
+    this.behaviorEvent.emit({ behavior: behaviors.checkFeedback });
+  }
+
+  behaviorMultipleRow(behavior) {
+    this.behaviorEvent.emit({ behavior: behavior });
+  }
+
+  addComment() {
+    this.behaviorEvent.emit({ behavior: behaviors.addComment });
+  }
+
+  editComment() {
+    this.behaviorEvent.emit({ behavior: behaviors.editComment });
+  }
+
+  indicationRemove(): void {
+    let indicationData = copyIndication(this.section as Section, 0);
+    clearIndication(this.section as Section, 0);
+    const newRow = createNewRowGlobalReview((this.section as Section).rows);
+    (this.section as Section).rows.splice(this.rowIndex, 0, newRow);
+    moveDataInColumn(this.section as Section, 0, indicationData);
+    this.behaviorEvent.emit({ behavior: behaviors.indicationRemove });
+  }
+
+  indicationAdded(): void {
+    let indicationData = copyIndication(this.section as Section, 1);
+    clearIndication(this.section as Section, 1);
+    const newRow = createNewRowGlobalReview((this.section as Section).rows);
+    (this.section as Section).rows.splice(this.rowIndex, 0, newRow);
+    moveDataInColumn(this.section as Section, 1, indicationData);
+    this.behaviorEvent.emit({ behavior: behaviors.indicationAdded });
   }
 }

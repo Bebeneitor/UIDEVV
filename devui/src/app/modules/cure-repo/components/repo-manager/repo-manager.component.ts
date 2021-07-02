@@ -1,14 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { RepoTableAdminService } from './repo-module-admin/repo-table-admin.service';
 
 @Component({
   selector: 'app-repo-manager',
   templateUrl: './repo-manager.component.html',
   styleUrls: ['./repo-manager.component.css']
 })
-export class RepoManagerComponent implements OnInit {
+export class RepoManagerComponent implements OnInit, OnDestroy {
   title: string = '';
-  constructor(private activatedRoute: ActivatedRoute, private router: Router) { }
+  titleSubs: Subscription;
+  constructor(private activatedRoute: ActivatedRoute, private router: Router, private repoTableAdminService: RepoTableAdminService) { }
+
 
   ngOnInit() {
     this.activatedRoute.url.subscribe(url => {
@@ -17,5 +21,13 @@ export class RepoManagerComponent implements OnInit {
       }
       this.title = this.activatedRoute.snapshot.children[0].data.pageTitle;
     });
+
+    this.titleSubs = this.repoTableAdminService.setPageTitleObs().subscribe((title) => {
+      this.title = title;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.titleSubs.unsubscribe();
   }
 }

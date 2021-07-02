@@ -1,0 +1,25 @@
+:host:last-child .bar {
+  display: none;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.content {
+  flex: 1;
+}
+
+.bar {
+  position: absolute;
+  top: 0;
+  right: 0px;
+  bottom: 0;
+  width: 5px;
+  margin: 0;
+  background: #dee2e6;
+  background-clip: content-box;
+  cursor: ew-resize;
+  z-index: 997;
+}

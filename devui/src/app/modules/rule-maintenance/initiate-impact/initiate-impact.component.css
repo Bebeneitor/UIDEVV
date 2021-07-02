@@ -10,13 +10,6 @@ body {
   overflow-x: hidden;
 }
 
-.block-img-loading {
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  width: 120px
-}
-
 /*************************
    REFERENCE DETAIL        *
   **************************/

@@ -1,0 +1,41 @@
+.project-request-form {
+    border: 1px solid;
+    border-radius: 3px;
+    padding: 50px;
+    padding-top: 10px;
+    left: 0px;
+    top: 0px;
+    background: inherit;
+    background-color: rgba(255, 255, 255, 1);
+    box-sizing: border-box;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(161, 161, 161, 1);
+    border-radius: 3px;
+    -moz-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    -webkit-box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+    box-shadow: -3px -1px 3px rgba(0, 0, 0, 0.349019607843137);
+}
+
+h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    color: #31006F;
+}
+
+.nav-page-title {
+    cursor: pointer;
+    text-decoration: underline;
+    margin-right: 0.6%;
+    white-space: pre;
+}
+
+.rr-btn {
+    min-width: 25%;
+}
+
+.flex-rr-btn {
+    display: flex;
+    justify-content: flex-end;
+    height: 40px;
+}

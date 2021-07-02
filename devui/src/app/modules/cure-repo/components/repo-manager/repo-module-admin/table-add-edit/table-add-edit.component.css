@@ -1,0 +1,49 @@
+.tableDetails{
+    border:1px solid#d0cccc;
+    border-radius: 5px 5px 5px 5px; 
+    display: flex;
+}
+
+.button-validate{
+    width: 100% !important;
+}
+
+.no-padding-right {
+    padding-right:  0;
+}
+
+.button-col{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (max-width: 768px) { 
+    .tableDetails { 
+        display: block; 
+        margin-bottom: 10px;
+    }
+    .button-validate{ 
+        width: 100% !important;
+        margin-bottom: 10px;
+    }
+
+    .no-padding-right {
+        padding-right:  15px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 992px){
+    .no-padding-right {
+        padding-right:  0;
+    }
+    .button-validate{
+        width: max-content !important;
+    }
+}
+
+::ng-deep .ecl-table-add-edit ecl-table a.btn-primary {
+    width: 100% !important;
+    font-size: 11px !important;
+    height: 26px !important;
+}

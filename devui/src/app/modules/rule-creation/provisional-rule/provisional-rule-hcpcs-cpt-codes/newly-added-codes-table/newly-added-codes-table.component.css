@@ -1,0 +1,25 @@
+
+.cpt-tab h4 {
+    color:#31006F;
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 0px !important;
+}
+
+.cpt-tab .section-table {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    clear: both;
+}
+
+#legend #square {
+    display: inline-block;
+    margin-right: 2px;
+    height:10px;
+    width: 10px;
+    background-color: orange;
+}
+
+#legend label{
+    color:black;
+}

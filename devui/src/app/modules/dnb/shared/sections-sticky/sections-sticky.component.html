@@ -18,14 +18,19 @@
     <table class="table" [id]="stickyItem.section.name">
       <thead>
         <tr>
-          <th *ngFor="let header of stickyItem.headers">{{ header }}</th>
+          <th
+            *ngFor="let header of stickyItem.headers; index as headerIndex"
+            [style.width.%]="stickyItem.headersUIWidth[headerIndex]"
+          >
+            {{ header }}
+          </th>
         </tr>
       </thead>
       <ng-container *ngIf="stickyItem.groups; else rowSticky">
         <tbody
           *ngFor="let group of stickyItem.groups; index as groupIndex"
           [ngClass]="{
-            border: group.hasBorder
+            border: groupHasBorder(group)
           }"
         >
           <tr

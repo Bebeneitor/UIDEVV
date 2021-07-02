@@ -1,3 +1,16 @@
-::ng-deep p-table#tableGoodIdeas > div > .ui-table-caption.ui-widget-header {
-    padding-bottom: 8px !important;
+.good-ideas {
+    margin: 0px;
+    border: 0px;
+    padding : 0px;
+}
+
+.good-ideas h5 {
+    font-size : 17px;
+    margin-bottom: 15px;
+}
+
+.good-ideas .btn-container {
+    margin-bottom: 20px;
+    margin-top: 20px;
+    float: right;
 }

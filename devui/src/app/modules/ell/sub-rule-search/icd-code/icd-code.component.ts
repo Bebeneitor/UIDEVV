@@ -17,7 +17,7 @@ import { TableDetailDto } from 'src/app/shared/models/dto/table-detail-dto';
 })
 export class IcdCodeComponent implements OnInit {
   
-  @ViewChild('icdTableView') icdTableView: EclTableComponent;
+  @ViewChild('icdTableView',{static: true}) icdTableView: EclTableComponent;
   icdTable : EclTableModel ;
 
   constructor(private dialogService: DialogService) { }
@@ -27,7 +27,7 @@ export class IcdCodeComponent implements OnInit {
   }
 
   /**
-   * This Method is for config the ecl-table for CPT Codes data. 
+   * This Method is for config the ecl-table for ICD Codes data. 
    * @param ellSearchDto 
    */
   private initializeTableConfig(ellSearchDto?  : EllSearchDto){   

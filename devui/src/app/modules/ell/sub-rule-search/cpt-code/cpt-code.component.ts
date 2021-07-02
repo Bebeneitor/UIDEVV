@@ -16,7 +16,7 @@ import { TableDetailDto } from 'src/app/shared/models/dto/table-detail-dto';
   styleUrls: ['./cpt-code.component.css']
 })
 export class CptCodeComponent implements OnInit {
-  @ViewChild('cptTableView') cptTableView: EclTableComponent;
+  @ViewChild('cptTableView',{static: true}) cptTableView: EclTableComponent;
 
   cptTable : EclTableModel ;
   constructor(private dialogService: DialogService) { }

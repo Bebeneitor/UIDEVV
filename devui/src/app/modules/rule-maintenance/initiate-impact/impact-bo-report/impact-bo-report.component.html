@@ -1,0 +1,39 @@
+<div class="panel-data">
+  <div class="row">
+    <div class="col-12">
+      <label>File (xlsx):</label>
+      <br />
+      <input id="file" #fileInput style="font-size : 11px;" type="file" (change)="fileChange($event.target.files)"
+        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="float-right">
+        <button [disabled]="file == null" style="width: 100px; font-size: 11px; margin-right: 5px;"
+          type="button" class="btn btn-primary" (click)="showPreview()">View</button>
+      </div>
+    </div>
+  </div>
+  <div [hidden]='file == null ||!preview'>
+    <div class="row row-div">
+      <div class="col-12">
+        <h2>Rule Results</h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <ecl-table #viewTable [tableModel]='tableConfig' (onSelectRecord)="setSelectRules($event)"
+          (onUnSelectRecord)="setSelectRules($event)" (onAcctionLink)="onActionLink($event)">
+        </ecl-table>
+      </div>
+    </div>
+    <div class="row row-div">
+      <div class="col-12 button-submit">
+        <button class="btn btn-primary" name="action" [disabled]="disableInitiateBtn" type="submit"
+        style="font-size: 11px;"
+          (click)="initateImpact()">​Initiate impact Analysis</button>
+      </div>
+    </div>
+  </div>
+</div>

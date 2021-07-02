@@ -13,6 +13,7 @@ import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column'
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
 import { ProvisionalRuleComponent } from '../../rule-creation/provisional-rule/provisional-rule.component';
+import { ImpactBoReportComponent } from './impact-bo-report/impact-bo-report.component';
 
 @Component({
   selector: 'app-initiate-impact',
@@ -21,8 +22,10 @@ import { ProvisionalRuleComponent } from '../../rule-creation/provisional-rule/p
 })
 export class InitiateImpactComponent implements OnInit {
 
-  @ViewChild('viewGrid') viewGrid: any;
-  @ViewChild('viewTable') viewTable: EclTableComponent;
+  @ViewChild('viewGrid',{static: true}) viewGrid: any;
+  @ViewChild('viewTable',{static: true}) viewTable: EclTableComponent;
+  @ViewChild('boReport',{static: true}) boReport:ImpactBoReportComponent;
+
 
   minDate: Date;
   maxDate: Date;
@@ -160,7 +163,7 @@ export class InitiateImpactComponent implements OnInit {
 
   /**
    * Method to get selected rows in viewTable
-   * @param event 
+   * @param event
    */
   setSelectRules(event: any) {
     this.selectedRules = event;
@@ -187,7 +190,9 @@ export class InitiateImpactComponent implements OnInit {
     this.utilService.getAllLookUps(Constants.LOOKUP_TYPE_CLAIM_PLACE_OF_SERVICE).subscribe(response => {
       if (response !== null && response !== undefined) {
         response.forEach(pos => {
-          this.placeOfServiceList.push({ label: pos.lookupDesc, value: { id: pos.lookupId, name: pos.lookupDesc } });
+          if (pos.lookupDesc !== Constants.TWO_PERC_POS) {
+            this.placeOfServiceList.push({ label: pos.lookupDesc, value: { id: pos.lookupId, name: pos.lookupDesc } });
+          }
         });
       }
     });
@@ -238,20 +243,33 @@ export class InitiateImpactComponent implements OnInit {
   }
 
 
-  initate() {
+  initiate() {
     this.disableInitiateBtn = true;
-    this.loading = true;
-    this.impactDto.ruleIds = [];
-    this.impactDto.ruleIds = this.selectedRules.map(ele => ele.ruleId);
-    this.rule.saveInitiateImpact(this.impactDto).subscribe(response => {
-      if (response.data !== undefined && response.data !== null) {
-        this.viewTable.selectedRecords = [];
-        this.impactDto.ruleIds = [];
-        this.selectedRules = [];
-        this.showInitiateMessage(response.data.runId);
-        this.viewImpactedRules();
-      }
-    });
+    this.initiateImpactAnalysis(this.selectedRules)
+    .then(() => {
+      this.viewTable.selectedRecords = [];
+      this.viewTable.savedSelRecords = [];
+      this.impactDto.ruleIds = [];
+      this.selectedRules = [];
+      this.disableInitiateBtn = true;
+      this.viewImpactedRules();
+    })
+  }
+
+  initiateImpactAnalysis(rulesToImpact: any[]): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.loading = true;
+      this.impactDto.ruleIds = [];
+      this.impactDto.ruleIds = rulesToImpact.map(ele => ele.ruleId);
+      this.rule.saveInitiateImpact(this.impactDto).subscribe(response => {
+        if (response.data !== undefined && response.data !== null) {
+          this.impactDto.ruleIds = [];
+          this.showInitiateMessage(response.data.runId);
+        }
+        this.boReport.showRecords(true);
+        resolve(true);
+      })
+    })
   }
 
   showInitiateMessage(runId: number) {
@@ -272,7 +290,6 @@ export class InitiateImpactComponent implements OnInit {
           this.messageService.add({ severity: 'warn', summary: 'Info', detail: 'User profile setup is incomplete , please contact ECL Admin.', life: 5000, closable: true });
         }
       }
-      this.disableInitiateBtn = true;
       this.loading = false;
     });
   }
@@ -324,5 +341,8 @@ export class InitiateImpactComponent implements OnInit {
   indexShift(event) {
 
   }
-
+  
+  onToggleLoader(toggle: boolean) {
+    this.loading = toggle;
+  }
 }

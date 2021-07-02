@@ -1,0 +1,60 @@
+
+.rr-search-container {
+    background-clip: border-box;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .1rem;
+    box-shadow: 0 4px 14px 1px rgba(143,143,143,.56);
+    background-color : #fff;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.rr-search-container input {
+    font-size: 11px !important;
+    height: 31px !important;
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+.rr-search-table {
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .1rem;
+    box-shadow: 0 4px 14px 1px rgba(143,143,143,.56);
+    background-color : #fff;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input:disabled {
+    border: 1px #F5F5F5 solid
+}
+
+.button-container {
+    padding: 15px;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    padding-right: 15px;
+    padding-left: 15px; 
+}
+
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+::ng-deep .rr-search-container .ui-dropdown {
+    min-width: 100% !important;
+}
+
+.row {
+    margin: 0 !important;
+}
+input {
+    width: 100%;
+}

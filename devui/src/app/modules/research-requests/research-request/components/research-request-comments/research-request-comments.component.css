@@ -1,0 +1,6 @@
+.view-button {
+    display: flex; 
+    justify-content: flex-end; 
+    margin-top: 0.7em;
+    margin-bottom: 0.2em;
+  }

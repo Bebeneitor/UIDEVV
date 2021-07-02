@@ -23,6 +23,7 @@ export class FileUploaderComponent implements OnInit, AfterViewChecked {
 
   @Input('isTextArea') isTextArea: boolean = false;
   @Input('isRequired') isRequired: boolean = false;
+  @Input('showTooltip') showTooltip: boolean = false;
 
   @Input('flag') flag: number = 0;
 
@@ -98,6 +99,7 @@ export class FileUploaderComponent implements OnInit, AfterViewChecked {
     };
 
     this.fileId = 0;
+    this.errorLabel = false;
   }
 
   removeFile(fileId: number) {

@@ -1,0 +1,228 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
+<div
+  class="content dnb-page"
+  [ngClass]="{
+    'is-fullscreen': isFullScreen,
+    'navigation-closed': !isNavigationOpen
+  }"
+>
+  <div class="row" *ngIf="sections$ | async">
+    <div class="dnb-section-navigation">
+      <app-dnb-section-navigation
+        [isFullScreen]="isFullScreen"
+        [(isNavigationOpen)]="isNavigationOpen"
+        [navigationItems]="navigationItems"
+      ></app-dnb-section-navigation>
+    </div>
+    <div class="page-content">
+      <div class="sentinal"></div>
+      <div class="dnb-page-header sticky-header">
+        <h1 class="dnb-title">
+          Create Drug:
+          <span class="drug-name">
+            <app-cell-editor
+              [attr.slm-id]="'drug_name_text'"
+              [column]="undoRedo.drugNameColumn"
+              [searchInfo]="undoRedo.drugNameColumn.searchData"
+              [highLight]="undoRedo.drugNameColumn.highlight"
+              [sectionPosition]="createDrugPosition()"
+              [isReadOnly]="!enableEditing"
+              [(focus)]="undoRedo.drugNameColumn.focus"
+              (cellNavigate)="cellNavigate($event)"
+            ></app-cell-editor>
+          </span>
+        </h1>
+        <div class="dnb-header-buttons">
+          <span class="dnb-toggle" *ngIf="!isApproverReviewing">
+            <button
+              [attr.slm-id]="'toggle_find_replace_btn'"
+              (click)="showFindAndReplace = !showFindAndReplace"
+              tabindex="-1"
+            >
+              Find {{ enableEditing ? "& Replace" : "" }}
+            </button>
+          </span>
+          <ng-container *ngIf="enableEditing">
+            <span class="dnb-toggle">
+              <button
+                [attr.slm-id]="'clear_all_btn'"
+                (click)="confirmClearAll()"
+                tabindex="-1"
+              >
+                Clear All Sections
+              </button>
+            </span>
+          </ng-container>
+          <span class="dnb-toggle">
+            <p-inputSwitch
+              [(ngModel)]="isFullScreen"
+              [attr.slm-id]="'is_full_screen_btn'"
+              (onChange)="onSwitchChange($event)"
+              tabindex="-1"
+            ></p-inputSwitch>
+            <label>{{ toggleLabel }}</label>
+          </span>
+          <p-overlayPanel
+            #mi
+            [dismissable]="true"
+            styleClass="ingest-overlay"
+            (onShow)="openMI = true"
+            (onHide)="openMI = false"
+          >
+            <app-dnb-upload-ingestion
+              *ngIf="openMI"
+              [isNew]="drugCode === null"
+              [editable]="true"
+              [drugName]="undoRedo.drugNameColumn.value"
+              [drugCode]="drugCode"
+              (drugNameChanged)="drugNameChange($event)"
+              (getIngestedContent)="getIngestedContent($event)"
+              (drugCreated)="drugCreated($event)"
+            ></app-dnb-upload-ingestion>
+          </p-overlayPanel>
+          <button
+            *ngIf="enableEditing"
+            class="dnb-btn inges-btn"
+            [attr.slm-id]="'manual_ingestion_btn'"
+            (click)="mi.toggle($event)"
+            tabindex="-1"
+          >
+            <i class="fa fa-upload"></i>DRD
+          </button>
+        </div>
+        <app-find
+          #find
+          [sections]="undoRedo.sections"
+          [drugNameColumn]="undoRedo.drugNameColumn"
+          [(showFindAndReplace)]="showFindAndReplace"
+          [showButtonReplace]="enableEditing"
+          [shouldShowCurrent]="false"
+        ></app-find>
+      </div>
+      <div class="section-titles">
+        <div class="row">
+          <span class="col-6 dnd-label-percentage">
+            Percentage Completed: {{ percentage | percent: "1.0" }}
+          </span>
+        </div>
+        <div class="row">
+          <span class="col-6 dnd-label-percentage">
+            Mark All Sections Completed
+            <p-checkbox
+              [(ngModel)]="shouldMarkSections"
+              (onChange)="allMarkSections($event)"
+              binary="true"
+              [disabled]="!enableEditing"
+            ></p-checkbox>
+          </span>
+        </div>
+      </div>
+      <div class="sortable_list sections-container">
+        <div
+          *ngFor="
+            let section of undoRedo.sections;
+            index as sectionIndex;
+            trackBy: trackBySections
+          "
+        >
+          <ng-container *ngIf="!section.grouped; else groupedSection">
+            <app-dnb-sections-container
+              [id]="section.id"
+              [sectionIndex]="sectionIndex"
+              [attr.slm-id]="section.id"
+              [currentVersion]="section.current"
+              [newVersion]="section.new"
+              [hasRowHeading]="section.hasRowHeading"
+              [isComparing]="false"
+              [enableEditing]="enableEditing && !showFindAndReplace"
+              [isApproverReviewing]="isApproverReviewing"
+              [feedbackComplete]="feedbackComplete"
+              [showCurrent]="false"
+              (stickySection)="stickySection($event)"
+              (toggleCompleted)="toggleCompleted($event, sectionIndex)"
+              (toggleSectionCopy)="toggleSectionCopy($event)"
+              [focusType]="section.new.focusType"
+              (sectionNavigate)="sectionNavigateEvt($event, sectionIndex)"
+              (dataPopulateSections)="dataPopulateSections($event)"
+              (feedbackUpdate)="feedbackUpdate($event, sectionIndex)"
+              (validIcdCodes)="validIcdCodes($event)"
+            >
+            </app-dnb-sections-container>
+          </ng-container>
+          <ng-template #groupedSection>
+            <app-dnb-grouped-sections-container
+              [sectionIndex]="sectionIndex"
+              [id]="section.id"
+              [attr.slm-id]="section.id"
+              [currentVersion]="section.current"
+              [newVersion]="section.new"
+              [isComparing]="false"
+              [enableEditing]="enableEditing && !showFindAndReplace"
+              [isApproverReviewing]="isApproverReviewing"
+              [feedbackComplete]="feedbackComplete"
+              [showCurrent]="false"
+              (stickySection)="stickySection($event)"
+              (toggleCompleted)="toggleCompleted($event, sectionIndex)"
+              (toggleSectionCopy)="toggleSectionCopy($event)"
+              [focusType]="section.new.focusType"
+              (sectionNavigate)="sectionNavigateEvt($event, sectionIndex)"
+              (dataPopulateSections)="dataPopulateSections($event)"
+              (feedbackUpdate)="feedbackUpdate($event, sectionIndex)"
+            ></app-dnb-grouped-sections-container>
+          </ng-template>
+        </div>
+      </div>
+      <div class="dnb-page-btns dnb-buttons-floating" *ngIf="showButtons">
+        <div *ngIf="enableEditing" class="dnb-action-btns">
+          <button (click)="undo()" [disabled]="position < 1">
+            <i class="fa fa-undo" aria-hidden="true"></i>
+          </button>
+          <button (click)="redo()" [disabled]="position >= stack.length - 1">
+            <i class="fa fa-repeat" aria-hidden="true"></i>
+          </button>
+        </div>
+        <ng-container *ngIf="isApproverReviewing">
+          <button *ngIf="feedbackComplete" (click)="addMoreFeedback()">
+            Add More Feedback
+          </button>
+          <button *ngIf="!feedbackComplete" (click)="confirmReturnData()">
+            Return
+          </button>
+        </ng-container>
+        <ng-container *ngIf="enableEditing">
+          <span class="dnb-toggle autosave-toggle">
+            <label class="dnd-label-autosave">
+              {{ labelAutosave }}
+              <i
+                *ngIf="labelAutosave === 'Saving'"
+                class="fa fa-spinner fa-pulse"
+              ></i>
+            </label>
+          </span>
+          <span class="dnb-toggle autosave-toggle">
+            <p-inputSwitch
+              [(ngModel)]="switchAutosave"
+              [attr.slm-id]="'is_autosave_btn'"
+              (onChange)="isAutosavingActive($event)"
+              tabindex="-1"
+              [disabled]="this.drugCode === null"
+            ></p-inputSwitch>
+            <label> Autosave </label>
+          </span>
+        </ng-container>
+        <button
+          [disabled]="saveDisabled"
+          (click)="confirmSaveData()"
+          *ngIf="!isApproverReviewing"
+        >
+          Save
+        </button>
+        <button (click)="validateFeedback()" [disabled]="submitReviewDisable">
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<p-confirmDialog class="dnb-modal"></p-confirmDialog>
+<p-confirmDialog class="dnb-modal" key="approve"></p-confirmDialog>

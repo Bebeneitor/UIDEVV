@@ -21,8 +21,8 @@ import { RuleManagerService } from '../../../services/rule-manager.service';
   styleUrls: ['./reassignment-cca.component.css']
 })
 export class ReassignmentCcaComponent implements OnInit, OnDestroy {
-  @ViewChild('rulesTable') rulesTable: EclTableComponent;
-  @ViewChild('rulesTableReturned') rulesTableReturned: EclTableComponent;
+  @ViewChild('rulesTable',{static: true}) rulesTable: EclTableComponent;
+  @ViewChild('rulesTableReturned',{static: true}) rulesTableReturned: EclTableComponent;
 
   resetDataSubscription: Subscription;
 
@@ -123,7 +123,7 @@ export class ReassignmentCcaComponent implements OnInit, OnDestroy {
       case Constants.ASSIGNED_TAB:
         this.selectedRules = [];
         if (this.rulesTable) {
-          this.rulesTable.refreshTable();
+          this.rulesTable.resetDataTable();
           this.rulesTable.selectedRecords = [];
           this.rulesTable.savedSelRecords = [];
         }
@@ -131,7 +131,7 @@ export class ReassignmentCcaComponent implements OnInit, OnDestroy {
       case Constants.RETURNED_TAB:
         this.selectedRulesReturned = [];
         if (this.rulesTableReturned) {
-          this.rulesTableReturned.refreshTable();
+          this.rulesTableReturned.resetDataTable();
           this.rulesTableReturned.selectedRecords = [];
           this.rulesTableReturned.savedSelRecords = [];
         }
@@ -175,7 +175,8 @@ export class ReassignmentCcaComponent implements OnInit, OnDestroy {
       case "instanceName":        // this.sameSimService.showAnalysisScreenObs(event.row.instanceId)
         this.dialogService.open(ReferenceAnalysisComponent, {
           data: {
-            instanceId: event.row.instanceId
+            instanceId: event.row.instanceId,
+            codesType: event.row.codesType == null ? Constants.HCPCS_CODE_TYPE : event.row.codesType
           },
           header: 'Reference Analysis',
           width: '80%',

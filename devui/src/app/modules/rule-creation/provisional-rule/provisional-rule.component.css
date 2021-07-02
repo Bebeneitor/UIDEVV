@@ -221,14 +221,53 @@ textarea {
   width: 90% !important;
 }
 
-.block-img-loading {
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  width: 120px
-}
-
 .adjust-margin {
   margin-left: -1em;
   margin-right: -1em;
+}
+
+.expandRuleLogic{
+    width: 680px !important;
+    z-index: 15;
+    display: block;
+    position: absolute;
+    /* border: 1px solid #000; */
+    transition: all 0.25s ease-in-out;
+    box-shadow: 3px 5px 5px #888;
+}
+.ruleLogic{
+  height: 40px !important;
+  transition: all 0.25s ease-in-out;
+}
+
+.rowHeight{
+  height: 90px;
+}
+.nav-page-title {
+  cursor: pointer;
+  text-decoration: underline;
+  margin-right: 0.6%;
+}
+.custom-header{
+  border: 1px solid #c8c8c8;
+  background-color: #f4f4f4;
+  color: #333333;
+  padding: 15px;
+  font-size: larger;
+  border-bottom: 0 none;
+}
+
+::ng-deep.ui-dialog-content.ui-widget-content{
+  padding: 0px;
+}
+
+::ng-deep .lobs .ui-multiselect .ui-corner-right{
+  display: none  !important;
+}
+
+.ell-link {
+  display:inline-block; 
+  margin-left: 40px; 
+  color: #351772 !important;
+  font-weight: 400;
 }

@@ -50,9 +50,9 @@ export class DeprecatedRulesComponent implements OnInit {
   counters: any = null;
   totalItems: number = 0;
 
-  @ViewChild('dd') dd;
-  @ViewChild('ds') ds;
-  @ViewChild('di') di;
+  @ViewChild('dd',{static: true}) dd;
+  @ViewChild('ds',{static: true}) ds;
+  @ViewChild('di',{static: true}) di;
 
   yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
 

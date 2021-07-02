@@ -21,7 +21,7 @@ export class RuleApplicationComponent implements OnInit {
   @Output() loadingELLDetail = new EventEmitter<any>();
   @Output() ruleApplicationsEmitter = new EventEmitter<any>();
 
-  @ViewChild('markpupEd') markupEd;
+  @ViewChild('markpupEd',{static: true}) markupEd;
 
   constructor(
     private router: Router,

@@ -1,0 +1,12 @@
+<div class="dnb-page is-fullscreen pinned-section">
+  <h4 class="font">Drugs & Biologicals Sections</h4>
+  <h5>
+    If any changes are made in the pinned section(s) they are not going to be
+    reflected.
+  </h5>
+  <app-sections-sticky
+    [stickySection]="stickySections"
+    (behaviorEvnt)="undoStickSection($event)"
+  >
+  </app-sections-sticky>
+</div>

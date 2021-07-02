@@ -20,7 +20,7 @@ import { EclTableModule } from 'src/app/shared/components/ecl-table/ecl-table.mo
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { PanelModule } from 'primeng/panel';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { EmailReport } from '../ecl-rules-catalogue/email-report/email-report.component';
+import { EmailReport } from './email-report/email-report.component';
 
 @NgModule({
   declarations: [TagfilterManagementComponent, EmailReport],

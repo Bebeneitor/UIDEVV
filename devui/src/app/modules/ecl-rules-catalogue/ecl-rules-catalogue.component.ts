@@ -24,6 +24,12 @@ import { FilterTagSequenceDto } from 'src/app/shared/models/dto/filter-tag-seque
 import { ConfirmationService } from 'primeng/api';
 import { UtilsService } from "src/app/services/utils.service";
 import { Subject } from 'rxjs';
+import { KeyLimitService } from 'src/app/shared/services/utils';
+import { FilterTagCompareComponent } from './filter-tag-compare/filter-tag-compare.component';
+import { DatePipe } from '@angular/common';
+import { CacheRequestDto } from 'src/app/shared/models/dto/cache-request-dto';
+import { CompareGridRequestDto } from 'src/app/shared/models/dto/compare-grid-request-dto';
+import { EclTableService } from 'src/app/shared/components/ecl-table/service/ecl-table.service';
 
 const FILTER_CONDITION = "FILTER_CONDITION";
 const RULE_CATALOG_LAST_REQUEST = "RULE_CATALOG_LAST_REQUEST";
@@ -46,6 +52,14 @@ const COMMA_DELIM = ',';
 const COMMA_ESCAPE = '%#%';
 const SELECTION_PANEL_HEADER = 'Selected Items';
 const HIDE_SELECTION_PANEL_HEADER = 'Hide Selected Items';
+const ASSOCIATED_TAG_DETAILS = 'ASSOCIATED_TAG_DETAILS';
+const IS_VIEW_FLAG = 'IS_VIEW_FLAG';
+const ACTIVE_STATUS = 'active';
+const COND_STATUS_STR = 'STATUS';
+const CALENDAR_DATE_FORMAT = 'MM/dd/yyyy';
+const IS_COMPARE_REQUEST = 'IS_COMPARE_REQUEST';
+const CRITERIA_FILTERS = 'criteriaFilters';
+const COMPARE_TAG_DTO = 'COMPARE_TAG_DTO';
 
 enum SUBJECT {
   category = 'category',
@@ -53,7 +67,10 @@ enum SUBJECT {
   cpt_desc = 'cpt_desc', cpt = 'cpt', hcpcs_desc = 'hcpcs_desc', hcpcs = 'hcpcs',
   hcpcs_proc_type = 'hcpcs_proc_type', cpt_proc_type = 'cpt_proc_type', keyword = 'keyword',
   reference = 'reference_source', referenceTitle = 'reference_title', revenueCode = 'revenue_code',
-  specialty = 'specialty', subspecialty = 'subspecialty', gender = 'gender_ind', rule_engine = "rule_engine", statusActive = 'status_active'
+  specialty = 'specialty', subspecialty = 'subspecialty', gender = 'gender_ind',
+  rule_engine = 'rule_engine', statusActive = 'status', billTypes = 'bill_types',
+  placeOfServices = 'place_of_service', logicEffectiveDate = 'rule_logic_eff_dt', globalRanges = 'global_ranges',
+  policy_package = 'policy_package'
 };
 
 @Component({
@@ -122,16 +139,15 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
   selectedReferences: any[] = [];
   procCodeCategories: any[] = [];
   statusActive: boolean = false;
+  globalRanges: boolean = false;
+  disableGlobalRange: boolean = true;
   referenceDocument: string = "";
   referenceTitle: string = "";
   procedureCode: string = "";
   dateFormat: string = Constants.DATE_FORMAT;
-  startDate: Date;
-  endDate: Date;
-  minDate: Date = Constants.MIN_VALID_DATE;
+  yearValidRange = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
   filters: any[] = [];
 
-  maxDate: Date = new Date();
   blockedDocument: boolean = false;
   serviceCallsQty: number = 0;
   associatedTagDetails: FilterTagSequenceDto[];
@@ -149,6 +165,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
   disableSave: boolean = false;
   disableTag: boolean = false;
   disableTagSequence: boolean = false;
+  isCompare: boolean = false;
 
   filterNames: any[] = [
     { label: 'Search or Create a filter', value: ' ' },
@@ -173,18 +190,39 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
   createNewFilterFlag: boolean = false;
   escapeRx = /\%#%/gi;
 
-  @ViewChild('tableResults') tableResults: EclTableComponent;
+  @ViewChild('tableResults',{static: true}) tableResults: EclTableComponent;
+  @ViewChild('compareResult',{static: true}) compareResult: FilterTagCompareComponent;
 
-  yearValidRange = `${Constants.MIN_VALID_YEAR}:${Constants.MAX_VALID_YEAR}`;
-  disableView: boolean = false;
   disableSubSpecialty: boolean = true;
   isAdditionalSettings: boolean = true;
   showSelectionPanel: boolean = true;
+  newFilter: boolean = false;
+  compareImg = 'assets/img/compare-icon.png';
+
+
+  //Key Limiter 
+  limitCount: number = 100;
+  showCountHcpcsCode: number = this.limitCount;
+  showCountCptCode: number = this.limitCount;
+  showCountHcpcsDesc: number = this.limitCount;
+  showCountCptDesc: number = this.limitCount;
+  logicEffectiveDate : string = '';
+  tagRequest: any;
+  cacheRequest: any;
+  hideDeleted: boolean = false;
+  showOnlyNewRules: boolean = false;
+  endPoint: any;
+
+  //Policy Package
+  policyPackageValues: any = [];
+  policyPackageSelected: any[] = [];
 
   constructor(private utils: AppUtils, private dashboardService: DashboardService, private metadataCacheService: MetadataCacheService,
     private libraryViewService: LibraryViewService, private storageService: StorageService, private dialogService: DialogService,
     private router: Router, private cdr: ChangeDetectorRef, private activatedRoute: ActivatedRoute,
-    private toastService: ToastMessageService, private confirmationService: ConfirmationService, private utilsService: UtilsService,) {
+    private toastService: ToastMessageService, private confirmationService: ConfirmationService, 
+    private utilsService: UtilsService,private key: KeyLimitService, 
+    private datepipe: DatePipe, private eclTableService:EclTableService) {
   }
 
   ngOnInit() {
@@ -192,13 +230,13 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     this.loadTagNames();
     this.loadCatalogues();
 
-
     this.tableResults.hasPreviousFilter = false;
     this.initiateTableModel();
     this.tableResults.loading = false;
     this.tableResults.totalRecords = 0;
     this.activatedRoute.queryParams.subscribe(params => {
       if (params['view'] === Constants.RULES_CATALOG_PARAMETER_VIEW_LAST_REQUEST) {
+        this.fillLastRequest();
         let isTagRequest: boolean = JSON.parse(this.storageService.get(IS_TAG_REQUEST, false));
         if (isTagRequest) {
           if (this.storageService.get(TAG_TABLE_CONFIG, true) != null) {
@@ -208,6 +246,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
             if (this.tagDto.filterId != 0) {
               this.selectedFilterName = this.tagDto.filterId;
             }
+
             if (this.tagDto.tagSequenceId != 0) {
               this.selectedTagSequenceId = this.tagDto.tagSequenceId;
             }
@@ -217,16 +256,19 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
               } else {
                 this.updateTagDetails(this.tagDto);
               }
+              this.fillLastRequest();
             });
           }
         } else {
-          this.fillLastRequest();
           if (this.tableConfig !== null && this.storageService.exists(this.tableConfig.storageFilterKey)) {
             this.tableResults.tableModel = this.tableConfig;
             this.tableResults.hasPreviousFilter = true;
             this.viewFromSession();
           }
           this.selectedSpecialty.length ? this.disableSubSpecialty = false : this.disableSubSpecialty = true;
+        }
+        if(this.globalRanges == true){
+          this.disableGlobalRange = false;
         }
       }
     });
@@ -244,8 +286,16 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       this.storageService.remove(IS_TAG_REQUEST);
       this.storageService.remove(TAG_TABLE_CONFIG);
       this.storageService.remove(JSON_TAG_DTO);
+      this.storageService.remove(IS_VIEW_FLAG);
+      this.storageService.remove(ASSOCIATED_TAG_DETAILS);
+      this.storageService.remove(IS_COMPARE_REQUEST);
+      this.storageService.remove(COMPARE_TAG_DTO);
       if (this.tableConfig.storageFilterKey)
         this.storageService.remove(this.tableConfig.storageFilterKey);
+      if (this.compareResult.tagResultTableConfig.storageFilterKey)
+        this.storageService.remove(this.compareResult.tagResultTableConfig.storageFilterKey);
+      if (this.compareResult.newResultTableConfig.storageFilterKey)
+        this.storageService.remove(this.compareResult.newResultTableConfig.storageFilterKey);
     }
   }
 
@@ -262,11 +312,14 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       this.utils.getAllLobsValue(this.lobs, false);
       this.utils.getAllSpecialityTypes(this.specialties, SPECIALITY_TYPE);
       this.utils.getAllSubspecialityTypes(this.subSpecialties, SUBSPECIALITY_TYPE);
-      this.utils.getAllEngines(this.engines, false);
+      this.utils.getAllEnginesLibraryView(this.engines, false);
+      this.utils.getAllPolicyPackageValue(this.policyPackageValues);
 
       this.references = [];
       this.utils.getAllReferencesValue(this.references, false);
       this.utils.getAllRevenueCodes(this.revenueCodes, false);
+      this.utils.getAllProfessionalClaims(this.placeOfServices, false);
+      this.utils.getAllBillTypeClaims(this.billTypes, false);
       this.hcpcProcCodeCats = this.procCodeCategories;
       this.cptProcCodeCats = this.procCodeCategories;
       this.icdProcCodeCats = this.procCodeCategories;
@@ -290,7 +343,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
 
   loadTagNames() {
     this.utilsService.getCacheUrl().subscribe((response: any) => {
-      Constants.redisCacheUrl = response.data;  
+      Constants.redisCacheUrl = response.data;
       this.metadataCacheService.getAllTags().subscribe((tags: TagDto[]) => {
         tags.forEach((tag: TagDto) => this.tagNames.push({ label: tag.tagName, value: tag.tagId }));
       });
@@ -336,40 +389,66 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     let filterConditionString: string = '';
     let condArray: EclCacheLbvSearchDto[] = JSON.parse(filterCondition);
     condArray.forEach((item, index) => {
-      switch (item.subject.toLowerCase()) {
+      let subject = item.subject.toLowerCase();
+      switch (subject) {
+        case SUBJECT.policy_package:
+          if (isSavedFilter) {
+            this.policyPackageSelected = this.setDropdownCondValues(item, this.policyPackageValues);
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.policy_package, item);
+          }
+          break;        
         case SUBJECT.lob:
-          if (isSavedFilter) this.selectedLobs = this.setDropdownCondValues(item, this.lobs);
-          else filterConditionString = this.getConditionListString(SUBJECT.lob, item);
+          if (isSavedFilter) {
+            this.selectedLobs = this.setDropdownCondValues(item, this.lobs);
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.lob, item);
+          }
           break;
         case SUBJECT.category:
-          if (isSavedFilter) this.selectedCategories = this.setDropdownCondValues(item, this.categories);
-          else filterConditionString = this.getConditionListString(SUBJECT.category, item);
+          if (isSavedFilter) {
+            this.selectedCategories = this.setDropdownCondValues(item, this.categories);
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.category, item);
+          }
           break;
         case SUBJECT.jurisdiction:
-          if (isSavedFilter) this.selectedJurisdictions = this.setDropdownCondValues(item, this.jurisdictions);
-          else filterConditionString = this.getConditionListString(SUBJECT.jurisdiction, item);
+          if (isSavedFilter) {
+            this.selectedJurisdictions = this.setDropdownCondValues(item, this.jurisdictions);
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.jurisdiction, item);
+          }
           break;
         case SUBJECT.state:
-          if (isSavedFilter) this.selectedStates = this.setDropdownCondValues(item, this.states);
-          else filterConditionString = this.getConditionListString(SUBJECT.state, item);
+          if (isSavedFilter) {
+            this.selectedStates = this.setDropdownCondValues(item, this.states);
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.state, item);
+          }
           break;
         case SUBJECT.cpt_desc:
           if (isSavedFilter) {
             this.cptProcDesc = item.value;
             this.cptCodeDescInd = '1';
-          } else filterConditionString = SUBJECT.cpt_desc.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          } else {
+            filterConditionString = SUBJECT.cpt_desc.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          }
           break;
         case SUBJECT.hcpcs_desc:
           if (isSavedFilter) {
             this.hcpcsProcDesc = item.value;
             this.hcpcsCodeDescInd = '1';
-          } else filterConditionString = SUBJECT.hcpcs_desc.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          } else {
+            filterConditionString = SUBJECT.hcpcs_desc.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          }
           break;
         case SUBJECT.icd_desc:
           if (isSavedFilter) {
             this.icdProcDesc = item.value;
             this.icdCodeDescInd = '1';
-          } else filterConditionString = SUBJECT.icd_desc.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          } else {
+            filterConditionString = SUBJECT.icd_desc.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          }
           break;
         case SUBJECT.cpt:
           if (isSavedFilter) {
@@ -378,9 +457,15 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
           } else {
             filterConditionString = SUBJECT.cpt.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
           }
-          if (typeof item.associateCondition != 'undefined' && item.associateCondition) {
-            if (isSavedFilter) this.selectedCptProcCodeCats = this.setDropdownCondValues(item.associateCondition, null);
-            else filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.cpt_proc_type, item.associateCondition);
+
+          let associateConditionCptProcType: any = [];
+          associateConditionCptProcType = this.getValueFromConditionArr(item.associateCondition, SUBJECT.cpt_proc_type);
+          if (typeof item.associateCondition != 'undefined' && Object.keys(associateConditionCptProcType).length) {
+            if (isSavedFilter) {
+              this.selectedCptProcCodeCats = this.setDropdownCondValues(associateConditionCptProcType, null);
+            } else {
+              filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.cpt_proc_type, associateConditionCptProcType);
+            }
           }
           break;
         case SUBJECT.hcpcs:
@@ -390,9 +475,14 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
           } else {
             filterConditionString = SUBJECT.hcpcs.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
           }
-          if (typeof item.associateCondition != 'undefined' && item.associateCondition) {
-            if (isSavedFilter) this.selectedHcpcProcCodeCats = this.setDropdownCondValues(item.associateCondition, null);
-            else filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.hcpcs_proc_type, item.associateCondition);
+          let associateConditionHcpcsProcType: any;
+          associateConditionHcpcsProcType = this.getValueFromConditionArr(item.associateCondition, SUBJECT.hcpcs_proc_type);
+          if (typeof item.associateCondition != 'undefined' && Object.keys(associateConditionHcpcsProcType).length) {
+            if (isSavedFilter) {
+              this.selectedHcpcProcCodeCats = this.setDropdownCondValues(associateConditionHcpcsProcType, null);
+            } else {
+              filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.hcpcs_proc_type, item.associateCondition[0]);
+            }
           }
           break;
         case SUBJECT.icd:
@@ -438,7 +528,9 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
             this.selectedSpecialty = this.setDropdownCondValues(item, this.specialties);
             this.additionalSearchPanelHeader = HIDE_SEARCH_HEADER;
             this.isAdditionalSettings = false;
-          } else filterConditionString = this.getConditionListString(SUBJECT.specialty, item);
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.specialty, item);
+          }
           break;
         case SUBJECT.subspecialty:
           this.filterSubSpecialty();
@@ -446,7 +538,9 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
             this.selectedSubSpecialty = this.setDropdownCondValues(item, this.subSpecialtyFiltered);
             this.additionalSearchPanelHeader = HIDE_SEARCH_HEADER;
             this.isAdditionalSettings = false;
-          } else filterConditionString = this.getConditionListString(SUBJECT.subspecialty, item);
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.subspecialty, item);
+          }
           break;
         case SUBJECT.gender:
           let genderVal = Number.parseInt(item.value);
@@ -457,35 +551,82 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
           } else {
             filterConditionString = SUBJECT.gender.toUpperCase() + ' ' + item.operator + ' "' + this.getValueFromId(this.genders, genderVal) + '"';
           }
-          break; 
+          break;
         case SUBJECT.rule_engine:
           if (isSavedFilter) {
             this.selectedEngines = this.setDropdownCondValues(item, this.engines);
             this.additionalSearchPanelHeader = HIDE_SEARCH_HEADER;
             this.isAdditionalSettings = false;
-          }  else {
+          } else {
             filterConditionString = this.getConditionListString(SUBJECT.rule_engine, item);
           }
           break;
         case SUBJECT.statusActive:
-          let statusActive = (item.value == 'true');
           if (isSavedFilter) {
-            this.statusActive = statusActive;
+            this.statusActive = item.value === BOTH ? true : false;
           } else {
             filterConditionString = SUBJECT.statusActive.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
           }
-          break; 
-      }
+          break;
+        case SUBJECT.placeOfServices:
+          if (isSavedFilter) {
+            this.selectedPlaceOfService = this.setDropdownCondValues(item, this.placeOfServices);
+            this.additionalSearchPanelHeader = HIDE_SEARCH_HEADER;
+            this.isAdditionalSettings = false;
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.placeOfServices, item);
+          }
+          break;
+        case SUBJECT.billTypes:
+          if (isSavedFilter) {
+            this.selectedBillType = this.setDropdownCondValues(item, this.billTypes);
+            this.additionalSearchPanelHeader = HIDE_SEARCH_HEADER;
+            this.isAdditionalSettings = false;
+          } else {
+            filterConditionString = this.getConditionListString(SUBJECT.billTypes, item);
+          }
+          break;
+        case SUBJECT.logicEffectiveDate:
+          if (isSavedFilter) {
+            this.logicEffectiveDate = item.value;
+          } else {
+            filterConditionString = SUBJECT.logicEffectiveDate.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          }
+          break;
 
+          
+      }
+      if (subject === SUBJECT.cpt || subject === SUBJECT.cpt_desc ||
+        subject === SUBJECT.hcpcs || subject === SUBJECT.hcpcs_desc) {
+        let associateConditionGlobalRange = this.getValueFromConditionArr(item.associateCondition, SUBJECT.globalRanges);
+        if (typeof item.associateCondition != 'undefined' && Object.keys(associateConditionGlobalRange).length) {
+          if (isSavedFilter) {
+            this.globalRanges = (associateConditionGlobalRange.value === "true") ? true : false;
+            this.disableGlobalRange = !this.globalRanges;
+          } else if (filterConditionString.indexOf(SUBJECT.globalRanges) == -1) {
+            filterConditionString = filterConditionString + ' AND ' + SUBJECT.globalRanges.toUpperCase() + ' = true ';
+          }
+        }
+        
+      }
       if (!isSavedFilter) {
-        if (index > 0)
+        if (index > 0) {
           conditionString = conditionString + ' ' + item.preOperator + ' ' + filterConditionString;
-        else
+        } else {
           conditionString = filterConditionString;
+        }
       }
     });
-
     return conditionString;
+  }
+  getValueFromConditionArr(associateCondition:  EclCacheLbvSearchDto[], key: SUBJECT) {
+    let condObj = new EclCacheLbvSearchDto();
+    if (null !== associateCondition) {
+      associateCondition.filter(function (cond) {
+        return (cond.subject === key) ? condObj = cond : null;
+      })
+    }
+    return condObj;
   }
 
 
@@ -503,8 +644,11 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     condValue.forEach((data: string, index) => {
       if (data.indexOf(COMMA_ESCAPE) > -1)
         data = data.replace(this.escapeRx, COMMA_DELIM);
-      if (null != masterList) selArray.push(this.getIdFromValue(masterList, data));
-      else selArray.push(data);
+      if (null != masterList) {
+        selArray.push(this.getIdFromValue(masterList, data));
+      } else {
+        selArray.push(data);
+      }
     });
     return selArray;
   }
@@ -518,6 +662,8 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
 
   getCacheJsonRequest() {
     this.eclCacheRequest = [];
+    if (this.policyPackageSelected.length > 0)
+      this.buildListCondition(SUBJECT.policy_package, this.policyPackageSelected, 'in', this.policyPackageValues);      
     if (this.selectedCategories.length > 0)
       this.buildListCondition(SUBJECT.category, this.selectedCategories, 'in', this.categories);
     if (this.selectedLobs.length > 0)
@@ -528,9 +674,9 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       this.buildListCondition(SUBJECT.jurisdiction, this.selectedJurisdictions, 'in', this.jurisdictions);
 
     if (typeof this.hcpcsProcDesc != 'undefined' && this.hcpcsProcDesc)
-      this.buildStringCondition(SUBJECT.hcpcs_desc, this.hcpcsProcDesc, 'like', false);
+      this.buildStringCondition(SUBJECT.hcpcs_desc, this.hcpcsProcDesc, 'like', true);
     if (typeof this.cptProcDesc != 'undefined' && this.cptProcDesc)
-      this.buildStringCondition(SUBJECT.cpt_desc, this.cptProcDesc, 'like', false);
+      this.buildStringCondition(SUBJECT.cpt_desc, this.cptProcDesc, 'like', true);
     if (typeof this.icdProcDesc != 'undefined' && this.icdProcDesc)
       this.buildStringCondition(SUBJECT.icd_desc, this.icdProcDesc, 'like', false);
 
@@ -556,8 +702,18 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       this.buildStringCondition(SUBJECT.gender, this.selectedGender, '=', false);
     if (this.selectedEngines.length > 0)
       this.buildListCondition(SUBJECT.rule_engine, this.selectedEngines, 'in', this.engines);
-    if (typeof this.statusActive != 'undefined' && this.statusActive)
-      this.buildStringCondition(SUBJECT.statusActive, this.statusActive, '=', false);
+    if (this.selectedPlaceOfService.length > 0)
+      this.buildListCondition(SUBJECT.placeOfServices, this.selectedPlaceOfService, 'in', this.placeOfServices);
+    if (this.selectedBillType.length > 0)
+      this.buildListCondition(SUBJECT.billTypes, this.selectedBillType, 'in', this.billTypes);
+    if (typeof this.logicEffectiveDate != 'undefined' && this.logicEffectiveDate)
+      this.buildStringCondition(SUBJECT.logicEffectiveDate, this.extractDate(this.logicEffectiveDate), '>=', false);
+    if (typeof this.statusActive != 'undefined' && this.statusActive) {
+      this.buildStringCondition(SUBJECT.statusActive, BOTH, '=', false);
+    } else {
+      this.buildStringCondition(SUBJECT.statusActive, ACTIVE_STATUS, '=', false);
+    }
+
   }
 
   /**  
@@ -591,28 +747,40 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     this.lbvSearchDto.subject = subject;
     this.lbvSearchDto.value = strText;
     if (isProcCode) {
+      this.lbvSearchDto.associateCondition = [];
       if (SUBJECT.cpt == subject && this.selectedCptProcCodeCats.length > 0) {
         let codeDto = new EclCacheLbvSearchDto();
         codeDto.operator = 'in';
         codeDto.subject = SUBJECT.cpt_proc_type;
         codeDto.preOperator = 'and';
         codeDto.value = this.selectedCptProcCodeCats.join();
-        this.lbvSearchDto.associateCondition = codeDto;
+        this.lbvSearchDto.associateCondition.push(codeDto);
       } else if (SUBJECT.hcpcs == subject && this.selectedHcpcProcCodeCats.length > 0) {
         let codeDto = new EclCacheLbvSearchDto();
         codeDto.operator = 'in';
         codeDto.subject = SUBJECT.hcpcs_proc_type;
         codeDto.preOperator = 'and';
         codeDto.value = this.selectedHcpcProcCodeCats.join();
-        this.lbvSearchDto.associateCondition = codeDto;
+        this.lbvSearchDto.associateCondition.push(codeDto);
       }
-
+      this.addGlobalRangeCondition();
     }
     if (null != this.eclCacheRequest &&
       this.eclCacheRequest.length > 0) {
       this.lbvSearchDto.preOperator = 'and';
     }
     this.eclCacheRequest.push(this.lbvSearchDto);
+  }
+
+  addGlobalRangeCondition() {
+    if (this.globalRanges == true) {
+      let rangeDto = new EclCacheLbvSearchDto();
+      rangeDto.operator = '=';
+      rangeDto.subject = SUBJECT.globalRanges;
+      rangeDto.preOperator = 'and';
+      rangeDto.value = "true";
+      this.lbvSearchDto.associateCondition.push(rangeDto);
+    }
   }
 
 
@@ -632,10 +800,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     json["referenceSources"] = this.selectedReferences.length == 0 ? [] : this.selectedReferences;
     json["revenueCodes"] = this.selectedRevCodes.length == 0 ? [] : this.selectedRevCodes;
     json["referenceDocument"] = this.referenceDocument == '' ? null : this.referenceDocument;
-    json["logicEffectiveDate"] = {
-      "initialDate": this.startDate,
-      "finalDate": this.endDate
-    };
+    json["logicEffectiveDate"] = this.extractDate(this.logicEffectiveDate);
     json["hcpcsProcCode"] = this.hcpcsProcCode;
     json["hcpcsProcDesc"] = this.hcpcsProcDesc;
     json["cptProcCode"] = this.cptProcCode;
@@ -655,6 +820,9 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     json["showSelectionPanel"] = this.showSelectionPanel;
     json["selectedEngines"] = this.selectedEngines.length == 0 ? [] : this.selectedEngines;
     json["statusActive"] = this.statusActive;
+    json["globalRanges"] = this.globalRanges;
+    json["selectedPlaceOfService"] = this.selectedPlaceOfService.length == 0 ? [] : this.selectedPlaceOfService;
+    json["selectedBillType"] = this.selectedBillType.length == 0 ? [] : this.selectedBillType;
     return json;
   }
 
@@ -694,6 +862,10 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       this.showSelectionPanel = lastRequest.showSelectionPanel;
       this.selectedEngines = lastRequest.selectedEngines;
       this.statusActive = lastRequest.statusActive;
+      this.globalRanges = lastRequest.globalRanges;
+      this.selectedPlaceOfService = lastRequest.selectedPlaceOfService;
+      this.selectedBillType = lastRequest.selectedBillType;
+      this.logicEffectiveDate = lastRequest.logicEffectiveDate;
     }
   }
 
@@ -731,9 +903,17 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       this.checkVisibleColumns(this.tableConfig, request);
       this.tableConfig.cacheService = true;
       this.tableConfig.cacheRequest = this.eclCacheRequest;
-
+      this.tableConfig.endpointType = RoutingConstants.CACHE_LIBRARY_VIEW_SEARCH;
       // set url value:            
       this.tableConfig.url = RoutingConstants.CACHE_URL + RoutingConstants.CACHE_LIBRARY_VIEW_SEARCH;
+
+      this.compareResult.newResultTableConfig.url = this.tableConfig.url;
+      this.compareResult.newResultTableConfig.cacheRequest = this.tableConfig.cacheRequest;
+      this.compareResult.newResultTableConfig.cacheService = this.tableConfig.cacheService
+      this.compareResult.newResultTableConfig.endpointType =  this.tableConfig.endpointType;
+      let cacheRequestDto = new CacheRequestDto();
+      cacheRequestDto.cacheRequstList = this.tableConfig.cacheRequest;
+      this.compareResult.newResultTableConfig.criteriaFilters = cacheRequestDto;
 
       this.tableResults.clearFilters();
       this.tableResults.totalRecords = 0;
@@ -757,9 +937,18 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       this.checkVisibleColumns(this.tableConfig, this.getJsonRequest());
       this.tableConfig.cacheService = true;
       this.tableConfig.cacheRequest = [tagDto];
-
+      this.tableConfig.endpointType = RoutingConstants.METADATA_TAG_DETAILS;
       // set url value:      
       this.tableConfig.url = RoutingConstants.METADATA_URL + "/" + RoutingConstants.METADATA_TAG_DETAILS;
+
+      this.compareResult.tagResultTableConfig.url = this.tableConfig.url;
+      this.compareResult.tagResultTableConfig.cacheRequest = this.tableConfig.cacheRequest;
+      this.compareResult.tagResultTableConfig.cacheService = this.tableConfig.cacheService
+      let cacheRequestDto = new CacheRequestDto();
+      cacheRequestDto.cacheRequstList = this.tableConfig.cacheRequest;
+      this.compareResult.tagResultTableConfig.criteriaFilters = cacheRequestDto;
+      this.tagRequest = this.tableConfig.cacheRequest;
+
       this.tableResults.clearFilters();
       this.tableResults.totalRecords = 0;
       this.tableResults.selectedRecords = [];
@@ -769,23 +958,38 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     });
   }
 
+  resetGlobalRange() {
+    if (this.cptProcCode == '' && this.cptProcDesc == '' && this.hcpcsProcCode == '' && this.hcpcsProcDesc == '') {
+      this.globalRanges = false;
+      this.disableGlobalRange = true;
+    }else{
+      this.disableGlobalRange = false;
+    }
+  }
+
 
   checkHcpcs(event) {
     if (this.hcpcsCodeDescInd == '1') {
       this.selectedHcpcProcCodeCats = [];
       this.hcpcsProcCode = '';
+      this.showCountHcpcsCode = 100;
     } else {
       this.hcpcsProcDesc = '';
+      this.showCountHcpcsDesc = 100;
     }
+    this.resetGlobalRange();
   }
 
   checkCpt(event) {
     if (this.cptCodeDescInd == '1') {
       this.selectedCptProcCodeCats = [];
       this.cptProcCode = '';
+      this.showCountCptCode = 100;
     } else {
       this.cptProcDesc = '';
+      this.showCountCptDesc = 100;
     }
+    this.resetGlobalRange();
   }
 
   checkIcd(event) {
@@ -812,19 +1016,31 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       case SUBJECT.hcpcs:
         this.hcpcsProcCode = '';
         this.selectedHcpcProcCodeCats = [];
+        if (this.cptProcCode == '' && this.cptProcDesc == ''){
+          this.resetGlobalRange();
+        }
         break;
       case SUBJECT.cpt:
         this.cptProcCode = '';
         this.selectedCptProcCodeCats = [];
+        if (this.hcpcsProcCode == '' && this.hcpcsProcDesc == ''){
+          this.resetGlobalRange();
+        }
         break;
       case SUBJECT.icd:
         this.icdProcCode = '';
         break;
       case SUBJECT.hcpcs_desc:
         this.hcpcsProcDesc = '';
+        if (this.cptProcCode == '' && this.cptProcDesc == ''){
+          this.resetGlobalRange();
+        }
         break;
       case SUBJECT.cpt_desc:
         this.cptProcDesc = '';
+        if (this.hcpcsProcCode == '' && this.hcpcsProcDesc == ''){
+          this.resetGlobalRange();
+        }
         break;
       case SUBJECT.icd_desc:
         this.icdProcDesc = '';
@@ -840,6 +1056,12 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
         break;
       case SUBJECT.statusActive:
         this.statusActive = false;
+        break;
+      case SUBJECT.logicEffectiveDate:
+        this.logicEffectiveDate = '';
+        break;
+      case SUBJECT.globalRanges:
+        this.globalRanges = false;
         break;
     }
   }
@@ -888,6 +1110,12 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       case SUBJECT.rule_engine:
         this.selectedEngines = JSON.parse(JSON.stringify(arr));
         break;
+      case SUBJECT.placeOfServices:
+        this.selectedPlaceOfService = JSON.parse(JSON.stringify(arr));
+        break;
+      case SUBJECT.billTypes:
+        this.selectedBillType = JSON.parse(JSON.stringify(arr));
+        break;
     }
   }
 
@@ -903,11 +1131,10 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     this.lbvSearchDto = null;
     this.referenceDocument = '';
 
-    this.startDate = null;
-    this.endDate = null;
     this.initiateTableModel();
     this.storageService.remove(RULE_CATALOG_LAST_REQUEST);
     this.storageService.remove(RULE_CAT_CACHE_LAST_REQUEST);
+    this.storageService.remove(IS_COMPARE_REQUEST);
     // for hiding the table when reset clicked
     this.tableResults.totalRecords = 0;
     this.serviceCallsQty = 0;
@@ -922,11 +1149,17 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
       { label: 'Create New Tag', value: 0 },
     ];
     this.loadTagNames();
-    this.disableView = false;
     this.disableTag = false;
     this.disableTagSequence = false;
     this.selectedData = [];
     this.selectedRuleIds = [];
+    this.showCountCptCode = 100;
+    this.showCountHcpcsCode = 100;
+    this.showCountCptDesc = 100;
+    this.showCountHcpcsDesc = 100;
+    this.compareResult.reset();
+    this.isCompare = false;
+    this.endPoint = '';
   }
 
   resetCatalogResultsTable() {
@@ -943,6 +1176,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     this.filterCondition = "";
     this.tableResults.value = [{}, {}, {}, {}, {}];
     this.viewFlag = false;
+    this.storageService.set(IS_VIEW_FLAG, this.viewFlag, false);
     this.createNewFilterFlag = false;
     this.returnedFilterDto = null;
     this.selectedFilterNameLabel = null;
@@ -978,6 +1212,10 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     this.showSelectionPanel = true;
     this.selectedEngines = [];
     this.statusActive = false;
+    this.globalRanges = false;
+    this.selectedPlaceOfService = [];
+    this.selectedBillType = [];
+    this.logicEffectiveDate = '';
   }
 
 
@@ -993,10 +1231,13 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     }
 
     this.getCacheJsonRequest();
-    if (null != this.eclCacheRequest && this.eclCacheRequest.length > 0) {
+    if (null != this.eclCacheRequest && this.eclCacheRequest.length > 1) {
       let previousFilterCondition = this.filterCondition;
       this.filterCondition = this.getValuesfromFilterDto(JSON.stringify(this.eclCacheRequest), false);
-      if (previousFilterCondition !== this.filterCondition) {
+      if(previousFilterCondition !== null && previousFilterCondition.indexOf(COND_STATUS_STR) < 0) {
+        previousFilterCondition = `${previousFilterCondition} and ${SUBJECT.statusActive.toUpperCase()} = "${ACTIVE_STATUS}"`;
+      }
+      if (previousFilterCondition.trim() !== this.filterCondition.trim()) {
         this.selectedFilterName = ' ';
       }
       this.viewFromSession();
@@ -1022,6 +1263,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     this.tableConfig.checkBoxSelection = true;
     this.tableResults.selectedRecords = [];
     this.viewFlag = true;
+    this.storageService.set(IS_VIEW_FLAG, this.viewFlag, false);
     this.createNewFilterFlag = false;
   }
 
@@ -1087,6 +1329,65 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     this.blockedDocument = (ev.action === Constants.ECL_TABLE_START_SERVICE_CALL);
     if (ev.action === Constants.ECL_TABLE_END_SERVICE_CALL) {
       this.serviceCallsQty++;
+      if (this.tableResults.totalRecords == 0) {
+        this.tableResults.loading = false;
+        this.tableConfig.checkBoxSelection = true;
+        this.tableResults.value = [{}, {}, {}, {}, {}];
+      }
+      let isCompareRequest: boolean = JSON.parse(this.storageService.get(IS_COMPARE_REQUEST, false));
+      if(isCompareRequest){
+        this.identifyingNewRules(this.storageService.get(COMPARE_TAG_DTO, true));
+      }
+      if(this.endPoint !== RoutingConstants.METADATA_TAG_DETAILS_COMPARE){
+        if(this.tableConfig.endpointType === RoutingConstants.METADATA_TAG_DETAILS){
+          this.compareResult.taggedResult = this.tableResults.value;
+          this.compareResult.totalTaggedResult = this.tableResults.totalRecords;
+    
+          if(this.selectedFilterName === ' '){
+            this.compareResult.clearNewResultTableConfig();
+          }
+    
+          this.compareResult.triggerTagRulesTable();
+        }
+        if(this.tableConfig.endpointType === RoutingConstants.CACHE_LIBRARY_VIEW_SEARCH){
+          this.compareResult.newRuleResults = this.tableResults.value;
+          this.compareResult.totalNewResults = this.tableResults.totalRecords;
+          this.compareResult.clearTagResultTableConfig();
+          this.compareResult.triggerNewResultTable();
+        }
+      }
+      this.endPoint = '';
+      this.activatedRoute.queryParams.subscribe(params => {
+        let isCompareRequest: boolean = JSON.parse(this.storageService.get(IS_COMPARE_REQUEST, false));
+        if(params['view'] === Constants.RULES_CATALOG_PARAMETER_VIEW_LAST_REQUEST && isCompareRequest){
+          this.tableResults.tableModel = this.storageService.get(TAG_TABLE_CONFIG, true);
+          this.compareResult.initaiteNewResultTableModel();
+          this.compareResult.initaiteTagResultTableModel();
+          this.compareResult.taggedRules.tableModel = this.compareResult.tagResultTableConfig;
+          this.compareResult.newResults.tableModel = this.compareResult.newResultTableConfig;
+          this.tagDto = this.storageService.get(JSON_TAG_DTO, true);
+          let compareTagDto = this.storageService.get(COMPARE_TAG_DTO, true);
+          this.selectedTagName = compareTagDto.tagId;
+          let existFilterName: boolean;
+          let viewFlag;
+
+          if (this.tagDto.filterId != 0) {
+            this.selectedFilterName = this.tagDto.filterId;
+            this.associatedTagDetails = this.storageService.get(ASSOCIATED_TAG_DETAILS, true);
+            existFilterName = this.associatedTagDetails.find((filter: FilterTagSequenceDto) =>
+            filter.filterDto.filterId === this.selectedFilterName) != undefined ? true : false;
+            viewFlag = this.storageService.get(IS_VIEW_FLAG, false);
+          }
+          this.compareResult.newResults.hasPreviousFilter = true;
+          this.compareResult.taggedRules.hasPreviousFilter = true;
+          if(existFilterName === true && viewFlag){
+            this.loadTaggedRulesInCompare(Constants.SELECTED_FILTER);
+          }else{
+            this.loadTaggedRulesInCompare(Constants.SELECTED_TAG);
+          }
+          this.storageService.set(IS_COMPARE_REQUEST, false, false);
+        }
+      });
     }
   }
 
@@ -1107,6 +1408,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
         accept: () => {
           this.loadFilters();
           this.viewFlag = false;
+          this.storageService.set(IS_VIEW_FLAG, this.viewFlag, false);
           this.savedFilterReset();
           this.selectedSavedFilter = [];
           this.filterCondition = '';
@@ -1153,7 +1455,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
         //update tag condition loop
         this.metadataCacheService.getFiltersAndRules(this.selectedTagName).subscribe((tagDetails: TagDto) => {
           this.associatedTagDetails = tagDetails.associatedFilterTagSequences;
-
+          this.storageService.set(ASSOCIATED_TAG_DETAILS, this.associatedTagDetails, true);
           this.filterNames = [
             { label: 'Search or Create a filter', value: ' ' },
             { label: 'Create New Filter', value: 0 }
@@ -1172,16 +1474,31 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
 
             let existFilterName: boolean = this.associatedTagDetails.find((filter: FilterTagSequenceDto) =>
               filter.filterDto.filterId === this.selectedFilterName) != undefined ? true : false;
+            if(existFilterName === true){
+              this.loadTaggedRulesInCompare(Constants.SELECTED_FILTER);
+            }else{
+              this.loadTaggedRulesInCompare(Constants.SELECTED_TAG);
+            }
             if (existFilterName === true && !this.viewFlag) {
-              this.retrieveTagResults();
-            } else {
-              this.disableSave = false;
+              let selectedFilter = this.associatedTagDetails.filter(filterDetail => filterDetail.filterDto.filterId === this.selectedFilterName);
+              if(selectedFilter.length > 0){
+                this.selectedTagSequenceId = selectedFilter[0].tagSequenceDto.tagSequenceId;
+              }
+              this.endPoint = RoutingConstants.METADATA_TAG_DETAILS_COMPARE;
+              this.loadRulesDetails(Constants.SELECTED_FILTER);
+            } else {              
               if (this.returnedFilterDto !== undefined && this.returnedFilterDto !== null) {
+                this.disableSave = false;
                 this.tableConfig.checkBoxSelection = true;
                 let existingFilter = this.filterNames.filter(existFilter => existFilter.value === this.returnedFilterDto.filterId);
                 if (!existingFilter.length)
                   this.filterNames.push({ label: this.returnedFilterDto.filterName, value: this.returnedFilterDto.filterId });
               } else {
+                if (this.viewFlag) {  
+                  this.disableSave = false; 
+                } else { 
+                  this.disableSave = true; 
+                }
                 let existingFilter = this.filterNames.filter(existFilter => existFilter.value === this.selectedFilterName);
                 if (!existingFilter.length)
                   this.filterNames.push({ label: this.selectedFilterNameLabel, value: this.selectedFilterName });
@@ -1198,6 +1515,88 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     });
   }
 
+  hideOrShowDeletedNewRules(){
+    if (this.selectedFilterName != ' ' && this.selectedFilterName != 0 && this.filterCondition != '') {
+      let existFilterName: boolean = this.associatedTagDetails.find((filter: FilterTagSequenceDto) =>
+        filter.filterDto.filterId === this.selectedFilterName) != undefined ? true : false;
+      if(existFilterName === true){
+        this.loadTaggedRulesInCompare(Constants.SELECTED_FILTER);
+      }else {
+        this.loadTaggedRulesInCompare(Constants.SELECTED_TAG);
+      }
+    }
+  }
+
+  loadTaggedRulesInCompare(selectedValue: string){
+    this.storageService.set(IS_COMPARE_REQUEST, true, false);
+    let tagDto = new TagDto();
+    if (Constants.SELECTED_FILTER === selectedValue) {
+      tagDto.tagId = this.selectedTagName;
+      tagDto.filterId = this.selectedFilterName;
+      let selectedFilter = this.associatedTagDetails.filter(filterDetail => filterDetail.filterDto.filterId === this.selectedFilterName);
+      if(selectedFilter.length > 0){
+        tagDto.tagSequenceId = selectedFilter[0].tagSequenceDto.tagSequenceId;
+      }else{
+        let tagDtoJson = this.storageService.get(JSON_TAG_DTO, true);
+        tagDto.tagSequenceId = tagDtoJson.tagSequenceId;
+      }
+
+    } else if (Constants.SELECTED_TAG === selectedValue) {
+      tagDto.tagId = this.selectedTagName;
+    }
+
+    this.storageService.set(COMPARE_TAG_DTO, tagDto, true)
+ 
+    let request = new CompareGridRequestDto();
+    request.cacheRequestDto = this.eclCacheRequest;
+    request.tagDto = [tagDto];
+    request.hideDeleted = this.hideDeleted;
+    request.showOnlyNewRules = this.showOnlyNewRules;
+
+    let cacheRequestDto = new CacheRequestDto();
+    cacheRequestDto.cacheRequstList = [request];
+    this.compareResult.tagResultTableConfig.criteriaFilters = cacheRequestDto;
+    this.compareResult.tagResultTableConfig.cacheService = true;
+    this.compareResult.tagResultTableConfig.cacheRequest = [tagDto];
+    this.compareResult.tagResultTableConfig.endpointType = RoutingConstants.METADATA_TAG_DETAILS_COMPARE;
+    this.compareResult.tagResultTableConfig.url = RoutingConstants.METADATA_URL + "/" + RoutingConstants.METADATA_TAG_DETAILS_COMPARE + "/" + Constants.TAG;
+
+    this.compareResult.newResultTableConfig.url = RoutingConstants.METADATA_URL + "/" + RoutingConstants.METADATA_TAG_DETAILS_COMPARE + "/"  + Constants.NEW;
+    this.compareResult.newResultTableConfig.criteriaFilters = cacheRequestDto;
+    this.compareResult.newResultTableConfig.endpointType = RoutingConstants.METADATA_TAG_DETAILS_COMPARE;
+    
+    this.tableResults.tableModel = this.tableConfig;
+    this.tagRequest = [tagDto];
+    this.endPoint = RoutingConstants.METADATA_TAG_DETAILS_COMPARE;
+    this.compareResult.taggedRules.loadData(null);
+    this.identifyingNewRules(tagDto);
+  }
+
+  identifyingNewRules(tagDto:any){
+    if(this.tableConfig.endpointType === RoutingConstants.CACHE_LIBRARY_VIEW_SEARCH){
+      let request = {};
+      let cacheRequestDto = new CacheRequestDto();
+      cacheRequestDto.cacheRequstList = [tagDto];
+      request[CRITERIA_FILTERS] = cacheRequestDto;
+      this.eclTableService.getCacheData(RoutingConstants.METADATA_URL + "/" + RoutingConstants.METADATA_TAG_DETAILS,request).subscribe(response=>{
+        let tagResult = response.data.dtoList;
+        if(this.tableResults.value.length){
+          const eclTableRows = this.tableResults.eclTable.el.nativeElement.getElementsByClassName('ui-selectable-row');
+          let i = 0;
+          this.tableResults.value.forEach((rules,index)=>{
+            let spanElement =  eclTableRows[index].querySelectorAll("td")[1].querySelector('div').querySelector('.newRule');
+            if(spanElement !== null){
+              spanElement.remove();
+            }
+            if(tagResult.filter(tagRule => tagRule.ruleCode === rules.ruleCode).length === 0){
+              eclTableRows[index].querySelectorAll("td")[1].querySelector('div').insertAdjacentHTML('beforeend','<span class="newRule">N</span>')
+            }
+          })
+        }
+      });
+    }
+
+  }
   retrieveTagResults() {
     this.loadRulesDetails(Constants.SELECTED_TAG);
     this.disableSave = true;
@@ -1206,22 +1605,23 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
   }
 
 
-  checkToTrigger(event: any) {
+  checkToTrigger(event: any, type: String) {
     let lastRequest = this.storageService.get(RULE_CATALOG_LAST_REQUEST, true);
     let lastCacheRequest = this.storageService.get(RULE_CAT_CACHE_LAST_REQUEST, true);
 
     if (lastRequest != null) {
-      let foundStatusActive = lastCacheRequest.find(condition => {
-        return condition.subject === SUBJECT.statusActive
-      });
-
       let lengthOfLastCacheRequest = Object.keys(lastCacheRequest).length;
-      if ((event == true && typeof foundStatusActive == 'undefined') || (event == false && typeof foundStatusActive !== 'undefined' && lengthOfLastCacheRequest > 1)) {
+      if (lengthOfLastCacheRequest > 1) {
         let previousFilterRequest = lastRequest;
         let currentFilterRequest = this.getJsonRequest();
 
-        delete previousFilterRequest.statusActive;
-        delete currentFilterRequest["statusActive"];
+        if (type == SUBJECT.statusActive) {
+          delete previousFilterRequest.statusActive;
+          delete currentFilterRequest["statusActive"];
+        }else if (type == SUBJECT.globalRanges) {
+          delete previousFilterRequest.globalRanges;
+          delete currentFilterRequest["globalRanges"];
+        }
 
         if (JSON.stringify(previousFilterRequest) == JSON.stringify(currentFilterRequest)) {
           this.clearTableFilters();
@@ -1234,8 +1634,8 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
   loadFilterCondition(event: any) {
     this.disableTag = false;
     this.disableTagSequence = false;
-    this.tableResults.selectedRecords = [];
     if (this.selectedFilterName === ' ') {
+      this.tableResults.selectedRecords = [];
       this.filterCondition = "";
       this.selectedTagSequenceId = "";
     } else if (this.selectedFilterName === 0) {
@@ -1243,9 +1643,12 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
         let warnMessage: string = 'Please select search conditions to create a filter';
         this.toastService.messageWarning(Constants.TOAST_SUMMARY_WARN, warnMessage, 5000, true);
       } else {
+        this.newFilter = true;
         this.createNewFilter();
       }
     } else {
+      this.tableResults.selectedRecords = [];
+      this.newFilter = false;
       if (typeof this.associatedTagDetails != undefined && this.associatedTagDetails) {
         this.disableSave = true;
         this.tableConfig.checkBoxSelection = false;
@@ -1255,19 +1658,11 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
             this.filterCondition = this.getValuesfromFilterDto(filter.filterDto.filterCondition, false);
             this.selectedTagSequenceId = filter.tagSequenceDto.tagSequenceId;
             this.loadRulesDetails(Constants.SELECTED_FILTER);
+            this.compareResult.clearNewResultTableConfig();
             if (this.selectedFilterName != 0 && this.selectedFilterName != ' ' && this.filterCondition != '' && filter.filterDto.filterCondition != '') {
               this.savedFilterReset();
               this.selectedSavedFilter = [];
               this.getValuesfromFilterDto(filter.filterDto.filterCondition, true);
-            }
-            //disable tagname, tagsequence  & view button if the currently selected filter is not created by logged in user and it is a private filter
-            this.disableView = filter.filterDto.disableView;
-            if (this.disableView) {
-              this.disableTag = true;
-              this.disableTagSequence = true;
-            } else {
-              this.disableTag = false;
-              this.disableTagSequence = false;
             }
           }
         });
@@ -1293,8 +1688,6 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
             this.selectedSavedFilter = [];
             this.getValuesfromFilterDto(filter.filterDto.filterCondition, true);
           }
-          //disable view button if the currently selected filter is not created by logged in user and it is a private filter
-          this.disableView = filter.filterDto.disableView;
         }
       });
     }
@@ -1347,6 +1740,9 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
             this.filterNames.push({ label: this.selectedFilterNameLabel, value: this.selectedFilterName });
           }
           this.retrieveTagResults();
+          this.returnedFilterDto = null; 
+          this.viewFlag = false;
+          this.loadTaggedRulesInCompare(Constants.SELECTED_TAG);
         } else {
           this.selectedTagName = ' ';
         }
@@ -1391,11 +1787,14 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
               this.selectedTagSequenceId = response.data.tagSequenceId;
               this.metadataCacheService.getFiltersAndRules(this.selectedTagName).subscribe((tagDetails: TagDto) => {
                 this.associatedTagDetails = tagDetails.associatedFilterTagSequences;
+                this.storageService.set(ASSOCIATED_TAG_DETAILS, this.associatedTagDetails, true);
               });
               this.loadRulesDetails(Constants.SELECTED_FILTER);
+              this.loadTaggedRulesInCompare(Constants.SELECTED_FILTER);
               this.tableResults.selectedRecords = [];
               this.disableSave = true;
               this.tableConfig.checkBoxSelection = false;
+              this.viewFlag = false;
             }
           }
         );
@@ -1453,6 +1852,7 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
         ];
         this.filterNames.push({ label: returnValue.filterName, value: returnValue.filterId });
         this.selectedFilterName = returnValue.filterId;
+        this.selectedFilterNameLabel = returnValue.filterName;
         this.selectedTagSequenceId = "";
         this.selectedTagName = ' ';
       } else {
@@ -1500,16 +1900,45 @@ export class EclRulesCatalogueComponent implements OnInit, OnDestroy {
     return selectedSubspecialties;
   }
 
-  hasSelectedItems() {
-    if (this.selectedLobs.length == 0 && this.selectedStates.length == 0 && this.selectedJurisdictions.length == 0 
-      && this.selectedCategories.length == 0 && this.selectedReferences.length == 0 && this.selectedHcpcProcCodeCats.length == 0 
-      && this.selectedCptProcCodeCats.length == 0 && this.selectedRevCodes.length == 0 && this.hcpcsProcCode == '' 
-      && this.hcpcsProcDesc == '' && this.cptProcCode == '' && this.cptProcDesc == '' && this.icdProcCode == '' 
-      && this.icdProcDesc == '' && this.referenceTitle == '' && this.keyword == '' && this.selectedGender == 0 
-      && this.selectedSpecialty.length == 0  && this.selectedSubSpecialty.length == 0 && this.selectedEngines.length == 0 && this.statusActive == false) {
-        return true;
+  hasNoSelectedItems() {
+    if (this.selectedLobs.length == 0 && this.selectedStates.length == 0 && this.selectedJurisdictions.length == 0
+      && this.selectedCategories.length == 0 && this.selectedReferences.length == 0 && this.selectedHcpcProcCodeCats.length == 0
+      && this.selectedCptProcCodeCats.length == 0 && this.selectedRevCodes.length == 0 && this.hcpcsProcCode == ''
+      && this.hcpcsProcDesc == '' && this.cptProcCode == '' && this.cptProcDesc == '' && this.icdProcCode == ''
+      && this.icdProcDesc == '' && this.referenceTitle == '' && this.keyword == '' && this.selectedGender == 0
+      && this.selectedSpecialty.length == 0 && this.selectedSubSpecialty.length == 0 && this.selectedEngines.length == 0
+      && this.statusActive == false && this.selectedBillType.length == 0 && this.selectedPlaceOfService.length == 0
+      && (this.logicEffectiveDate == ''  || !this.logicEffectiveDate)  && this.globalRanges == false) {
+      return true;
     }
     return false;
   }
 
+  //Key Limiter 
+  returnMessage(event, type: String) {
+    if (type === SUBJECT.hcpcs) {
+      this.showCountHcpcsCode = this.key.keyCheck(event, this.limitCount);
+    } else if (type === SUBJECT.cpt) {
+      this.showCountCptCode = this.key.keyCheck(event, this.limitCount);
+    } else if (type === SUBJECT.hcpcs_desc) {
+      this.showCountHcpcsDesc = this.key.keyCheck(event, this.limitCount);
+    } else if (type === SUBJECT.cpt_desc) {
+      this.showCountCptDesc = this.key.keyCheck(event, this.limitCount);
+    }
+    this.resetGlobalRange();
+  }
+
+  compare() {
+    this.isCompare = !this.isCompare;
+    this.compareResult.isEqualizeHeight = true;
+  }
+
+  extractDate(datestr: string) {
+    let returnVar = '';
+    if (typeof datestr != 'undefined' && datestr) {
+      returnVar = this.datepipe.transform(datestr, CALENDAR_DATE_FORMAT);
+    }
+    return returnVar;
+  }
 }
+

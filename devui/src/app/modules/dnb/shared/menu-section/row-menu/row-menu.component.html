@@ -14,10 +14,49 @@
     <button
       class="button is-text"
       [attr.slm-id]="'toggle_row_separation_btn'"
-      (click)="toggleSeparationGroup(section.groups[groupIndex],section.groups[groupIndex].rows[rowIndex],rowIndex)"
+      (click)="
+        toggleSeparationGroup(
+          section.groups[groupIndex],
+          section.groups[groupIndex].rows[rowIndex],
+          rowIndex
+        )
+      "
     >
-      {{ section.groups[groupIndex].rows[rowIndex].hasBorder ? "Remove" : "Add" }}
+      {{
+        section.groups[groupIndex].rows[rowIndex].hasBorder ? "Remove" : "Add"
+      }}
       Separation
+    </button>
+  </li>
+
+  <li
+    *ngIf="menuPermissions.completeSeparatiion && isGrouped"
+    [ngClass]="{
+      liExtraHeight:
+        section.groups[groupIndex].rows[
+          section.groups[groupIndex].rows.length - 1
+        ].hasBorder
+    }"
+  >
+    <button
+      class="button is-text"
+      [attr.slm-id]="'toggle_row_separation_btn'"
+      (click)="
+        toggleCompleteSeparationGroup(
+          section.groups[groupIndex],
+          section.groups[groupIndex].rows[rowIndex],
+          rowIndex
+        )
+      "
+    >
+      {{
+        section.groups[groupIndex].rows[
+          section.groups[groupIndex].rows.length - 1
+        ].hasBorder
+          ? "Remove"
+          : "Add"
+      }}
+      Complete Separation
     </button>
   </li>
 
@@ -28,6 +67,15 @@
       [attr.slm-id]="'add_row_btn'"
     >
       Add Row
+    </button>
+  </li>
+  <li *ngIf="menuPermissions.addManyRows">
+    <button
+      class="button is-text"
+      (click)="addManyRows()"
+      [attr.slm-id]="'add_many_rows_btn'"
+    >
+      Add Multiple Rows
     </button>
   </li>
   <li *ngIf="menuPermissions.addGroupRow.visible">
@@ -55,15 +103,6 @@
       [attr.slm-id]="'remove_row_btn'"
     >
       Remove Row
-    </button>
-  </li>
-  <li *ngIf="undoRemoveRowFlagChild && menuPermissions.undoRemoveRow">
-    <button
-      class="button is-text"
-      (click)="undoRemoveRow()"
-      [attr.slm-id]="'undo_remove_row_btn'"
-    >
-      Undo
     </button>
   </li>
   <li *ngIf="shouldMoveUp && menuPermissions.moveUp">
@@ -163,15 +202,6 @@
       Remove Group
     </button>
   </li>
-  <li *ngIf="undoRemoveGroupFlagChild && menuPermissions.undoRemoveGroup">
-    <button
-      class="button is-text"
-      (click)="undoRemoveGroup()"
-      [attr.slm-id]="'undo_group_remove_column_btn'"
-    >
-      Undo
-    </button>
-  </li>
   <li *ngIf="groupIndex > 0 && menuPermissions.moveGroupUp">
     <button
       class="button is-text"
@@ -216,4 +246,265 @@
       Paste
     </button>
   </li>
+
+  <li *ngIf="menuPermissions.addMidRule">
+    <button
+      class="button is-text"
+      (click)="detailEdit()"
+      [attr.slm-id]="'detailEdit_btn'"
+    >
+      Detail Edit
+    </button>
+  </li>
+
+  <ng-container *ngxPermissionsOnly="['ROLE_DNBE']">
+    <li *ngIf="menuPermissions.addMidRule">
+      <button
+        class="button is-text"
+        (click)="addExistingMidRule()"
+        [attr.slm-id]="'addExistingMidRule_btn'"
+      >
+        Add Existing Rule
+      </button>
+    </li>
+  </ng-container>
+
+  <ng-container *ngxPermissionsOnly="['ROLE_DNBE']">
+    <li class="liExtraHeight" *ngIf="menuPermissions.addMidRule">
+      <button
+        class="button is-text"
+        (click)="addMidRule()"
+        [attr.slm-id]="'addMidRule_btn'"
+      >
+        Add MidRule from Template
+      </button>
+    </li>
+  </ng-container>
+
+  <li *ngIf="menuPermissions.checkFeedback">
+    <button
+      class="button is-text"
+      (click)="checkFeedback()"
+      [attr.slm-id]="'check_feedback_btn'"
+    >
+      Check Feedback
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.addComment">
+    <button
+      class="button is-text"
+      (click)="addComment()"
+      [attr.slm-id]="'add_query_btn'"
+    >
+      Add Query
+    </button>
+  </li>
+
+  <li *ngIf="menuPermissions.editComment">
+    <button
+      class="button is-text"
+      (click)="editComment()"
+      [attr.slm-id]="'check_query_btn'"
+    >
+      Check Query
+    </button>
+  </li>
+
+  <ng-container *ngxPermissionsOnly="['ROLE_DNBE']">
+    <ng-container *ngIf="menuPermissions.multiSelect">
+      <li *ngIf="!cancelMultiSelect && typeRemoveMultiple === 'rows'">
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('removeMultipleRows')"
+        >
+          Remove Multiple Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="cancelMultiSelect && typeRemoveMultiple === 'rows'"
+      >
+        <button
+          class="button is-text"
+          (click)="
+            behaviorMultipleRow('confirmRemoveMultipleRows'); rowIndex = 0
+          "
+        >
+          Confirm Remove Multiple Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="cancelMultiSelect && typeRemoveMultiple === 'rows'"
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('cancelMultiSelectRows')"
+        >
+          Cancel Remove Multiple Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="
+          !cancelMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) === -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('removeMultipleGroups')"
+        >
+          Remove Multiple Groups/Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="
+          cancelMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) === -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('confirmRemoveMultipleGruped')"
+        >
+          Confirm Remove Multiple Groups/Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="
+          cancelMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) === -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('cancelMultiSelectGroupsM')"
+        >
+          Cancel Remove Multiple Groups/Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="
+          undoItems.undoMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) === -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('undoRemoveMultiSelect')"
+        >
+          Undo Remove Multiple Groups/Rows
+        </button>
+      </li>
+
+      <li
+        *ngIf="
+          !cancelMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) > -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('removeMultipleGroups')"
+        >
+          Remove Multiple Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="
+          cancelMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) > -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('confirmRemoveMultipleGruped')"
+        >
+          Confirm Remove Multiple Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="
+          cancelMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) > -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('cancelMultiSelectGroupsM')"
+        >
+          Cancel Remove Multiple Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="
+          undoItems.undoMultiSelect &&
+          typeRemoveMultiple === 'groups' &&
+          blockGroupedCheckBox.indexOf(section.section.code) > -1
+        "
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('undoRemoveMultiSelect')"
+        >
+          Undo Remove Multiple Rows
+        </button>
+      </li>
+
+      <li
+        class="liExtraHeight"
+        *ngIf="undoItems.undoMultiSelect && typeRemoveMultiple === 'rows'"
+      >
+        <button
+          class="button is-text"
+          (click)="behaviorMultipleRow('undoRemoveMultiSelect')"
+        >
+          Undo Remove Multiple Rows
+        </button>
+      </li>
+      <li *ngIf="menuPermissions.indicationRemove.visible">
+        <button
+          class="button is-text"
+          (click)="indicationRemove()"
+          [attr.slm-id]="'remove_indication_btn'"
+        >
+          {{ menuPermissions.indicationRemove.label }}
+        </button>
+      </li>
+
+      <li *ngIf="menuPermissions.indicationAdded.visible">
+        <button
+          class="button is-text"
+          (click)="indicationAdded()"
+          [attr.slm-id]="'added_indication_btn'"
+        >
+          {{ menuPermissions.indicationAdded.label }}
+        </button>
+      </li>
+    </ng-container>
+  </ng-container>
 </ul>

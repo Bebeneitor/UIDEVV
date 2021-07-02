@@ -14,7 +14,20 @@ import {
 import { ConfirmationService } from "primeng/api";
 import { Subscription } from "rxjs";
 import { filter } from "rxjs/operators";
-import { behaviors } from "../../models/constants/behaviors.constants";
+import { dnbCodes } from "../../models/constants/actionCodes.constants";
+import {
+  arrowNavigation,
+  behaviors,
+} from "../../models/constants/behaviors.constants";
+import {
+  HeaderDialog,
+  IconDialog,
+} from "../../models/constants/dialogConfig.constants";
+import {
+  ParentSections,
+  SectionAutopopulationGlobal,
+  SectionsAutopopulationIndication,
+} from "../../models/constants/sectionAutopopulation.constants";
 import { SectionCode } from "../../models/constants/sectioncode.constant";
 import {
   Column,
@@ -29,11 +42,15 @@ import {
   undoCopyGroupUtil,
   undoCopyRowUtil,
 } from "../../utils/copyrow.utils";
-import { groupExist, isEmptyGroup } from "../../utils/tools.utils";
+import {
+  getSectionFeedbacks,
+  getSectionUnresolvedFeedbacksCount,
+  groupExist,
+  guidGenerator,
+  isEmptyGroup,
+} from "../../utils/tools.utils";
 import { CopyToNew } from "../../utils/utils.index";
 import { GroupedSectionComponent } from "../grouped-section/grouped-section.component";
-import { convertIUtoAPI } from '../../utils/convertUIToAPI.utils';
-import { HeaderDialog, IconDialog } from '../../models/constants/dialogConfig.constants';
 
 @Component({
   selector: "app-dnb-grouped-sections-container",
@@ -44,29 +61,46 @@ import { HeaderDialog, IconDialog } from '../../models/constants/dialogConfig.co
 })
 export class GroupedSectionsContainerComponent
   implements OnChanges, OnInit, OnDestroy {
-  @ViewChild("editSection") editSection: GroupedSectionComponent;
+  @ViewChild("editSection",{static: false}) editSection: GroupedSectionComponent;
   @Input() currentVersion: GroupedSection;
   @Input() newVersion: GroupedSection;
+  @Input() isApproverReviewing: boolean = false;
+  @Input() feedbackComplete: boolean = false;
   @Input() hasRowHeading: boolean = false;
   @Input() isComparing: boolean = false;
   @Input() showCurrent: boolean = false;
-  @Input() set enableEditing(value: boolean) {
-    this.hideDisableToggle = value;
-    this._enableEditing = value;
-  }
-  @Output() newVersionChanged: EventEmitter<
-    GroupedSection
-  > = new EventEmitter();
+  @Input() enableEditing: boolean = true;
+  @Input() focusType: { type: string; isTabAction?: boolean } = null;
+  @Input() sectionIndex: number;
+
+  @Output()
+  newVersionChanged: EventEmitter<GroupedSection> = new EventEmitter();
   @Output() stickySection: EventEmitter<GroupedSection> = new EventEmitter();
   @Output() toggleSectionCopy: EventEmitter<{
     section: GroupedSection;
     status: boolean;
   }> = new EventEmitter();
-  hideDisableToggle: boolean = false;
+  @Output() toggleCompleted: EventEmitter<boolean> = new EventEmitter();
+  @Output() sectionNavigate: EventEmitter<{
+    type: string;
+    isTabAction?: boolean;
+  }> = new EventEmitter();
+  @Output() focusTypeChange = new EventEmitter<{
+    type: string;
+    isTabAction?: boolean;
+  }>();
+  @Output() feedbackUpdate = new EventEmitter<number>();
+  @Output() dataPopulateSections: EventEmitter<{
+    dataCopy: Row[] | GroupRow[];
+    activeSection: string;
+  }> = new EventEmitter();
+  dnbCodes = dnbCodes;
+  hideDisableToggle: boolean = this.enableEditing;
   expandSection: boolean = true;
   backUpCopyRow: Row = null;
   backUpCopyRowGroup: GroupRow = null;
   backUpCopyGroup: GroupRow = null;
+  backUpSection: GroupedSection;
   backupRowGroupIndex: number = 0;
   backupGroupIndex: number = 0;
   backUpRowGroupGroupIndex: number = -1;
@@ -74,13 +108,19 @@ export class GroupedSectionsContainerComponent
   lastCopyGroupWasAdded: boolean = false;
   lastCopyIndex: number = 0;
   isSecondaryMalignancy: boolean = false;
+  isDailyMaxUnits: boolean = false;
   currentCodes: string = "";
-  consoleCount: number = 0;
   cellChangeSubscribe: Subscription;
   sectionChangeSubscribe: Subscription;
-  shouldDisableSection: boolean = false;
-  _enableEditing: boolean = false;
+  shouldEnableSection: boolean = true;
+  _enableEditing: boolean = this.enableEditing;
   shouldShowUndo: boolean = true;
+  newSectionUnsolvedFeedbackCount: number = 0;
+  newSectionFeedbackCount: number = 0;
+  backUpSectionRowsGrouped: GroupRow[] = [];
+  sectionsChildsAutopopulate = [];
+  sectionsAutopopulate = ParentSections;
+  autopopulateTooltipLabel: string = "";
   constructor(
     private copyToNew: CopyToNew,
     private confirmationService: ConfirmationService,
@@ -89,10 +129,13 @@ export class GroupedSectionsContainerComponent
   ) {}
 
   ngOnInit() {
+    this.sectionsChildsAutopopulate = SectionAutopopulationGlobal.concat(
+      SectionsAutopopulationIndication
+    );
     this.cellChangeSubscribe = this.dnbStore.updateCurrentColumn
       .pipe(filter((val) => val !== null))
       .subscribe(({ sectionId, compareColumn, diff }) => {
-        if (this.currentVersion.section.name === sectionId) {
+        if (this.currentVersion.section.code === sectionId) {
           if (compareColumn) {
             compareColumn.diff = diff;
           }
@@ -105,7 +148,7 @@ export class GroupedSectionsContainerComponent
     this.sectionChangeSubscribe = this.dnbStore.updateCurrentSection
       .pipe(filter((val) => val !== null))
       .subscribe((sectionId) => {
-        if (this.currentVersion.section.name === sectionId) {
+        if (this.currentVersion.section.code === sectionId) {
           this.currentVersion.groups.forEach((group) => {
             group.names.forEach((col) => {
               if (col.compareColumn === null) {
@@ -147,14 +190,59 @@ export class GroupedSectionsContainerComponent
     if (changes.newVersion) {
       this.isSecondaryMalignancy =
         this.newVersion.section.code === SectionCode.SecondaryMalignancy;
+      this.isDailyMaxUnits =
+        this.newVersion.section.code === SectionCode.DailyMaxUnits;
+      this.copyToNew.isDailyMaxUnits = this.isDailyMaxUnits;
+      this.copyToNew.isSecondaryMalignancy = this.isSecondaryMalignancy;
       this.currentCodes = this.isSecondaryMalignancy
         ? this.currentVersion.codes.join(", ")
+        : this.isDailyMaxUnits
+        ? this.currentVersion.codes.join(", ")
         : "";
+
+      if (
+        !this.isApproverReviewing ||
+        (this.isApproverReviewing && this.feedbackComplete)
+      ) {
+        this.getNewVersionFeedbackLeft();
+      }
     }
 
     if (changes.isComparing) {
       this.resetCompare();
     }
+    if (changes.focusType) {
+      if (
+        (this.isSecondaryMalignancy || this.isDailyMaxUnits) &&
+        this.focusType &&
+        this.focusType.type === arrowNavigation.down
+      ) {
+        this.newVersion.codesColumn.focus = {
+          hasFocus: true,
+          isTabAction: this.focusType.isTabAction,
+        };
+        this.focusType = null;
+      }
+    }
+  }
+
+  autopopulate() {
+    this.autopopulateOverlapsSection();
+  }
+
+  autopopulateOverlapsSection() {
+    this.confirmationService.confirm({
+      message:
+        "This action will feed and replace All the Section data. Do you want to continue?",
+      header: HeaderDialog.confirm,
+      icon: IconDialog.question,
+      accept: () => {
+        this.dataPopulateSections.emit({
+          dataCopy: null,
+          activeSection: this.newVersion.section.code,
+        });
+      },
+    });
   }
 
   behavior(event): void {
@@ -176,6 +264,8 @@ export class GroupedSectionsContainerComponent
         this.checkSectionsDifference();
         break;
       default:
+        this.getNewVersionFeedbackLeft();
+        this.feedbackUpdate.emit(this.newSectionUnsolvedFeedbackCount);
         this.checkSectionsDifference();
         break;
     }
@@ -213,17 +303,23 @@ export class GroupedSectionsContainerComponent
               isReadOnly: false,
               value: "",
               diff,
+              feedbackData: [],
+              feedbackLeft: 0,
             };
           }),
+          codeGroupUI: guidGenerator(),
           rows: [
             {
               hasBorder: false,
+              codeUI: guidGenerator(),
               columns: this.newVersion.groups[0].rows[0].columns.map(() => {
                 const diff: [number, string][] = [[0, ""]];
                 return {
                   isReadOnly: false,
                   value: "",
                   diff,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 };
               }),
             },
@@ -297,7 +393,7 @@ export class GroupedSectionsContainerComponent
   }
 
   copyGroup(groupRow: GroupRow, groupIndex: number) {
-    const values = copyGroupUtil(groupRow, this.newVersion.groups);
+    const values = copyGroupUtil(groupRow, this.newVersion);
 
     this.backUpCopyGroup = values.backUpCopyGroup;
     this.lastCopyGroupWasAdded = values.lastCopyGroupWasAdded;
@@ -324,7 +420,33 @@ export class GroupedSectionsContainerComponent
 
   resetCompare(): void {
     if (this.isComparing) {
+      this.currentVersion.groups.forEach((group) => {
+        group.names.forEach((header) => {
+          (header as any).compared = false;
+        });
+        group.rows.forEach((row) => {
+          row.columns.forEach((column) => {
+            (column as any).compared = false;
+          });
+        });
+      });
       this.checkSectionColumns(this.newVersion);
+      this.currentVersion.groups.forEach((group) => {
+        group.names.forEach((header) => {
+          header.compareColumn = null;
+          if ((header as any).compared === false) {
+            header.diff = [[-1, header.value]];
+          }
+        });
+        group.rows.forEach((row) => {
+          row.columns.forEach((column) => {
+            column.compareColumn = null;
+            if ((column as any).compared === false) {
+              column.diff = [[-1, column.value]];
+            }
+          });
+        });
+      });
     } else {
       this.setSectionColumns(this.currentVersion);
       this.setSectionColumns(this.newVersion);
@@ -376,6 +498,7 @@ export class GroupedSectionsContainerComponent
       if (originalCell == null) {
         column.compareColumn = null;
       } else {
+        (originalCell as any).compared = true;
         column.compareColumn = originalCell;
         column.compareColumn.compareColumn = column;
       }
@@ -403,7 +526,7 @@ export class GroupedSectionsContainerComponent
       if (isHeader) {
         if (
           foundGroup.names.length === 0 ||
-          foundGroup.names.length <= columnIndex
+          foundGroup.names[columnIndex] === undefined
         ) {
           return null;
         }
@@ -411,7 +534,7 @@ export class GroupedSectionsContainerComponent
       } else {
         if (
           foundGroup.rows.length === 0 ||
-          foundGroup.rows.length <= rowIndex
+          foundGroup.rows[rowIndex] === undefined
         ) {
           return null;
         }
@@ -432,7 +555,7 @@ export class GroupedSectionsContainerComponent
   collapseSection() {
     this.expandSection = !this.expandSection;
     const removeSectionFromCopy =
-      !this.shouldDisableSection && this.expandSection;
+      this.shouldEnableSection && this.expandSection;
     this.toggleSectionCopy.emit({
       section: this.newVersion,
       status: removeSectionFromCopy,
@@ -452,7 +575,6 @@ export class GroupedSectionsContainerComponent
         this.checkSectionsDifference();
         this.cd.detectChanges();
       },
-      reject: () => {},
     });
   }
 
@@ -473,39 +595,108 @@ export class GroupedSectionsContainerComponent
               this.currentVersion,
               this.shouldShowUndo
             )
-          :this.copyToNew.undoCopySectionGroup(this.newVersion, this.currentVersion, this.shouldShowUndo);
+          : this.copyToNew.undoCopySectionGroup(
+              this.newVersion,
+              this.currentVersion,
+              this.shouldShowUndo
+            );
 
-        this.checkSectionsDifference();
         this.newVersion = {
           ...this.newVersion,
         };
-
+        this.checkSectionsDifference();
+        this.cd.detectChanges();
       },
-      reject: () => {},
     });
   }
 
-
-
-  consoleResponseGroup() {
-    if (this.consoleCount === 2) {
-      console.log(
-        `${this.newVersion.section.name}`,
-        convertIUtoAPI(this.newVersion)
-      );
-      this.consoleCount = 0;
-    } else {
-      this.consoleCount++;
-    }
-  }
-
   disableChange() {
-    this._enableEditing = !this.shouldDisableSection;
+    this.shouldEnableSection = !this.newVersion.enabled;
+    this._enableEditing = this.shouldEnableSection;
     const removeSectionFromCopy =
-      !this.shouldDisableSection && this.expandSection;
+      this.shouldEnableSection && this.expandSection;
     this.toggleSectionCopy.emit({
       section: this.newVersion,
       status: removeSectionFromCopy,
     });
+  }
+
+  completeToggle(isComplete: boolean): void {
+    this.toggleCompleted.emit(isComplete);
+  }
+
+  focusTypeChanged(focusType: { type: string; isTabAction: boolean }): void {
+    this.focusType = focusType;
+    this.focusTypeChange.emit(this.focusType);
+  }
+
+  sectionNavigateEvt({
+    type,
+    isTabAction,
+  }: {
+    type: string;
+    isTabAction: boolean;
+  }): void {
+    if (
+      (this.isSecondaryMalignancy || this.isDailyMaxUnits) &&
+      type === arrowNavigation.up
+    ) {
+      this.newVersion.codesColumn.focus = { hasFocus: true, isTabAction };
+    } else {
+      this.sectionNavigate.emit({ type, isTabAction });
+    }
+  }
+
+  cellNavigate(focusType: { type: string; isTabAction: boolean }): void {
+    if (
+      focusType.type === arrowNavigation.up ||
+      focusType.type === arrowNavigation.left
+    ) {
+      this.sectionNavigate.emit({
+        type: arrowNavigation.up,
+        isTabAction: focusType.isTabAction,
+      });
+    }
+    if (
+      focusType.type === arrowNavigation.down ||
+      focusType.type === arrowNavigation.right
+    ) {
+      this.focusType = {
+        isTabAction: focusType.isTabAction,
+        type: arrowNavigation.down,
+      };
+    }
+  }
+
+  feedbackUpdateEvt(feedbackLeft: number) {
+    this.newSectionUnsolvedFeedbackCount += feedbackLeft;
+    this.feedbackUpdate.emit(this.newSectionUnsolvedFeedbackCount);
+  }
+
+  openSectionFeedback(section: GroupedSectionComponent) {
+    section.openSectionFeedbacks();
+  }
+
+  getNewVersionFeedbackLeft() {
+    this.newSectionUnsolvedFeedbackCount = getSectionUnresolvedFeedbacksCount(
+      this.newVersion,
+      true
+    );
+    this.newSectionFeedbackCount = getSectionFeedbacks(
+      this.newVersion,
+      true
+    ).length;
+    if (this.newSectionFeedbackCount === 0) {
+      this.newSectionUnsolvedFeedbackCount = null;
+    }
+  }
+
+  createSectionCodesPosition() {
+    {
+      return {
+        sectionIndex: this.sectionIndex,
+        isSectionCodes: true,
+      };
+    }
   }
 }

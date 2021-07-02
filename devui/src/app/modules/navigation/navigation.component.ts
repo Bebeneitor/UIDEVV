@@ -7,7 +7,7 @@ import { RuleInfoService } from 'src/app/services/rule-info.service';
 import { GoodIdeasServiceService } from 'src/app/services/good-ideas-service.service';
 import { Constants } from 'src/app/shared/models/constants';
 import { RuleManagerService } from '../industry-update/rule-process/services/rule-manager.service';
-import { constants } from 'os';
+import { PageTitleConstants as ptc} from 'src/app/shared/models/page-title-constants';
 
 const WRITE_MODE="w";
 const READ_MODE="r";
@@ -118,6 +118,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
         });
         break;
       case "RULE":
+      case 'CHANGE-TEMP':
         this.checkRuleCase();
         break;
       case "GOODIDEA":
@@ -214,7 +215,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
     this.configRule = {
       ruleId: this.id,
-      header: "Provisional Details",
+      header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
       ruleReview: true,
       templateActivate: this.templateActivate,
       readOnlyView: this.readOnlyView,

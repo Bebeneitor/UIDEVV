@@ -1,0 +1,257 @@
+<div class="add-info">
+<div class="row mt-2">
+  <div class="col-md-12 ">
+    <label tooltipStyleClass="tooltip-heading" pTooltip="{{literals.KEYRULE_TOOLTIP}}" tooltipPosition="top"
+      [tooltipZIndex]="999999999">Key Rule Logic Parameter(s)</label>
+    <textarea class="text-area" maxlength="1300" [disabled]="provDialogDisable"
+      [(ngModel)]="_ruleInfo.pdgTemplateDto.keyRuleLogic"></textarea>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label tooltipStyleClass="tooltip-heading" pTooltip="{{literals.CGRID_TOOLTIP}}" tooltipPosition="top"
+        [tooltipZIndex]="999999999">Client Grid<span class="required-field-color">*</span></label>
+    </div>
+    <div>
+      <app-pdg-file-attachments [pdgOption]="pdgOption" [maxFiles]="'*'" [provDialogDisable]="provDialogDisable"
+        [ruleInfo]="_ruleInfo" [(fileList)]="_ruleInfo.pdgTemplateDto.clientGridFiles"
+        (onFilesAttached)="setClientGridFiles($event)">
+      </app-pdg-file-attachments>
+    </div>
+  </div>
+</div>
+<div class="row mt-3">
+  <div class="col-md-12">
+    <div>
+      <label style="text-decoration: underline; font-weight: bold; font-size:14px">Additional Information</label>
+      <br />
+      <label pTooltip="{{literals.RULE_TOOLTIP}}" tooltipPosition="top" [tooltipZIndex]="999999999">Rule Relationships
+        or Comments</label>
+      <p-editor class="editor" (onInit)="initializeQuill($event,'RULE_RELATIONSHIPS')"
+        (onTextChange)="evt = replaceText($event); ruleRelationshipsModel = modifyText(evt, quillRuleRelation)"
+        [readonly]="provDialogDisable" [ngModel]="ruleRelationshipsModel" (ngModelChange) = "_ruleInfo.pdgTemplateDto.ruleRelationships = ruleRelationshipsModel">
+        <p-header>
+          <span class="ql-formats">
+            <button class="ql-bold q1-box first" aria-label="Bold" title="Bold"></button>
+            <button class="ql-italic q1-box" aria-label="Italic" title="Italic"></button>
+            <button class="ql-underline q1-box" aria-label="Underline" title="Underline"></button>
+            <button class="ql-list ql-active q1-box" value="bullet" type="button" title="Bullets"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button class="ql-indent q1-box" value="+1" title="Right indent"></button>
+            <button class="ql-indent q1-box last" value="-1" title="Left indent"></button>
+          </span>
+        </p-header>
+      </p-editor>
+    </div>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label pTooltip="{{literals.CPTDISTR_TOOLTIP}}" tooltipStyleClass="tooltip-heading" tooltipPosition="top"
+        [tooltipZIndex]="999999999">CPT Distribution File(s)<span class="required-field-color">*</span></label>
+    </div>
+    <div>
+      <app-pdg-file-attachments [pdgOption]="pdgOption" [maxFiles]="'*'" [provDialogDisable]="provDialogDisable"
+        [ruleInfo]="_ruleInfo" [(fileList)]="_ruleInfo.pdgTemplateDto.cptDistrFiles"
+        (onFilesAttached)="setCptFiles($event)">
+      </app-pdg-file-attachments>
+    </div>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label tooltipStyleClass="tooltip-heading" pTooltip="{{literals.CODE_TOOLTIP}}" tooltipPosition="top"
+        [tooltipZIndex]="999999999">Code Coverage</label>
+    </div>
+    <div class="text">
+      <p-editor class="editor" (onInit)="initializeQuill($event,'CODE')"
+        (onTextChange)="evt = replaceText($event); codeCoverageModel = modifyText(evt, quillCodeCoverage)"
+        [readonly]="provDialogDisable" [ngModel]="codeCoverageModel" (ngModelChange) = "_ruleInfo.pdgTemplateDto.codeCoverage = codeCoverageModel">
+        <p-header>
+          <span class="ql-formats">
+            <button class="ql-bold q1-box first" aria-label="Bold" title="Bold"></button>
+            <button class="ql-italic q1-box" aria-label="Italic" title="Italic"></button>
+            <button class="ql-underline q1-box" aria-label="Underline" title="Underline"></button>
+            <button class="ql-list ql-active q1-box" value="bullet" type="button" title="Bullets"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button class="ql-indent q1-box" value="+1" title="Right indent"></button>
+            <button class="ql-indent q1-box last" value="-1" title="Left indent"></button>
+          </span>
+        </p-header>
+      </p-editor>
+    </div>
+    <div class="attachment">
+      <app-pdg-file-attachments [pdgOption]="pdgOption" [maxFiles]="'*'" [provDialogDisable]="provDialogDisable"
+        [ruleInfo]="_ruleInfo" [(fileList)]="_ruleInfo.pdgTemplateDto.codeCoverageFiles"
+        (onFilesAttached)="setCodeCovFiles($event)">
+      </app-pdg-file-attachments>
+    </div>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label tooltipStyleClass="tooltip-heading" pTooltip="{{literals.CLAIMTYPE_TOOLTIP}}" tooltipPosition="top"
+        [tooltipZIndex]="999999999">Claim Type</label>
+    </div>
+    <div>
+      <p-editor class="editor" (onInit)="initializeQuill($event,'CLAIM')"
+        (onTextChange)="evt = replaceText($event); claimTypeInfoModel = modifyText(evt, quillClaimType)"
+        [readonly]="provDialogDisable" [ngModel]="claimTypeInfoModel" (ngModelChange) = "_ruleInfo.pdgTemplateDto.claimTypeInfo = claimTypeInfoModel">
+        <p-header>
+          <span class="ql-formats">
+            <button class="ql-bold q1-box first" aria-label="Bold" title="Bold"></button>
+            <button class="ql-italic q1-box" aria-label="Italic" title="Italic"></button>
+            <button class="ql-underline q1-box" aria-label="Underline" title="Underline"></button>
+            <button class="ql-list ql-active q1-box" value="bullet" type="button" title="Bullets"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button class="ql-indent q1-box" value="+1" title="Right indent"></button>
+            <button class="ql-indent q1-box last" value="-1" title="Left indent"></button>
+          </span>
+        </p-header>
+      </p-editor>
+    </div>
+    <div class="attachment">
+      <app-pdg-file-attachments [pdgOption]="pdgOption" [maxFiles]="'*'" [provDialogDisable]="provDialogDisable"
+        [ruleInfo]="_ruleInfo" [(fileList)]="_ruleInfo.pdgTemplateDto.claimTypeFiles"
+        (onFilesAttached)="setClaimTypeFiles($event)">
+      </app-pdg-file-attachments>
+    </div>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label tooltipStyleClass="tooltip-heading" pTooltip="{{literals.DOS_TOOLTIP}}" tooltipPosition="top"
+        [tooltipZIndex]="999999999">Sub Rule DOS From</label>
+    </div>
+    <div>
+      <p-editor class="editor" (onInit)="initializeQuill($event,'DOS')"
+        (onTextChange)="evt = replaceText($event); dosInfoModel = modifyText(evt, quillDos)"
+        [readonly]="provDialogDisable" [ngModel]="dosInfoModel" (ngModelChange) = "_ruleInfo.pdgTemplateDto.dosFromInfo = dosInfoModel">
+        <p-header>
+          <span class="ql-formats">
+            <button class="ql-bold q1-box first" aria-label="Bold" title="Bold"></button>
+            <button class="ql-italic q1-box" aria-label="Italic" title="Italic"></button>
+            <button class="ql-underline q1-box" aria-label="Underline" title="Underline"></button>
+            <button class="ql-list ql-active q1-box" value="bullet" type="button" title="Bullets"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button class="ql-indent q1-box" value="+1" title="Right indent"></button>
+            <button class="ql-indent q1-box last" value="-1" title="Left indent"></button>
+          </span>
+        </p-header>
+      </p-editor>
+    </div>
+    <div class="attachment">
+
+      <app-pdg-file-attachments [pdgOption]="pdgOption" [maxFiles]="'*'" [provDialogDisable]="provDialogDisable"
+        [ruleInfo]="_ruleInfo" [(fileList)]="_ruleInfo.pdgTemplateDto.subRuleDosFiles"
+        (onFilesAttached)="setSubRuleDosFiles($event)">
+      </app-pdg-file-attachments>
+    </div>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label tooltipStyleClass="tooltip-heading" pTooltip="{{literals.OTHERS_TOOLTIP}}" tooltipPosition="top"
+        [tooltipZIndex]="999999999">Other</label>
+    </div>
+    <div>
+      <p-editor class="editor" (onInit)="initializeQuill($event,'OTHER')"
+        (onTextChange)="evt = replaceText($event); otherInfoModel = modifyText(evt,quillOther,'OTHER');"
+        [readonly]="provDialogDisable" [ngModel]="otherInfoModel" (ngModelChange) = "_ruleInfo.pdgTemplateDto.otherInfo = otherInfoModel">
+        <p-header>
+          <span class="ql-formats">
+            <button class="ql-bold q1-box first" aria-label="Bold" title="Bold"></button>
+            <button class="ql-italic q1-box" aria-label="Italic" title="Italic"></button>
+            <button class="ql-underline q1-box" aria-label="Underline" title="Underline"></button>
+            <button class="ql-list ql-active q1-box" value="bullet" type="button" title="Bullets"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button class="ql-indent q1-box" value="+1" title="Right indent"></button>
+            <button class="ql-indent q1-box last" value="-1" title="Left indent"></button>
+          </span>
+        </p-header>
+      </p-editor>
+    </div>
+    <div class="attachment">
+      <app-pdg-file-attachments [pdgOption]="pdgOption" [maxFiles]="'*'" [provDialogDisable]="provDialogDisable"
+        [ruleInfo]="_ruleInfo" [(fileList)]="_ruleInfo.pdgTemplateDto.otherInfoFiles"
+        (onFilesAttached)="setOtherInfoFiles($event)">
+      </app-pdg-file-attachments>
+    </div>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label tooltipStyleClass="tooltip-heading" pTooltip="{{literals.ITU_TOOLTIP}}" tooltipPosition="top"
+        [tooltipZIndex]="999999999">ITU Review</label>
+    </div>
+    <div>
+      <p-editor class="editor" (onInit)="initializeQuill($event,'ITU')"
+        (onTextChange)="evt = replaceText($event); ituReviewInfoModel = modifyText(evt, quillItu)"
+        [readonly]="provDialogDisable" [ngModel]="ituReviewInfoModel" (ngModelChange) = "_ruleInfo.pdgTemplateDto.ituReviewInfo = ituReviewInfoModel">
+        <p-header>
+          <span class="ql-formats">
+            <button class="ql-bold q1-box first" aria-label="Bold" title="Bold"></button>
+            <button class="ql-italic q1-box" aria-label="Italic" title="Italic"></button>
+            <button class="ql-underline q1-box" aria-label="Underline" title="Underline"></button>
+            <button class="ql-list ql-active q1-box" value="bullet" type="button" title="Bullets"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button class="ql-indent q1-box" value="+1" title="Right indent"></button>
+            <button class="ql-indent q1-box last" value="-1" title="Left indent"></button>
+          </span>
+        </p-header>
+      </p-editor>
+    </div>
+    <div class="attachment">
+      <app-pdg-file-attachments [pdgOption]="pdgOption" [maxFiles]="'*'" [ruleInfo]="_ruleInfo"
+        [(fileList)]="_ruleInfo.pdgTemplateDto.ituFiles" [provDialogDisable]="provDialogDisable"
+        (onFilesAttached)="setItuFiles($event)"></app-pdg-file-attachments>
+    </div>
+  </div>
+</div>
+<div class="row mt-2">
+  <div class="col-md-12">
+    <div>
+      <label tooltipStyleClass="tooltip-heading"
+        pTooltip="Provider information needed to be communicated to the eLL team for the rule and any related rules"
+        tooltipPosition="top" [tooltipZIndex]="999999999">ELL Team Note</label>
+      <p-editor class="editor" (onInit)="initializeQuill($event,'ELL_TEAM')"
+        (onTextChange)="evt = replaceText($event); ellTeamNoteModel = modifyText(evt, quillEllTeam);"
+        [readonly]="provDialogDisable" [ngModel]="ellTeamNoteModel"
+        (ngModelChange)="_ruleInfo.pdgTemplateDto.ellTeamNote = ellTeamNoteModel">
+        <p-header>
+          <span class="ql-formats">
+            <button class="ql-bold q1-box first" aria-label="Bold" title="Bold"></button>
+            <button class="ql-italic q1-box" aria-label="Italic" title="Italic"></button>
+            <button class="ql-underline q1-box" aria-label="Underline" title="Underline"></button>
+            <button class="ql-list ql-active q1-box" value="bullet" type="button" title="Bullets"></button>
+          </span>
+
+          <span class="ql-formats">
+            <button class="ql-indent q1-box" value="+1" title="Right indent"></button>
+            <button class="ql-indent q1-box last" value="-1" title="Left indent"></button>
+          </span>
+        </p-header>
+      </p-editor>
+    </div>
+  </div>
+</div>
+</div>

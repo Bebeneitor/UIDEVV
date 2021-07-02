@@ -1,0 +1,41 @@
+<p-dialog
+  #dialog
+  header="Mid Rules' Summary from eLL"
+  [(visible)]="openDialog"
+  styleClass="dnb-dialog"
+  appendTo="body"
+  [modal]="true"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width: 10%">Type</th>
+          <th style="width: 10%">Midrule</th>
+          <th style="width: 70%">Description</th>
+          <th style="width: 10%">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let midR of midRules; let index = index">
+          <td>
+            {{ midR.type }}
+          </td>
+          <td>
+            {{ midR.midrule }}
+          </td>
+          <td>
+            {{ midR.description }}
+          </td>
+          <td>
+            <button class="dnb-btn" *ngIf="midR.type === 'New'" (click)="updateRulesAction(midR, index)" > Add</button>
+            <button class="dnb-btn" *ngIf="midR.type === 'New Version'" (click)="updateRulesAction(midR, index)"> Override</button>
+            <button class="dnb-btn" *ngIf="midR.type === 'Deprecated'" (click)="updateRulesAction(midR, index)"> Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</p-dialog>

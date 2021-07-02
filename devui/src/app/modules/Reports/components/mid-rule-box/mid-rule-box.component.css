@@ -1,35 +1,100 @@
 .mid-text-box {
+    padding: 2.5px;
+    padding-top: 5.5px;
+    font-size: 13px;
     height: 100%;
     width: 100%;
-    max-width: 605px;
     max-height: 70px;
-    border: 1px solid #d3d3d3;
+    border: 1px solid #31006F;
     border-radius: 2px;
-    overflow: auto;
-}
-span {
-    font-family: 'Montserrat', sans-serif;
+    overflow-wrap: anywhere;
+    overflow-y: auto;
 }
 
-mark {
-    padding: 0 !important;
-    color: transparent;
-    background-color: grey;
+::ng-deep #editable span {
+    white-space: pre;
+}
+
+::ng-deep span.hl-cotiviti-pink {
+    padding: 1px;
+    margin: 0 2px 0 2px;
+    font-size: 14px;
+    background-color: #E72B8A;
+    border: solid 1px #E72B8A;
+    border-radius: 4px;
+    color: white;
+}
+
+::ng-deep span.highlight-red {
+    padding: 2.5px;
+    margin: 0 2px 0 2px;
+    font-size: 13px;
+    background-color: red;
+    border: solid 1px red;
+    border-radius: 4px;
+    color: white;
+    white-space: nowrap;
+}
+
+::ng-deep span.highlight-red > span.highlight-remove-red {
+    cursor: pointer;
+    padding: 1px;
+    font-family: cursive;
+    margin: 0 2px 0 2px;
+    font-weight: bold;
     font-size: 12px;
-    font-family: 'Montserrat', sans-serif;
+    background-color: red;
+    border: solid 1px red;
+    white-space: nowrap;
 }
 
-::ng-deep span.happy {
-    background-color: #d3d3d3;
-    color: black;
+::ng-deep span.highlight-blue{
+    padding: 2.5px;
+    margin: 0 2px 0 2px;
+    font-size: 13px;
+    background-color: #3665c9;
+    border: solid 1px #3665c9;
+    border-radius: 4px;
+    color: white;
+    white-space: nowrap;
 }
 
-.fakeTextArea {
-    position: absolute;
-    z-index: 1;
-    border: 2px solid #685972;
-    background-color: #fff;
-    overflow: auto;
-    pointer-events: none;
-    transition: transform 1s;
+::ng-deep span.highlight-blue > span.highlight-remove-blue {
+    cursor: pointer;
+    padding: 1px;
+    font-family: cursive;
+    margin: 0 2px 0 2px;
+    font-weight: bold;
+    font-size: 12px;
+    background-color: #3665c9;
+    border: solid 1px #3665c9;
+    white-space: nowrap;
+}
+
+.mid-rr-text-box {
+  padding: 2.5px;
+  padding-top: 3.5px;
+  font-size: 13px;
+  height: 62%;
+  width: 100%;
+  max-height: 70px;
+  border: 1px solid rgb(49, 0, 111);
+  border-radius: 3px;
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+}
+
+::ng-deep.blockable .ui-blockui {
+    background-color: #e6e6e6;
+    opacity: .9;
+    border-radius: 3px;
+}
+
+.img-loading {
+    top: 0;
+    width: 50px;
+}
+
+::ng-deep span.keep-space {
+    white-space: pre;
 }

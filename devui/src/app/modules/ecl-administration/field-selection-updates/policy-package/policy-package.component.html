@@ -1,0 +1,31 @@
+<div class="row">
+    <div class="col-md-5">
+      <div>Selections
+        <span style="float: right">
+          <a (click)="showPolicyPackageInput()">
+            <i class="fa fa-plus-circle" style="color: #007ad9;"></i>Add
+          </a>
+        </span>
+      </div>
+  
+      <div class="list-box">
+        <div class="list-box-head">
+          <div class="search-box">
+            <input class="list-head" type="text" (keyup)="searchPolicyPackageList()" 
+            [(ngModel)]="searchPolicyPackageName" />
+            <span class="fa fa-search"></span>
+          </div>
+        </div>
+        <div class="input-box" *ngIf="addNewPolicyPackage">
+          <input class="ref-input" type="text" maxlength="100" (keyup)="checkPolicyPackage()"
+            [(ngModel)]="selectedPolicyPackage" />
+        </div>
+        <div>
+          <div class="list-item" *ngFor="let policyPackage of policyPackageList">
+            <span>{{policyPackage}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+</div>

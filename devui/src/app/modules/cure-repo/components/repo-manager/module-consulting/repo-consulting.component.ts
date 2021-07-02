@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SelectItem } from 'primeng/api';
 import { Dropdown } from 'primeng/primeng';
 import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
@@ -26,9 +26,17 @@ export class RepoConsultingComponent implements OnInit {
   blocked = true;
   blockedMessage = '';
 
-  @ViewChild('dataSourceDropdown') dataSourceDropdownControl: Dropdown;
-  @ViewChild('repoDataTable') repoDataTable: EclTableComponent;
-  @ViewChild('repoForm') repoForm: ElementRef;
+  isRadioButtonRequired = false;
+  unbTable = false;
+
+  @ViewChild('dataSourceDropdown',{static: true}) dataSourceDropdownControl: Dropdown;
+  @ViewChild('repoDataTable',{static: true}) repoDataTable: EclTableComponent;
+  @ViewChild('repoForm',{static: true}) repoForm: ElementRef;
+  hasRadioButtons: any;
+  dialogLeftPosition: number;
+  message: string;
+  headerText: string;
+  saveDisplay: boolean;
 
   get tableSourceControl() { return this.repoConsultingForm.get('tableSource'); }
   get dataSourceControl() { return this.repoConsultingForm.get('dataSet'); }
@@ -38,6 +46,7 @@ export class RepoConsultingComponent implements OnInit {
 
   yearValidRange = `${Constants.MIN_VALID_YEAR}:${Constants.MAX_VALID_YEAR}`;
   tableColumns: any;
+  reportColumns: any;
 
   constructor(private repoConsultingService: RepoConsultingService, private fb: FormBuilder) { }
 
@@ -63,7 +72,7 @@ export class RepoConsultingComponent implements OnInit {
     if (dataSourceId) {
       this.blocked = true;
       this.blockedMessage = 'Creating Search Criteria controls, please wait.';
-
+      this.unbTable = this.isUnbTable(dataSourceId);
       if (this.lastSelectedDataSource) {
         const selectionToReplace = this.lastSelectedSearchCriteria.findIndex(last => last.dataSource === this.lastSelectedDataSource);
         if (selectionToReplace > -1) {
@@ -73,8 +82,14 @@ export class RepoConsultingComponent implements OnInit {
       }
 
       this.repoConsultingService.getTableDetails(dataSourceId.repoTableId).subscribe((response) => {
+
         this.dataSet = response.data.datasets;
-        this.tableColumns = response.data.repoAttributes;
+        this.tableColumns = response.data.repoAttributes.filter(element => element.searchCriteria === Constants.YES);
+        this.reportColumns = response.data.repoAttributes.filter(element => element.inReport === Constants.YES);
+
+        response.data.repoAttributes = response.data.repoAttributes.filter(element => element.searchCriteria === Constants.YES);
+
+        this.hasRadioButtons = this.tableColumns.some(element => element.uiDataType === 'radio_button');
 
         this.createControls(response.data.repoAttributes, dataSourceId.repoTableId);
         this.submited = false;
@@ -122,10 +137,21 @@ export class RepoConsultingComponent implements OnInit {
         }
       }
 
-      if (element.mandatory) {
-        this.searchCriteriaControl.push(this.fb.control(value));
+      if (element.mandatory && element.uiDataType !== 'radio_button') {
+        if (element.uiDataType === 'number') {
+          this.searchCriteriaControl.push(this.fb.control(value, [Validators.required, Validators.min(0), Validators.pattern('[0-9]+([,\.][0-9]+)?')]));
+        } else {
+          this.searchCriteriaControl.push(this.fb.control(value, Validators.required));
+        }
+
       } else {
-        this.searchCriteriaControl.push(this.fb.control(value));
+        if (element.uiDataType === 'radio_button') {
+          this.searchCriteriaControl.push(this.fb.control(null));
+        } else if (element.uiDataType === 'number') {
+          this.searchCriteriaControl.push(this.fb.control(value, [Validators.min(0), Validators.pattern('[0-9]+([,\.][0-9]+)?')]));
+        } else {
+          this.searchCriteriaControl.push(this.fb.control(value));
+        }
       }
       this.searchCriteriaElements.push(element);
     });
@@ -140,16 +166,108 @@ export class RepoConsultingComponent implements OnInit {
     if (this.repoConsultingForm.invalid) {
       return;
     }
+    if (this.hasRadioButtons) {
+      if (!this.isRadioButtonSelected()) {
+        this.dialogLeftPosition = 150;
+        this.message = 'Please select one Radio button.';
+        this.headerText = 'Information';
+        this.saveDisplay = true;
+        return;
+      }
+    }
+
+
     this.blocked = true;
     this.blockedMessage = 'Getting data, please wait.';
 
     this.submited = true;
 
     const requestObject = { ...this.repoConsultingForm.value };
-    this.dataTableConfiguration = this.repoConsultingService.crateTableConfiguration(requestObject, this.tableColumns);
-    if (this.repoDataTable) {
-      this.repoDataTable.resetDataTable();
+    this.dataTableConfiguration = this.repoConsultingService.crateTableConfiguration(requestObject, this.reportColumns, this.searchCriteriaElements);
+  }
+
+  /**
+   * sets the radio button value.
+   */
+  setRadioButtonValue(i, element) {
+    for (let index = 0; index < this.tableColumns.length; index++) {
+      if (this.tableColumns[index].uiDataType === 'radio_button') {
+
+        const currentElement = this.tableColumns[index] ? this.tableColumns[index].columnName : null;
+        const penultimate = this.tableColumns[index - 1] ? this.tableColumns[index - 1].columnName : null;
+        const nextElement = this.tableColumns[index + 1] ? this.tableColumns[index + 1].columnName : null;
+
+        if (element.columnName === currentElement) {
+
+          if (currentElement === penultimate) {
+            this.searchCriteriaControl.at(index - 1).setValue(null);
+          }
+          if (currentElement === nextElement) {
+            this.searchCriteriaControl.at(index + 1).setValue(null);
+
+          }
+        }
+      }
     }
+
+    this.searchCriteriaControl.at(i).setValue(element.attributeName);
+  }
+
+  /**
+   * Checks if the radio button is selected.
+   */
+  isRadioButtonSelected() {
+    const radiobuttonElements = this.tableColumns.filter(element => element.attributeId !== null);
+
+    for (let index = 0; index < radiobuttonElements.length; index++) {
+      if (radiobuttonElements[index].uiDataType === 'radio_button') {
+        const currentElement = radiobuttonElements[index] ? radiobuttonElements[index].columnName : null;
+        const penultimate = radiobuttonElements[index - 1] ? radiobuttonElements[index - 1].columnName : null;
+        const nextElement = radiobuttonElements[index + 1] ? radiobuttonElements[index + 1].columnName : null;
+
+        if ((currentElement !== nextElement) || (nextElement !== penultimate)) {
+          if (radiobuttonElements[index].mandatory === true && this.repoConsultingForm.value.searchCriteria[index] !== null) {
+            this.isRadioButtonRequired = true;
+          }
+          if (radiobuttonElements[index].mandatory === false && this.repoConsultingForm.value.searchCriteria[index] === null) {
+            this.isRadioButtonRequired = true;
+          }
+        }
+
+        if (currentElement === nextElement) {
+          if (radiobuttonElements[index].mandatory === true && this.repoConsultingForm.value.searchCriteria[index] !== null) {
+            this.isRadioButtonRequired = true;
+          }
+          if (radiobuttonElements[index].mandatory === false && this.repoConsultingForm.value.searchCriteria[index] === null) {
+            this.isRadioButtonRequired = true;
+          }
+          if (radiobuttonElements[index].mandatory === true && this.repoConsultingForm.value.searchCriteria[index] === null) {
+            this.isRadioButtonRequired = false;
+          }
+        }
+        
+        if (currentElement !== nextElement && currentElement !== penultimate) {
+          if (radiobuttonElements[index].mandatory === true && this.repoConsultingForm.value.searchCriteria[index] === null) {
+            this.isRadioButtonRequired = false;
+            break;
+          }
+        } else if (currentElement === nextElement) {
+          if (radiobuttonElements[index].mandatory === true && this.repoConsultingForm.value.searchCriteria[index] === null && this.repoConsultingForm.value.searchCriteria[index +1] === null) {
+            this.isRadioButtonRequired = false;
+            break;
+          }
+        } else if (currentElement === nextElement || currentElement === penultimate) {
+          if (radiobuttonElements[index].mandatory === true && this.repoConsultingForm.value.searchCriteria[index] === null && this.repoConsultingForm.value.searchCriteria[index +1] === null && this.repoConsultingForm.value.searchCriteria[index -1] === null) {
+            this.isRadioButtonRequired = false;
+            break;
+          }
+        } else {
+          this.isRadioButtonRequired = true;
+          break;
+        }
+      }
+    }
+    return this.isRadioButtonRequired;
   }
 
   /**
@@ -178,5 +296,58 @@ export class RepoConsultingComponent implements OnInit {
     this.repoForm.nativeElement.reset();
     this.submited = false;
     this.removeSearchCriteriaControls();
+  }
+
+  /**
+   * Changes the dialog display property.
+   */
+  saveDialog() {
+    this.saveDisplay = false;
+  }
+
+  /**
+   * create radio buttons style inside frame. the dialog display property.
+   */
+  setRadioButtonStyles(key) {
+    const currentElement = this.searchCriteriaElements[key];
+    const penultimate = this.searchCriteriaElements[key - 1];
+    const nextElement = this.searchCriteriaElements[key + 1];
+
+    if ((penultimate && penultimate.columnName) !== currentElement.columnName) {
+      return 'p-grid-group-right';
+    }
+    if (penultimate && currentElement && nextElement) {
+      if (penultimate.columnName === currentElement.columnName && currentElement.columnName !== nextElement.columnName) {
+        return 'p-grid-group-left';
+      }
+    }
+    if (penultimate && currentElement && nextElement === undefined) {
+      if (penultimate.columnName === currentElement.columnName) {
+        return 'p-grid-group-left';
+      }
+    }
+    if (penultimate && currentElement && nextElement) {
+      if (penultimate.columnName === currentElement.columnName && penultimate.columnName === nextElement.columnName) {
+        return 'p-grid-group-center';
+      } else if (penultimate.columnName !== currentElement.columnName) {
+        return 'p-grid-group-left';
+      }
+    }
+  }
+
+  /**
+   * make radio buttons visible style inside frame.
+   */
+  setVisibleLabelRadioButtons(key) {
+    const currentElement = this.searchCriteriaElements[key];
+    const penultimate = this.searchCriteriaElements[key - 1];
+
+    if ((penultimate && penultimate.columnName) !== currentElement.columnName) {
+      return 'radio-button-visible';
+    }
+  }
+
+  isUnbTable(dataSourceId: RepoTable){
+    return dataSourceId !== undefined && (dataSourceId.tableName == 'PCI_EDIT_UNB' || dataSourceId.tableName == 'PCI_EDIT_UNB_OUTPT')
   }
 }

@@ -79,6 +79,76 @@
     background-color: greenyellow;
 }
 
+::ng-deep .ell-main-screen .policy {
+    color : #000000;
+    background : transparent;
+}
+
+.ell-main-screen .policy {
+    color : #000000;
+    background :transparent;
+}
+
+::ng-deep .ell-main-screen .topic {
+    color : #914343;
+    background : transparent;
+}
+
+.ell-main-screen .topic {
+    color : #914343;
+    background : transparent;
+}
+
+::ng-deep .ell-main-screen .decision {
+    color : #0606F6;
+    background : transparent;
+}
+
+.ell-main-screen .decision {
+    color : #0606F6;
+    background : transparent;
+}
+
+::ng-deep .ell-main-screen .do-not-present {
+    color  :#FF0000;
+    background  : transparent;
+}
+
+.ell-main-screen .do-not-present {
+    color  :#FF0000;
+    background  : transparent;
+}
+
+::ng-deep .ell-main-screen .retired {
+    color : #000000;
+    background : #ACACB5;
+}
+
+.ell-main-screen .retired {
+    color : #000000;
+    background : #ACACB5;
+}
+
+::ng-deep .ell-main-screen .do-not-present-and-retired {
+    color : #FF0000;
+    background : #ACACB5;
+}
+
+.ell-main-screen .do-not-present-and-retired {
+    color : #FF0000;
+    background : #ACACB5;
+}
+
+.ell-main-screen .legend-table {
+    margin : 0px;
+    border : 0px;
+    padding: 0px;
+}
+
+.ell-main-screen .legend-table label {
+    margin: 15px;
+}
+
 .container ::ng-deep p-calendar .ui-datepicker {
     padding: 5px !important;
     position: initial;

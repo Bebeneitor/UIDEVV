@@ -107,18 +107,19 @@ export class CvpTemplateComponent implements OnInit {
       selected: 0
     }
   };
+  originalCvp: any = JSON.parse(JSON.stringify(this.cvp));
 
-  @ViewChild('placeOfService') placeOfService: FileUploaderComponent;
-  @ViewChild('billTypes') billTypes: FileUploaderComponent;
-  @ViewChild('revenueCodes') revenueCodes: FileUploaderComponent;
-  @ViewChild('conditionCodes') conditionCodes: FileUploaderComponent;
-  @ViewChild('specialities') specialities: FileUploaderComponent;
-  @ViewChild('diagnoses') diagnoses: FileUploaderComponent;
-  @ViewChild('logicExceptions') logicExceptions: FileUploaderComponent;
-  @ViewChild('procedureCodes') procedureCodes: FileUploaderComponent;
-  @ViewChild('denyAction') denyAction: FileUploaderComponent;
-  @ViewChild('modifiers') modifiers: FileUploaderComponent;
-  @ViewChild('cvRule') cvRule: FileUploaderComponent;
+  @ViewChild('placeOfService',{static: true}) placeOfService: FileUploaderComponent;
+  @ViewChild('billTypes',{static: true}) billTypes: FileUploaderComponent;
+  @ViewChild('revenueCodes',{static: true}) revenueCodes: FileUploaderComponent;
+  @ViewChild('conditionCodes',{static: true}) conditionCodes: FileUploaderComponent;
+  @ViewChild('specialities',{static: true}) specialities: FileUploaderComponent;
+  @ViewChild('diagnoses',{static: true}) diagnoses: FileUploaderComponent;
+  @ViewChild('logicExceptions',{static: true}) logicExceptions: FileUploaderComponent;
+  @ViewChild('procedureCodes',{static: true}) procedureCodes: FileUploaderComponent;
+  @ViewChild('denyAction',{static: true}) denyAction: FileUploaderComponent;
+  @ViewChild('modifiers',{static: true}) modifiers: FileUploaderComponent;
+  @ViewChild('cvRule',{static: true}) cvRule: FileUploaderComponent;
 
   displayDetail: boolean = false;
   copyText: string = '';
@@ -138,7 +139,7 @@ export class CvpTemplateComponent implements OnInit {
     { name: 'Select claim type', code: null },
     { name: 'Facility', code: 'F' },
     { name: 'Professional', code: 'P' },
-    { name: 'Professional and Facility', code: 'FP' }
+    { name: 'Professional and Facility', code: 'PF' }
   ];
 
   productCodes: any[] = [
@@ -175,7 +176,7 @@ export class CvpTemplateComponent implements OnInit {
     sources: false
   };
 
-  @ViewChild('moduleName') moduleName;
+  @ViewChild('moduleName',{static: true}) moduleName;
 
   //Event to display text from focused input
   @HostListener('document:keydown.control.e', ['$event']) onKeydownHandler(event: KeyboardEvent) {
@@ -214,6 +215,8 @@ export class CvpTemplateComponent implements OnInit {
     } else {
       this.readOnly = true;
     }
+
+    this.cvp.sources = [];
 
     this.loadModuleNames().then(() => {
 
@@ -413,6 +416,8 @@ export class CvpTemplateComponent implements OnInit {
       .then((confirmed) => {
         if (confirmed) {
           window.scroll(0, 0);
+
+          this.cvp = JSON.parse(JSON.stringify(this.originalCvp));
 
           this.resetFiles().then(response => {
             this.router.navigate(['/rule-ingestion/cvp-template/']);

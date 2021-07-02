@@ -1,13 +1,28 @@
 import { async, TestBed } from "@angular/core/testing";
+import { drugVersionStatus } from "../models/constants/drug.constants";
 import {
+  Column,
+  GroupRow,
+  Row,
+  Section,
+  UISection,
+} from "../models/interfaces/uibase";
+import {
+  backupSectionSearchData,
+  calculatePercentage,
+  clearIndication,
+  copyIndication,
+  createNewRow,
+  eliminateUndefined,
+  escapeRegExp,
+  getDrugVersionId,
   groupExist,
   isEmptyGroup,
   isEmptyRow,
+  pasteClipboardRows,
   prepareData,
-  escapeRegExp,
-  backupSectionSearchData,
+  validateDataForAutopopulation,
 } from "./tools.utils";
-import { GroupRow, Column, Row, Section } from "../models/interfaces/uibase";
 
 fdescribe("tools utils", () => {
   beforeEach(async(() => {
@@ -19,10 +34,14 @@ fdescribe("tools utils", () => {
       {
         isReadOnly: true,
         value: "ColumGroup 1",
+        feedbackData: [],
+        feedbackLeft: 0,
       },
       {
         isReadOnly: true,
         value: "ColumGroup 2",
+        feedbackData: [],
+        feedbackLeft: 0,
       },
     ];
 
@@ -33,10 +52,14 @@ fdescribe("tools utils", () => {
           {
             isReadOnly: true,
             value: "ColumGroup 1",
+            feedbackData: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "ColumGroup 2",
+            feedbackData: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -54,10 +77,14 @@ fdescribe("tools utils", () => {
       {
         isReadOnly: true,
         value: "ColumGroup 1",
+        feedbackData: [],
+        feedbackLeft: 0,
       },
       {
         isReadOnly: true,
         value: "ColumGroup 2",
+        feedbackData: [],
+        feedbackLeft: 0,
       },
     ];
 
@@ -68,10 +95,14 @@ fdescribe("tools utils", () => {
           {
             isReadOnly: true,
             value: "ColumGroup 1",
+            feedbackData: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "ColumGroup 2",
+            feedbackData: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -88,10 +119,14 @@ fdescribe("tools utils", () => {
       {
         isReadOnly: true,
         value: "ColumGroup 1",
+        feedbackData: [],
+        feedbackLeft: 0,
       },
       {
         isReadOnly: true,
         value: "ColumGroup 2",
+        feedbackData: [],
+        feedbackLeft: 0,
       },
     ];
 
@@ -120,9 +155,230 @@ fdescribe("tools utils", () => {
       },
       codes: [],
       headers: [],
+      headersUIWidth: [],
       rows: [],
     };
     const result = backupSectionSearchData(sectionTest, false);
     expect(result.drugVersionCode).toBe("DrugVersion test");
+  });
+
+  it("should return version number or draft", () => {
+    const version = {
+      versionStatus: drugVersionStatus.InProgress,
+    };
+    const result = getDrugVersionId(version);
+    expect(result).toBe("Draft");
+  });
+
+  it("should create a new row", () => {
+    const row: Row = {
+      hasBorder: false,
+      columns: [
+        {
+          value: "",
+          maxLength: 0,
+          isReadOnly: false,
+          feedbackData: [],
+          feedbackLeft: 0,
+        },
+      ],
+    };
+    const newrow = createNewRow([row]);
+    expect(newrow.columns[0].value).toEqual("");
+  });
+
+  it("should calculate percentage", () => {
+    const section: UISection[] = [
+      {
+        id: "",
+        current: {
+          drugVersionCode: "DrugVersion test",
+          id: "",
+          section: {
+            code: "",
+            name: "",
+          },
+          codes: [],
+          headers: [],
+          headersUIWidth: [],
+          rows: [],
+          completed: true,
+          enabled: true,
+        },
+        new: {
+          drugVersionCode: "DrugVersion test",
+          id: "",
+          section: {
+            code: "",
+            name: "",
+          },
+          codes: [],
+          headers: [],
+          headersUIWidth: [],
+          rows: [],
+          completed: true,
+          enabled: true,
+        },
+        hasRowHeading: false,
+        grouped: false,
+      },
+    ];
+    const result = calculatePercentage(section);
+    expect(result).toBe("1.00");
+  });
+
+  it("should validate data for autopopulate", () => {
+    const row: Row[] = [
+      {
+        hasBorder: false,
+        columns: [
+          {
+            isReadOnly: false,
+            value: "column one",
+            feedbackData: [],
+            feedbackLeft: 0,
+          },
+          {
+            isReadOnly: false,
+            value: "column two",
+            feedbackData: [],
+            feedbackLeft: 0,
+          },
+        ],
+      },
+    ];
+    const result = validateDataForAutopopulation(row);
+    expect(result).toBe(true);
+  });
+
+  it("should eliminate undefinded data", () => {
+    const section: UISection[] = [
+      {
+        id: "",
+        current: {
+          drugVersionCode: "DrugVersion test",
+          id: "",
+          section: {
+            code: "",
+            name: "",
+          },
+          codes: [],
+          headers: [],
+          headersUIWidth: [],
+          rows: [],
+          completed: true,
+          enabled: true,
+        },
+        new: {
+          drugVersionCode: "DrugVersion test",
+          id: "",
+          section: {
+            code: "",
+            name: "",
+          },
+          codes: [],
+          headers: [],
+          headersUIWidth: [],
+          rows: [],
+          completed: true,
+          enabled: true,
+        },
+        hasRowHeading: false,
+        grouped: false,
+      },
+    ];
+    const result = eliminateUndefined(section);
+    expect(result).toBe(undefined);
+  });
+
+  it("should clear indication", () => {
+    const section: Section = {
+      drugVersionCode: "DrugVersion test",
+      id: "",
+      section: {
+        code: "",
+        name: "",
+      },
+      codes: [],
+      headers: [],
+      headersUIWidth: [],
+      rows: [
+        {
+          hasBorder: true,
+          columns: [
+            {
+              isReadOnly: false,
+              value: "5",
+              feedbackData: [],
+              feedbackLeft: 0,
+            },
+          ],
+        },
+      ],
+      completed: true,
+      enabled: true,
+    };
+    const result = clearIndication(section, 0);
+    expect(result).toBeUndefined();
+  });
+
+  it("should copy data column", () => {
+    const section: Section = {
+      drugVersionCode: "DrugVersion test",
+      id: "",
+      section: {
+        code: "",
+        name: "",
+      },
+      codes: [],
+      headers: [],
+      headersUIWidth: [],
+      rows: [
+        {
+          hasBorder: true,
+          columns: [
+            {
+              isReadOnly: false,
+              value: "5",
+              feedbackData: [],
+              feedbackLeft: 0,
+            },
+          ],
+        },
+      ],
+      completed: true,
+      enabled: true,
+    };
+    const dataInd = copyIndication(section, 1);
+    expect(dataInd).toBeTruthy();
+  });
+  //pasteClipboardRows
+  it("should paste rows", () => {
+    const rows: Row[] = [
+      {
+        hasBorder: false,
+        columns: [
+          {
+            isReadOnly: true,
+            value: "ColumGroup 1",
+            feedbackData: [],
+            feedbackLeft: 0,
+          },
+          {
+            isReadOnly: true,
+            value: "ColumGroup 2",
+            feedbackData: [],
+            feedbackLeft: 0,
+          },
+        ],
+      },
+    ];
+    const rest = pasteClipboardRows(
+      rows,
+      { colIndex: 0, rowIndex: 0 },
+      [],
+      false
+    );
+    expect(rest.length).toBe(0);
   });
 });

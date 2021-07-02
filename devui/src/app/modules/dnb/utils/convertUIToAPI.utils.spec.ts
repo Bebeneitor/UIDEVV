@@ -33,64 +33,103 @@ fdescribe("convertAPIToUI", () => {
   // #region 'Const'
   const maxLengthDefault: number = 4000;
   const maxLengthFourhundred: number = 400;
-  const GeneralInformationUI: Section = {
+  const GeneralInformationUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.GeneralInformation,
       name: "General Information",
     },
     headers: GeneralInformationHeaders,
+    headersUIWidth: [],
     id: "general_information",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
             value: "[HCPCS] (Descriptor)",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
     ],
   };
 
-  const ReferencesUI: Section = {
+  const ReferencesUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.References,
       name: "References",
     },
     headers: ReferenceHeaders,
+    headersUIWidth: [],
     id: "references",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
-            value: "Drug Label",
-            maxLength: maxLengthDefault,
+            value: "test",
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "Drug Label",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
@@ -104,6 +143,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Medical Journal",
     },
     headers: MedicalJournalHeaders,
+    headersUIWidth: [],
     id: "medical_journal",
     rows: [
       {
@@ -113,16 +153,25 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -136,6 +185,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Manifestation Codes",
     },
     headers: ManifestationCodesHeaders,
+    headersUIWidth: [],
     id: "manifestation_codes",
     rows: [
       {
@@ -145,16 +195,25 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -168,6 +227,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Diagnosis Code Summary",
     },
     headers: DiagnosisCodeSummaryHeaders,
+    headersUIWidth: [],
     id: "diagnosis_code_summary",
     rows: [
       {
@@ -177,16 +237,25 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -200,6 +269,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Diagnosis Codes",
     },
     headers: DiagnosisCodesHeaders,
+    headersUIWidth: [],
     id: "diagnosis_code",
     rows: [
       {
@@ -209,21 +279,33 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -237,6 +319,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Notes",
     },
     headers: NotesHeaders,
+    headersUIWidth: [],
     id: "notes",
     rows: [
       {
@@ -246,11 +329,17 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -263,6 +352,7 @@ fdescribe("convertAPIToUI", () => {
       name: "LCD",
     },
     headers: LCDHeaders,
+    headersUIWidth: [],
     id: "LCDs",
     rows: [
       {
@@ -272,58 +362,89 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
     ],
   };
 
-  const DialyMaxDoseUI: Section = {
+  const DialyMaxDoseUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.DailyMaximumDose,
       name: "Daily Maximum Dose",
     },
     headers: DailyMaximumDoseHeaders,
+    headersUIWidth: [],
     id: "daily_maximum_dose",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthDefault,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
@@ -336,6 +457,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Indications",
     },
     headers: IndicationsHeaders,
+    headersUIWidth: [],
     id: "Indications",
     rows: [
       {
@@ -345,141 +467,216 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
     ],
   };
-  const maximumFrequencyUI: Section = {
+  const maximumFrequencyUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.MaximumFrequency,
-      name: "Maximum frequency",
+      name: "Maximum frequency (Standard)",
     },
     headers: MaximumFrquencyHeaders,
+    headersUIWidth: [],
     id: "maximum_frequency",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
     ],
   };
 
-  const UnitsOverTimeUI: Section = {
+  const UnitsOverTimeUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.UnitsOverTime,
-      name: "Units over time",
+      name: "Units Over Time (Standard)",
     },
     headers: UnistOverTimeHeaders,
+    headersUIWidth: [],
     id: "units_over_time",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
     ],
   };
 
-  const VisitsOverTimeUI: Section = {
+  const VisitsOverTimeUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.VisitOverTime,
       name: "Visits over time",
     },
     headers: VisitOverTimeHeaders,
+    headersUIWidth: [],
     id: "visit_over_time",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: 100,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: 100,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthDefault,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: 100,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: 100,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
@@ -493,6 +690,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Global Review Codes",
     },
     headers: GlobalReviewCodesHeaders,
+    headersUIWidth: [],
     id: "global_review_codes",
     rows: [
       {
@@ -502,16 +700,25 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: 100,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: 100,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -524,6 +731,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Global Review Indications",
     },
     headers: GlobalReviewIndicationsHeaders,
+    headersUIWidth: [],
     id: "global_review_indication",
     rows: [
       {
@@ -533,16 +741,25 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -556,6 +773,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Combination Therapy",
     },
     headers: CombinationTherapyHeaders,
+    headersUIWidth: [],
     id: "combination_therapy",
     groups: [
       {
@@ -563,6 +781,9 @@ fdescribe("convertAPIToUI", () => {
           {
             isReadOnly: true,
             value: "test",
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
         rows: [
@@ -573,16 +794,25 @@ fdescribe("convertAPIToUI", () => {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
             ],
           },
@@ -591,73 +821,117 @@ fdescribe("convertAPIToUI", () => {
     ],
   };
 
-  const AgeUI: Section = {
+  const AgeUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.Age,
       name: "Age",
     },
     headers: AgeHeaders,
+    headersUIWidth: [],
     id: "age",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
     ],
   };
-
-  const dailyMaxUnits: Section = {
+  const dailyMaxUnits: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.DailyMaxUnits,
       name: "Daily Maximum Units Values For HCPCS ",
     },
     headers: GlobalReviewIndicationsHeaders,
+    headersUIWidth: [],
     id: "daily_maximum_units_values_for_hcpcs ",
     codesColumn: {
       isReadOnly: false,
       value: "",
+      feedbackData: [],
+      comments: [],
+      feedbackLeft: 0,
     },
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
-            value: "some value",
-            maxLength: maxLengthDefault,
+            value: "test",
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "value",
-            maxLength: maxLengthDefault,
-          },
-          {
-            isReadOnly: true,
-            value: "info",
-            maxLength: maxLengthDefault,
-          },
-          {
-            isReadOnly: true,
-            value: "comment",
-            maxLength: maxLengthDefault,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "some value",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "value",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "info",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "comment",
+                maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
@@ -670,6 +944,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Dosing Patterns",
     },
     headers: DosingPatternsHeaders,
+    headersUIWidth: [],
     id: "dosing_patterns",
     groups: [
       {
@@ -677,6 +952,9 @@ fdescribe("convertAPIToUI", () => {
           {
             isReadOnly: true,
             value: "test",
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
         rows: [
@@ -687,36 +965,57 @@ fdescribe("convertAPIToUI", () => {
                 isReadOnly: true,
                 value: "test",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
               {
                 isReadOnly: true,
                 value: "",
                 maxLength: maxLengthDefault,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
               },
             ],
           },
@@ -732,6 +1031,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Gender",
     },
     headers: GenderHeaders,
+    headersUIWidth: [],
     id: "gender",
     rows: [
       {
@@ -741,73 +1041,113 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
     ],
   };
 
-  const DiagnosisCodeOverlapsUI: Section = {
+  const DiagnosisCodeOverlapsUI: GroupedSection = {
     drugVersionCode: "",
     section: {
       code: SectionCode.DiagnosisCodeOverlaps,
       name: "Diagnosis code overlaps",
     },
     headers: DiagnosisCodeOverlapsHeaders,
+    headersUIWidth: [],
     id: "diagnosis_code_overlaps",
-    rows: [
+    groups: [
       {
-        hasBorder: false,
-        columns: [
+        names: [
           {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
+        ],
+        rows: [
           {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
-          },
-          {
-            isReadOnly: true,
-            value: "",
-            maxLength: maxLengthFourhundred,
+            hasBorder: false,
+            columns: [
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+              {
+                isReadOnly: true,
+                value: "",
+                maxLength: maxLengthFourhundred,
+                feedbackData: [],
+                comments: [],
+                feedbackLeft: 0,
+              },
+            ],
           },
         ],
       },
@@ -821,6 +1161,7 @@ fdescribe("convertAPIToUI", () => {
       name: "Rules",
     },
     headers: RulesHeaders,
+    headersUIWidth: [],
     id: "rule",
     rows: [
       {
@@ -830,16 +1171,25 @@ fdescribe("convertAPIToUI", () => {
             isReadOnly: true,
             value: "test",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
           {
             isReadOnly: true,
             value: "",
             maxLength: maxLengthFourhundred,
+            feedbackData: [],
+            comments: [],
+            feedbackLeft: 0,
           },
         ],
       },
@@ -850,14 +1200,14 @@ fdescribe("convertAPIToUI", () => {
   it("should convert UI General information data to API request", () => {
     const section = convertIUtoAPI(GeneralInformationUI);
     expect(section.data[0].item.name).toBe(
-      GeneralInformationUI.rows[0].columns[0].value
+      GeneralInformationUI.groups[0].names[0].value
     );
   });
 
   it("should convert UI References data to API request", () => {
     const section = convertIUtoAPI(ReferencesUI);
     expect(section.data[0].referenceSourceDto.name).toBe(
-      ReferencesUI.rows[0].columns[0].value
+      ReferencesUI.groups[0].names[0].value
     );
   });
 
@@ -877,7 +1227,7 @@ fdescribe("convertAPIToUI", () => {
 
   it("should convert UI diagnosis code summary  data to API request", () => {
     const section = convertIUtoAPI(DiagnosisCodeSummaryUI);
-    expect(section.data[0].indication).toBe(
+    expect(section.data[0].indication.label).toBe(
       DiagnosisCodeSummaryUI.rows[0].columns[0].value
     );
   });
@@ -901,8 +1251,8 @@ fdescribe("convertAPIToUI", () => {
 
   it("should convert UI Daily maximum dose data to API request", () => {
     const section = convertIUtoAPI(DialyMaxDoseUI);
-    expect(section.data[0].maximumDose).toBe(
-      DialyMaxDoseUI.rows[0].columns[2].value
+    expect(section.data[0].indication.label).toBe(
+      DialyMaxDoseUI.groups[0].names[0].value
     );
   });
 
@@ -916,21 +1266,21 @@ fdescribe("convertAPIToUI", () => {
   it("should convert UI maximum frequency data to API request", () => {
     const section = convertIUtoAPI(maximumFrequencyUI);
     expect(section.data[0].indication).toBe(
-      maximumFrequencyUI.rows[0].columns[0].value
+      maximumFrequencyUI.groups[0].names[0].value
     );
   });
 
   it("should convert UI UnitsOverTime data to API request", () => {
     const section = convertIUtoAPI(UnitsOverTimeUI);
     expect(section.data[0].indication.label).toBe(
-      UnitsOverTimeUI.rows[0].columns[0].value
+      UnitsOverTimeUI.groups[0].names[0].value
     );
   });
 
   it("should convert UI VisitsOverTime data to API request", () => {
     const section = convertIUtoAPI(VisitsOverTimeUI);
     expect(section.data[0].indication.label).toBe(
-      VisitsOverTimeUI.rows[0].columns[0].value
+      VisitsOverTimeUI.groups[0].names[0].value
     );
   });
 
@@ -958,14 +1308,14 @@ fdescribe("convertAPIToUI", () => {
   it("should convert UI AGE data to API request", () => {
     const section = convertIUtoAPI(AgeUI);
     expect(section.data[0].indication.label).toBe(
-      AgeUI.rows[0].columns[0].value
+      AgeUI.groups[0].names[0].value
     );
   });
 
   it("should convert Daily max units  data to API request", () => {
     const section = convertIUtoAPI(dailyMaxUnits);
-    expect(section.data[0].currentValues).toBe(
-      dailyMaxUnits.rows[0].columns[1].value
+    expect(section.data[0].dmuvItemDto.name).toBe(
+      dailyMaxUnits.groups[0].names[0].value
     );
   });
 
@@ -986,7 +1336,7 @@ fdescribe("convertAPIToUI", () => {
   it("should convert UI diagnosis code overlaps data to API request", () => {
     const section = convertIUtoAPI(DiagnosisCodeOverlapsUI);
     expect(section.data[0].icd10Code.icd10Code).toBe(
-      DiagnosisCodeOverlapsUI.rows[0].columns[0].value
+      DiagnosisCodeOverlapsUI.groups[0].names[0].value
     );
   });
 

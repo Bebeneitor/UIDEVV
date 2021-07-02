@@ -42,7 +42,7 @@ export class ProcCodesUtils {
             item.indexOf(ProcCodesUtils.GLOB_RANGE_END_3) >= 0)
     }
 
-    private static isGlobalRange(item: string): boolean {
+    public static isGlobalRange(item: string): boolean {
         if (!item) {
             return false;
         }

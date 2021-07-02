@@ -1,0 +1,440 @@
+<p-table #eclTable class="eclTable" [columns]="tableModel.columns" [value]="value"
+  [paginator]="tableModel.showPaginator" [rows]="tableModel.paginationSize"
+  [rowsPerPageOptions]="tableModel.showPaginatorOptions ? [10,50,100,500,1000] : null" [(selection)]="selectedRecords"
+  [totalRecords]="totalRecords" [lazy]="tableModel.lazy" (onLazyLoad)="loadData($event)" [loading]="loading"
+  [paginatorDropdownAppendTo]="paginatorReference" [sortField]="tableModel.sortBy" [sortOrder]="tableModel.sortOrder"
+  (onRowSelect)="onRowSelect($event)" (onRowUnselect)="onRowUnselect($event)" [dataKey]="tableModel.dataKey"
+  [responsive]='true' [scrollable]="tableModel.scrollable"
+  [scrollHeight]="tableModel.verticalScrollable ? tableModel.scrollHeight : 0" [(first)]="this.firstIndex"
+  (onHeaderCheckboxToggle)="selectAllToggle($event)" (sortFunction)="customSort($event)"
+  [customSort]="tableModel.customSort" [selectionMode]="tableModel.selectionMode">
+
+  <ng-template pTemplate="caption" *ngIf="tableModel.export || tableModel.filterGlobal || tableModel.toolBar">
+    <div class="row">
+      <div class="col-6">
+        <div class="float-left" *ngIf="tableModel.export">
+          <button type="button" class="excel-button btn-transparent float-left" (click)="exportData('excel')"
+            title="Export to Excel"><i class="fa fa-download"></i></button>
+
+          <button type="button" class="pdf-button btn-transparent float-left" (click)="exportData()"
+            title="Print Table"><i class="fa fa-file-pdf-o f-18"></i></button>
+        </div>
+
+        <div class="float-left" *ngIf="tableModel.toolBar">
+
+          <button *ngIf="tableModel.toolBar.trashButton" type="button" class="pdf-button btn-transparent float-left"
+            (click)="deleteSelection()" title="Delete Selection" [disabled]='selectedRecords.length === 0'><i
+              class="fa fa-trash"></i>
+          </button>
+
+          <button *ngIf="tableModel.toolBar.recoveryButton"
+            type="button" class="pdf-button btn-transparent float-left"
+          (click)="onRecoveryIcon()" title="Recover Selection" [disabled]='selectedRecords.length === 0'><i
+            class="fa fa-undo"></i>
+        </button>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="float-right" *ngIf="tableModel.filterGlobal">
+          <input type="text" class="form-control ecl-keyword-search" maxlength="200" size="200"
+            placeholder="Keyword Search" [(ngModel)]="keywordSearch" (input)="filterGlobalData($event)">
+          <span class="ecl-keyword-icon"><i *ngIf="keywordSearch !== ''" (click)="resetDataTable()"
+              class="fa fa-times-circle purple"></i>
+            <i *ngIf="keywordSearch === ''" class="fa fa-search purple"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template *ngIf="tableModel.horizontalScrollable" pTemplate="colgroup" let-columns>
+    <colgroup>
+      <col *ngIf="tableModel.checkBoxSelection" style="{width:35px;padding: 5px;}">
+      <col *ngFor="let col of columns"
+        [style.width]="(tableModel.horizontalScrollable && col.width !=null) ? col.width : '250px'">
+    </colgroup>
+  </ng-template>
+
+
+  <ng-template pTemplate="header" let-columns>
+    <tr>
+      <th class="col-checkbox" *ngIf="tableModel.checkBoxSelection" style="text-align: center;">
+        <ng-container *ngIf="tableModel.checkBoxSelectAll">
+          <p-checkbox (click)="selectAllRows(e.checked)" #e *ngIf="tableModel.checkBoxRestriction" [(ngModel)]="checkedRestriction" [binary]="true"></p-checkbox>
+          <p-tableHeaderCheckbox *ngIf="!tableModel.checkBoxRestriction"></p-tableHeaderCheckbox>
+        </ng-container>
+      </th>
+      <th *ngFor="let col of columns" [style.width]="col.width" [pSortableColumn]="col.field" class="text-center"
+        [pSortableColumnDisabled]="!col.sort || col.columnType == templateColumnsConstant.ICON || col.columnType == templateColumnsConstant.BUTTONS">
+        {{col.header}}
+        <p-sortIcon
+          *ngIf="tableModel.sort && (col.sort && col.columnType != templateColumnsConstant.ICON && col.columnType != templateColumnsConstant.BUTTONS)"
+          [field]="col.field" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order"
+          ariaLabelAsc="Activate to sort in ascending order">
+        </p-sortIcon>
+      </th>
+    </tr>
+    <tr *ngIf="filterRow">
+      <th class="col-checkbox" *ngIf="tableModel.checkBoxSelection">&nbsp;</th>
+      <th *ngFor="let col of columns" [style.width]="col.width" [style.text-align]="col.alignment">
+        <input *ngIf="col.filter && col.filterType == templateColumnsConstant.TEXT"
+          [(ngModel)]="filtersColumns[col.field]" class="form-control" type="text"
+          (input)="filter($event.target.value, col.field)" [placeholder]="'Search by ' + col.header"
+          [disabled]="keywordSearch != ''" maxlength="200">
+
+        <input *ngIf="col.filter && col.filterType == templateColumnsConstant.DATE_TEXT"
+          [(ngModel)]="filtersColumns[col.field]" class="form-control" type="text"
+          (input)="filter($event.target.value, col.field)" [placeholder]="'Search by ' + col.header"
+          [disabled]="keywordSearch != ''" maxlength="200">
+
+        <p-dropdown *ngIf="col.filter && col.filterType == templateColumnsConstant.DROPDOWN"
+          [(ngModel)]="filtersColumns[col.field]" appendTo="body" [options]="customFilterOptions"
+          [style]="{'width':'100%','text-align': 'center'}"
+          (onChange)="filter($event.value, col.field, templateColumnsConstant.DROPDOWN)"
+          [disabled]="keywordSearch != ''"></p-dropdown>
+
+        <p-dropdown *ngIf="col.filter && col.filterType == templateColumnsConstant.CATEGORY"
+          [(ngModel)]="filtersColumns[col.field]" appendTo="body" [options]="categories" [style]="{'width':'100%'}"
+          (onChange)="filter($event.value, col.field, templateColumnsConstant.CATEGORY)"
+          [disabled]="keywordSearch != ''"></p-dropdown>
+
+        <p-dropdown *ngIf="col.filter && col.filterType == templateColumnsConstant.LOB"
+          [(ngModel)]="filtersColumns[col.field]" appendTo="body" [options]="lobs" [style]="{'width':'100%'}"
+          (onChange)="filter($event.value, col.field, templateColumnsConstant.LOB)" [disabled]="keywordSearch != ''">
+        </p-dropdown>
+
+        <p-dropdown *ngIf="col.filter && col.filterType == templateColumnsConstant.JURISDICTION"
+          [(ngModel)]="filtersColumns[col.field]" appendTo="body" [options]="jurisdictions" [style]="{'width':'100%'}"
+          (onChange)="filter($event.value, col.field, templateColumnsConstant.JURISDICTION)"
+          [disabled]="keywordSearch != ''"></p-dropdown>
+
+        <p-dropdown *ngIf="col.filter && col.filterType == templateColumnsConstant.STATE"
+          [(ngModel)]="filtersColumns[col.field]" appendTo="body" [options]="states" [style]="{'width':'100%'}"
+          (onChange)="filter($event.value, col.field, templateColumnsConstant.STATE)" [disabled]="keywordSearch != ''">
+        </p-dropdown>
+
+        <p-dropdown *ngIf="col.filter && col.filterType == templateColumnsConstant.STATUS"
+          [(ngModel)]="filtersColumns[col.field]" appendTo="body" [options]="status" [style]="{'width':'100%'}"
+          (onChange)="filter($event.value, col.field, templateColumnsConstant.STATUS)" [disabled]="keywordSearch != ''">
+        </p-dropdown>
+
+        <div class="input-group"  
+        *ngIf="
+       (col.filter && col.filterType == templateColumnsConstant.DATE) ||
+       (col.filter &&
+         col.filterType == templateColumnsConstant.DATE_TIME_ZONE)">
+         <p-calendar appendTo="body" [(ngModel)]="filtersColumns[col.field]"
+           (onSelect)="filter($event, col.field, col.filterType)" [readonlyInput]="true" [monthNavigator]="true"
+           [yearNavigator]="true" placeholder="mm/dd/yyyy" dateFormat="mm/dd/yy" [yearRange]="getRangeDate(col)"
+           [disabled]="keywordSearch != ''" [maxDate]="getMaxDate(col)">
+         </p-calendar>
+         <div class="input-group-append group-absolute">
+           <button class="btn btn-secondary btn-sm" type="button" title="Clear Data" style="z-index: auto"><i
+               class="fa fa-eraser" (click)="filter(null, col.field, col.filterType)"></i></button>
+         </div>
+       </div>
+
+        <p-checkbox *ngIf="col.filter && col.filterType ===  templateColumnsConstant.CHECK ||
+          col.filterType ===  templateColumnsConstant.CHECK_ICON_IND" [style]="{'text-align': 'center'}"
+          [(ngModel)]="filtersColumns[col.field]" [binary]="true" (onChange)="filter($event, col.field)"
+          [disabled]="keywordSearch != ''">
+        </p-checkbox>
+
+      </th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-rowData let-columns="columns">
+    <tr [pSelectableRow]="rowData">
+      <td class="col-checkbox" *ngIf="tableModel.checkBoxSelection && !tableModel.horizontalScrollable">
+        <p-tableCheckbox [value]="rowData"
+          [disabled]="rowData['checkBoxDisabled'] != undefined && rowData['checkBoxDisabled'] == true">
+        </p-tableCheckbox>
+      </td>
+      <td class="col-checkbox-hor" *ngIf="tableModel.checkBoxSelection && tableModel.horizontalScrollable">
+        <p-tableCheckbox [value]="rowData"
+          [disabled]="rowData['checkBoxDisabled'] != undefined && rowData['checkBoxDisabled'] == true">
+        </p-tableCheckbox>
+      </td>
+      <td *ngFor="let col of columns" [style.width]="col.width" class="break-all">
+
+        <span class="ui-column-title">{{col.header}}</span>
+        <div [ngClass]="'text-' + col.alignment">
+          <ng-container *ngIf="rowData[col.field] != undefined && col.columnType == templateColumnsConstant.TEXT && col.maxLength > 0
+            && checkInnerValueSize(rowData, col.field).length >= col.maxLength; else elseTemplate">
+
+            <span *ngIf="!col.isOverlayPanel" [pTooltip]="util.getSlicedXmlValue(splitAttributes(rowData, col.field, col, false), 0, false)" tooltipPosition="right"
+              [tooltipZIndex]="999999"
+              [innerHTML]="(splitAttributes(rowData, col.field, col))"
+              [ngStyle]="getStyle(rowData, col)"></span>
+
+            <a nghref="#" *ngIf="col.isOverlayPanel"
+              [innerHTML]="(splitAttributes(rowData, col.field, col))"
+              [ngStyle]="getStyle(rowData, col)" (click)="onHoverTableColumn(rowData, col.field, $event, op2);"></a>
+
+          </ng-container>
+          <ng-template #elseTemplate>
+
+
+            <ng-container *ngIf="col.columnType == templateColumnsConstant.TEXT &&
+            rowData[col.toolTipDescriptionField] !== undefined &&
+            splitAttributes(rowData, col.toolTipDescriptionField).length > 0; else longDescritionToolTip">
+              <span [pTooltip]="util.getSlicedXmlValue(splitAttributes(rowData, col.toolTipDescriptionField,false), 0, false)" tooltipPosition="right"
+                [tooltipZIndex]="999999" [innerHTML]="splitAttributes(rowData, col.field, col)"
+                [ngStyle]="getStyle(rowData, col)"></span>
+            </ng-container>
+            <ng-template #longDescritionToolTip>
+              <div (click)="onHoverTableColumn(rowData, col.field, $event, op2);">
+
+                <span *ngIf="col.columnType == templateColumnsConstant.TEXT"
+                 (mouseleave)="op2.hide()"
+                  [innerHTML]="splitAttributes(rowData, col.field, col)" [ngStyle]="getStyle(rowData, col)">
+                </span>
+              </div>
+            </ng-template>
+
+
+          </ng-template>
+
+          <a nghref="#" class="link-column" style="text-decoration: underline; cursor: pointer;"
+            *ngIf="col.columnType == templateColumnsConstant.LINK"
+            (click)="onAcctionLinkFu(rowData, col.field)">{{splitAttributes(rowData, col.field)}} </a>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.LINK_WITH_ICON">
+            <a nghref="#" class="link-column" style="text-decoration: underline; cursor: pointer;"
+              (click)="onAcctionLinkFu(rowData, col.field)">{{splitAttributes(rowData, col.field, col)}} </a>
+            <i *ngIf="showLinkIcon(rowData, col.textIconField)"
+              style="font-size: 13px; font-weight: bold; margin-left: 5px;" class="{{col.textIconImage}}"></i>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.SIMPLE_TEXT" class="simple">
+            <span>{{splitAttributes(rowData, col.field)}}</span>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.TEXT_WITH_ICON">
+            <span>{{splitAttributes(rowData, col.field, col)}} </span>
+            <i *ngIf="showLinkIcon(rowData, col.textIconField)"
+              style="font-size: 13px; font-weight: bold; margin-left: 5px;" class="{{col.textIconImage}}"></i>
+          </span>
+
+          <a nghref="#" class="link-column" style="text-decoration: underline; cursor: pointer;"
+            *ngIf="col.columnType == templateColumnsConstant.DNB_LINK"
+            (click)="onAcctionLinkFu(rowData, col.field)">{{getDrugVersionId(rowData)}}</a>
+            <span *ngIf="col.columnType == templateColumnsConstant.DNB_VERSION && getDrugVersionId(rowData) ==='Draft'">
+              <label >                
+                {{getDrugVersionId(rowData)}}
+              </label>
+            </span>
+
+            <a nghref="#" class="link-column" style="text-decoration: underline; cursor: pointer;"
+            *ngIf="col.columnType == templateColumnsConstant.DNB_VERSION && getDrugVersionId(rowData) !=='Draft'"
+            (click)="onAcctionLinkFu(rowData, col.field)">{{getDrugVersionId(rowData)}}</a>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.MULTI_LINE_TEXT">
+            <label class="display-multiline"
+              *ngFor="let item of splitDataColumnAsList(rowData, col.field, col.showPartOfData)">
+              {{ item }}
+            </label>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.MULTI_LINE_LINK">
+            <button (click)="onActionMultiLineLink(item, rowData)" class="hyperlink display-multiline"
+              *ngFor="let item of splitDataColumnAsList(rowData, col.field)">
+              {{ item }}
+            </button>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.TEXT_WITH_NUMBER">
+            <span>{{splitAttributes(rowData, col.field, col)}}
+              <span *ngIf="rowData.feedback && rowData.feedback > 0" class="counter-icon">{{splitAttributes(rowData,
+                'feedback')}}</span>
+            </span>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.SWITCH">
+            <p-inputSwitch (onChange)="onSwitchChange($event, rowData)" [(ngModel)]="rowData.isActive"></p-inputSwitch>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.CHECK" >            
+            <p-checkbox [binary]="true" (onChange)="onActionCheck(rowData, $event, col)" *ngIf="!col.shouldDisplay || col.shouldDisplay(rowData)"
+             [(ngModel)]="rowData.checked">                   
+            </p-checkbox>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.CHECK_ICON_IND">
+            <span *ngIf="rowData[col.field] === 'Y' || rowData[col.field] === true ||rowData[col.field] === 1">
+              <i class="fa fa-check"></i></span>
+
+            <span *ngIf="rowData[col.field] === 'N' || rowData[col.field] === false || rowData[col.field] === 0">
+              <i class="fa fa-times"></i></span>
+          </span>
+
+          <span *ngIf="col.columnType == templateColumnsConstant.CHECK_MULTI_ICON_IND">
+            <span *ngIf="rowData[col.field] === 'Y' || rowData[col.field] === true ||rowData[col.field] === 1">
+              <i class="fa fa-check"></i></span>
+
+            <span *ngIf="rowData[col.field] === 'N' || rowData[col.field] === false || rowData[col.field] === 0">
+              <i class="fa fa-times"></i></span>
+
+            <span
+              *ngIf="rowData[col.field].includes('<deleted>Y</deleted>')  || rowData[col.field] === true ||rowData[col.field] === 1">
+              <i class="fa fa-check" style="color: red; text-decoration: line-through !important;"></i></span>
+
+            <span
+              *ngIf="rowData[col.field].includes('<deleted>N</deleted>') || rowData[col.field] === false || rowData[col.field] === 0">
+              <i class="fa fa-times" style="color: red; text-decoration: line-through !important;"></i></span>
+
+            <span
+              *ngIf="rowData[col.field].includes('<added>Y</added>')  || rowData[col.field] === true ||rowData[col.field] === 1">
+              <i class="fa fa-check" style="color: blue !important;"></i></span>
+
+            <span
+              *ngIf="rowData[col.field].includes('<added>N</added>') || rowData[col.field] === false || rowData[col.field] === 0">
+              <i class="fa fa-times" style="color: blue !important;"></i></span>
+          </span>
+
+
+
+
+          <a nghref="#" class="link-column" style="text-decoration: underline; cursor: pointer;"
+            *ngIf="col.columnType == templateColumnsConstant.OVERLAY_PANEL"
+            (click)="onAcctionLinkFu(rowData, col.field);op2.toggle($event)">{{splitAttributes(rowData, col.field, col)}} </a>
+
+          <p-overlayPanel #op2 [dismissable]="true" [appendTo]="'body'" [baseZIndex]="99999999999999999"
+            [dismissable]="true" [showCloseIcon]="true">
+            <div *ngIf="popUpOverlayInfo?.isList">
+              <div *ngFor="let element of popUpOverlayInfo?.data">
+                <div *ngIf="popUpOverlayInfo?.isLink">
+                  <a [innerHTML]="element.description" class="fa fa-external-link" [href]="element.href" target="_blank"
+                    style="font-size:12px"></a>
+                </div>
+                <div *ngIf="!popUpOverlayInfo?.isLink">
+                  <span [innerHTML]="element.description"></span>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="!popUpOverlayInfo?.isList">
+              <div *ngIf="popUpOverlayInfo?.isLink">
+                <a class="fa fa-external-link" [href]="popUpOverlayInfo.data.href" target="_blank"
+                  style="font-size:12px">&nbsp;{{popUpOverlayInfo.data.description}}</a>
+              </div>
+              <div *ngIf="!popUpOverlayInfo?.isLink">
+                <span>{{popUpOverlayInfo.data.description}}</span>
+              </div>
+            </div>
+          </p-overlayPanel>
+
+        </div>
+
+        <span *ngIf="col.columnType == templateColumnsConstant.ICON" class="icon-column">
+          <ng-template [ngIf]="col.iconImage != null" [ngIfElse]="iconImages">
+            <i [ngClass]="col.iconImage + ' icon-item'" *ngIf="!col.shouldDisplay || col.shouldDisplay(rowData)"
+              (click)="onAcctionIconFu(rowData, col.field)"></i>
+          </ng-template>
+          <ng-template #iconImages>
+            <ng-container [ngSwitch]="rowData[col.field]">
+              <ng-container *ngFor="let iconOption of iconOptions; let i = index">
+                <ng-container *ngSwitchCase="iconOption">
+                  <i [ngClass]="col.iconImages[i] + ' icon-item'" (click)="onAcctionIconFu(rowData, col.field)"></i>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </ng-template>
+        </span>
+
+        <input type="text" *ngIf="col.columnType == templateColumnsConstant.INPUT" [(ngModel)]="rowData[col.field]"
+          class="form-control" />
+
+        <p-dropdown *ngIf="col.columnType == templateColumnsConstant.DROPDOWN" [(ngModel)]="rowData[col.field]"
+          appendTo="body" [options]="col.optionsDropDown == null ? rowData[col.fieldOptions] : col.optionsDropDown"
+          [style]="{'width':'100%'}" (onChange)="col.onChangeDropDown && col.onChangeDropDown($event, rowData)">
+        </p-dropdown>
+
+        <span *ngIf="col.columnType == templateColumnsConstant.DATE || col.columnType == templateColumnsConstant.DATE_TIME_ZONE" class="icon-column">{{(col.pipeName == null ||
+          col.pipeFormat == null) ? (splitAttributes(rowData, col.field) | date: 'MM/dd/yyyy') :
+          (splitAttributes(rowData, col.field) | date: col.pipeFormat)}}</span>
+
+        <span *ngIf="col.columnType == templateColumnsConstant.BUTTONS" class="icon-column">
+          <ng-container *ngFor="let b of col.buttons">
+            <a nghref="#" class="btn btn-sm btn-primary f-11 btn-ecl-table"
+              (click)="onAcctionButtonFu(rowData, col.field)">
+              <span *ngIf="b.isField ; else isText">{{getTextWithCondition(rowData, b)}}</span>
+              <ng-template #isText><span>{{b.text}}</span></ng-template>
+              <i *ngIf="b.icon != null" [ngClass]="b.icon"></i>
+            </a>
+          </ng-container>
+        </span>
+        <p-calendar appendTo="body" type="text" *ngIf="col.columnType == templateColumnsConstant.CALENDAR"
+          [(ngModel)]="rowData[col.field]" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
+          [placeholder]="col.header" [yearRange]="yearValidRangeEft">
+        </p-calendar>
+
+        <ng-container *ngIf="col.columnType == templateColumnsConstant.COMMENTS">
+          <input readonly style="cursor: pointer;" (focus)="selectComments($event, rowData, overlayComments, col)"
+          type="text" [value]="getCommentsText(rowData, col)"
+          class="w-100" />
+        </ng-container>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="paginatorright" let-state *ngIf="tableModel.showRecords" #paginatorReference>
+    <span *ngIf="state.totalRecords > 0" class="pagination-ecl-table">
+      Showing <b>{{(state.page * state.rows) + 1}}</b> -
+      <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) :
+        state.totalRecords}}</b>
+      of <b>{{state.totalRecords}}</b>
+    </span>
+    <span class="pagination-ecl-table" *ngIf="state.totalRecords < 1">No records found.</span>
+  </ng-template>
+</p-table>
+
+<!--Comments overlay panel-->
+<p-overlayPanel #overlayComments [showCloseIcon]="true" [dismissable]="true">
+  <div class="f-11" *ngIf="!displayComments" style="width: 350px;">Loading...</div>
+  <div *ngIf="displayComments">
+    <div style="width: 350px;">
+      <label style="display: block;">Comment:</label>
+      <div class="ui-inputgroup">
+        <input type="text" placeholder="Enter your comment here..." [(ngModel)]="commentToAdd" class="w-100"/>
+        <button pButton (click)="addComment()" type="button" class="btn btn-primary btn-xs"
+          [disabled]="commentToAdd == ''" style="height: 30px;"><i class="fa fa-plus"></i></button>
+      </div>
+    
+      <hr>
+      <div *ngIf="loadedComments.length == 0" class="div-no-data">
+        <img src="assets/img/no-data.png" class="img-no-data" />
+        <p class="no-data">NO COMMENTS HERE</p>
+      </div>
+      <table *ngIf="loadedComments.length > 0" class="table table-hover table-striped table-bordered">
+        <thead>
+          <tr>
+            <th *ngFor="let h of columnConfig.commentsConfig.displayColumns">{{h.header}}</th>
+            <th *ngIf="columnConfig.commentsConfig.useDeleteButton"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let la of loadedComments; let i = index">
+            <td *ngFor="let h of columnConfig.commentsConfig.displayColumns">
+              <span *ngIf="!h.header.includes('Date')">{{la[h.field]}}</span>
+              <span *ngIf="h.header.includes('Date')">{{(la[h.field] | date: 'MM/dd/yyyy')}}</span>
+            </td>
+            <td style="width: 5%;" *ngIf="columnConfig.commentsConfig.useDeleteButton">
+              <button type="button" class="btn btn-sm btn-danger" (click)="removeComment(la, i)"><i class="fa fa-trash"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</p-overlayPanel>
+
+<p-blockUI [blocked]="loadingText != ''">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif"/>
+    <p style="font-size: 12px; color: #fff;">{{loadingText}}</p>
+  </div>
+</p-blockUI>
+
+<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>

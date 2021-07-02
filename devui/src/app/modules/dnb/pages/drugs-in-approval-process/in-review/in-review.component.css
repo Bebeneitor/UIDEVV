@@ -1,0 +1,25 @@
+.table-container {
+  margin-bottom: 15px;
+}
+
+:host ::ng-deep p-table.eclTable .ui-chkbox .ui-chkbox-box.ui-state-active {
+  outline: none !important;
+  background-color: #ffffff !important;
+  border-color: #c2c0e0 !important;
+}
+
+:host ::ng-deep p-table.eclTable .ui-chkbox .ui-chkbox-box.ui-state-active {
+  color: #a480bd;
+}
+
+.reassign-box {
+  padding: 10px 0;
+}
+
+.reassign-box.dnb-page-btns {
+  justify-content: flex-start;
+}
+
+.reassing-label {
+  font-weight: bold;
+}

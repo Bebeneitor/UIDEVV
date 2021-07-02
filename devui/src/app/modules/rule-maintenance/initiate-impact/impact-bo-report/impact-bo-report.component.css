@@ -1,0 +1,18 @@
+.panel-data {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+}
+.row-div {
+  margin-top: 20px;
+}
+
+h2 {
+    font-size: 16px;
+    color: #31006F;
+    font-weight: bold;
+  }
+.button-submit {
+    display: flex;
+    justify-content: flex-end;
+  }  

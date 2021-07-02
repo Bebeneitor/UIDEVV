@@ -1,0 +1,57 @@
+<div>
+  <table class="download-grid">
+    <tbody>
+      <tr>
+        <td class="title-table text-left" colspan="2">
+          <div style="margin-bottom: 5px;" [innerHTML]="getTitle()"></div>
+          <br>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div style="max-height: 50vh; overflow: auto;">
+            <table class="table table-hover table-striped table-bordered">
+              <thead>
+                <tr>
+                  <td style="width: 5%;">
+                   <p-checkbox [(ngModel)]="allChecked" binary="true" (onChange)="changeAllChecked($event)"></p-checkbox> 
+                 </td>
+                  <td>Name</td>
+                  <td style="width: 5%;" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']">Lock</td>
+                </tr>
+              </thead>
+              <tbody>
+               <tr *ngFor="let d of downloadOptions; let i = index">
+                 <td>
+                   <p-checkbox [(ngModel)]="d.checked" binary="true"></p-checkbox> 
+                 </td>
+                 <td>
+                   <span [title]="d.name">
+                     <span *ngIf="i > 0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                     {{d.name && d.name.length > 35 ? d.name.substring(0, 34) + '... ' : d.name}}
+                   </span>
+                 </td>
+                 <td class="text-center" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']">
+                   <p-checkbox [disabled]="d.disabled" [(ngModel)]="d.locked" binary="true"></p-checkbox> 
+                 </td>
+               </tr>
+              </tbody>
+           </table>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<span *ngIf="showProgress" style="width: 390px; display: block;" class="f-11">{{progressMessage}}...</span>
+<p-progressBar *ngIf="showProgress" [value]="progress"></p-progressBar>
+<hr *ngIf="showProgress">
+
+<button type="button" style="width: 48%;" (click)="cancel()" class="btn btn-primary f-11">Cancel</button>
+&nbsp;
+<button type="button" style="width: 48%;" (click)="download()"
+          class="btn btn-primary f-11">Download</button>
+<br><br>

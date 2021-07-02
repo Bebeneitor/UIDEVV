@@ -24,7 +24,7 @@ const ICMS_RULE_ENGINE_SHORT_DESC ="ICMS";
 })
 export class IndustryUpdateCrosswalkComponent implements OnInit {
 
-  @ViewChild('viewGrid') viewGrid: any;
+  @ViewChild('viewGrid',{static: true}) viewGrid: any;
   cols: any[];
   data: any[] = [];
   selectedData: any[] = [];
@@ -140,8 +140,14 @@ export class IndustryUpdateCrosswalkComponent implements OnInit {
     const ref = this.dialogService.open(ProvisionalRuleComponent, {
       data: {
         ruleId: ruleId,
-        // selectorConfig: ruleId,
-        header: 'Library View'
+        header: "Library View",
+        isSameSim: false,
+        fromSameSimMod: false,
+        fromMaintenanceProcess: false,
+        readOnlyView: true,
+        provDialogDisable: true,
+        ruleReview: true,
+        readWrite: false
       },
       header: 'Library Rule Details',
       width: '80%',

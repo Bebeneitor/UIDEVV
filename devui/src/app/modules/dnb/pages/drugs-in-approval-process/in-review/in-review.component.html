@@ -1,0 +1,29 @@
+<div class="table-container">
+  <ecl-table
+    #versionTable
+    [tableModel]="drugsInReviewProcessConfig"
+    (onAcctionIcon)="iconColumAction($event)"
+    (onSelectRecord)="setSelectedApprover($event)"
+    (onUnSelectRecord)="setSelectedApprover($event)"
+  ></ecl-table>
+</div>
+<label class="reassing-label"> Reassign to: </label>
+<div class="reassign-box dnb-page-btns">
+  <p-dropdown
+    #dropList
+    [options]="approvers$ | async"
+    [(ngModel)]="selectedApprover"
+    [filter]="true"
+    filterBy="label,value"
+    [style]="{ width: '150px' }"
+    (onChange)="reassignSelectedApprover($event)"
+  ></p-dropdown>
+  <button
+    *ngIf="selectedApprover !== null || selectedApproverVersions.length > 0"
+    (click)="reassignApproverSelected()"
+  >
+    Reassign
+  </button>
+</div>
+
+<p-confirmDialog class="dnb-modal" key="inReview"></p-confirmDialog>

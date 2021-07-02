@@ -4,24 +4,26 @@
  *
  *****/
 
-import { Component, OnInit, ViewChild, Input } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, ViewChild, Input, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService, MessageService, DynamicDialogConfig, DynamicDialogRef } from 'primeng/api';
 import { NewIdeaService } from 'src/app/services/new-idea.service';
-import { ReferenceSourceService } from 'src/app/services/reference-source.service';
 import { IdeaInfo } from 'src/app/shared/models/idea-info';
 import { ReferenceInfo } from 'src/app/shared/models/reference-info';
 import { ReferenceSource } from 'src/app/shared/models/reference-source';
 import { RuleReference } from 'src/app/shared/models/rule-reference';
 import { RuleStatus } from 'src/app/shared/models/rule-status';
 import { AppUtils } from 'src/app/shared/services/utils';
-import { FileUpload, OverlayPanel } from 'primeng/primeng';
+import { FileUpload } from 'primeng/primeng';
 import { StorageService } from 'src/app/services/storage.service';
 import { NewIdeaCreationDto } from 'src/app/shared/models/dto/new-idea-creation-dto';
-import {ReferenceService} from "../../../services/reference.service";
-import {environment} from "../../../../environments/environment";
-import {Constants} from "../../../shared/models/constants";
+import { ReferenceService } from "../../../services/reference.service";
+import { environment } from "../../../../environments/environment";
+import { Constants } from "../../../shared/models/constants";
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
+import { Subscription } from 'rxjs';
+import { ResearchRequestService } from 'src/app/services/research-request.service';
+import { EclComments } from 'src/app/shared/models/ecl-comments';
 
 const FIRST_REFERENCE_FIRST_FILE = 1;
 const FIRST_REFERENCE_SECOND_FILE = 2;
@@ -41,14 +43,14 @@ const ONE_FILE_ALLOWED = 1;
   providers: [ConfirmationService]
 })
 
-export class NewIdeaComponent implements OnInit {
+export class NewIdeaComponent implements OnInit, OnDestroy {
 
   @Input() ideaIdInp;
   @Input() readOnlyView;
 
-  @ViewChild('uploadControl') uploadControl: FileUpload;
-  @ViewChild('uploadControl1') uploadControl1: FileUpload;
-  @ViewChild('uploadControl2') uploadControl2: FileUpload;
+  @ViewChild('uploadControl',{static: false}) uploadControl: FileUpload;
+  @ViewChild('uploadControl1',{static: false}) uploadControl1: FileUpload;
+  @ViewChild('uploadControl2',{static: false}) uploadControl2: FileUpload;
   // [x: string]: any;
 
   validationRes: boolean = false;
@@ -61,6 +63,8 @@ export class NewIdeaComponent implements OnInit {
   referenceDetails1: ReferenceInfo;
   referenceDetails2: ReferenceInfo;
   referenceDetails3: ReferenceInfo;
+  newCommentsDto: EclComments = null;
+  commentList: EclComments[] = [];
 
   ruleReference1: RuleReference;
   ruleReference2: RuleReference;
@@ -94,7 +98,11 @@ export class NewIdeaComponent implements OnInit {
   refuploadedFiles2: File[] = [];
   userId: number;
   passingIdeaId: number;
-  fromDialog:boolean = false;
+  fromDialog: boolean = false;
+
+  //policy packages
+  policyPackageValues: any = [];
+  policyPackageSelected: any[] = [];
 
   /*
   Idea references
@@ -116,7 +124,7 @@ export class NewIdeaComponent implements OnInit {
   referenceURL3: string;
   refUrlFile3: File[] = [];
   fileSize3: number = 0;
-  ideaSubmitDisabled:boolean = false;
+  ideaSubmitDisabled: boolean = false;
 
   //handle previously saved attachments
   previouslySavedFiles: File[] = [];
@@ -140,9 +148,19 @@ export class NewIdeaComponent implements OnInit {
   //File loading wait
   loading: boolean = false;
 
+  // Research Request
+  rrId: number;
+  rrCode: string;
+  navPageTitle: string = 'My Requests';
+  sub: Subscription;
+
+  //From assignment screen
+  fromAssignmentNewIdeaScreen: boolean;
+
   constructor(private storage: StorageService, private newIdeaService: NewIdeaService, private router: Router,
     private confirmationService: ConfirmationService, private utils: AppUtils, private messageService: MessageService,
-    private config: DynamicDialogConfig, private ref: DynamicDialogRef,private eclReferenceService: ReferenceService) {
+    private config: DynamicDialogConfig, private ref: DynamicDialogRef, private eclReferenceService: ReferenceService,
+    private route: ActivatedRoute, private rrService: ResearchRequestService) {
 
     this.referenceDetails1 = new ReferenceInfo();
     this.referenceDetails2 = new ReferenceInfo();
@@ -156,8 +174,52 @@ export class NewIdeaComponent implements OnInit {
     this.ruleReference3 = new RuleReference();
     this.ideaInfo = new IdeaInfo();
 
+    this.sub = this.route.params.subscribe(params => {
+      if (this.utils.decodeString(params['id']) !== undefined && this.utils.decodeString(params['id']) !== "") {
+        this.ideaIdInp = parseInt(this.utils.decodeString(params['id']));
+      }
+      this.rrId = parseInt(this.utils.decodeString(params['rrid']));
+      this.rrCode = params['code'];
+    });
+
+    this.route.data.subscribe(params => {
+      this.readOnlyView = params['readOnlyView'];
+    });
+
+    this.fromAssignmentNewIdeaScreen = this.route.snapshot.queryParams.fromAssignmentForNewIdeaScreen;
+
   }
 
+  ngOnInit() {
+    if (this.readOnlyView == undefined) {
+      this.readOnlyView = false;
+    }
+
+    this.ideaInfo.createdDt = new Date();
+    this.userId = this.utils.getLoggedUserId();
+
+    this.utils.getAllPolicyPackageValue(this.policyPackageValues);
+
+    this.fileSize1 = 0;
+    this.fileSize2 = 0;
+    this.fileSize3 = 0;
+    if (this.config && this.config.data && this.config.data.ideaId) {
+      this.ideaIdInp = this.config.data.ideaId;
+      this.readOnlyView = (this.config.data.readOnly === false ? false : true);
+      this.fromDialog = true;
+    }
+    if (this.ideaIdInp !== undefined && this.ideaIdInp !== null) {
+      this.ideaInfo.ideaId = this.ideaIdInp;
+      this.refreshIdeaAndReferences();
+    }
+
+    this.ideaSubmitDisabled = false;
+    this.newCommentsDto = new EclComments();
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+  }
 
   hideRef() {
     this.showAdditionalRef = false;
@@ -166,12 +228,12 @@ export class NewIdeaComponent implements OnInit {
   }
 
   showRef() {
-    if(this.referenceDetails1.referenceName || this.referenceDetails1.referenceURL) {
+    if (this.referenceDetails1.referenceName || this.referenceDetails1.referenceURL) {
       this.showAdditionalRef = true;
       this.plusSign = false;
       this.negSign = true;
     }
-    
+
   }
 
   /* Function to navigate to home page after idea submit */
@@ -194,6 +256,7 @@ export class NewIdeaComponent implements OnInit {
         this.referenceDetails1 = new ReferenceInfo();
         this.referenceDetails2 = new ReferenceInfo();
         this.referenceDetails3 = new ReferenceInfo();
+        this.newCommentsDto = new EclComments();
         this.clearFileUploadSelection(this.uploadControl, 1);
         this.clearFileUploadSelection(this.uploadControl1, 2);
         this.clearFileUploadSelection(this.uploadControl2, 3);
@@ -215,32 +278,6 @@ export class NewIdeaComponent implements OnInit {
       }
     });
   }
-
-  ngOnInit() {
-    
-    if (this.readOnlyView == undefined) {
-      this.readOnlyView = false;
-    }
-
-    this.ideaInfo.createdDt = new Date();
-    this.userId = this.utils.getLoggedUserId();
-    this.fileSize1 = 0;
-    this.fileSize2 = 0;
-    this.fileSize3 = 0;
-    if (this.config && this.config.data && this.config.data.ideaId) {
-      this.ideaIdInp = this.config.data.ideaId;
-      this.readOnlyView = true;
-      this.fromDialog = true;
-    }
-    if (this.ideaIdInp !== undefined && this.ideaIdInp !== null) {
-      this.ideaInfo.ideaId = this.ideaIdInp;
-      this.refreshIdeaAndReferences();
-    }
-
-    this.ideaSubmitDisabled = false;
-
-  }
-
 
   refreshIdeaAndReferences() {
     this.ideaRefresh().then((response) => {
@@ -270,6 +307,8 @@ export class NewIdeaComponent implements OnInit {
   exitReadOnly() {
     if (this.fromDialog) {
       this.ref.close();
+    } else if (this.fromAssignmentNewIdeaScreen) {
+      this.navigateAssign();
     } else {
       this.navigateHome();
     }
@@ -277,7 +316,7 @@ export class NewIdeaComponent implements OnInit {
 
   ideaRefresh() {
     this.loading = true;
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let i = 0;
       this.newIdeaService.onRefresh(this.ideaInfo.ideaId).subscribe(response => {
         let responseObj = response.data;
@@ -287,10 +326,13 @@ export class NewIdeaComponent implements OnInit {
         this.ideaInfo.ideaName = responseObj.ideaName;
         this.ideaInfo.ideaDescription = responseObj.ideaDescription;
 
-        //this.ideaInfo = responseObj;
+        this.policyPackageSelected = responseObj.eclPolicyPackages
+          .map(eclPolicyPackage => eclPolicyPackage.policyPackage)
+          .map(policyPackage => policyPackage.policyPackageTypeId);
+
         let ruleRefArrayObj = [];
-        ruleRefArrayObj =  responseObj.eclReferences;
-        ruleRefArrayObj.sort((a,b) => a.eclReferenceId - b.eclReferenceId );
+        ruleRefArrayObj = responseObj.eclReferences;
+        ruleRefArrayObj.sort((a, b) => a.eclReferenceId - b.eclReferenceId);
         let rulerefArray = ruleRefArrayObj;
         if (rulerefArray.length < 1) {
           this.loading = false;
@@ -309,9 +351,9 @@ export class NewIdeaComponent implements OnInit {
               this.referenceDetails1.refDocFileType1 = this.referenceArray[0].refDocFileType1;
               this.referenceDetails1.refUrlFileName = this.referenceArray[0].refUrlFileName;
               this.referenceDetails1.refUrlFileType = this.referenceArray[0].refUrlFileType;
-  
+
               this.ruleReference1.eclReferenceId = rulerefArray[obj].eclReferenceId;
-              
+
               this.previousAttachmentDownload();
             }
             if (i == 2) {
@@ -342,10 +384,19 @@ export class NewIdeaComponent implements OnInit {
         }
         this.changeFileUploadLimits();
         resolve();
-
       });
+      this.loadIdeaComments(this.ideaInfo.ideaId);
     })
+  }
 
+  loadIdeaComments(ideaId: number) {
+    this.newCommentsDto = new EclComments();
+    this.newIdeaService.getIdeaComments(ideaId).subscribe(resp => {
+      if (resp && resp.data && resp.data.length > 0) {
+        this.commentList = resp.data;
+        this.newCommentsDto.comments = this.commentList[0].comments;
+      }
+    });
   }
 
   changeFileUploadLimits() {
@@ -361,7 +412,7 @@ export class NewIdeaComponent implements OnInit {
   }
 
   changeUploadLimit(referenceDetail: ReferenceInfo) {
-    const {refUrlFileName, refDocFileName1} = referenceDetail;
+    const { refUrlFileName, refDocFileName1 } = referenceDetail;
     if ((refUrlFileName && !refDocFileName1) || (refDocFileName1 && !refUrlFileName)) {
       this.setUploadLimitToOne(referenceDetail);
     } else if (refUrlFileName && refDocFileName1) {
@@ -444,7 +495,7 @@ export class NewIdeaComponent implements OnInit {
       let uploadingFiles1: File[] = [];
       if (this.previouslySavedFiles1.length > 0) {
         uploadingFiles1 = this.previouslySavedFiles1;
-      } 
+      }
       if (this.uploadControl1) {
         if (this.uploadControl1.files.length > 0) {
           uploadingFiles1 = [...uploadingFiles1, ...this.uploadControl1.files];
@@ -461,8 +512,9 @@ export class NewIdeaComponent implements OnInit {
         }
       }
 
-      this.newIdeaService.saveNewIdea(this.ideaInfo, this.referenceArray, this.ruleReferenceArray, this.userId,
-        uploadingFiles, uploadingFiles1, uploadingFiles2).subscribe(response => {
+      if (!this.rrCode) { this.rrId = null }
+      this.newIdeaService.saveNewIdea(this.ideaInfo, this.policyPackageSelected, this.referenceArray, this.ruleReferenceArray, this.userId,
+        uploadingFiles, uploadingFiles1, uploadingFiles2, this.rrId, this.newCommentsDto).subscribe(response => {
 
           if (this.uploadControl) {
             this.uploadControl.files = [];
@@ -476,6 +528,7 @@ export class NewIdeaComponent implements OnInit {
           this.ideaInfo.ideaId = response.data.ideaId;
           this.ideaInfo.ideaName = response.data.ideaName;
           this.ideaInfo.ideaDescription = response.data.ideaDescription;
+          this.ideaInfo.ideaCode = response.data.ideaCode;
 
           // Moving new Idea Id to localstorage to persist.
           this.storage.remove('NewIdeaId');
@@ -483,9 +536,12 @@ export class NewIdeaComponent implements OnInit {
 
           this.validateButtons();
           if (this.ideaInfo.ideaId != null) {
-            this.messageService.add({ severity: 'success', summary: 'Save', detail: 'New idea successfully saved', life: 3000, closable: true });
+            this.messageService.add({ severity: 'success', summary: 'Save', detail: 'New idea ' + this.ideaInfo.ideaCode + ' successfully saved', life: 3000, closable: true });
           }
           this.ideaSubmitDisabled = false;  //enable save button after saving the idea
+          if (this.rrId !== null && this.ideaInfo.ideaId !== null) {
+          }
+          this.rrService.saveRrMapping({ rrId: this.rrId, ideaId: this.ideaInfo.ideaId, actionMapping: "SV" }).subscribe();
         }, error => console.log(error),
           () => this.ideaRefresh()
         );
@@ -527,7 +583,7 @@ export class NewIdeaComponent implements OnInit {
       let uploadingFiles1: File[] = [];
       if (this.previouslySavedFiles1.length > 0) {
         uploadingFiles1 = this.previouslySavedFiles1;
-      } 
+      }
       if (this.uploadControl1) {
         if (this.uploadControl1.files.length > 0) {
           uploadingFiles1 = [...uploadingFiles1, ...this.uploadControl1.files];
@@ -544,15 +600,19 @@ export class NewIdeaComponent implements OnInit {
         }
       }
 
-      this.newIdeaService.submitNewIdea(this.ideaInfo, this.referenceArray, this.ruleReferenceArray, this.userId, uploadingFiles, uploadingFiles1, uploadingFiles2).subscribe(response => {
+      if (!this.rrCode) { this.rrId = null }
+      this.newIdeaService.submitNewIdea(this.ideaInfo, this.policyPackageSelected, this.referenceArray, this.ruleReferenceArray, this.userId, uploadingFiles, uploadingFiles1, uploadingFiles2, this.rrId, this.newCommentsDto).subscribe(response => {
         this.ideaInfo.ideaId = response.data.ideaId;
-
+        this.ideaInfo.ideaCode = response.data.ideaCode;
         this.storage.set('NEW_IDEA_ID', this.ideaInfo.ideaId, true);
 
         if ((this.ideaInfo.ideaId != null)) {
-          this.messageService.add({ severity: 'success', summary: 'Submit', detail: 'New idea successfully submitted', life: 3000, closable: true });
+
+
+          this.messageService.add({ severity: 'success', summary: 'Submit', detail: 'New idea ' + this.ideaInfo.ideaCode + ' successfully submitted', life: 3000, closable: true });
           setTimeout(() => {
-            this.navigateHome();
+            this.rrId ? this.navigateBackResearchId() : this.navigateHome();
+            this.rrService.saveRrMapping({ rrId: this.rrId, ideaId: this.ideaInfo.ideaId, actionMapping: "SB" }).subscribe();
           }, 1250);
         }
       });
@@ -561,7 +621,7 @@ export class NewIdeaComponent implements OnInit {
 
   }
   validateForm() {
-     let res: boolean = true;
+    let res: boolean = true;
 
     if (!this.referenceDetails1.referenceURL && this.referenceDetails2.referenceURL) {
       this.referenceDetails1.referenceURL = "";
@@ -572,10 +632,10 @@ export class NewIdeaComponent implements OnInit {
       res = true;
     }
 
-    if (!this.ideaInfo.ideaName) {
+    if (!this.ideaInfo.ideaName || this.utils.validateStringContaintOnlyWhiteSpaces(this.ideaInfo.ideaName)) {
       this.messageService.add({ severity: 'warn', summary: 'Info', detail: 'Please enter idea name', life: 3000, closable: true });
       res = false;
-    } else if (!this.ideaInfo.ideaDescription) {
+    } else if (!this.ideaInfo.ideaDescription || this.utils.validateStringContaintOnlyWhiteSpaces(this.ideaInfo.ideaDescription)) {
       this.messageService.add({ severity: 'warn', summary: 'Info', detail: 'Please enter idea description', life: 3000, closable: true });
       res = false;
     } else if (!this.referenceDetails1.referenceName && (this.referenceDetails1.referenceURL || this.validateFiles1.length > 0)) {
@@ -610,7 +670,7 @@ export class NewIdeaComponent implements OnInit {
 
     if (this.validateReferenceUrl(this.referenceDetails1.referenceURL)) {
       this.messageService.add({ severity: 'warn', summary: 'Info', detail: `Reference details 1 URL must start with 'http://' or 'https://`, life: 5000, closable: true });
-       res = false;
+      res = false;
     } else if (this.validateReferenceUrl(this.referenceDetails2.referenceURL)) {
       this.messageService.add({ severity: 'warn', summary: 'Info', detail: `Reference details 2 URL must start with 'http://' or 'https://`, life: 5000, closable: true });
       res = false;
@@ -618,7 +678,8 @@ export class NewIdeaComponent implements OnInit {
       this.messageService.add({ severity: 'warn', summary: 'Info', detail: `Reference details 3 URL must start with 'http://' or 'https://'`, life: 5000, closable: true });
       res = false;
     }
-
+    this.ideaInfo.ideaName = this.ideaInfo.ideaName.trim();
+    this.ideaInfo.ideaDescription = this.ideaInfo.ideaDescription.trim();
     return res;
   }
 
@@ -902,7 +963,7 @@ export class NewIdeaComponent implements OnInit {
   }
 
   /***Method to retrieve previously saved url file attachment for first reference */
-  previousAttachmentDownload(){
+  previousAttachmentDownload() {
     this.loading = true;
     this.previouslySavedFiles = [];
     const fileUrl = environment.restServiceUrl + RoutingConstants.ECL_REFERENCES_URL + "/" + RoutingConstants.REF_FILE_DOWNLOAD_FIRST_URL + "/" + this.referenceDetails1.referenceId + "/" + Constants.REF_URL_FILE;
@@ -932,10 +993,10 @@ export class NewIdeaComponent implements OnInit {
           if (response.size > 0) {
             const attachedFile = new File([response], this.referenceDetails1.refDocFileName1, { type: this.referenceDetails1.refDocFileType1 });
             this.previouslySavedFiles = [...this.previouslySavedFiles, attachedFile];
-           }
+          }
         }
       }, error => console.log(error),
-        () => this.previousAttachmentDownload1() 
+        () => this.previousAttachmentDownload1()
       );
     } else {
       this.previousAttachmentDownload1()
@@ -943,7 +1004,7 @@ export class NewIdeaComponent implements OnInit {
   }
 
   /***Method to retrieve previously saved url file attachment for second reference */
-  previousAttachmentDownload1(){
+  previousAttachmentDownload1() {
     this.previouslySavedFiles1 = [];
     const fileUrl = environment.restServiceUrl + RoutingConstants.ECL_REFERENCES_URL + "/" + RoutingConstants.REF_FILE_DOWNLOAD_FIRST_URL + "/" + this.referenceDetails2.referenceId + "/" + Constants.REF_URL_FILE;
     if (this.referenceDetails2.referenceId) {
@@ -954,7 +1015,7 @@ export class NewIdeaComponent implements OnInit {
             this.previouslySavedFiles1 = [...this.previouslySavedFiles1, attachedFile];
             this.isDownloadFileHidden1 = false;
           }
-        } 
+        }
       }, error => console.log(error),
         () => this.previousDocFile1Download1()
       );
@@ -972,7 +1033,7 @@ export class NewIdeaComponent implements OnInit {
           if (response.size > 0) {
             const attachedFile = new File([response], this.referenceDetails2.refDocFileName1, { type: this.referenceDetails2.refDocFileType1 });
             this.previouslySavedFiles1 = [...this.previouslySavedFiles1, attachedFile];
-           }
+          }
         }
       }, error => console.log(error),
         () => this.previousAttachmentDownload2()
@@ -983,7 +1044,7 @@ export class NewIdeaComponent implements OnInit {
   }
 
   /***Method to retrieve previously saved url file attachment for third reference */
-  previousAttachmentDownload2(){
+  previousAttachmentDownload2() {
     this.previouslySavedFiles2 = [];
     const fileUrl = environment.restServiceUrl + RoutingConstants.ECL_REFERENCES_URL + "/" + RoutingConstants.REF_FILE_DOWNLOAD_FIRST_URL + "/" + this.referenceDetails3.referenceId + "/" + Constants.REF_URL_FILE;
     if (this.referenceDetails3.referenceId) {
@@ -994,7 +1055,7 @@ export class NewIdeaComponent implements OnInit {
             this.previouslySavedFiles2 = [...this.previouslySavedFiles2, attachedFile];
             this.isDownloadFileHidden2 = false;
           }
-        } 
+        }
       }, error => console.log(error),
         () => this.previousDocFile1Download2()
       );
@@ -1056,8 +1117,27 @@ export class NewIdeaComponent implements OnInit {
       if (response.code === Constants.HTTP_OK) {
         this.refreshIdeaAndReferences();
       }
-    });  
-    }
+    });
+  }
+
+  navigateBackResearch() {
+    this.router.navigate(['my-research-request']);
+  }
+
+  navigateBackResearchId() {
+    let rrPathParams = btoa(JSON.stringify({
+      'rrCode': this.rrCode,
+      'navPageTitle': this.navPageTitle,
+      'navPagePath': Constants.MY_RESEARCH_REQUEST_ROUTE,
+      'rrReadOnly': true,
+      'rrButtonsDisable': false
+    }));
+    let navigationPath = Constants.RESEARCH_REQUEST_ROUTE;
+
+    this.router.navigate([navigationPath], {
+      queryParams: { rrPathParams: rrPathParams }
+    });
+  }
 }
 
 /**
@@ -1067,7 +1147,7 @@ export class NewIdeaComponent implements OnInit {
  */
 FileUpload.prototype.formatSize = function (bytes) {
   if (bytes === 0) {
-      return '0 B';
+    return '0 B';
   }
   let k = 1000, dm = 0, sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'], i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];

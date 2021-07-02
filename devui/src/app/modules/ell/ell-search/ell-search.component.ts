@@ -10,6 +10,15 @@ import { OverlayPanel } from 'primeng/primeng';
 
 const DECISION_TYPE = 'DECISION';
 const TOPIC_TYPE = 'TOPIC';
+const POLICY_TYPE = undefined;
+
+//This constantes have to have relation with css file.
+const CSS_RETIRED = 'retired';
+const CSS_DO_NOT_PRESENT = 'do-not-present'
+const CSS_DO_NOT_PRESENT_AND_RETIRED = 'do-not-present-and-retired';
+const CSS_TOPIC = 'topic';
+const CSS_DECISION = 'decision';
+const CSS_POLICY = 'policy'
 
 @Component({
   selector: 'app-ell-search',
@@ -18,9 +27,10 @@ const TOPIC_TYPE = 'TOPIC';
 })
 export class EllSearchComponent implements OnInit {
 
-  @ViewChild('dateFilters') dateFilters: OverlayPanel;
-  @ViewChild('authorFilter') authorFilter: OverlayPanel;
+  @ViewChild('dateFilters',{static: true}) dateFilters: OverlayPanel;
+  @ViewChild('authorFilter',{static: true}) authorFilter: OverlayPanel;
 
+  colorsPallete : ColorPallete[];
   data: TreeNode[] = [];
   keywordSearch: string = "";
   userName: string = "";
@@ -35,6 +45,7 @@ export class EllSearchComponent implements OnInit {
   minDate: Date = Constants.MIN_VALID_DATE;
   maxDate: Date = new Date();
   searchExpanded: boolean = false;
+  legendExpanded: boolean = false;
   showAll: boolean = false;
   filterRequest: any;
   dataRange: any;
@@ -51,6 +62,15 @@ export class EllSearchComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.colorsPallete = [
+      {label: 'Policy',                     cssColor : CSS_POLICY},
+      {label: 'Topic',                      cssColor : CSS_TOPIC},
+      {label: 'Decision Point',             cssColor : CSS_DECISION},
+      {label: 'Do Not Present',             cssColor : CSS_DO_NOT_PRESENT},
+      {label: 'Retired',                    cssColor : CSS_RETIRED},
+      {label: 'Do Not Present And Retired', cssColor : CSS_DO_NOT_PRESENT_AND_RETIRED}
+    ];
+
     this.ellSearchService.loadReleaseLogKey().subscribe((response: BaseResponse) => {
       this.releaseLogKey = response.data;
       if(this.browserCacheService.exists('ELL_SEARCH_VIEW')) {
@@ -142,7 +162,6 @@ export class EllSearchComponent implements OnInit {
               children: children,
               expanded: item.topics != undefined && item.topics.length > 0
             };
-
             this.data.push(newEntry);
           });
 
@@ -167,7 +186,7 @@ export class EllSearchComponent implements OnInit {
    */
   expandNode(event) {
     switch (event.node.data.typeLoad) {
-      case undefined:
+      case POLICY_TYPE:
         this.loadTopicNode(event);
         break;
       case TOPIC_TYPE:
@@ -275,6 +294,13 @@ export class EllSearchComponent implements OnInit {
     this.searchExpanded = !this.searchExpanded;
   }
 
+   /**
+   * Show or hide Legend expanded
+   */
+  changeLegendExpanded() {
+    this.legendExpanded = !this.legendExpanded;
+  }
+
   /**
    * This method cleans the search fields.
    */
@@ -348,7 +374,74 @@ export class EllSearchComponent implements OnInit {
     this.finalDate = null;
   }
 
-  highlight(text) {
+  /**
+   * This method is to redirect to screen respective (TOPICS or DECISIONS).
+   * @param rowData  - rowData.
+   */
+  redirectToScreen(rowData: any){
+    switch(rowData.typeLoad){
+      case TOPIC_TYPE:
+          this.redirectToTopicDetail(rowData.topicKey);
+          break;
+      case DECISION_TYPE:
+          this.redirectToDecisionPoint(rowData.dpKey);
+          break;
+    }
+  }
+
+  /**
+   * This method is to format text.
+   * @param rowData  - rowData.
+   */
+  formatText(rowData: any) {
+    const LOADING_MESSAGE = "Loading...";
+    let textToFormat =  rowData.typeLoad === TOPIC_TYPE ? rowData.topicTitle : 
+                        rowData.typeLoad === DECISION_TYPE ? rowData.dpDesc : rowData.medPolTitle ;
+    if (textToFormat){
+      textToFormat = this.highlight(textToFormat);
+      textToFormat = this.colorText(textToFormat, rowData);
+    }else{
+      textToFormat = LOADING_MESSAGE;
+    }
+    return textToFormat;
+  }
+
+  /**
+   * This method is to color text.
+   * @param text  - Item text.
+   * @param typeLoad - type load: POLICY, TOPIC or DECISION.
+   * @param lifeCycleKey  - lifeCycleKey attribute, when it has 3 value, the item is retired.
+   * @param doNotPresent10  - doNotPresent10 attribute, when it has -1 value, the item is not present. 
+   */
+  private colorText(text: string, {typeLoad, lifeCycleKey, doNotPresent10}) {
+    let colorTextClass : string;
+    if (lifeCycleKey === Constants.RETIRED_STATUS_ID && doNotPresent10 === Constants.DO_NOT_PRESENT_STATUS_ID){
+      colorTextClass = CSS_DO_NOT_PRESENT_AND_RETIRED;
+    }else if  (lifeCycleKey === Constants.RETIRED_STATUS_ID){
+      colorTextClass = CSS_RETIRED;
+    }else if  (doNotPresent10 === Constants.DO_NOT_PRESENT_STATUS_ID){
+      colorTextClass = CSS_DO_NOT_PRESENT;
+    }else{
+      switch(typeLoad){
+        case TOPIC_TYPE:
+            colorTextClass = CSS_TOPIC;
+            break;
+        case DECISION_TYPE:
+            colorTextClass = CSS_DECISION;
+            break;
+        case POLICY_TYPE:
+            colorTextClass = CSS_POLICY;
+      }
+    }
+    return `<span class="${colorTextClass}">${text}</span>`;
+  }
+
+
+  /**
+   * This method is to highlight text.
+   * @param text  - Item text.
+   */
+  private highlight(text: string) {
     if (this.keywordSearch == '') {
       return text;
     }
@@ -359,3 +452,9 @@ export class EllSearchComponent implements OnInit {
   }
 
 }
+
+interface ColorPallete{
+  label    : string,
+  cssColor : string
+}
+

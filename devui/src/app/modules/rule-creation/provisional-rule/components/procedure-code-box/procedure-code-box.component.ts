@@ -20,7 +20,7 @@ const NO_CODES_MSG = ' No codes to validate';
 
 export class ProcedureCodeBoxComponent implements OnInit, OnDestroy {
 
-  @ViewChild('procCodeBox') procCodeBox: ElementRef;
+  @ViewChild('procCodeBox',{static: true}) procCodeBox: ElementRef;
 
   @Input() boxTitle:string = '';
   /** Procedure code type: HCPCS, IDC10, ALL */
@@ -174,9 +174,7 @@ export class ProcedureCodeBoxComponent implements OnInit, OnDestroy {
     this.blocked = true;
     let codes = ProcCodesUtils.extractUniqueProcedureCodes(codesString);
     if (codes.length == 0 && !ProcCodesUtils.containsGlobalRange(codesString)) {
-      this.resetValidationStatus();
-      this.validationMsg = NO_CODES_MSG;
-      this.valMsgClass = 'text-danger';
+      this.processValidationResult([]);
     } else {
       this.procedureCodesService.validateCodes(codes, this._procCodeType)
       .subscribe( resp => {

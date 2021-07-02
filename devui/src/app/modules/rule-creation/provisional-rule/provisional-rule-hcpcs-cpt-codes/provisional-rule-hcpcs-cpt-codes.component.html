@@ -1,0 +1,62 @@
+<div class="hcpcs-cpt-codes">
+  <div class="row top-bar" *ngIf="!(_provDialogDisable || readOnlyView)">
+    <div class="col-md-2">
+      <label class="label-text">{{selectedRadioText}}</label>
+    </div>
+    <div class="col-md-3 col-sm-12 text-right pl-0 pr-0">
+      <input type="radio" id="individual" name="radioType" value="individual" [(ngModel)]="selectedRadioValue" (change)="changeTab()" />
+      <label for="individual" [ngClass]="(selectedRadioValue == 'individual')?'active-blue':''" class="pl-1">Add Codes
+        Individually</label>
+    </div>
+
+    <div class="col-md-2 col-sm-12 text-center pl-0 pr-0">
+      <input type="radio" id="upload" name="radioType" value="upload" [(ngModel)]="selectedRadioValue" (change)="changeTab()" />
+      <label for="upload" [ngClass]="(selectedRadioValue == 'upload')?'active-blue':''" class="pl-1">Upload Spreadsheet</label>
+    </div>
+
+    <div class="col-md-2 col-sm-12 text-left pl-0 pr-0">
+      <input type="radio" id="copypaste" name="radioType" value="copypaste" [(ngModel)]="selectedRadioValue" (change)="changeTab()" />
+      <label for="copypaste" [ngClass]="(selectedRadioValue == 'copypaste')?'active-blue':''" class="pl-1">Copy/Paste codes</label>
+    </div>
+
+    <div class="col-md-3 col-sm-12 text-right pl-0">
+      <div class="line-height-header">
+        <input type="text" placeholder="Search" hidden="true" class="form-control search-header"
+          (input)="newCodesTableTag.eclTable.filterGlobal($event.target.value, 'contains')" />
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="!(_provDialogDisable || readOnlyView)">
+    <div class="col-md-12" *ngIf="openTab === 'upload'">
+      <app-provrule-proccodes-upload [(response)]="validationResponse" [(ruleInfo)]="_ruleInfo"
+        (validatedFile)="updateCodesTable($event)">
+      </app-provrule-proccodes-upload>
+    </div>
+
+    <div class="col-md-12" *ngIf="openTab === 'copypaste'">
+      <app-provisional-rule-copy-paste #copyTag [(errorMap)]="validationResponse.errorList" [(ruleInfo)]="_ruleInfo"
+        (addRowToCodes)="addRowToCodesTable($event)" [procTypeOptions]="procTypeOptions" [posOptions]="posOptions"
+        [modifierOptions]="modifierOptions" [revenueCodeOptions]="revenueCodeOptions">
+      </app-provisional-rule-copy-paste>
+    </div>
+
+    <div class="col-md-12" *ngIf="openTab === 'individual' || rowToEdit">
+      <app-provisional-rule-individual-codes #individuallyTag [rowToEdit]="rowToEdit" [(ruleInfo)]="_ruleInfo" [tabType]="'individual'"
+        (addRowToCodes)="addRowToCodesTable($event)" [procTypeOptions]="procTypeOptions" [posOptions]="posOptions"
+        [modifierOptions]="modifierOptions" [revenueCodeOptions]="revenueCodeOptions">
+      </app-provisional-rule-individual-codes>
+    </div>
+    <div class="col-md-12">
+      <app-error-codes #errorTag [errorMap]="validationResponse.errorList" [selectedRadioValue]="selectedRadioValue">
+      </app-error-codes>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <app-newly-added-codes-table #newCodesTableTag [disableFields]="disableFields"
+      [(ruleInfo)]="_ruleInfo" (editableRowEvent)="editCurrentRow($event)" [selectedRadioValue]="selectedRadioValue">
+      </app-newly-added-codes-table>
+    </div>
+  </div>
+</div>

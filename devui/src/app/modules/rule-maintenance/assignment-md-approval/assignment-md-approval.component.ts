@@ -9,6 +9,7 @@ import { ECLConstantsService } from '../../../services/ecl-constants.service';
 import { UsersService } from '../../../services/users.service';
 import { Users } from '../../../shared/models/users';
 import { Constants } from 'src/app/shared/models/constants';
+import { PageTitleConstants as ptc } from "src/app/shared/models/page-title-constants";
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
 import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
@@ -17,6 +18,8 @@ import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column'
 import { BaseResponse } from 'src/app/shared/models/base-response';
 import { UtilsService } from 'src/app/services/utils.service';
 import { ToastMessageService } from 'src/app/services/toast-message.service';
+import {ResearchRequestSearchedRuleDto} from "../../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../../services/research-request.service";
 
 @Component({
   selector: 'app-assignment-md-approval',
@@ -25,9 +28,9 @@ import { ToastMessageService } from 'src/app/services/toast-message.service';
 })
 export class AssignmentMdApprovalComponent implements OnInit {
 
-  @ViewChild('notAssignedTable') notAssignedTable: EclTableComponent;
-  @ViewChild('assignedTable') assignedTable: EclTableComponent;
-  @ViewChild('returnedTable') returnedTable: EclTableComponent;
+  @ViewChild('notAssignedTable',{static: false}) notAssignedTable: EclTableComponent;
+  @ViewChild('assignedTable',{static: false}) assignedTable: EclTableComponent;
+  @ViewChild('returnedTable',{static: false}) returnedTable: EclTableComponent;
 
   notAssignedTableConfig: EclTableModel = null;
   assignedTableConfig: EclTableModel = null;
@@ -50,10 +53,11 @@ export class AssignmentMdApprovalComponent implements OnInit {
 
   users: any[] = [];
   comments: any[] = [];
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
 
   constructor(private ruleInfoService: RuleInfoService, private http: HttpClient, private utils: AppUtils,
     public route: ActivatedRoute, private dialogService: DialogService, private eclConstants: ECLConstantsService,private toastService: ToastMessageService,
-    private usersService: UsersService, private utilService: UtilsService) {
+    private usersService: UsersService, private utilService: UtilsService, private rrService: ResearchRequestService) {
     this.users = [{ label: 'Search for User', value: null }];
     this.comments = [{ label: 'Select Comment', value: null }];
     this.serviceUrl = RoutingConstants.RULES_URL + "/" + RoutingConstants.ASSIGN_FOR_PEER_REVIEWER_APPROVAL + "/"
@@ -86,7 +90,7 @@ export class AssignmentMdApprovalComponent implements OnInit {
   }
 
   /**
-    * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT  
+    * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT
     */
   getAllReassignComments() {
     this.comments = [];
@@ -110,7 +114,8 @@ export class AssignmentMdApprovalComponent implements OnInit {
     table.url = this.serviceUrl + stage + "/" + tabStatus;
     table.columns = this.initializeTableColumns();
     table.lazy = true;
-    table.sortOrder = 1;
+    table.sortBy = 'daysOld';
+    table.sortOrder = 0;
     table.excelFileName = tabStatus.substring(0, 1).toUpperCase()
       + tabStatus.substring(1, tabStatus.length - 1) + ' Rules for Peer Reviewer Approval';
     table.checkBoxSelection = true;
@@ -122,7 +127,7 @@ export class AssignmentMdApprovalComponent implements OnInit {
   initializeTableColumns(): EclColumn[] {
     let manager = new EclTableColumnManager();
     let provisional: string = this.ruleStatus > Constants.ECL_PROVISIONAL_STAGE ? "" : "Provisional ";
-    manager.addLinkColumn("ruleCode", provisional + "Rule ID", '12%', true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon("ruleCode", provisional + "Rule ID", '12%', true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn("ruleName", provisional + "Rule Name", null, true, EclColumn.TEXT, true);
     manager.addTextColumn('categoryDesc', 'Category', '16%', true, EclColumn.TEXT, true);
     manager.addTextColumn('daysOld', 'Days Old', "8%", true, EclColumn.TEXT, true);
@@ -136,6 +141,17 @@ export class AssignmentMdApprovalComponent implements OnInit {
     this.tabIndex = index;
     this.selectedUserAssigned = "";
     this.selectedUserReturned = "";
+    this.selectedRulesNotAssigned = [];
+    if(index === 0) {
+      this.notAssignedTableConfig.sortBy = 'daysOld';
+      this.notAssignedTableConfig.sortOrder = 0;
+    } else if(index === 1) {
+      this.assignedTableConfig.sortBy = 'daysOld';
+      this.assignedTableConfig.sortOrder = 0;
+    } else if (index === 2) {
+      this.returnedTableConfig.sortBy = 'daysOld';
+      this.returnedTableConfig.sortOrder = 0;
+    }
   }
 
   setSelectRules(event: any, tab: string) {
@@ -166,7 +182,7 @@ export class AssignmentMdApprovalComponent implements OnInit {
             selectedRule.assignedTo = username;
           })
           this.selectedRulesNotAssigned = [];
-          this.notAssignedTable.refreshTable();
+          this.notAssignedTable.resetDataTable();
           this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, Constants.SUCCESS_PR_CLAIM_MESSAGE);
         });
       }
@@ -196,7 +212,7 @@ export class AssignmentMdApprovalComponent implements OnInit {
         this.selectedCommentAssigned = "";
         this.selectedRulesAssigned = [];
         this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, 'Selected rules have been assigned to ' + username + '.');
-        this.assignedTable.refreshTable();
+        this.assignedTable.resetDataTable();
       }
     });
   }
@@ -224,48 +240,62 @@ export class AssignmentMdApprovalComponent implements OnInit {
         this.selectedCommentReturned = "";
         this.selectedRulesReturned = [];
         this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, 'Selected rules have been assigned to ' + username + '.');
-        this.returnedTable.refreshTable();
+        this.returnedTable.resetDataTable();
       }
     });
   }
 
   viewRuleModal(event: any) {
     const rowData: any = event.row;
+    let ruleResponseIndicator: boolean = false;
+    let rrId: string = '';
+    this.getRuleResponseIndicator(rowData.ruleId).then((rrCode: any) => {
+      if (rrCode !== null && rrCode != "" ) {
+        ruleResponseIndicator = true;
+        rrId = rrCode;
+      }
+    });
     this.ruleInfoService.getRulesByParentId(rowData.ruleId).subscribe((response: any) => {
       let draftRuleId: number = 0;
       response.data.forEach((rule: any) => {
         draftRuleId = rule.ruleId;
       })
       if (draftRuleId > 0 && this.ruleStatus > Constants.ECL_PROVISIONAL_STAGE) {
-        this.callMaintenanceRuleDetail(rowData, draftRuleId);
+        this.callMaintenanceRuleDetail(rowData, draftRuleId, ruleResponseIndicator, rrId);
       } else {
-        this.callCreationRuleDetail(rowData.ruleId);
+        this.callCreationRuleDetail(rowData.ruleId, ruleResponseIndicator, rrId);
       }
     });
   }
 
-  private callCreationRuleDetail(ruleId) {
-    const ref = this.dialogService.open(ProvisionalRuleComponent, {
+  private callCreationRuleDetail(ruleId, ruleResponseIndicator: boolean, rrId: string) {
+    this.dialogService.open(ProvisionalRuleComponent, {
       data: {
         ruleId: ruleId,
-        header: 'Provisional Details'
+        header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
+        provDialogDisable: true,
+        stageId: Constants.ECL_PROVISIONAL_STAGE,
+        provSetup: Constants.ECL_PROVISIONAL_STAGE,
+        ruleResponseInd: ruleResponseIndicator,
+        researchRequestId: rrId
       },
-      header: 'Library Rule Details',
+      showHeader: !ruleResponseIndicator,
+      header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
       width: '80%',
       height: '92%',
       closeOnEscape: false,
       closable: false,
-      contentStyle: { 
-        'max-height': '92%', 
+      contentStyle: {
+        'max-height': '92%',
         'overflow': 'auto',
-        'padding-top': '0', 
-        'padding-bottom': '0', 
+        'padding-top': '0',
+        'padding-bottom': '0',
         'border': 'none' }
     });
   }
 
-  private callMaintenanceRuleDetail(ruleData, draftId) {
-    const ref = this.dialogService.open(ProvisionalRuleComponent, {
+  private callMaintenanceRuleDetail(ruleData, draftId, ruleResponseIndicator: boolean, rrId: string) {
+    this.dialogService.open(ProvisionalRuleComponent, {
       data: {
         pageTitle: this.pageTitle,
         reassignmentFlag: true,
@@ -277,21 +307,36 @@ export class AssignmentMdApprovalComponent implements OnInit {
         fromMaintenanceProcess: true,
         workFlowStatusId: ruleData.reviewStatus,
         reviewComments: ruleData.reviewComments,
-        readOnlyView: true
+        readOnlyView: true,
+        ruleResponseInd: ruleResponseIndicator,
+        researchRequestId: rrId
       },
+      showHeader: !ruleResponseIndicator,
       header: 'Library Rule Details',
       width: '80%',
       height: '92%',
       closeOnEscape: false,
       closable: false,
-      contentStyle: { 
-        'max-height': '92%', 
+      contentStyle: {
+        'max-height': '92%',
         'overflow': 'auto',
-        'padding-top': '0', 
-        'padding-bottom': '0', 
+        'padding-top': '0',
+        'padding-bottom': '0',
         'border': 'none' }
     });
 
+  }
+
+  async getRuleResponseIndicator(ruleId: number) {
+    let rrCode = "";
+    return new Promise((resolve, reject) => {
+      this.rrService.isRuleCreatedFromRR(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined ) {
+          rrCode = resp.data;
+        }
+        resolve(rrCode);
+      });
+    });
   }
 
   getReviewStatus(rowInfo: any): any {
@@ -316,21 +361,21 @@ export class AssignmentMdApprovalComponent implements OnInit {
         this.notAssignedTable.selectedRecords = [];
         this.notAssignedTable.savedSelRecords = [];
         this.notAssignedTable.keywordSearch = '';
-        this.notAssignedTable.refreshTable();
+        this.notAssignedTable.resetDataTable();
         break;
       case "assigned":
         this.selectedRulesAssigned = [];
         this.assignedTable.selectedRecords = [];
         this.assignedTable.savedSelRecords = [];
         this.assignedTable.keywordSearch='';
-        this.assignedTable.refreshTable();
+        this.assignedTable.resetDataTable();
         break;
       case "returned":
         this.selectedRulesReturned = [];
         this.returnedTable.selectedRecords = [];
         this.returnedTable.savedSelRecords = [];
         this.returnedTable.keywordSearch='';
-        this.returnedTable.refreshTable();
+        this.returnedTable.resetDataTable();
         break;
     }
   }

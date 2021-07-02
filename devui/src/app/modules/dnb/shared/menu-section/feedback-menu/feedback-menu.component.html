@@ -1,0 +1,11 @@
+<ul *ngIf="visible">
+  <li *ngIf="menuPermissions.addFeedback">
+    <button
+      class="button is-text add-feedback"
+      (click)="addFeedback($event)"
+      [attr.slm-id]="'add_feedback_btn'"
+    >
+      Add Feedback
+    </button>
+  </li>
+</ul>

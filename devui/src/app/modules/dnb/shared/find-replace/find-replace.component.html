@@ -48,19 +48,12 @@
       >
         <span class="fa fa-refresh"></span>
       </button>
-      <button
+      <button *ngIf="coincidences.length > 0"
         (click)="confirmReplaceAll()"
         title="Replace All"
         [disabled]="disableReplaceAll"
       >
         <span class="fa fa-refresh"></span><sup>all</sup>
-      </button>
-      <button
-        *ngIf="replacedCoincidencesBackUp"
-        (click)="confirmUndoReplaceAll()"
-        title="Undo Replace All"
-      >
-        <span class="fa fa-undo"></span>
       </button>
     </span>
   </div>

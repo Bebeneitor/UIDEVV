@@ -11,6 +11,7 @@
   
 ::ng-deep .ql-editor {
     overflow-y: auto !important;
+    padding: 6px;
     font-size: 12px;
 }
 

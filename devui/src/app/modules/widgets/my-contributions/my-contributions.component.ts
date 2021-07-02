@@ -4,6 +4,7 @@ import { DashboardService } from 'src/app/services/dashboard.service';
 import { Constants } from 'src/app/shared/models/constants';
 import { StorageService } from 'src/app/services/storage.service';
 import { Router } from '@angular/router';
+import { NgxPermissionsService } from 'ngx-permissions';
 
 @Component({
   selector: 'app-my-contributions',
@@ -37,20 +38,37 @@ export class MyContributionsComponent implements OnInit {
   minDate: Date = Constants.MIN_VALID_DATE;;
   maxDate: Date = new Date();
 
-  @ViewChild("dt2") dt2;
-  @ViewChild("dt3") dt3;
+  @ViewChild("dt2",{static: true}) dt2;
+  @ViewChild("dt3",{static: true}) dt3;
 
   options: any;
 
-  @ViewChild('start') start;
+  @ViewChild('start',{static: true}) start;
 
   yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
+  isDefaultUser: boolean = false;
 
   constructor(private utils: AppUtils, private cdr: ChangeDetectorRef,
     private dashboardService: DashboardService, private storageService: StorageService,
-    private router : Router) { }
+    private router : Router, private permissionService: NgxPermissionsService) { }
 
   ngOnInit() {
+
+    let permissions = this.permissionService.getPermissions();
+    let roles = [];
+
+    Object.keys(permissions).forEach(function(k){
+      if(k.includes('ROLE')) {
+        roles.push(k);
+      }
+    });
+
+    if(roles.length == 1) {
+      if(roles[0] == 'ROLE_OTH') {
+        this.isDefaultUser = true;
+        this.selectedTab = 'ideas';
+      }
+    }
 
     this.options = {
       legend: {
@@ -233,6 +251,12 @@ export class MyContributionsComponent implements OnInit {
         } 
     }
 
+    if(this.isDefaultUser) {
+      start = startIdea;
+      end = endIdea;
+    }
+    
+
     if(start != null){
       start.setHours(0);
       start.setMinutes(0);
@@ -284,22 +308,27 @@ export class MyContributionsComponent implements OnInit {
       dataIdeas.push(mapIdeas[arrIdeas[i]]);
     }
 
+    let datasets = [
+      {
+        label: 'Ideas',
+        data: dataIdeas,
+        fill: false,
+        borderColor: 'rgb(51, 51, 51)'
+      }
+    ];
+
+    if(!this.isDefaultUser) {
+      datasets.push({
+        label: 'Rules',
+        data: dataRules,
+        fill: false,
+        borderColor: 'rgb(149, 121, 211)'
+      });
+    }
+
     this.data = {
       labels: labels,
-      datasets: [
-        {
-          label: 'Rules',
-          data: dataRules,
-          fill: false,
-          borderColor: 'rgb(149, 121, 211)'
-        },
-        {
-          label: 'Ideas',
-          data: dataIdeas,
-          fill: false,
-          borderColor: 'rgb(51, 51, 51)'
-        }
-      ]
+      datasets: datasets
     }
   }
 

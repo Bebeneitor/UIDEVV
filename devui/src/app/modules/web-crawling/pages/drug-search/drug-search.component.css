@@ -1,0 +1,173 @@
+::ng-deep .ui-autocomplete-input {
+    border: none !important;
+}
+
+.t-style {
+    color: #31006F;
+}
+
+.ps-note {
+    color: grey;
+    font-size: 14px;
+}
+
+.bio-edit {
+    cursor: pointer;
+    font-size: 16px;
+    float: right;
+}
+
+.bio-del {
+    cursor: pointer;
+    font-size: 18px;
+    float: right;
+    padding-left: 6px;
+}
+
+.url {
+    cursor: pointer;
+    color: #31006F;
+}
+
+.custsearch {
+    cursor: pointer;
+}
+
+tr:nth-child(even) {
+    background-color: #e1eaf2 !important;
+}
+
+th {
+    height: 35px;
+    color: #31006F !important;
+    font-size: 14px;
+    font-weight: normal !important;
+}
+
+.overlaycontainer {
+    position: relative;
+    width: 100%;
+    padding-right: 50px;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    padding-left: 10px;
+    transition: .3s ease;
+}
+
+::ng-deep .tooltip .ui-tooltip-text {
+    width: 100em;
+}
+
+tr:hover .overlay {
+    opacity: 1;
+}
+
+.bio-header {
+    background-color: #31006F !important;
+    color: white !important;
+}
+
+.drugdetail {
+    color: #31006F;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 4px;
+}
+
+.drugsection {
+    left: 24px;
+    top: 160px;
+    position: absolute;
+}
+
+td .popup-table {
+    height: 30px;
+    width: 100%;
+    color: #31006F !important;
+    border: 1px solid #afa8b8;
+    font-size: 14px;
+}
+
+td {
+    height: 35px;
+    color: #31006F;
+    font-size: 14px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width:100px;
+}
+
+.single-input {
+    background-color: #FFFFFF;
+    border: 1px solid #31006F;
+    height: 42px;
+    color: #31006F;
+    font-size: 12pt;
+    border-radius: 4px;
+}
+
+:host ::ng-deep button {
+    margin-right: .25em;
+}
+
+.pdfstyle {
+    font-size: 1em;
+    color: #006400;
+}
+
+.errorStyle {
+    font-size: 1em;
+    color: red;
+}
+
+.buttonDisable {
+    height: 30px;
+    border-radius: 2px;
+    border:0;
+    background-color: rgb(189, 184, 184);
+    font-size: 14px;
+    cursor: not-allowed;
+}
+
+.disabled{
+    pointer-events: none;
+  }
+
+.buttonFor1Style {
+    color: white;
+    height: 30px;
+    padding:2px;
+    border-radius: 2px;
+    background-color: #69b117;
+    font-size: 14px;
+    border: 0;
+  }
+
+.buttonStyle {
+    color: white;
+    height: 30px;
+    padding:2px;
+    border-radius: 2px;
+    background-color: red;
+    font-size: 14px;
+    border: 0;
+  }
+
+.comment-style{
+   color: #D2691E;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.5);
+}

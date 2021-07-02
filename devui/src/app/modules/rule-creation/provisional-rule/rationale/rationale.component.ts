@@ -11,7 +11,7 @@ export class RationaleComponent implements OnInit {
   @Input() ruleInfo:RuleInfo;
   @Input() provDialogDisable:boolean;
   @Input() fromMaintenanceProcess:boolean;
-  @ViewChild('markpupEd') markupEd;
+  @ViewChild('markpupEd',{static: true}) markupEd;
   constructor() { }
 
   ngOnInit() {

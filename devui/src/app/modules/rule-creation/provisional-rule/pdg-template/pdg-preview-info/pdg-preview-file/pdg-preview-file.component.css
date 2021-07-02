@@ -1,0 +1,32 @@
+.pdg-preview-file span.file-info, .pdg-attach-file-100 span.file-info {
+    font-style: italic;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    font-size: 12px !important;
+  }
+  
+  .pdg-preview-file .no-files-text, .pdg-attach-file-100 .no-files-text {
+    font-style: italic;
+    font-size: 12px !important;
+  }
+
+  .pdg-preview-file .ss-panel{
+    width: 100%;
+    height: 235px;
+    border: 1px solid #31006F;
+    margin-top : 20px;
+    margin-bottom : 20px;
+}
+.pdg-preview-file .ss-image{
+    width:100%;
+    height:100%;
+    margin-top : 10px;
+}
+.pdg-preview-file span.fa{
+  display: inline-block;
+  cursor: pointer
+}
+
+.pdg-preview-file span.fa.fa-times{
+  cursor: pointer
+}

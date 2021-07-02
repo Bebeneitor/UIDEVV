@@ -27,7 +27,7 @@ const RULE_STAT_LIB_RULE = 9;
 export class NewIdeaResearchDuplicateCheckComponent implements OnInit {
 
   @Input() readOnlyView;
-  @ViewChild('dt') dataTable: Table;
+  @ViewChild('dt',{static: true}) dataTable: Table;
 
   //Primeng Values
   data: any[] = [];
@@ -110,7 +110,7 @@ export class NewIdeaResearchDuplicateCheckComponent implements OnInit {
           })).subscribe((list: any) => {
             this.data = list.data;
             if (this.data.length === 0) {
-              this.searchMessage.add({ severity: 'info', summary: 'Info', detail: 'No search result found', life: 2000, closable: false })
+              this.searchMessage.add({ severity: 'success', summary: 'Info', detail: 'No search result found', life: 2000, closable: false })
               this.setOne = 0;
             } else {
               this.searchMessage.add({ severity: 'success', summary: 'Info', detail: 'Search result was a success!', life: 2000, closable: false })

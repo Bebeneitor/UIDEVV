@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { AppUtils } from 'src/app/shared/services/utils';
 import { Constants } from 'src/app/shared/models/constants';
 import { ToastMessageService } from 'src/app/services/toast-message.service';
-import { DialogService } from 'primeng/api';
+import { DialogService, SelectItem } from 'primeng/api';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
@@ -16,16 +16,20 @@ import { ConfirmationService } from 'primeng/api';
 import * as _ from 'underscore';
 import { UpdateFilterTagComponent } from 'src/app/shared/components/update-filter-tag/update-filter-tag.component';
 import { StorageService } from 'src/app/services/storage.service';
-import { EmailReport } from '../ecl-rules-catalogue/email-report/email-report.component';
+import { EmailReport } from './email-report/email-report.component';
 import { TagDto } from 'src/app/shared/models/dto/tag-dto';
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
 import { UtilsService } from 'src/app/services/utils.service';
 
-const enum SUBJECT {
+enum SUBJECT {
   category = 'category',
   lob = 'lob', state = 'state', jurisdiction = 'jurisdiction', icd_desc = 'icd_desc', icd = 'icd',
   cpt_desc = 'cpt_desc', cpt = 'cpt', hcpcs_desc = 'hcpcs_desc', hcpcs = 'hcpcs',
-  hcpcs_proc_type = 'hcpcs_proc_type', cpt_proc_type = 'cpt_proc_type'
+  hcpcs_proc_type = 'hcpcs_proc_type', cpt_proc_type = 'cpt_proc_type', keyword = 'keyword',
+  reference = 'reference_source', referenceTitle = 'reference_title', revenueCode = 'revenue_code',
+  specialty = 'specialty', subspecialty = 'subspecialty', gender = 'gender_ind',
+  rule_engine = 'rule_engine', statusActive = 'status', billTypes = 'bill_types',
+  placeOfServices = 'place_of_service', logicEffectiveDate = 'rule_logic_eff_dt', globalRanges = 'global_ranges'
 };
 
 const SUCESS_UPDATE = 'Successfully Updated.';
@@ -46,7 +50,7 @@ const REPORT_NO_RECORDS = 'Tag has no filters associated with, to generate repor
 export class TagfilterManagementComponent implements OnInit {
 
 
-  @ViewChild('tableResults') tableResults: EclTableComponent;
+  @ViewChild('tableResults',{static: true}) tableResults: EclTableComponent;
 
   blockedDocument: boolean = false;
 
@@ -56,7 +60,7 @@ export class TagfilterManagementComponent implements OnInit {
   selectedTag: MetaTagDto = null;
   tagDPList: any[] = [];
   selectedFilter: FilterDto = null;
-  filterDPList: any[] = [];
+  filterDPList: SelectItem[] = [];
   selectedTagSeq: TagSequenceDto = null;
   tagSeqList: any[] = [];
   conditionString: string;
@@ -452,27 +456,86 @@ export class TagfilterManagementComponent implements OnInit {
           break;
         case SUBJECT.cpt:
           filterConditionString = SUBJECT.cpt.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
-          if (typeof item.associateCondition != 'undefined' && item.associateCondition) {
-            filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.cpt_proc_type, item.associateCondition);
-          }
+          let associateConditionCptProcType: any;
+          associateConditionCptProcType = this.getValueFromConditionArr(item.associateCondition, SUBJECT.hcpcs_proc_type);
+          if (typeof item.associateCondition != 'undefined' && Object.keys(associateConditionCptProcType).length) {
+              filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.hcpcs_proc_type, item.associateCondition[0]);
+           }
           break;
         case SUBJECT.hcpcs:
           filterConditionString = SUBJECT.hcpcs.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
-          if (typeof item.associateCondition != 'undefined' && item.associateCondition) {
-            filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.hcpcs_proc_type, item.associateCondition);
-          }
+          let associateConditionHcpcsProcType: any;
+          associateConditionHcpcsProcType = this.getValueFromConditionArr(item.associateCondition, SUBJECT.hcpcs_proc_type);
+          if (typeof item.associateCondition != 'undefined' && Object.keys(associateConditionHcpcsProcType).length) {
+              filterConditionString = filterConditionString + ' AND ' + this.getConditionListString(SUBJECT.hcpcs_proc_type, item.associateCondition[0]);
+           }
           break;
         case SUBJECT.icd:
           filterConditionString = SUBJECT.icd.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
           break;
+        case SUBJECT.keyword:
+            filterConditionString = SUBJECT.keyword.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+            break;
+        case SUBJECT.reference:
+            filterConditionString = this.getConditionListString(SUBJECT.reference, item);
+          break;
+        case SUBJECT.referenceTitle:
+             filterConditionString = SUBJECT.referenceTitle.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+            break;
+        case SUBJECT.revenueCode:
+            filterConditionString = this.getConditionListString(SUBJECT.revenueCode, item);
+            break;
+        case SUBJECT.specialty:
+            filterConditionString = this.getConditionListString(SUBJECT.specialty, item);
+          break;
+        case SUBJECT.subspecialty:
+          filterConditionString = this.getConditionListString(SUBJECT.subspecialty, item);
+          break;
+        case SUBJECT.gender:
+          let genderVal = Number.parseInt(item.value);
+            filterConditionString = SUBJECT.gender.toUpperCase() + ' ' + item.operator + ' "' + genderVal + '"';
+          break;
+        case SUBJECT.rule_engine:
+            filterConditionString = this.getConditionListString(SUBJECT.rule_engine, item);
+          break;
+        case SUBJECT.statusActive:
+            filterConditionString = SUBJECT.statusActive.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+          break;
+        case SUBJECT.placeOfServices:
+           filterConditionString = this.getConditionListString(SUBJECT.placeOfServices, item);
+          break;
+        case SUBJECT.billTypes:
+            filterConditionString = this.getConditionListString(SUBJECT.billTypes, item);
+          break;
+        case SUBJECT.logicEffectiveDate:
+            filterConditionString = SUBJECT.logicEffectiveDate.toUpperCase() + ' ' + item.operator + ' "' + item.value + '" ';
+
+          break;
       }
+      if (item.subject.toLowerCase() === SUBJECT.cpt || item.subject.toLowerCase() === SUBJECT.cpt_desc ||
+        item.subject.toLowerCase() === SUBJECT.hcpcs || item.subject.toLowerCase() === SUBJECT.hcpcs_desc) {
+        let associateConditionGlobalRange = this.getValueFromConditionArr(item.associateCondition, SUBJECT.globalRanges);
+        if (typeof item.associateCondition != 'undefined' 
+        && Object.keys(associateConditionGlobalRange).length 
+        && (filterConditionString.indexOf(SUBJECT.globalRanges) == -1)) {
+            filterConditionString = filterConditionString + ' AND ' + SUBJECT.globalRanges.toUpperCase() + ' = true ';
+          }
+        }
       if (index > 0)
         this.conditionString = this.conditionString + ' ' + item.preOperator + ' ' + filterConditionString;
       else
         this.conditionString = filterConditionString;
     });
+  }
 
-
+  getValueFromConditionArr(associateCondition: EclCacheLbvSearchDto[], key: SUBJECT) {
+    let condObj = new EclCacheLbvSearchDto();
+    if (null !== associateCondition) {
+      associateCondition.filter(function (cond) {
+        return (cond.subject === key) ? condObj = cond : null;
+      })
+    }
+    return condObj;
   }
 
 
@@ -485,8 +548,10 @@ export class TagfilterManagementComponent implements OnInit {
  */
   checkVisibleColumns(tableConfig) {
     let colManager = new EclTableColumnManager();
-    colManager.addTextColumn('ruleCode', 'Rule Code', '20%', false, null, true);
-    colManager.addTextColumn('filterName', 'Filter Name', '80%', false, null, true);
+    colManager.addTextColumn('ruleCode', 'Rule Id', '20%', false, null, true);
+    colManager.addTextColumn('midRuleVersion', 'Midrule/Version', '20%', false, null, true);
+    colManager.addTextColumn('ruleName', 'Rule Name', '30%', false, null, true);
+    colManager.addTextColumn('filterName', 'Filter Name', '30%', false, null, true);
     tableConfig.columns = colManager.getColumns();
   }
 

@@ -11,8 +11,15 @@ import { LibraryRuleComponent } from './library-rule/library-rule.component';
 import { ChangeTypesComponent } from './change-types/change-types.component';
 import { ChangeSourcesComponent } from './change-sources/change-sources.component';
 import { ChangeLogGroupsComponent } from './change-log-groups/change-log-groups.component';
+import { ReferenceSourcesComponent } from './reference-sources/reference-sources.component';
 import { CptCodeComponent } from './cpt-code/cpt-code.component';
 import { IcdCodeComponent } from './icd-code/icd-code.component';
+import { PayerCatalogComponent } from './payer-catalog/payer-catalog.component';
+import { PolicyTypesComponent } from './policy-types/policy-types.component';
+import { ReasonCodeComponent } from './reason-code/reason-code.component';
+import { ProjectCategoriesComponent } from './project-categories/project-categories.component';
+import { ReferenceTitleComponent } from './reference-title/reference-title.component';
+import { SubRuleContainerComponent } from './sub-rule-container/sub-rule-container.component';
 
 @Component({
   selector: 'app-sub-rule-search',
@@ -21,17 +28,24 @@ import { IcdCodeComponent } from './icd-code/icd-code.component';
 })
 export class SubRuleSearchComponent implements OnInit {
 
-  @ViewChild('midRules') midRules: MidRuleComponent;
-  @ViewChild('midRulesKey') midRulesKey: MidRuleKeyComponent;
-  @ViewChild('payerRules') payerRules: PayerRuleComponent;
-  @ViewChild('libraryRule') libraryRule: LibraryRuleComponent;
-  @ViewChild('changeLogGroup') changeLogGroup: ChangeLogGroupsComponent;
-  @ViewChild('changeTypes') changeTypes: ChangeTypesComponent;
-  @ViewChild('changeSources') changeSources: ChangeSourcesComponent;
-  @ViewChild('cptCode') cptCode: CptCodeComponent;
-  @ViewChild('icdCode') icdCode: IcdCodeComponent;
-  @ViewChild('libraryStatusCodes') libraryStatusCodes: LibraryStatusCodesComponent;
-
+  @ViewChild('midRules',{static: false}) midRules: MidRuleComponent;
+  @ViewChild('midRulesKey',{static: false}) midRulesKey: MidRuleKeyComponent;
+  @ViewChild('payerRules',{static: false}) payerRules: PayerRuleComponent;
+  @ViewChild('libraryRule',{static: false}) libraryRule: LibraryRuleComponent;
+  @ViewChild('changeLogGroup',{static: false}) changeLogGroup: ChangeLogGroupsComponent;
+  @ViewChild('changeTypes',{static: false}) changeTypes: ChangeTypesComponent;
+  @ViewChild('changeSources',{static: false}) changeSources: ChangeSourcesComponent;
+  @ViewChild('cptCode',{static: false}) cptCode: CptCodeComponent;
+  @ViewChild('icdCode',{static: false}) icdCode: IcdCodeComponent;
+  @ViewChild('libraryStatusCodes',{static: false}) libraryStatusCodes: LibraryStatusCodesComponent;
+  @ViewChild('payerCatalog',{static: false}) payerCatalog: PayerCatalogComponent;
+  @ViewChild('policyTypes',{static: false}) policyTypes: PolicyTypesComponent;
+  @ViewChild('reasonTypes',{static: false}) reasonTypes: ReasonCodeComponent;
+  @ViewChild('projectCategories',{static: false}) projectCategories: ProjectCategoriesComponent;
+  @ViewChild('referenceSources',{static: false}) referenceSources: ReferenceSourcesComponent;
+  @ViewChild('refTitle',{static: false}) refTitle: ReferenceTitleComponent;
+  @ViewChild('subRuleContainer',{static: false}) subRuleContainer: SubRuleContainerComponent;
+  
   //Search attributes
     keywordSearch           : string;
     ellSearchDto            : EllSearchDto;
@@ -99,9 +113,12 @@ export class SubRuleSearchComponent implements OnInit {
     this.cleanSearchComponent();
     this.searchSubRules(this.selectedSubRuleSecondaryType, Constants.NA_TYPE_SEARCH);
 
+    
     //This line of code is temporal, while the seach functionality to Code Resources screens is activated.    
-    this.isVisibleSearchComponent = !(this.selectedSubRuleSecondaryType === Constants.ICD_CODES_ELL 
-      || this.selectedSubRuleSecondaryType === Constants.LIBRARY_STATUS_CODES_ID);
+    this.isVisibleSearchComponent = !(
+      this.selectedSubRuleSecondaryType === Constants.INSURANCE || this.selectedSubRuleSecondaryType === Constants.GENDER
+      || this.selectedSubRuleSecondaryType === Constants.ELL_POS
+    );
   }
 
   /**
@@ -159,9 +176,42 @@ export class SubRuleSearchComponent implements OnInit {
           if(this.libraryStatusCodes){
             this.libraryStatusCodes.showResultSearch(this.ellSearchDto);
           }
-          break;       
+          break; 
+      case Constants.PAYER_CATALOG:
+        if(this.payerCatalog){
+          this.payerCatalog.showResultSearch(this.ellSearchDto);
+        }
+        break;
+      case Constants.POLICY_TYPES_ID:
+        if (this.policyTypes) {
+          this.policyTypes.showResultSearch(this.ellSearchDto);
+        }
+        break;
+      case Constants.REASON_TYPES_ID:
+        if (this.reasonTypes) {
+          this.reasonTypes.showResultSearch(this.ellSearchDto);
+        }
+        break;
+      case Constants.PROJECT_CATEGORIES_ID:
+        if (this.projectCategories) {
+          this.projectCategories.showResultSearch(this.ellSearchDto);
+        }
+        break; 
+      case Constants.REFERENCE_SOURCES_ID:
+        if (this.referenceSources) {
+          this.referenceSources.showResultSearch(this.ellSearchDto);
+        }
+        break;  
+      case Constants.REFERENCE_TITLE:
+        if (this.refTitle) {
+          this.refTitle.showResultSearch(this.ellSearchDto);
+        }
+        break;
       default:
-    }
+        if (this.subRuleContainer) {
+          this.subRuleContainer.showResultSearch(this.ellSearchDto);
+        }
+    } 
     this.selectedScreen = selectedSubRuleType;
   }
 

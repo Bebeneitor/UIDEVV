@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { AppUtils } from 'src/app/shared/services/utils';
 import { ReferenceInfoChangeDto } from 'src/app/shared/models/dto/reference-info-change-dto';
 import { InitiateImpactService } from 'src/app/services/initiate-impact-service';
@@ -29,7 +30,6 @@ export class ReferenceChangeComponent implements OnInit {
   cols: any;
   data: any;
   keywordSearch: string;
-  loading: boolean;
   references: ReferenceInfoChangeDto[];
   selectedRefSource: any[] = [];
   selectedReferences: any[] = [];
@@ -39,21 +39,22 @@ export class ReferenceChangeComponent implements OnInit {
 
   tableConfig: EclTableModel = null;
 
-  @ViewChild('viewTable') viewTable: EclTableComponent;
+  @ViewChild('viewTable',{static: true}) viewTable: EclTableComponent;
   isViewTableHidden = true;
   selectedRules: any[] = [];
 
   disableInitiateBtn: boolean = true;
   listStyles: any = { 'width': '100%', 'height': '435px', 'overflow': 'auto', 'border': '1px solid #31006F', 'margin': '1px' };
+  @Output() toggleLoader = new EventEmitter<boolean>();
   constructor(private util: AppUtils, private impactService: InitiateImpactService, private ruleService: RuleInfoService,
     public route: ActivatedRoute, private messageService: MessageService, private router: Router, private dialogService: DialogService) { }
 
   ngOnInit() {
     this.references = [];
     this.keywordSearch = '';
-    this.loading = true;
+    this.toggleLoader.emit(true);
     this.util.getAllReferencesValue(this.newRefSource, this.response);
-    this.loading = false;
+    this.toggleLoader.emit(false);
     this.cols = [
       { field: 'refSourceName', header: 'Reference Source', width: '30%' },
       { field: 'referenceTitle', header: 'Reference Title', width: '70%' },
@@ -146,12 +147,13 @@ export class ReferenceChangeComponent implements OnInit {
 
   initiateReferenceImpact() {
     this.disableInitiateBtn = true;
-    this.loading = true;
+    this.toggleLoader.emit(true);
     this.impactDto.ruleIds = [];
     this.impactDto.ruleIds = this.selectedRules.map(ele => ele.ruleId);
     this.ruleService.saveInitiateImpact(this.impactDto).subscribe(response => {
       if (response.data !== undefined && response.data !== null) {
         this.viewTable.selectedRecords = [];
+        this.viewTable.savedSelRecords = [];
         this.impactDto.ruleIds = [];
         this.selectedRules = [];
         this.showInitiateMessage(response.data.runId);
@@ -162,7 +164,7 @@ export class ReferenceChangeComponent implements OnInit {
 
   /**
    * Method to get selected rows in viewTable
-   * @param event 
+   * @param event
    */
   setSelectRules(event: any) {
     this.selectedRules = event;
@@ -192,7 +194,7 @@ export class ReferenceChangeComponent implements OnInit {
         }
       }
       this.disableInitiateBtn = true;
-      this.loading = false;
+      this.toggleLoader.emit(false);
     });
   }
 
@@ -210,7 +212,7 @@ export class ReferenceChangeComponent implements OnInit {
   }
 
   getAllReferences(refSourceIds) {
-    this.loading = true;
+    this.toggleLoader.emit(true);
     this.impactService.getAllReferenceInfo(refSourceIds).subscribe(response => {
       if (response) {
         if (response.data) {
@@ -221,7 +223,7 @@ export class ReferenceChangeComponent implements OnInit {
           });
         }
       }
-      this.loading = false;
+      this.toggleLoader.emit(false);
     });
   }
 

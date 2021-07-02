@@ -112,6 +112,10 @@
             inputId="css"></p-checkbox>
         </div>
         <div class="ui-g-12" style="padding:0px !important;">
+          <p-checkbox name="recodeunits" [disabled]="readOnly" value="considerHistory" label="Consider History" [(ngModel)]="cvp.recodeUnits"
+            inputId="ch"></p-checkbox>
+        </div>
+        <div class="ui-g-12" style="padding:0px !important;">
           <p-checkbox name="recodeunits" [disabled]="readOnly" value="edithistory" label="Edit on History" [(ngModel)]="cvp.recodeUnits"
             inputId="la"></p-checkbox>
         </div>
@@ -167,15 +171,15 @@
   <!-- Start Row -->
   <div class="row">
     <div class="col-12">
-      <label [ngClass]="{ 'error-label': validationErrors.editAction }">Edit Action/Exception Logic <span class="text-danger">(*)</span></label>
+      <label [ngClass]="{ 'error-label': validationErrors.editAction }">Edit Action <span class="text-danger">(*)</span></label>
       <textarea class="form-control" style="height: 70px !important; width: 100%;"
-        placeholder="Edit Action/Exception Logic" (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)"
+        placeholder="Edit Action" (focus)="setTextToCopy($event)" (input)="setTextToCopy($event)"
         [(ngModel)]="cvp.editAction" [disabled]="readOnly"></textarea>
     </div>
 
     <div class="col-4">
       <file-uploader #logicExceptions label="Logic Exceptions" [showInputFile]="false"
-        (onSetData)="setTextToCopy($event)" [disabled]="readOnly" [isRequired]="true" (onDeleteFile)="deleteFile($event, 'logicExceptions')"></file-uploader>
+        (onSetData)="setTextToCopy($event)" [disabled]="readOnly" [isRequired]="true" [isTextArea]="true" [showTooltip]="true" (onDeleteFile)="deleteFile($event, 'logicExceptions')"></file-uploader>
     </div>
 
     <div class="col-4">
@@ -299,7 +303,7 @@
 
 <p-blockUI [blocked]="blocked">
   <div class="img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" />
+    <img src="assets/img/loading.gif"/>
     <p style="font-size: 12px;color: #fff;">Saving data, please wait...</p>
   </div>
 </p-blockUI>

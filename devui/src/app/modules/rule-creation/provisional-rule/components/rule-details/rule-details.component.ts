@@ -9,7 +9,7 @@ export class RuleDetailsComponent implements OnInit {
   @Input() ruleInfo:any;
   @Input() provDialogDisable : boolean;
 
-  @ViewChild('markpupEd') markupEd;
+  @ViewChild('markpupEd',{static: false}) markupEd;
 
   
   constructor() { }

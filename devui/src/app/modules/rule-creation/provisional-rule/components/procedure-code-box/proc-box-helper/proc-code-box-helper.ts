@@ -222,7 +222,7 @@ export class ProcCodeBoxHelper {
             let elem: any = this.nativeElem.children[i];
             if (!ProcCodesUtils.isCodeSeparator(elem.firstChild.nodeValue)) {
                 let valid = false;
-                let vlRes = procCodesValResult.find( cv => cv.codeName === elem.firstChild.nodeValue);
+                let vlRes = this.determineValidationResult(elem, procCodesValResult);
                 if (vlRes) {
                     valid = Constants.CODE_VALID_STATUS === vlRes.codeStatus; 
                 } else {
@@ -238,7 +238,36 @@ export class ProcCodeBoxHelper {
             }
         }
     }
+    /**
+     * Determine validation Result for a given element. Consiering if element
+     * is part of a global range.
+     * @param elem element to verify.
+     * @param procCodesValResult Validation result (null if elem is part of global range).
+     */
+    private determineValidationResult(elem: Element, 
+        procCodesValResult?: ProcedureCodeValidationDto[]): ProcedureCodeValidationDto {
+        if (this.isElemStartGlobalRange(elem) || this.isElemEndGlobalRange(elem)) {
+            return null;
+        }
+        return procCodesValResult.find( cv => cv.codeName === elem.firstChild.nodeValue);
+    }
 
+    private isElemStartGlobalRange(elem: Element): boolean {
+        if (elem && elem.nextElementSibling && elem.nextElementSibling.nextElementSibling) {
+            let text = elem.textContent + elem.nextElementSibling.textContent + 
+                elem.nextElementSibling.nextElementSibling.textContent;
+            return ProcCodesUtils.isGlobalRange(text);
+        }
+        return false;
+    }
+    private isElemEndGlobalRange(elem: Element): boolean {
+        if (elem && elem.previousElementSibling && elem.previousElementSibling.previousElementSibling) {
+            let text = elem.previousElementSibling.previousElementSibling.textContent + 
+                elem.previousElementSibling.textContent + elem.textContent;
+            return ProcCodesUtils.isGlobalRange(text);
+        }
+        return false;
+    }
 
     /**
      * Updates procedure code in given children element, adding spans to represent codes items.

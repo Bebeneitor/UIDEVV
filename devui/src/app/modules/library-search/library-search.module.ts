@@ -6,6 +6,7 @@ import { LibrarySearchRoutingModule } from './library-search.routing';
 import {TreeModule} from 'primeng/tree';
 import {TooltipModule} from 'primeng/tooltip';
 import { TabViewModule } from 'primeng/tabview';
+import {DropdownModule} from 'primeng/dropdown';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { TabViewModule } from 'primeng/tabview';
     LibrarySearchRoutingModule,
     TreeModule,
     TooltipModule, 
-    TabViewModule
+    TabViewModule,
+    DropdownModule
   ],
   providers: [
   ],

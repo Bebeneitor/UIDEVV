@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { UsersService } from '../../../services/users.service';
 import { ConfirmationService } from 'primeng/api';
 import { RoleSetupService } from 'src/app/services/role-setup.service';
 import { Users } from 'src/app/shared/models/users';
@@ -9,6 +8,8 @@ import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-tab
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column';
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
+import { Constants } from 'src/app/shared/models/constants';
+import { EclButtonTable } from 'src/app/shared/components/ecl-table/model/ecl-button';
 
 @Component({
   selector: 'app-ecl-user-directory',
@@ -18,7 +19,7 @@ import { RoutingConstants } from 'src/app/shared/models/routing-constants';
 
 export class EclUserDirectoryComponent implements OnInit {
 
-  @ViewChild('usersTable') usersTable: EclTableComponent;
+  @ViewChild('usersTable',{static: true}) usersTable: EclTableComponent;
 
   pageTitle: string;
   usersTableConfig: EclTableModel = null;
@@ -30,19 +31,22 @@ export class EclUserDirectoryComponent implements OnInit {
   users: any[];
   selectedUser: Users;
 
-  constructor(private route: ActivatedRoute, private usersService: UsersService, private confirmationService: ConfirmationService,
+  constructor(private route: ActivatedRoute, private confirmationService: ConfirmationService,
     private router: Router, private roleSetupService: RoleSetupService) { }
 
   ngOnInit() {
     this.route.data.subscribe(params => {
       this.pageTitle = params['pageTitle'];
     });
+    this.usersTable.iconOptions = [Constants.STATUS_ACTIVE, Constants.STATUS_INACTIVE];
     let manager = new EclTableColumnManager();
-    manager.addTextColumn('userId', 'User ID', '20%', true, EclColumn.TEXT, true);
-    manager.addTextColumn('firstName', 'User Name', null, true, EclColumn.TEXT, true);
-    manager.addTextColumn('email', 'User E-mail', null, true, EclColumn.TEXT, true);
+    manager.addTextColumn('userId', 'User ID', '10%', true, EclColumn.TEXT, true, 10, "center");
+    manager.addTextColumn('userName', 'Login User Name', null, true, EclColumn.TEXT, true, 300, "center");
+    manager.addTextColumn('firstName', 'Full Name', null, true, EclColumn.TEXT, true, 300, "center");
+    manager.addTextColumn('email', 'e-mail', null, true, EclColumn.TEXT, true, 300, "center");
     manager.addIconColumn('edit', 'Edit', '10%', 'fa fa-pencil purple');
-    manager.addIconColumn('delete', 'Delete', '10%', 'fa fa-trash-o purple');
+    manager.addTextColumn('statusDesc', 'ECL User Status', '10%', false, EclColumn.TEXT, false, 300, "center");
+    manager.addButtonsColumn('changeStatus', 'Modify Status', '10%', [new EclButtonTable("statusAction", true)]);
 
     this.usersTableConfig = new EclTableModel();
     this.usersTableConfig.url = RoutingConstants.USERS_URL + "/";
@@ -53,19 +57,22 @@ export class EclUserDirectoryComponent implements OnInit {
     this.usersTableConfig.excelFileName = "ECL User Directory";
     this.usersTableConfig.filterGlobal = true;
     this.usersTableConfig.checkBoxSelection = false;
+
+    setTimeout(() => {
+      this.usersTable.fillCustomFilterOptions("statusDesc", [
+        { label: "Select", value: "" },
+        { label: Constants.ACTIVE_STRING_VALUE, value: Constants.STATUS_ACTIVE },
+        { label: Constants.INACTIVE_STRING_VALUE, value: Constants.STATUS_INACTIVE }
+      ]);
+    }, 200);
   }
 
   onClickIcon(event: any) {
-    const row = event.row;
-    const field = event.field;
-    switch (field) {
-      case "edit":
-        this.editUserAccess(row);
-        break;
-      case "delete":
-        this.deleteUser(row);
-        break;
-    }
+    this.editUserAccess(event.row);
+  }
+
+  onAcctionButton(event: any) {
+    this.updateUser(event.row);
   }
 
   setupUser() {
@@ -95,35 +102,51 @@ export class EclUserDirectoryComponent implements OnInit {
     this.selectedUser.firstName = user.firstName;
     this.selectedUser.lastName = user.lastName;
     this.selectedUser.email = user.email;
-
+    this.selectedUser.initials =user.initials;
     sessionStorage.setItem("userAuthSetup", JSON.stringify(this.selectedUser));
     this.router.navigate(['/ecl-user-authority-setup']);
   }
 
-  deleteUser(user: any) {
-    this.confirmationService.confirm({
-      message: 'Are you sure, you want to delete the user from ECL?',
-      header: 'Deletion Confirmation',
-      icon: 'pi pi-info-circle',
-      accept: () => {
-        let userId: number = user.userId;
-        this.deleteSelectedUser(userId);
-      },
-      reject: () => {
-        //Do nothing here
-      }
-    });
+  updateUser(user: any) {
+    switch (user.status) {
+      case Constants.STATUS_ACTIVE:
+        this.confirmationService.confirm({
+          message: 'Are you sure, you want to mark as inactive the user from ECL?',
+          header: 'Inactive Confirmation',
+          icon: 'pi pi-info-circle',
+          accept: () => {
+            //Deactivate user
+            this.updateSelectedUser(user, Constants.STATUS_CODE_INACTIVE);
+          },
+          reject: () => {
+            //Do nothing here
+          }
+        });
+        break;
+      case Constants.STATUS_INACTIVE:
+        //Activate user
+        this.updateSelectedUser(user, Constants.STATUS_CODE_ACTIVE);
+    }
   }
 
-  deleteSelectedUser(userId: number) {
-    this.roleSetupService.deleteUserAccess(userId).subscribe(response => {
-      if (response != null) {
-        if (response.message == 'Success') {
-          this.successHeader = "Delete Message";
-          this.message = "User deleted successfully!";
-          this.display = true;
-          this.usersTable.refreshTable();
-        }
+  updateSelectedUser(user, status: string) {
+    this.roleSetupService.updateUserStatus(user.userId, status).subscribe(response => {
+      if (response.code) {
+        this.successHeader = "Updated Message";
+        this.message = "User updated successfully!";
+        this.display = true;
+
+        if(user.status == Constants.STATUS_INACTIVE) {
+          //Change status to active
+          user.status = Constants.STATUS_ACTIVE;
+          user.statusDesc = Constants.ACTIVE_STRING_VALUE;
+          user.statusAction = Constants.STATUS_ACTION_DEACTIVATE;
+        } else {
+          //Change status to inactive
+          user.status = Constants.STATUS_INACTIVE;
+          user.statusDesc = Constants.INACTIVE_STRING_VALUE;
+          user.statusAction = Constants.STATUS_ACTION_ACTIVATE;
+        } 
       }
     });
   }

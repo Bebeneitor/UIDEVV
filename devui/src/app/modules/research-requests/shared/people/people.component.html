@@ -1,0 +1,68 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h3>People</h3>
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3"><label>Assignee:</label></div>
+    <div class="col-9">
+      <p-dropdown id="assigneeList" name="assignee" placeholder="Choose" [style]="dropDownStyles" [options]="assigneeList"
+      [(ngModel)]="request.assignee" [disabled]="(readOnly && rrButtonsDisable) || disableAssigneeList" [style]="dropDownStyles">
+    </p-dropdown>
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3"><label>Reporter:</label></div>
+    <div class="col-9"><label>{{reporter}}</label></div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3"><label>Internal CC List:</label></div>
+    <div class="col-9">
+      <div class="col-field-box">
+        <div class="span-cc-list-search"><input type="text" list="user-list" (keyup)="searchCCUsers()"
+            [(ngModel)]="searchUser" (change)="searchCCUsers()" placeholder="Type to Search.."
+            [ngModelOptions]="{standalone: true}" class="form-control input-rule-search" [disabled]="disabledFieldByPR()"/>
+          <div *ngIf="userSearchList">
+            <datalist id="user-list">
+              <option *ngFor="let user of userSearchList" [value]="user.firstName">
+                {{user.email}}
+              </option>
+            </datalist>
+          </div>
+        </div>
+        <div class="span-cc-list-selection" *ngIf="selectedCCUsersList">
+          <span class="span-cc-selected-user" *ngFor="let user of selectedCCUsersList">
+            <span>{{user.firstName}}</span>
+            <span class="fa fa-times" aria-hidden="true" (click)="removeSelectedCCUser(user)"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3"><label>Watchers:</label></div>
+    <div class="col-9">
+      <div class="col-field-box">
+        <div class="span-cc-list-search"><input type="text" list="user-watcher-list"
+            (keyup)="searchWatcherUsers()" [(ngModel)]="searchWatcherUser" (change)="searchWatcherUsers()"
+            placeholder="Type to Search.." [ngModelOptions]="{standalone: true}"
+            class="form-control input-rule-search" [disabled]="disabledFieldByPR()"/>
+          <div *ngIf="userSearchWatcherList">
+            <datalist id="user-watcher-list">
+              <option *ngFor="let user of userSearchWatcherList" [value]="user.firstName">
+                {{user.email}}
+              </option>
+            </datalist>
+          </div>
+        </div>
+        <div class="span-cc-list-selection" *ngIf="selectedWatcherUsersList">
+          <span class="span-cc-selected-user" *ngFor="let user of selectedWatcherUsersList">
+            <span>{{user.firstName}}</span>
+            <span class="fa fa-times" aria-hidden="true" (click)="removeSelectedWatcherUser(user)"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

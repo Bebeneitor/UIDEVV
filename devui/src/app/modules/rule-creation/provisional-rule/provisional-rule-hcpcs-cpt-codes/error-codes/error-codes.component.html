@@ -1,0 +1,9 @@
+<div class="card p-2" *ngIf = "internalError && (internalError | json) != ({} | json)">
+  
+  <label class="active-blue pb-2">Please correct the following errors: </label>
+  <span *ngFor="let error of internalError | keyvalue">
+    <span *ngIf="error.value!=''" class="error">
+      {{showError(error)}}
+    </span>
+  </span>
+</div>

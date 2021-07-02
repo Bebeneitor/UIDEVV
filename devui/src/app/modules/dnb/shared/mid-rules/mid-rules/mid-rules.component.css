@@ -1,0 +1,88 @@
+input,
+textarea {
+  font-size: 12px !important;
+}
+
+.dialog-body {
+  overflow-y: auto;
+  max-height: 60vh;
+  max-width: 80vw;
+}
+
+::ng-deep p-dialog .ui-dialog-content.ui-widget-content {
+  padding: 15px !important;
+  overflow: visible;
+}
+
+.midRuleRow {
+  padding-bottom: 15px;
+}
+
+.midRuleSizeTextArea {
+  width: 500px !important;
+  height: 250px !important;
+  display: block;
+}
+
+.mid-rule-header {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 5px;
+  align-items: flex-end;
+}
+
+h6 {
+  font-size: 14px;
+  color: #31006f;
+  margin: 0;
+}
+
+.readonly {
+  background-color: #6e777c;
+  color: white;
+  border-radius: 3px;
+  text-align: center;
+  padding: 0 5px;
+  font-size: 11px;
+  line-height: 22px;
+  position: relative;
+}
+
+.locked-by-user {
+  display: none;
+}
+
+.readonly:hover .locked-by-user {
+  position: absolute;
+  width: 150px;
+  top: -1px;
+  right: -155px;
+  background: white;
+  border: 1px solid #6e777c;
+  border-radius: 3px;
+  display: block;
+  word-break: break-all;
+  min-height: 24px;
+}
+
+.readonly:hover .locked-by-user:before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: -4px;
+  display: inline-block;
+  border-right: 1px solid #6e777c;
+  border-bottom: 1px solid #6e777c;
+  background: white;
+  width: 6px;
+  height: 6px;
+  transform: rotate(-225deg);
+}
+
+.dnb-page-btns {
+  margin: 0;
+}
+
+.dnb-page-btns {
+  justify-content: space-between;
+}

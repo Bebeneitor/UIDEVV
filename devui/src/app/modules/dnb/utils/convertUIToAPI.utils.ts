@@ -3,7 +3,7 @@ import {
   AgeTemplateResponse,
   CombinationTherapyResponse,
   DailyMaximumDoseTemplateResponse,
-  DailyMaxUnitsTemplateResponse,
+  DailyMaxUnitsGroupedTemplateResponse,
   DiagnosisCodeOverlapsResponse,
   DiagnosisCodesTemplateResponse,
   DiagnosisCodeSummaryTemplateResponse,
@@ -25,48 +25,84 @@ import {
   VisitOverTimeTemplateResponse,
 } from "../models/interfaces/section";
 import { GroupedSection, Section } from "../models/interfaces/uibase";
-import { cleanData } from "./tools.utils";
+import {
+  cleanData,
+  getColumnComments,
+  getColumnFeedbacks,
+  getSectionRowComments,
+  getSectionRowFeedbacks,
+  transformUItoAPIFeedback,
+} from "./tools.utils";
+
+function commonConvertUItoAPI(section: Section | GroupedSection) {
+  return {
+    drugVersionCode: section.drugVersionCode,
+    section: {
+      code: section.section.code,
+      name: section.section.name,
+    },
+    uiDecorator: {
+      sectionActive: section.enabled,
+      sectionComplete: section.completed,
+      deletedRowFeedbackItemList: transformUItoAPIFeedback(
+        section.feedbackData
+      ),
+    },
+  };
+}
 
 function generalInformationConvertUItoAPI(
-  generalInformation: Section
+  generalInformation: GroupedSection
 ): GeneralInformationTemplateResponse {
   return {
-    drugVersionCode: generalInformation.drugVersionCode,
-    section: {
-      code: generalInformation.section.code,
-      name: generalInformation.section.name,
-    },
-    data: generalInformation.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(generalInformation),
+    data: generalInformation.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
-        item: { code: "", name: cleanData(itemRow.columns[0].value) },
-        itemDetails: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
-        order: index,
+        item: { code: "", name: cleanData(group.names[0].value) },
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            itemDetails: cleanData(itemRow.columns[0].value),
+            comments: Array.of(cleanData(itemRow.columns[1].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
 }
 
 function referencesConvertUItoAPI(
-  references: Section
+  dco: GroupedSection
 ): ReferencesTemplateResponse {
   return {
-    drugVersionCode: references.drugVersionCode,
-    section: {
-      code: references.section.code,
-      name: references.section.name,
-    },
-    data: references.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(dco),
+    data: dco.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
         referenceSourceDto: {
           code: "",
-          name: cleanData(itemRow.columns[0].value),
+          name: cleanData(group.names[0].value),
         },
-        referenceDetails: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
-        order: index,
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            referenceDetails: cleanData(itemRow.columns[0].value),
+            comments: Array.of(cleanData(itemRow.columns[1].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
@@ -76,17 +112,15 @@ function medicalJournalConverUIToAPI(
   medicalJournal: Section
 ): MedicalJournalTemplateResponse {
   return {
-    drugVersionCode: medicalJournal.drugVersionCode,
-    section: {
-      code: medicalJournal.section.code,
-      name: medicalJournal.section.name,
-    },
+    ...commonConvertUItoAPI(medicalJournal),
     data: medicalJournal.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         citation: cleanData(itemRow.columns[0].value),
-        comments: cleanData(itemRow.columns[1].value).split(","),
+        comments: Array.of(cleanData(itemRow.columns[1].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -96,22 +130,20 @@ function manifestationCodesConvertUIToAPI(
   manifestationCodes: Section
 ): ManifestationCodesTemplateResponse {
   return {
-    drugVersionCode: manifestationCodes.drugVersionCode,
-    section: {
-      code: manifestationCodes.section.code,
-      name: manifestationCodes.section.name,
-    },
+    ...commonConvertUItoAPI(manifestationCodes),
     data: manifestationCodes.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         icd10Code: {
           icd10CodeId: 0,
           icd10Code: cleanData(itemRow.columns[0].value),
           description: "",
         },
-        indication: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
+        indication: { code: "", label: cleanData(itemRow.columns[1].value) },
+        comments: Array.of(cleanData(itemRow.columns[2].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -121,18 +153,20 @@ function diagnosisCodeSummaryConvertUIToAPI(
   diagnosisCodeSummary: Section
 ): DiagnosisCodeSummaryTemplateResponse {
   return {
-    drugVersionCode: diagnosisCodeSummary.drugVersionCode,
-    section: {
-      code: diagnosisCodeSummary.section.code,
-      name: diagnosisCodeSummary.section.name,
-    },
+    ...commonConvertUItoAPI(diagnosisCodeSummary),
     data: diagnosisCodeSummary.rows.map((itemRow, index) => {
       return {
-        code: "",
-        indication: cleanData(itemRow.columns[0].value),
+        code: itemRow.code,
+        indication: {
+          code: "",
+          label: cleanData(itemRow.columns[0].value),
+        },
         icd10Codes: cleanSplitArrays(cleanData(itemRow.columns[1].value)),
-        comments: cleanData(itemRow.columns[2].value).split(","),
+        invalidIcd10Codes: [],
+        comments: Array.of(cleanData(itemRow.columns[2].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -142,11 +176,7 @@ function diagnosisCodesConvertUIToAPI(
   diagnosisCodes: Section
 ): DiagnosisCodesTemplateResponse {
   return {
-    drugVersionCode: diagnosisCodes.drugVersionCode,
-    section: {
-      code: diagnosisCodes.section.code,
-      name: diagnosisCodes.section.name,
-    },
+    ...commonConvertUItoAPI(diagnosisCodes),
     data: diagnosisCodes.rows.map((itemRow, index) => {
       const nccnCodes = cleanSplitArrays(
         cleanData(itemRow.columns[1].value)
@@ -169,12 +199,15 @@ function diagnosisCodesConvertUIToAPI(
       });
 
       return {
-        code: "",
-        comments: cleanData(itemRow.columns[3].value).split(","),
+        code: itemRow.code,
+        comments: Array.of(cleanData(itemRow.columns[3].value)),
         indication: cleanData(itemRow.columns[0].value),
         nccnIcdsCodes: nccnCodes,
         lcdIcdsCodes: lcdCodes,
+        lcdIcdsCodesInvalid: [],
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -182,17 +215,15 @@ function diagnosisCodesConvertUIToAPI(
 
 function notesConvertUIToAPI(notes: Section): NotesTemplateResponse {
   return {
-    drugVersionCode: notes.drugVersionCode,
-    section: {
-      code: notes.section.code,
-      name: notes.section.name,
-    },
+    ...commonConvertUItoAPI(notes),
     data: notes.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         note: cleanData(itemRow.columns[0].value),
-        comments: cleanData(itemRow.columns[1].value).split(","),
+        comments: Array.of(cleanData(itemRow.columns[1].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -200,44 +231,48 @@ function notesConvertUIToAPI(notes: Section): NotesTemplateResponse {
 
 function LCDConvertUIToAPI(lcd: Section): LCDTemplateResponse {
   return {
-    drugVersionCode: lcd.drugVersionCode,
-    section: {
-      code: lcd.section.code,
-      name: lcd.section.name,
-    },
+    ...commonConvertUItoAPI(lcd),
     data: lcd.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         lcd: cleanData(itemRow.columns[0].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
+        comments: Array.of(cleanData(itemRow.columns[2].value)),
         macName: cleanData(itemRow.columns[1].value),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
 }
 
 function dailyMaximumDoseConvertUIToAPI(
-  dmd: Section
+  dmd: GroupedSection
 ): DailyMaximumDoseTemplateResponse {
   return {
-    drugVersionCode: dmd.drugVersionCode,
-    section: {
-      code: dmd.section.code,
-      name: dmd.section.name,
-    },
-    data: dmd.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(dmd),
+    data: dmd.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
         indication: {
           code: "",
-          label: cleanData(itemRow.columns[0].value),
+          label: cleanData(group.names[0].value),
         },
-        maximumDosingPattern: cleanData(itemRow.columns[1].value),
-        maximumDose: cleanData(itemRow.columns[2].value),
-        maximumUnits: cleanData(itemRow.columns[3].value),
-        comments: cleanData(itemRow.columns[4].value).split(","),
-        order: index,
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            maximumDosingPattern: cleanData(itemRow.columns[0].value),
+            maximumDose: cleanData(itemRow.columns[1].value),
+            maximumUnits: cleanData(itemRow.columns[2].value),
+            comments: Array.of(cleanData(itemRow.columns[3].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
@@ -247,14 +282,10 @@ function IndicationsConvertUIToAPI(
   indications: Section
 ): IndicationsTemplateResponse {
   return {
-    drugVersionCode: indications.drugVersionCode,
-    section: {
-      code: indications.section.code,
-      name: indications.section.name,
-    },
+    ...commonConvertUItoAPI(indications),
     data: indications.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         drugLabel: cleanData(itemRow.columns[0].value),
         clinicalPharmacology: cleanData(itemRow.columns[1].value),
         micromedexDrugDex: cleanData(itemRow.columns[2].value),
@@ -263,71 +294,94 @@ function IndicationsConvertUIToAPI(
         ahfsDi: cleanData(itemRow.columns[5].value),
         lcd: cleanData(itemRow.columns[6].value),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
 }
 
 function maximumFrequencyConvertUIToAPI(
-  maxFreq: Section
+  maxFreq: GroupedSection
 ): MaximumFrequencyTemplateResponse {
   return {
-    drugVersionCode: maxFreq.drugVersionCode,
-    section: {
-      code: maxFreq.section.code,
-      name: maxFreq.section.name,
-    },
-    data: maxFreq.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(maxFreq),
+    data: maxFreq.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
-        indication: cleanData(itemRow.columns[0].value),
-        maximumFrequency: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
-        order: index,
+        indication: cleanData(group.names[0].value),
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            maximumFrequency: cleanData(itemRow.columns[0].value),
+            comments: Array.of(cleanData(itemRow.columns[1].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
 }
 
 function UnitsOverTimeConvertUIToAPI(
-  uot: Section
+  uot: GroupedSection
 ): UnitsOverTimeTemplateResponse {
   return {
-    drugVersionCode: uot.drugVersionCode,
-    section: {
-      code: uot.section.code,
-      name: uot.section.name,
-    },
-    data: uot.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(uot),
+    data: uot.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
-        indication: { code: "", label: cleanData(itemRow.columns[0].value) },
-        units: cleanData(itemRow.columns[1].value),
-        interval: cleanData(itemRow.columns[2].value),
-        comments: cleanData(itemRow.columns[3].value).split(","),
-        order: index,
+        indication: { code: "", label: cleanData(group.names[0].value) },
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            units: cleanData(itemRow.columns[0].value),
+            interval: cleanData(itemRow.columns[1].value),
+            comments: Array.of(cleanData(itemRow.columns[2].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
 }
 
 function VisitsOverTimeConvertUIToAPI(
-  vot: Section
+  vot: GroupedSection
 ): VisitOverTimeTemplateResponse {
   return {
-    drugVersionCode: vot.drugVersionCode,
-    section: {
-      code: vot.section.code,
-      name: vot.section.name,
-    },
-    data: vot.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(vot),
+    data: vot.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
-        indication: { code: "", label: cleanData(itemRow.columns[0].value) },
-        visits: cleanData(itemRow.columns[1].value),
-        interval: cleanData(itemRow.columns[2].value),
-        comments: cleanData(itemRow.columns[3].value).split(","),
-        order: index,
+        indication: {
+          code: "",
+          label: cleanData(group.names[0].value),
+        },
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            visits: cleanData(itemRow.columns[0].value),
+            interval: cleanData(itemRow.columns[1].value),
+            comments: Array.of(cleanData(itemRow.columns[2].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
@@ -337,14 +391,10 @@ function GlobalReviewCodesConvertUIToAPI(
   GlobalReview: Section
 ): GlobalReviewCodesResponse {
   return {
-    drugVersionCode: GlobalReview.drugVersionCode,
-    section: {
-      code: GlobalReview.section.code,
-      name: GlobalReview.section.name,
-    },
+    ...commonConvertUItoAPI(GlobalReview),
     data: GlobalReview.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         currentIcd10CodeRange: {
           icd10CodeId: 0,
           icd10Code: cleanData(itemRow.columns[0].value),
@@ -353,8 +403,10 @@ function GlobalReviewCodesConvertUIToAPI(
           icd10CodeId: 0,
           icd10Code: cleanData(itemRow.columns[1].value),
         },
-        comments: cleanData(itemRow.columns[2].value).split(","),
+        comments: Array.of(cleanData(itemRow.columns[2].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -364,18 +416,16 @@ function GlobalReviewIndicationsConvertUIToAPI(
   GlobalReview: Section
 ): GlobalReviewIndicationsResponse {
   return {
-    drugVersionCode: GlobalReview.drugVersionCode,
-    section: {
-      code: GlobalReview.section.code,
-      name: GlobalReview.section.name,
-    },
+    ...commonConvertUItoAPI(GlobalReview),
     data: GlobalReview.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         indication: { code: "", label: cleanData(itemRow.columns[0].value) },
         globalReviewIndication: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
+        comments: Array.of(cleanData(itemRow.columns[2].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -385,33 +435,45 @@ function CombinationTherapyConvertUIToAPI(
   Combination: GroupedSection
 ): CombinationTherapyResponse {
   return {
-    drugVersionCode: Combination.drugVersionCode,
-    section: {
-      code: Combination.section.code,
-      name: Combination.section.name,
-    },
+    ...commonConvertUItoAPI(Combination),
     data: Combination.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
         indication: { code: "", label: cleanData(group.names[0].value) },
         data: group.rows.map((itemRow, index) => {
-          const codes = cleanData(itemRow.columns[1].value)
-            .split(",")
-            .map((code) => {
-              return code ? { code } : {};
-            });
-          return Object.keys(codes[0]).length === 1
+          const codes = cleanSplitArrays(
+            cleanData(itemRow.columns[1].value)
+          ).map((code) => {
+            return code ? { code } : {};
+          });
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return codes.length > 0
             ? {
-                code: "",
+                code: itemRow.code,
                 combination: cleanData(itemRow.columns[0].value),
                 codes: codes,
-                comments: cleanData(itemRow.columns[2].value).split(","),
+                comments: Array.of(cleanData(itemRow.columns[2].value)),
                 order: index,
+                feedbackItemsList: feedBack.concat(
+                  getSectionRowFeedbacks(itemRow)
+                ),
+                documentNoteList: comments.concat(
+                  getSectionRowComments(itemRow)
+                ),
               }
             : {
-                code: "",
+                code: itemRow.code,
                 combination: cleanData(itemRow.columns[0].value),
-                comments: cleanData(itemRow.columns[2].value).split(","),
+                comments: Array.of(cleanData(itemRow.columns[2].value)),
                 order: index,
+                feedbackItemsList: feedBack.concat(
+                  getSectionRowFeedbacks(itemRow)
+                ),
+                documentNoteList: comments.concat(
+                  getSectionRowComments(itemRow)
+                ),
               };
         }),
       };
@@ -419,50 +481,60 @@ function CombinationTherapyConvertUIToAPI(
   };
 }
 
-function AgeConvertUIToAPI(age: Section): AgeTemplateResponse {
+function AgeConvertUIToAPI(age: GroupedSection): AgeTemplateResponse {
   return {
-    drugVersionCode: age.drugVersionCode,
-    section: {
-      code: age.section.code,
-      name: age.section.name,
-    },
-    data: age.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(age),
+    data: age.groups.map((group, index) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
         indication: {
           code: "",
-          label: cleanData(itemRow.columns[0].value),
+          label: cleanData(group.names[0].value),
         },
-        age: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
-        order: index,
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            age: cleanData(itemRow.columns[0].value),
+            comments: Array.of(cleanData(itemRow.columns[1].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
 }
 
 function dailyMaxUnitsConvertUIToAPI(
-  dailyMaxUnits: Section
-): DailyMaxUnitsTemplateResponse {
+  dailyMaxUnits: GroupedSection
+): DailyMaxUnitsGroupedTemplateResponse {
   const codes = cleanSplitArrays(cleanData(dailyMaxUnits.codesColumn.value));
   return {
-    drugVersionCode: dailyMaxUnits.drugVersionCode,
-    section: {
-      code: dailyMaxUnits.section.code,
-      name: dailyMaxUnits.section.name,
-    },
+    ...commonConvertUItoAPI(dailyMaxUnits),
     codes: codes,
-    data: dailyMaxUnits.rows.map((itemRow, index) => {
+    data: dailyMaxUnits.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
-        hasBorder: itemRow.hasBorder,
-        dmuvItemDto: {
-          name: cleanData(itemRow.columns[0].value),
-        },
-        currentValues: cleanData(itemRow.columns[1].value),
-        newValues: cleanData(itemRow.columns[2].value),
-        comments: cleanData(itemRow.columns[3].value).split(","),
-        order: index,
+        dmuvItemDto: { code: "", name: group.names[0].value },
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            hasBorder: itemRow.hasBorder,
+            currentValues: itemRow.columns[0].value,
+            newValues: itemRow.columns[1].value,
+            comments: Array.of(cleanData(itemRow.columns[2].value)),
+            order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        }),
       };
     }),
   };
@@ -472,17 +544,17 @@ function DosingPatternsConvertUIToAPI(
   Dosing: GroupedSection
 ): DosingPatternsResponse {
   return {
-    drugVersionCode: Dosing.drugVersionCode,
-    section: {
-      code: Dosing.section.code,
-      name: Dosing.section.name,
-    },
+    ...commonConvertUItoAPI(Dosing),
     data: Dosing.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
         indication: { code: "", label: cleanData(group.names[0].value) },
         data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
           return {
-            code: "",
+            code: itemRow.code,
             drugLabel: cleanData(itemRow.columns[0].value),
             clinicalPharma: cleanData(itemRow.columns[1].value),
             micromedex: cleanData(itemRow.columns[2].value),
@@ -491,6 +563,8 @@ function DosingPatternsConvertUIToAPI(
             ahfsDi: cleanData(itemRow.columns[5].value),
             other: cleanData(itemRow.columns[6].value),
             order: index,
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
           };
         }),
       };
@@ -500,52 +574,53 @@ function DosingPatternsConvertUIToAPI(
 
 function GenderConvertUIToAPI(gender: Section): GenderTemplateResponse {
   return {
-    drugVersionCode: gender.drugVersionCode,
-    section: {
-      code: gender.section.code,
-      name: gender.section.name,
-    },
+    ...commonConvertUItoAPI(gender),
     data: gender.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         indication: {
           code: "",
           label: cleanData(itemRow.columns[0].value),
         },
         gender: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
+        comments: Array.of(cleanData(itemRow.columns[2].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
 }
 
 function diagnosisCodeOverlapsConvertUIToAPI(
-  dco: Section
+  dco: GroupedSection
 ): DiagnosisCodeOverlapsResponse {
   return {
-    drugVersionCode: dco.drugVersionCode,
-    section: {
-      code: dco.section.code,
-      name: dco.section.name,
-    },
-    data: dco.rows.map((itemRow, index) => {
+    ...commonConvertUItoAPI(dco),
+    data: dco.groups.map((group) => {
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
-        code: "",
-        hasBorder: itemRow.hasBorder,
-        order: index,
-        icd10Code: {
-          icd10Code: cleanData(itemRow.columns[0].value),
-          description: "",
-        },
-        indication: { code: "", label: cleanData(itemRow.columns[1].value) },
-        units: cleanData(itemRow.columns[2].value),
-        frequency: cleanData(itemRow.columns[3].value),
-        unitsOverTime: cleanData(itemRow.columns[4].value),
-        visitsOverTime: cleanData(itemRow.columns[5].value),
-        age: cleanData(itemRow.columns[6].value),
-        comments: cleanData(itemRow.columns[7].value).split(","),
-      };
+        icd10Code: { icd10Code: cleanData(group.names[0].value) },
+        data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
+          return {
+            code: itemRow.code,
+            hasBorder: itemRow.hasBorder,
+            order: index,
+            indication: { code: "", label: cleanData(itemRow.columns[0].value) },
+            units: cleanData(itemRow.columns[1].value),
+            frequency: cleanData(itemRow.columns[2].value),
+            unitsOverTime: cleanData(itemRow.columns[3].value),
+            visitsOverTime: cleanData(itemRow.columns[4].value),
+            age: cleanData(itemRow.columns[5].value),
+            comments: Array.of(cleanData(itemRow.columns[6].value)),
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
+          };
+        })
+      }
     }),
   };
 }
@@ -555,19 +630,17 @@ function rulesConvertUIToAPI(
   drugCode: string = ""
 ): RulesTemplateResponse {
   return {
-    drugVersionCode: rule.drugVersionCode,
+    ...commonConvertUItoAPI(rule),
     drugCode: drugCode,
-    section: {
-      code: rule.section.code,
-      name: rule.section.name,
-    },
     data: rule.rows.map((itemRow, index) => {
       return {
-        code: "",
+        code: itemRow.code,
         rule: cleanData(itemRow.columns[0].value),
         description: cleanData(itemRow.columns[1].value),
-        comments: cleanData(itemRow.columns[2].value).split(","),
+        comments: Array.of(cleanData(itemRow.columns[2].value)),
         order: index,
+        feedbackItemsList: getSectionRowFeedbacks(itemRow),
+        documentNoteList: getSectionRowComments(itemRow),
       };
     }),
   };
@@ -580,25 +653,25 @@ function secondaryMalignancyConvertUIToAPI(
     cleanData(secondaryMalignancy.codesColumn.value)
   );
   return {
-    drugVersionCode: secondaryMalignancy.drugVersionCode,
-    section: {
-      code: secondaryMalignancy.section.code,
-      name: secondaryMalignancy.section.name,
-    },
+    ...commonConvertUItoAPI(secondaryMalignancy),
     codes: codes,
-    data: secondaryMalignancy.groups.map((group) => {
+    data: secondaryMalignancy.groups.map((group, groupIndex) => {
       const malignancyIcdCodes = cleanSplitArrays(
         cleanData(group.names[0].value)
       ).map((code) => {
         return { icd10Code: code };
       });
       const secondarySite = cleanData(group.names[1].value);
+      const groupNamesFeedback = getColumnFeedbacks(group.names);
+      const groupNamesComments = getColumnComments(group.names);
       return {
         malignancyIcdsCodes: malignancyIcdCodes,
         secondarySite: secondarySite,
         data: group.rows.map((itemRow, index) => {
+          const feedBack = index === 0 ? groupNamesFeedback : [];
+          const comments = index === 0 ? groupNamesComments : [];
           return {
-            code: "",
+            code: itemRow.code,
             order: index,
             hasBorder: itemRow.hasBorder,
             primaryMalignancy: cleanData(itemRow.columns[0].value),
@@ -607,7 +680,9 @@ function secondaryMalignancyConvertUIToAPI(
             unitsOverTime: cleanData(itemRow.columns[3].value),
             visitsOverTime: cleanData(itemRow.columns[4].value),
             age: cleanData(itemRow.columns[5].value),
-            comments: cleanData(itemRow.columns[6].value).split(","),
+            comments: Array.of(cleanData(itemRow.columns[6].value)),
+            feedbackItemsList: feedBack.concat(getSectionRowFeedbacks(itemRow)),
+            documentNoteList: comments.concat(getSectionRowComments(itemRow)),
           };
         }),
       };
@@ -621,9 +696,9 @@ export function convertIUtoAPI(
 ): any {
   switch (item.section.code) {
     case SectionCode.GeneralInformation:
-      return generalInformationConvertUItoAPI(item as Section);
+      return generalInformationConvertUItoAPI(item as GroupedSection);
     case SectionCode.References:
-      return referencesConvertUItoAPI(item as Section);
+      return referencesConvertUItoAPI(item as GroupedSection);
     case SectionCode.LCD:
       return LCDConvertUIToAPI(item as Section);
     case SectionCode.Notes:
@@ -633,31 +708,31 @@ export function convertIUtoAPI(
     case SectionCode.Indications:
       return IndicationsConvertUIToAPI(item as Section);
     case SectionCode.DailyMaxUnits:
-      return dailyMaxUnitsConvertUIToAPI(item as Section);
+      return dailyMaxUnitsConvertUIToAPI(item as GroupedSection);
     case SectionCode.DiagnosisCodes:
       return diagnosisCodesConvertUIToAPI(item as Section);
     case SectionCode.DiagnosticCodeSummary:
       return diagnosisCodeSummaryConvertUIToAPI(item as Section);
     case SectionCode.MaximumFrequency:
-      return maximumFrequencyConvertUIToAPI(item as Section);
+      return maximumFrequencyConvertUIToAPI(item as GroupedSection);
     case SectionCode.ManifestationCodes:
       return manifestationCodesConvertUIToAPI(item as Section);
     case SectionCode.Age:
-      return AgeConvertUIToAPI(item as Section);
+      return AgeConvertUIToAPI(item as GroupedSection);
     case SectionCode.DailyMaximumDose:
-      return dailyMaximumDoseConvertUIToAPI(item as Section);
+      return dailyMaximumDoseConvertUIToAPI(item as GroupedSection);
     case SectionCode.Gender:
       return GenderConvertUIToAPI(item as Section);
     case SectionCode.UnitsOverTime:
-      return UnitsOverTimeConvertUIToAPI(item as Section);
+      return UnitsOverTimeConvertUIToAPI(item as GroupedSection);
     case SectionCode.VisitOverTime:
-      return VisitsOverTimeConvertUIToAPI(item as Section);
+      return VisitsOverTimeConvertUIToAPI(item as GroupedSection);
     case SectionCode.CombinationTherapy:
       return CombinationTherapyConvertUIToAPI(item as GroupedSection);
     case SectionCode.DosingPatterns:
       return DosingPatternsConvertUIToAPI(item as GroupedSection);
     case SectionCode.DiagnosisCodeOverlaps:
-      return diagnosisCodeOverlapsConvertUIToAPI(item as Section);
+      return diagnosisCodeOverlapsConvertUIToAPI(item as GroupedSection);
     case SectionCode.GlobalReviewIndications:
       return GlobalReviewIndicationsConvertUIToAPI(item as Section);
     case SectionCode.SecondaryMalignancy:

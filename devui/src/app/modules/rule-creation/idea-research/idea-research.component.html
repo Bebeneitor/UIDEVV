@@ -3,7 +3,8 @@
     <p-tabPanel header="Assigned">
         <div *ngIf="tabIndex == 0">
             <ecl-table #assignedTable [tableModel]='assignedTableConfig' (onAcctionLink)="redirect($event, 'assigned')"
-                (onSelectRecord)="setSelectRules($event, 'assigned')"(onUnSelectRecord)="setSelectRules($event, 'assigned')"></ecl-table>
+                (onSelectRecord)="setSelectRules($event, 'assigned')"(onUnSelectRecord)="setSelectRules($event, 'assigned')"
+                       (onServiceCall)="onServiceCall($event)"></ecl-table>
             <div class="row">
                 <div class="col-md-12">
                     <div class="float-right" style="padding-bottom: 10px; padding-top: 10px">

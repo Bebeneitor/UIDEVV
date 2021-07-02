@@ -1,0 +1,128 @@
+<p-blockUI [blocked]="loading">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif"/>
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<div class="col-md-12">
+  <div class="row pad-btm-10">
+    <label>{{noteLabel}}</label>
+    <textarea id="notesTextArea" maxlength="4000" [disabled]="provDialogDisable" cols="8" name="notes"
+      [(ngModel)]="ruleNoteTabData.ruleNotesDto.notes" pTooltip="" tooltipPosition="top"
+      (paste)="checkMultiValidation(3, 'notesTextArea', $event, ruleNoteTabData.ruleNotesDto.notes)"
+      (keypress)="checkMultiValidation(2, 'notesTextArea', $event)" (input)="checkMultiValidation(1, 'notesTextArea')"
+      *ngIf="!fromMaintenanceProcess"></textarea>
+    <textarea maxlength="4000" [disabled]="provDialogDisable || fromMaintenanceProcess" cols="8" name="notes"
+      [(ngModel)]="originalNotesTabData.ruleNotesDto.notes" pTooltip="" tooltipPosition="top"
+      *ngIf="fromMaintenanceProcess">
+      </textarea>
+  </div>
+  <div class="row pad-btm-10" *ngIf="fromMaintenanceProcess">
+    <label>New Notes (With Markups)</label>
+    <app-dif-markups-editor id="notes-text-mark-up" name="notesMainteance" #markpupEd class="textarea"
+      [(ngModel)]="ruleNoteTabData.ruleNotesDto.notesModified" [saveAsDelta]="true" [height]="'90px'" [maxLength]="4000"
+      [originalText]="originalNotesTabData.ruleNotesDto.notes" [minHeight]="0" [provDialogDisable]="provDialogDisable">
+    </app-dif-markups-editor>
+  </div>
+  <div class="row pad-btm-10" *ngIf="fromMaintenanceProcess">
+    <button class="btn btn-primary btn-default-height small-td" style="width: 150px!important;"
+      (click)="getUpdatedNote()" [disabled]="provDialogDisable">Update Notes</button>
+  </div>
+  <div class="row pad-btm-10" *ngIf="fromMaintenanceProcess">
+    <label>Updated Notes</label>
+    <textarea style="width: 100%;height: 100px;" [disabled]="provDialogDisable"
+      [(ngModel)]="ruleNoteTabData.ruleNotesDto.notes" readonly></textarea>
+  </div>
+</div>
+
+
+<div class="row">
+  <div class="col-md-12">
+    <label>Attachments</label>
+    <div class="file-template" (drop)="dropFileHandler($event)" (dragover)="$event.preventDefault()">
+      <div *ngIf="!provDialogDisable" class="no-files-legend">Drop files to attach or <a nghref="#"
+          (click)="clickFileUpload()">browse</a>
+      </div>
+      <div [ngClass]="provDialogDisable?'notes-file-100':'notes-file'">
+        <div class="col-md-12">
+          <!-- SAVED FILES -->
+          <div *ngIf="isSavedFileExist">
+            <div *ngFor="let item of ruleNoteTabData.activeAttachmentList; let i=index;">
+              <div class="pb-1" *ngIf="!item.isRemoved">
+                <span (click)="downloadSavedFile(item)" [ngClass]="getFileIcon(item.fileName)"
+                  aria-hidden="true"></span>
+                <span class="file-info">{{item.fileName}}</span>
+                <span *ngIf="item.removable" [hidden]="provDialogDisable" class="fa fa-times delete-file"
+                  (click)="removeFile(item.fileId);"></span>
+              </div>
+            </div>
+          </div>
+          <!-- ADDED FILES -->
+          <div *ngIf="isAddedFileExist">
+            <div *ngFor="let item of filesAttached; let i=index;">
+              <div class="pb-1">
+                <span style="cursor : pointer" (click)="downloadAddedFile(item)" [ngClass]="getFileIcon(item.name)"
+                  aria-hidden="true"></span>
+                <span class="file-info">{{item.name}}</span>
+                <span [hidden]="provDialogDisable" class="fa fa-times delete-file"
+                  (click)="removeSelectedFile(item);"></span>
+              </div>
+            </div>
+          </div>
+          <!-- NO FILES DETECTED -->
+          <div *ngIf="!(isAddedFileExist || isSavedFileExist)">
+            <div class="text-center">
+              <span class="file-info no-files-text">No Attachments</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <input type="file" hidden #fileUpload (change)="addFiles($event)" multiple />
+
+    </div>
+  </div>
+</div>
+
+<div class="row note-comments">
+  <div class="col-md-12">
+    <fieldset>
+      <label>Comments</label>
+      <textarea id="taComments" maxlength="4000" cols="8" [disabled]="provDialogDisable" name="comments"
+        [(ngModel)]="ruleNoteTabData.newCommentsDto.comments" pTooltip="" tooltipPosition="top"
+        (paste)="checkMultiValidation(3, 'taComments', $event, ruleNoteTabData.newCommentsDto.comments)"
+        (keypress)="checkMultiValidation(2, 'taComments', $event)"
+        (input)="checkMultiValidation(1, 'taComments')"></textarea>
+
+      <p-accordion
+        *ngIf="ruleNoteTabData.existingCommentsList != null && ruleNoteTabData.existingCommentsList.length > 0"
+        expandIcon="pi pi-fw pi-chevron-up" collapseIcon="pi pi-fw pi-chevron-down">
+        <p-accordionTab *ngFor="let item of ruleNoteTabData.existingCommentsList" header={{getCommentHeader(item)}}>
+          {{item.comments}}
+        </p-accordionTab>
+      </p-accordion>
+    </fieldset>
+  </div>
+
+</div>
+
+<p-dialog header="Saved File" [class]="confirmDialog" [(visible)]="removeAttachmentDisplay">
+  <p class="message-bold"> <span class="icon-float-left">
+      <i class="pi pi-exclamation-triangle"></i>
+    </span>
+    <span>Are you sure you want to delete this attachment?</span>
+  </p>
+  <p class="message-center">This action cannot be undone.</p>
+  <p-footer>
+    <div class="row">
+      <div class="col-md-5">
+        <button name="removeAttachmentCancelBtn" class="btn btn-primary" pButton (click)="removeAttachmentCancel()"
+          label="Cancel"></button>
+      </div>
+      <div class="col-md-6">
+        <button name="removeAttachmentDeletebtn" class="btn btn-primary" pButton (click)="removeSavedFile()"
+          label="Delete"></button>
+      </div>
+    </div>
+  </p-footer>
+</p-dialog>

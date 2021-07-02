@@ -1,0 +1,73 @@
+.ind table tr th {
+    vertical-align: middle;
+    font-size: 11px;
+    padding: 0 !important;
+    color:#31006F !important;
+}
+
+.ind table tr td{
+    vertical-align: middle;
+}
+
+.ind input, .copy input{
+    width:100% !important;
+    height: 28px !important;
+}
+
+.ind .word-wrap, .copy .word-wrap{
+    word-break:break-word;
+}
+
+.ind .border-input, .copy .border-input{
+    border: 1px solid #9179B7;
+}
+
+/* Chrome, Safari, Edge, Opera */
+ input::-webkit-outer-spin-button,
+ input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+ input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.ind ::ng-deep .ui-multiselect{
+    margin-top:3px!important;
+}
+
+.ind ::ng-deep .ui-dropdown{
+    display: block;
+    margin-top:2px;
+}
+
+.copy .category ::ng-deep .ui-dropdown{
+    display: block;
+}
+
+.width-perc-9{
+    width:9%;
+} 
+.width-perc-15{
+    width:15%;
+} 
+.width-perc-14{
+    width:14%;
+} 
+.width-perc-9{
+    width:9%;
+}
+.width-perc-3{
+    width:3%;
+}
+.width-perc-4{
+    width:4%;
+}
+.width-perc-6{
+    width:6%;
+}
+.width-perc-10{
+    width:10%;
+}

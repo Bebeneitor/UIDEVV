@@ -1,0 +1,100 @@
+<div class="container">
+  <div class="row mt-2">
+    <div class="col-md-4"><span class="required-field-color">*</span>Rule Engines</div>
+    <div class="col-md-8"><span class="required-field-color">*</span>Rule Ids
+    <span class="info-text">(Choose Engine, Type Active Rule Id(s) with Versions separated by comma(s) and 
+      press Enter key)</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-4">
+      <p-dropdown name="ruleEngine" placeholder="Choose" [style]="dropDownStyles" [options]="ruleEngineList"
+        [(ngModel)]="selectedRuleEngine">
+      </p-dropdown>
+    </div>
+    <div class="col-md-8">
+      <mid-rule-box (midTextOutput)="updateSearchRules($event)" [midTextBoxCss]="midTextRrBoxCss"
+                    (enterTrigger)="onKeyUpSearch($event)" (midTextLengthOutput)="showInvalidLength($event)"
+                    [loading]="loadMidBox"></mid-rule-box>
+      <div [ngClass]="showInvalid"><i class="invalid-info-text fa fa-info-circle"></i> You have {{invalidRuleLength}} invalid</div>
+    </div>
+  </div>
+  <div class="row mt-2">
+    <div class="col-md-12">
+      <p-table #viewGrid [columns]="cols" [value]="filteredData" [paginator]="true" [(selection)]="selectedData"
+        [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="5"
+        [rowsPerPageOptions]="[5, 10, 20, 50, 100]" [loading]="loading" [responsive]="true"
+        [style]="{'margin-top': '15px'}">
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th class="checkbox-center" style="width:44px; background-color: white;">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
+              [ngStyle]="{'width': col.width}" pResizableColumn>
+              {{col.header}}
+              <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">
+              </p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-rule let-columns="columns">
+          <tr [pSelectableRow]="rule">
+            <td class="checkbox-center">
+              <p-tableCheckbox [value]="rule"></p-tableCheckbox>
+            </td>
+            <td class="small-td" *ngFor="let col of columns" (click)="clickRow(rule)" style="cursor: pointer;"
+              [ngClass]="{'row-accessories': rule.displayDescription === true}">
+              <span *ngIf="col.field == 'ruleCode'" class="span-centered">{{rule.ruleCode}}</span>
+              <span *ngIf="col.field == 'icmsId'" class="span-centered">{{rule.icmsId}}</span>
+              <span *ngIf="col.field == 'ruleName'">{{rule.ruleName}}</span>
+              <span *ngIf="col.field == 'status'" class="span-centered">{{rule.status}}</span>
+              <span *ngIf="col.field == 'assignedTo'" class="span-centered">{{rule.assignedTo}}</span>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="paginatorright" let-state>
+          <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+            Showing <b>{{(state.page  * state.rows) + 1}}</b> -
+            <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+            of <b>{{state.totalRecords}}</b>
+          </span>
+          <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+        </ng-template>
+      </p-table>
+      <div class="row mt-2">
+        <div class="col-12">
+          Description
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <textarea style="width: 100%;" disabled="true" rows="8">{{descriptionDisplayText}}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-2">
+    <div class="col-md-6">
+      <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+          <button class="btn btn-primary" (click)="onCancel()" style="width: 100%;">Cancel</button>
+        </div>
+        <div class="col-md-4"></div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+          <button class="btn btn-primary" style="width: 100%;" [disabled]="validateButton()"
+            (click)="onAdd()">Add</button>
+        </div>
+        <div class="col-md-4"></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -16,9 +16,10 @@ import { FieldSelectionUpdatesService } from 'src/app/services/field-selection-u
 import { ToastMessageService } from 'src/app/services/toast-message.service';
 import { EclTeamComponent } from './ecl-team/ecl-team.component';
 import { ToastModule } from 'primeng/toast';
+import { PolicyPackageComponent } from './policy-package/policy-package.component';
 
 @NgModule({
-  declarations: [FieldSelectionUpdatesComponent, EclCategoryComponent, ReferenceSourceComponent, EclTeamComponent],
+  declarations: [FieldSelectionUpdatesComponent, EclCategoryComponent, ReferenceSourceComponent, EclTeamComponent, PolicyPackageComponent],
   imports: [
     FieldSelectionUpdatesRoutingModule,
     FormsModule,

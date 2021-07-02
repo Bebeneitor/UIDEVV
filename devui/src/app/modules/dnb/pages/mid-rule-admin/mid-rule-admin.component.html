@@ -1,0 +1,30 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
+<div class="dnb-page-header">
+  <h1 class="dnb-title">Mid Rules Template Configuration</h1>
+  <div class="dnb-page-btns">
+    <button (click)="createNewTemplate()">Create New Template</button>
+  </div>
+</div>
+<div class="mid-rules-table">
+  <ecl-table
+    #midrulesTable
+    [tableModel]="tableConfig"
+    (onAcctionIcon)="actionIcon($event)"
+    (onActionSwitchChange)="changeStatus($event)"
+  ></ecl-table>
+</div>
+
+<app-mid-rules
+  [(openDialog)]="openMidRuleEdit"
+  [(midRule)]="midRuleSelected"
+  (midRuleData)="saveMidRule($event)"
+  [midRuleSetUp]="midRuleSetUp"
+  (backMidRuleList)="unlockMidRule()"
+>
+</app-mid-rules>
+<app-mid-rule-history
+  [(openDialog)]="openMidRuleHistory"
+  [midRuleId]="midRuleSelected.midRuleTemplateId"
+></app-mid-rule-history>
+
+<p-confirmDialog class="dnb-modal" key="midruleconfirm"></p-confirmDialog>

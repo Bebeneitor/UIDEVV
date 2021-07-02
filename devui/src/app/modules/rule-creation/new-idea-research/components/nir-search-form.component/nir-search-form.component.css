@@ -57,7 +57,7 @@ h5 {
 }
 .search-item-box-lob {
     height: 100%;
-    
+
 }
 
 .tab-panel-container {
@@ -97,6 +97,15 @@ h5 {
     padding: 10px;
     width: 100%;
     text-align: center;
+}
+
+.custom-all-label-pdg {
+    font-size: 12px;
+    margin-bottom: 0px;
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    padding-top:16px;
 }
 
 .custom-label,
@@ -158,7 +167,6 @@ h5 {
 
 .hide-show {
     display: none;
-    flex-direction: row;
 }
 
 .keyword-search {
@@ -187,6 +195,8 @@ h5 {
 :host ::ng-deep.ui-inputtext {
     background-color: transparent !important;
 }
+
+.state-search .ui-dropdown.ui-widget.ui-state-default.ui-corner-all,
 .ui-multiselect.ui-widget.ui-state-default.ui-corner-all {
     background-color: transparent;
 }
@@ -196,7 +206,8 @@ h5 {
     align-items: center;
 }
 
-:host>>>.ui-multiselect {
+:host>>>.multi-select-search .ui-multiselect,
+:host>>>.state-search .ui-dropdown {
     border: none;
     text-align: center;
     position: relative;
@@ -204,15 +215,22 @@ h5 {
     margin: 0px;
 }
 
-:host>>>.ui-multiselect-trigger-icon.ui-clickable {
+:host>>>.multi-select-search .ui-multiselect-trigger-icon.ui-clickable{
     margin-top: 2px;
+}
+
+:host>>>.state-search .ui-dropdown-trigger-icon.ui-clickable {
+    margin-top: 1px;
+    margin-left: -0.3em;
+    font-size: 1em;
 }
 
 :host>>>.ui-tabview {
     margin: 10px;
 }
 
-:host>>>.ui-multiselect-label-container {
+:host>>>.multi-select-search .ui-multiselect-label-container,
+:host>>>.state-search .ui-dropdown-label  {
     font-weight: bold;
     font-size: 16px;
     width: 120px;
@@ -220,10 +238,22 @@ h5 {
     margin-top: 10px;
 }
 
-:host>>>.ui-multiselect-header {
+:host>>>.multi-select-search .ui-multiselect-header {
     display: flex;
     justify-content: flex-end;
     flex-direction: row-reverse;
+}
+
+:host>>>.state-search .ui-dropdown-label  {
+font-size: 16px!important;
+padding: .429em 2em .429em .429em !important;
+font-family: "Open Sans","Helvetica Neue",sans-serif !important;
+white-space: normal;
+text-overflow: ellipsis;
+}
+
+:host>>>.state-search .ui-dropdown {
+    height: auto !important;
 }
 
 :host>>>.ui-dropdown-label {

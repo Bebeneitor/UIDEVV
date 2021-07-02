@@ -1,0 +1,13 @@
+<div class="container">
+  <h3>Issue Links</h3>
+  <div class="clone-issue-link">
+    <div class="clone-issue" *ngFor="let rr of issueList">
+      <span class="relation-ind"><b>{{rr.relationInd}}</b></span>
+      <span class="pr-5 active-link"
+        (click)="issueNavigation(rr.requestCode, rr.rrId, rr.issueStatus)">{{rr.requestCode}}</span>
+      <span [ngClass]="rr.jiraId ? 'pr-5': 'pad-right-6'">{{rr.jiraId}}</span>
+      <span class="pr-5 w-30">{{rr.issueSummary}}</span>
+      <span class="pr-5">{{rr.issueStatus}}</span>
+    </div>
+  </div>
+</div>

@@ -7,13 +7,29 @@
   <p-tabPanel header="Active Rules">
     <div class="container-fluid" style="padding: 0px">
       <div class="row">
+        <div class="col-4">
+          <label style="display: block;">Key Words:</label>
+          <p-dropdown (onChange)="filterRules()" [options]="fieldsKeyWords" [(ngModel)]="selectedKeyWord" [style]="{'width': '100%'}"></p-dropdown>
+        </div>
+        <div class="col-8">
+          &nbsp;
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <hr>
+        </div>
+      </div>
+      
+      <div class="row">
         <div class="col-12">
           <span class="ui-float-label">
             <input pInputText type="text" size="40" class="filter-field" [(ngModel)]="activeKeywordSearch" placeholder="Keyword Search" (keyup)="filterRules()">
             <i class="pi pi-search" style="position:absolute; right: 8px; top: 7px;"></i>
           </span>
           <p-tree *ngIf="categories.length > 0" [loading]="loading" [value]="categories" [filter]="false" selectionMode="single"
-              (onNodeExpand)="getCatalogueByCategory($event, true)">
+              (onNodeExpand)="getCatalogueByCategoryFromCache($event, true)">
             <ng-template let-node pTemplate="redirectIcon" class="fa fa-adjust">
               <span class="category-name" [pTooltip]="node.description" tooltipPosition="right"
                 (click)='redirect(node)'>{{node.label}} </span><i class="fa fa-adjust" (click)='goToOldVersion(node)' ></i>

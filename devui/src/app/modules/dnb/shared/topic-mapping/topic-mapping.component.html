@@ -1,0 +1,51 @@
+<p-dialog
+  #dialog
+  [header]="title"
+  [(visible)]="openDialog"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content topic-mapping">
+    <div class="dialog-body">
+      <div class="spacing">
+        <label>
+          <h6>D&B Drug Name</h6>
+        </label>
+        <input pInputText type="text" [(ngModel)]="drugName" disabled />
+      </div>
+      <div>
+        <label>
+          <h6>ELL Topic Name</h6>
+        </label>
+        <input
+          pInputText
+          type="text"
+          (keyup)="validateData($event)"
+          [(ngModel)]="ellTopic"
+        />
+        <label class="note">
+          NOTE: Please verify that the Topic Name is spelled exactly as it is in
+          ELL, including spaces.
+        </label>
+        <div class="preview" *ngIf="ellTopic.length > 0">
+          <button (click)="openEllRules()">
+            <i>Preview Mid Rules</i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p-footer>
+    <div class="dnb-page-btns">
+      <button class="dnb-btn" style="margin: 0" (click)="applyChanges()">
+        Apply
+      </button>
+    </div>
+  </p-footer>
+</p-dialog>
+
+<app-mid-rules-ell
+  [(openDialog)]="openEllRulesFlag"
+  [(readOnlyDialog)]="readOnlyDialog"
+  [topicName]="ellTopic"
+>
+</app-mid-rules-ell>

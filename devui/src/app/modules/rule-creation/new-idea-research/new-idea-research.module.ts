@@ -9,7 +9,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { PaginatorModule } from 'primeng/paginator';
-import { InputTextareaModule, InputTextModule, TooltipModule, CalendarModule, MessageModule, OverlayPanelModule } from 'primeng/primeng';
+import { InputTextareaModule, InputTextModule, TooltipModule, CalendarModule, MessageModule, OverlayPanelModule, AccordionModule } from 'primeng/primeng';
 import { TableModule } from 'primeng/table';
 import { TabViewModule } from 'primeng/tabview';
 import { ReturnDialogComponent } from 'src/app/modules/rule-creation/new-idea-research/components/return-dialog/return-dialog.component';
@@ -68,7 +68,8 @@ import { ToastModule } from 'primeng/toast';
         ConfirmDialogModule,
         ToastModule,
         MessageModule,
-        OverlayPanelModule
+        OverlayPanelModule, 
+        AccordionModule
     ],
     providers: [
         DialogService, 

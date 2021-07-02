@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-import { DynamicDialogConfig, DynamicDialogRef, MessageService } from 'primeng/api';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/api';
 import { ECLConstantsService } from 'src/app/services/ecl-constants.service';
 import { IdeaService } from 'src/app/services/idea.service';
 import { RuleEngineTemplateService } from 'src/app/services/rule-engine-template.service';
@@ -11,8 +11,8 @@ import { EclIcmsNotifiedRulesDto } from 'src/app/shared/models/dto/ecl-icms-noti
 import { RuleInfo } from 'src/app/shared/models/rule-info';
 import { Constants } from '../../../../shared/models/constants';
 import { AppUtils } from '../../../../shared/services/utils';
-
-const RMR_TEMP_INGESTED_ICMS_RULES_STATUS = 'Ingested Rule';
+import { forkJoin } from 'rxjs';
+import { RrUtils } from 'src/app/modules/research-requests/services/rr-utils.component';
 
 @Component({
   selector: 'app-icms-template',
@@ -21,8 +21,10 @@ const RMR_TEMP_INGESTED_ICMS_RULES_STATUS = 'Ingested Rule';
 })
 export class IcmsTemplateComponent implements OnInit {
   headerText = 'Confirmation';
-  @ViewChild('pridControl') pridControl: ElementRef;
+  @ViewChild('pridControl',{static: true}) pridControl: ElementRef;
   createProjectForm: FormGroup;
+
+  submmitedTemplate = false;
 
   notifiedRules: any;
   goToFirstPage = false;
@@ -37,6 +39,7 @@ export class IcmsTemplateComponent implements OnInit {
   saveDisplay = false;
   clients: any[] = [];
   categories: any[] = [];
+  response: boolean = false;
   cvSources: any[] = [];
   changeSources: any[] = [];
   reasonCodes: any[] = [];
@@ -57,7 +60,7 @@ export class IcmsTemplateComponent implements OnInit {
   icmoClaimType: any[] = [];
   duplicateChecking: any[] = [];
   policyTypes: any[] = [];
-
+  loading: boolean = false;
   minDate: Date = new Date(1752, 1, 1);
   maxDate: Date = new Date(2050, 1, 1);
   implementationDt = new Date();
@@ -91,45 +94,20 @@ export class IcmsTemplateComponent implements OnInit {
   lotusNotesUrl;
 
   yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
-  
+
   constructor(private ruleEngineTemplateService: RuleEngineTemplateService, private ideaService: IdeaService, private ruleInfoService: RuleInfoService,
     private util: AppUtils, public config: DynamicDialogConfig, private utilService: UtilsService, private eclConstant: ECLConstantsService,
-    public ref: DynamicDialogRef, private fb: FormBuilder, private sanitization: DomSanitizer,
-    private messageService: MessageService) {
+    public ref: DynamicDialogRef, private fb: FormBuilder, private sanitization: DomSanitizer, private catalogUtils: RrUtils) {
     this.eclIcmsNotifiedRules = new EclIcmsNotifiedRulesDto();
     this.ruleInfo = new RuleInfo();
   }
 
   ngOnInit() {
-
-    this.getIcmsCatalog();
-    this.loadDataToFields();
-
-    this.industrialUpdates = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_INDUSTRY_UPDATE);
-    this.getMotherBabyFlag(this.eclConstant.LOOKUP_TYPE_ICMS_MOTHER_BABY_FLAG);
-    this.libraryStatus = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_LIBRARY_STATUS);
-    this.OOSs = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_OOS);
-    this.policyTypes = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_POLICY_TYPES);
-
+    this.loadInternalCatalogs();
+    this.readLookupValues();
     this.getAllLOBs();
-
-    this.util.getAllUsers(this.users);
-    this.util.getAllResearchAnalysts(this.anlysts);
-    this.util.getAllMedicalDirectors(this.medicalDirectors);
-
-    this.icmClaimType = [
-      { name: 'ICM Facility-Type F', id: 'F' },
-      { name: 'ICM ASC-Type A', id: 'A' },
-      { name: 'Professional-Type P', id: 'P' }];
-    this.icmoClaimType = [
-      { name: 'ICMO Facility-Type O', id: 'O' },
-      { name: 'ICMO Inpatient-Type I', id: 'I' },
-      { name: 'ICMP ASC-Type S', id: 'S' }];
-    this.duplicateChecking = [
-      { name: 'Temp Rules Database', id: '1' },
-      { name: 'Rules Maintenance', id: '2' },
-      { name: 'CCI Table', id: '3' },
-      { name: 'Max Units Tables (Frequency logic only)', id: '4' }];
+    this.getIcmsCatalog()
+    .then(() => this.loadDataToFields());
 
     // Create the prid project form.
     this.createProjectForm = this.fb.group({
@@ -137,7 +115,34 @@ export class IcmsTemplateComponent implements OnInit {
       summary: new FormControl(null, [Validators.required]),
       description: new FormControl(null, [Validators.required])
     });
+  }
 
+
+  private loadInternalCatalogs() {
+    this.icmClaimType = [
+      { name: 'ICM Facility-Type F', id: 'F' },
+      { name: 'ICM ASC-Type A', id: 'A' },
+      { name: 'Professional-Type P', id: 'P' }
+    ];
+    this.icmoClaimType = [
+      { name: 'ICMO Facility-Type O', id: 'O' },
+      { name: 'ICMO Inpatient-Type I', id: 'I' },
+      { name: 'ICMP ASC-Type S', id: 'S' }
+    ];
+    this.duplicateChecking = [
+      { name: 'Temp Rules Database', id: '1' },
+      { name: 'Rules Maintenance', id: '2' },
+      { name: 'CCI Table', id: '3' },
+      { name: 'Max Units Tables (Frequency logic only)', id: '4' }
+    ];
+  }
+
+  private async readLookupValues() {
+    this.industrialUpdates = await this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_INDUSTRY_UPDATE);
+    this.getMotherBabyFlag(this.eclConstant.LOOKUP_TYPE_ICMS_MOTHER_BABY_FLAG);
+    this.libraryStatus = await this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_LIBRARY_STATUS)
+    this.OOSs = await this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_OOS)
+    this.policyTypes = await this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_POLICY_TYPES)
   }
 
   /**
@@ -173,15 +178,52 @@ export class IcmsTemplateComponent implements OnInit {
   }
 
   loadDataToFields() {
+    this.loading = true;
     this.ruleInfo = this.config.data.rule;
+    let notes = this.config.data.notes;
+
+
     this.ruleEngineTemplateService.getICMSTemplate(this.ruleInfo.ruleId,
       Constants.RMR_TEMPLATE_IS_NOT_SUBMITTED, Constants.RMR_TEMP_TYPE).subscribe(response => {
+
         setTimeout(() => {
           if (response.data == null || response.data === undefined) {
             this.templateStatus = 'New';
             this.eclIcmsNotifiedRules = new EclIcmsNotifiedRulesDto();
             this.eclIcmsNotifiedRules.ruleId = this.ruleInfo.ruleId;
             this.eclIcmsNotifiedRules.description = this.ruleInfo.ruleDescription;
+
+            // Mapping new elements into the template ecl-12033;
+            // load notes
+            this.eclIcmsNotifiedRules.notes = notes;
+            const cvCode = this.cvCodes.find(code => code.value.name === this.config.data.cvCode);
+            if (cvCode) {
+              this.eclIcmsNotifiedRules.cvCode = cvCode.value;
+            }
+
+            // load claimTypes
+            const ruleClaimTypes = this.ruleInfo.claimsType;
+            if (ruleClaimTypes) {
+              ruleClaimTypes.forEach(element => {
+                this.icmClaimType.forEach(claimTy => {
+                  if (element.claimType.lookupCode.trim() === claimTy.id) {
+                    const ele = this.icmClaimType.find(icm => icm.id === claimTy.id);
+                    this.icm.push(ele);
+                  }
+                });
+    
+                this.icmoClaimType.forEach(claimTy => {
+                  if (element.claimType.lookupCode.trim() === claimTy.id) {
+                    const ele = this.icmoClaimType.find(icmo => icmo.id === claimTy.id);
+                    this.icmo.push(ele);
+                  }
+                })
+              });
+            }
+            
+            this.eclIcmsNotifiedRules.claimTypes = [...this.icm, ...this.icmo];
+            this.eclIcmsNotifiedRules.claimTypesICM = [...this.icm];
+            this.eclIcmsNotifiedRules.claimTypesICMO = [...this.icmo];
 
             if (this.ruleInfo.clientRationale !== undefined && this.ruleInfo.clientRationale !== null) {
               this.eclIcmsNotifiedRules.rationale = this.ruleInfo.clientRationale;
@@ -193,12 +235,32 @@ export class IcmsTemplateComponent implements OnInit {
 
             //start: autopopulate when data is empty
             // destructuring version
-            let { ruleLogicOriginal, reasonsForDev, scriptRationale, otherExceptions, clientRationale, ruleCode } = this.ruleInfo;
+            let { ruleLogicOriginal, eclReferences, scriptRationale, otherExceptions, clientRationale, ruleCode } = this.ruleInfo;
             let { prm } = this.config.data;
             const medicalPolicy = this.ruleInfo.category.categoryDesc;
             if (prm !== undefined && prm !== null) {
               this.eclIcmsNotifiedRules.prid = prm;
             }
+            // Load primary and secondary reference based on rule details page
+            if (eclReferences && eclReferences.length > 0) {
+              const firstRefence = this.refTitles.find(element => {
+                return element.label.toString().toUpperCase() === eclReferences[0].refInfo.referenceName.toUpperCase();
+              })
+
+              let secondRefence = null;
+              if (eclReferences.length > 1) {
+                secondRefence = this.refTitles.find(element => {
+                  return element.label.toString().toUpperCase() === eclReferences[1].refInfo.referenceName.toUpperCase();;
+                })
+              }
+              if (firstRefence && secondRefence) {
+                this.eclIcmsNotifiedRules.primaryRefTitle = firstRefence.value;
+                this.eclIcmsNotifiedRules.secondaryRefTitle = secondRefence.value;
+              } else if (firstRefence && !secondRefence) {
+                this.eclIcmsNotifiedRules.primaryRefTitle = firstRefence.value;
+              }
+            }
+
             if (ruleCode !== undefined && ruleCode !== null) {
               this.eclIcmsNotifiedRules.tempRuleNumber = ruleCode;
             }
@@ -207,7 +269,7 @@ export class IcmsTemplateComponent implements OnInit {
             if (ruleLogicOriginal !== undefined && ruleLogicOriginal !== null) {
               this.eclIcmsNotifiedRules.description = ruleLogicOriginal;
             }
-            
+
             // If we have lobs in config object we add them to template.
             this.eclIcmsNotifiedRules.lob = [];
             if (this.config.data.lobs) {
@@ -227,7 +289,7 @@ export class IcmsTemplateComponent implements OnInit {
               this.eclIcmsNotifiedRules.midRuleDesc = ruleLogicOriginal;
             }
 
-            this.eclIcmsNotifiedRules.libraryStatus = this.libraryStatus[0].value;
+            this.eclIcmsNotifiedRules.libraryStatus = this.libraryStatus[0].value;            
 
             if (scriptRationale !== undefined && scriptRationale !== null) {
               this.eclIcmsNotifiedRules.script = scriptRationale;
@@ -235,9 +297,7 @@ export class IcmsTemplateComponent implements OnInit {
             if (clientRationale !== undefined && clientRationale !== null) {
               this.eclIcmsNotifiedRules.rationale = clientRationale;
             }
-            if (otherExceptions !== undefined && otherExceptions !== null) {
-              this.eclIcmsNotifiedRules.notes = otherExceptions;
-            }
+            
             const medicalPolicySelected = this.medicalPolicies.find(element => element.value.name === medicalPolicy);
             if (medicalPolicySelected) {
               this.eclIcmsNotifiedRules.medicalPolicy = medicalPolicySelected.value;
@@ -245,8 +305,16 @@ export class IcmsTemplateComponent implements OnInit {
             //end: autopopulate when data is empty
             this.eclIcmsNotifiedRules.motherBabyFlag = 0;
 
+            if(this.ruleInfo && this.ruleInfo.pdgTemplateDto && this.ruleInfo.pdgTemplateDto.pdgId){
+              this.setPdgFields();
+            }
           } else {
             this.eclIcmsNotifiedRules = response.data.icmsTemplateDetails;
+
+            if (response.data.submitted === true) {
+              this.eclIcmsNotifiedRules.reasonCodes = response.data.icmsTemplateDetails.reasonCodes[0];
+            }
+            this.submmitedTemplate = response.data.submitted;
 
             // Load lobs.
             const responseLobs = [...response.data.icmsTemplateDetails.lob];
@@ -332,53 +400,110 @@ export class IcmsTemplateComponent implements OnInit {
               });
             }
           }
-          if (this.eclIcmsNotifiedRules === undefined || this.eclIcmsNotifiedRules.createdBy === undefined  && this.templateStatus !== RMR_TEMP_INGESTED_ICMS_RULES_STATUS) {
+          if (this.eclIcmsNotifiedRules === undefined || this.eclIcmsNotifiedRules.createdBy === undefined && response.data.submitted === false) {
             this.saveBtnDisable = false;
             this.submitBtnDisable = false;
-          } else if (this.eclIcmsNotifiedRules !== undefined && this.eclIcmsNotifiedRules.createdBy !== this.util.getLoggedUserId() && this.templateStatus === RMR_TEMP_INGESTED_ICMS_RULES_STATUS) {
+          } else if (this.eclIcmsNotifiedRules !== undefined && this.eclIcmsNotifiedRules.createdBy !== this.util.getLoggedUserId() && response.data.submitted === true) {
             this.saveBtnDisable = true;
             this.submitBtnDisable = true;
           }
-
-          // Check if stored values are valid or not.
-          const { prid, description, medicalPolicy, primaryRefTitle, cvCode, clients, industryUpdateReqd, reasonCodes, duplicateChecking } = this.eclIcmsNotifiedRules;
-
-          this.requiredFields.forEach(field => {
-
-            if (field.name === 'PRID') {
-              field.isValid = (!prid || prid.length === 0) ? false : true;
-            } else if (field.name === 'Description') {
-              field.isValid = (!description || description.length === 0) ? false : true;
-            } else if (field.name === 'Medical Policy') {
-              field.isValid = !medicalPolicy ? false : true;
-            } else if (field.name === 'Client Required') {
-              field.isValid = (!clients || clients.length <= 0) ? false : true;
-            } else if (field.name === 'Primary Reference') {
-              field.isValid = !primaryRefTitle ? false : true;
-            } else if (field.name === 'CV Code (Edit Flag)') {
-              field.isValid = !cvCode ? false : true;
-            }  else if (field.name === 'Reason Codes') {
-              field.isValid = (!reasonCodes || reasonCodes.length <=0) ? false : true;
-            } else if (field.name === 'Industry Update Required') {
-              field.isValid = !industryUpdateReqd ? false : true;
-            } else if (field.name === 'Claim Type') {
-              field.isValid = (this.icm.length === 0 && this.icmo.length === 0) ? false : true;
-            } else if (field.name === 'Duplicate Checking') {
-              field.isValid = (!duplicateChecking || duplicateChecking.length < Constants.DUPLICATE_CHECKING_REQUIRED) ? false : true;
-            }
-          });
-        }, 1500);
+          this.checkWhetherValidFields();
+          this.loading = false;
+         
+        }, 2000);
       });
 
     this.ruleEngineTemplateService.getICMSRulesByRule(this.ruleInfo.ruleId).subscribe(responseData => {
       const getIcmsRules = responseData.data;
-      if (getIcmsRules && getIcmsRules.submitted != null && getIcmsRules.submitted === true &&  getIcmsRules.icmsTemplateDetails.templateStatus === RMR_TEMP_INGESTED_ICMS_RULES_STATUS) {
+      if (getIcmsRules && getIcmsRules.submitted != null && getIcmsRules.submitted === true && this.submmitedTemplate === true) {
         this.saveBtnDisable = true;
         this.submitBtnDisable = true;
       } else {
         this.saveBtnDisable = false;
         this.submitBtnDisable = false;
       }
+    });
+   
+  }
+
+  checkWhetherValidFields(){
+     // Check if stored values are valid or not.
+     const { prid, description, medicalPolicy, primaryRefTitle, cvCode, clients, industryUpdateReqd, reasonCodes, duplicateChecking } = this.eclIcmsNotifiedRules;
+
+     this.requiredFields.forEach(field => {
+
+       if (field.name === 'PRID') {
+         field.isValid = (!prid || prid.length === 0) ? false : true;
+       } else if (field.name === 'Description') {
+         field.isValid = (!description || description.length === 0) ? false : true;
+       } else if (field.name === 'Medical Policy') {
+         field.isValid = !medicalPolicy ? false : true;
+       } else if (field.name === 'Client Required') {
+         field.isValid = (!clients || clients.length <= 0) ? false : true;
+       } else if (field.name === 'Primary Reference') {
+         field.isValid = !primaryRefTitle ? false : true;
+       } else if (field.name === 'CV Code (Edit Flag)') {
+         field.isValid = !cvCode ? false : true;
+       } else if (field.name === 'Reason Codes') {
+         field.isValid = (!reasonCodes || reasonCodes.length <= 0) ? false : true;
+       } else if (field.name === 'Industry Update Required') {
+         field.isValid = !industryUpdateReqd ? false : true;
+       } else if (field.name === 'Claim Type') {
+         field.isValid = (this.icm.length === 0 && this.icmo.length === 0) ? false : true;
+       } else if (field.name === 'Duplicate Checking') {
+         field.isValid = (!duplicateChecking || duplicateChecking.length < Constants.DUPLICATE_CHECKING_REQUIRED) ? false : true;
+       }
+     });
+  }
+
+   /**
+  * set pdg specific data in the object
+  */
+  setPdgFields() {
+    let pdgTemplateDto = this.ruleInfo.pdgTemplateDto;
+    this.eclIcmsNotifiedRules.primaryRefTitle = null;
+    this.eclIcmsNotifiedRules.secondaryRefTitle = null;
+
+    this.eclIcmsNotifiedRules.duplicateChecking = this.duplicateChecking;
+    this.eclIcmsNotifiedRules.subRuleDosFrom = new Date(pdgTemplateDto.dosFrom);
+    this.eclIcmsNotifiedRules.subRuleDosTo = new Date(pdgTemplateDto.dosTo);
+    this.getFirstCCAFromLibraryRule(this.ruleInfo, Constants.ECL_PROVISIONAL_STAGE).then(res => {
+      this.eclIcmsNotifiedRules.analyst = res;
+    });
+    this.util.getAllLookUpsByTypeAndDescription(Constants.ICMS_REF_TITLE, Constants.STATE, []).then((dest: any[]) => {
+      dest.forEach(item => {
+        let lookups = item.label.split("-");
+        let lookupCode = lookups[0].trim();
+        let lookupDesc = lookups[1].trim();
+        if (item.value == pdgTemplateDto.primaryReferenceTitle) {
+          this.eclIcmsNotifiedRules.primaryRefTitle = { name: lookupDesc, id: lookupCode };
+        } else if (item.value == pdgTemplateDto.secondaryReferenceTitle) {
+          this.eclIcmsNotifiedRules.secondaryRefTitle = { name: lookupDesc, id: lookupCode };
+        }
+      });
+    }).then(() => {
+      this.util.getAllLookUpsByTypeAndDescription(Constants.ICMS_INDUSTRY_UPDATE, Constants.MCAID, []).then((dest: any[]) => {
+        dest.forEach(item => {
+          if (item.value == pdgTemplateDto.industryUpdateRequired) {
+            let label = item.label.replace(/ /g, '')
+            this.eclIcmsNotifiedRules.industryUpdateReqd = { name: item.label, id: label };
+          }
+        });
+
+        this.reasonCodes.forEach(item => {
+          if (item.value.id == pdgTemplateDto.reasonCodeAndDescription) {
+            this.eclIcmsNotifiedRules.reasonCodes = { name: item.value.name, id: item.value.id };
+          }
+        });
+
+        this.clients.forEach(client => {
+          if (client.value == "MCD") {
+            this.eclIcmsNotifiedRules.clients = ["MCD"];
+          }
+        });
+        this.checkWhetherValidFields();
+      });
+
     });
   }
 
@@ -412,7 +537,7 @@ export class IcmsTemplateComponent implements OnInit {
     this.projectCreationModal = true;
     setTimeout(() => {
       this.arrayMessage = [];
-      this.arrayMessage = Object.assign([], [{ severity: 'info', summary: 'Info', detail: 'This will create a Stub Project Request in Lotus Notes, along to a PRID.  Please note that for using this PRID to create RMR, the Project request should be fully processed and Submitted in Lotus Notes.' }]); 
+      this.arrayMessage = Object.assign([], [{ severity: 'info', summary: 'Info', detail: 'This will create a Stub Project Request in Lotus Notes, along to a PRID.  Please note that for using this PRID to create RMR, the Project request should be fully processed and Submitted in Lotus Notes.' }]);
     }, 1000);
 
 
@@ -424,25 +549,31 @@ export class IcmsTemplateComponent implements OnInit {
    */
   checkIsValid(event, field) {
     let element = this.requiredFields.find(el => el.name === field);
-    if (typeof event === 'string' || event instanceof String) {
-      if (event && event.length > 0) {
+    if (typeof event === 'number' || event instanceof Number) {
+      if (event && event > 0) {
         element.isValid = true;
       } else {
         element.isValid = false;
       }
-    } else if (event && typeof event === 'object' && event.constructor === Object) {
-      if (event) {
-        element.isValid = true;
+    } else if (typeof event === 'string' || event instanceof String) {
+        if (event && event.length > 0) {
+          element.isValid = true;
+        } else {
+          element.isValid = false;
+        }
+      } else if (event && typeof event === 'object' && event.constructor === Object) {
+        if (event) {
+          element.isValid = true;
+        } else {
+          element.isValid = false;
+        }
       } else {
-        element.isValid = false;
+        if (event.length > 0) {
+          element.isValid = true;
+        } else {
+          element.isValid = false;
+        }
       }
-    } else {
-      if (event.length > 0) {
-        element.isValid = true;
-      } else {
-        element.isValid = false;
-      }
-    }
   }
 
   /**
@@ -543,7 +674,7 @@ export class IcmsTemplateComponent implements OnInit {
     }
   }
 
-  onHide(event){
+  onHide(event) {
     this.arrayMessage = [];
   }
 
@@ -565,20 +696,22 @@ export class IcmsTemplateComponent implements OnInit {
     });
   }
 
-  private getLookupValues(lookupSearchValue): any[] {
+  private getLookupValues(lookupSearchValue): Promise<any[]> {
     const result: any[] = [];
-    this.utilService.getAllLookUps(lookupSearchValue).subscribe(response => {
-      response.forEach(lookupValue => {
-        result.push({
-          label: lookupValue.lookupDesc,
-          value: {
-            name: lookupValue.lookupDesc,
-            id: lookupValue.lookupCode
-          }
+    return new Promise((resolve, reject) => {
+      this.utilService.getAllLookUps(lookupSearchValue).subscribe(response => {
+        response.forEach(lookupValue => {
+          result.push({
+            label: lookupValue.lookupDesc,
+            value: {
+              name: lookupValue.lookupDesc,
+              id: lookupValue.lookupCode,
+            }
+          });
         });
+        resolve(result);
       });
-    });
-    return result;
+    })
   }
 
   private getAllClientInfo(): void {
@@ -592,128 +725,146 @@ export class IcmsTemplateComponent implements OnInit {
     });
   }
 
-  private getIcmsCatalog() {
+  private getIcmsCatalog(): Promise<any> {
+    this.loading = true;
     const result: any[] = [];
-    this.utilService.getIcmsCatalog().subscribe(response => {
+    this.readAndLoadCategory();
+    return new Promise((resolve, reject) => {
+      forkJoin([
+        this.utilService.getIcmsCatalog(),
+        this.utilService.getAllUsers(),
+        this.utilService.getUsersByRole(this.eclConstant.USERS_CLINICAL_CONTENT_ANALYST),
+        this.utilService.getUsersByRole(this.eclConstant.USERS_MEDICAL_DIRECTOR_ROLE)
+       ]).subscribe(([response, allUsers, allAnalysts, allPeerReviewer]) => {
 
-      this.cvSources = response.data.cvSources.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: {
-              name: element.icmsValue,
-              id: element.icmsId
+        this.users = this.catalogUtils.convertIntoSelectItemArray(allUsers, 'firstName', 'userId');
+        this.anlysts = this.catalogUtils.convertIntoSelectItemArray(allAnalysts, 'firstName', 'userId');
+        this.medicalDirectors = this.catalogUtils.convertIntoSelectItemArray(allPeerReviewer, 'firstName', 'userId');
+        this.cvSources = response.data.cvSources.map(
+          element => {
+            return {
+              label: element.icmsValue,
+              value: {
+                name: element.icmsValue,
+                id: element.icmsId
+              }
             }
           }
+        );
+        if (this.cvSources.length == 0) {
+          this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CV_SOURCE)
+            .then(r => this.cvSources = r);
         }
-      );
-      if (this.cvSources.length == 0) {
-        this.cvSources = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CV_SOURCE);
-      }
 
-      this.cvCodes = response.data.cvCodes.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: {
-              name: element.icmsValue,
-              id: element.icmsId
+        this.cvCodes = response.data.cvCodes.map(
+          element => {
+            return {
+              label: element.icmsValue,
+              value: {
+                name: element.icmsValue,
+                id: element.icmsId
+              }
             }
           }
+        );
+        if (this.cvCodes.length == 0) {
+          this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CV_CODE)
+            .then(r => this.cvCodes = r);
         }
-      );
-      if (this.cvCodes.length == 0) {
-        this.cvCodes = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CV_CODE);
-      }
 
-      this.refTitles = response.data.refTitles.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: {
-              name: element.icmsValue,
-              id: element.icmsId
+        this.refTitles = response.data.refTitles.map(
+          element => {
+            return {
+              label: element.icmsValue,
+              value: {
+                name: element.icmsValue,
+                id: element.icmsId
+              }
             }
           }
+        );
+        if (this.refTitles.length == 0) {
+          this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_REF_TITLE)
+            .then(r => this.refTitles = r);
         }
-      );
-      if (this.refTitles.length == 0) {
-        this.refTitles = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_REF_TITLE);
-      }
 
-      this.claimTypeLinks = response.data.claimTypes.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: {
-              name: element.icmsValue,
-              id: element.icmsId
+        this.claimTypeLinks = response.data.claimTypes.map(
+          element => {
+            return {
+              label: element.icmsValue,
+              value: {
+                name: element.icmsValue,
+                id: element.icmsId
+              }
             }
           }
+        );
+        if (this.claimTypeLinks.length == 0) {
+          this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CLAIM_TYPE_LINK)
+            .then(r => this.claimTypeLinks = r);
         }
-      );
-      if (this.claimTypeLinks.length == 0) {
-        this.claimTypeLinks = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CLAIM_TYPE_LINK);
-      }
 
-      this.medicalPolicies = response.data.medicalPolicies.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: {
-              name: element.icmsValue,
-              id: element.icmsId
+        this.changeSources = response.data.changeSource.map(
+          element => {
+            return {
+              label: element.icmsValue,
+              value: {
+                name: element.icmsValue,
+                id: element.icmsId
+              }
             }
           }
+        );
+        if (this.changeSources.length == 0) {
+          this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CHANGE_SOURCE)
+            .then(r => this.changeSources = r);
         }
-      );
-      if (this.medicalPolicies.length == 0) {
-        this.medicalPolicies = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_MEDICAL_POLICY);
-      }
 
-      this.changeSources = response.data.changeSource.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: {
-              name: element.icmsValue,
-              id: element.icmsId
+        this.reasonCodes = response.data.reasonCodes.map(
+          element => {
+            return {
+              label: element.icmsValue,
+              value: {
+                name: element.icmsValue,
+                id: element.icmsId
+              }
             }
           }
+        );
+        if (this.reasonCodes.length == 0) {
+          this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_REASON_CODES)
+            .then(r => this.reasonCodes = r);
         }
-      );
-      if (this.changeSources.length == 0) {
-        this.changeSources = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_CHANGE_SOURCE);
-      }
 
-      this.reasonCodes = response.data.reasonCodes.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: {
-              name: element.icmsValue,
-              id: element.icmsId
+        this.clients = response.data.clients.map(
+          element => {
+            return {
+              label: element.icmsValue,
+              value: element.icmsId
             }
           }
+        );
+        if (this.clients.length == 0) {
+          this.getAllClientInfo();
         }
-      );
-      if (this.reasonCodes.length == 0) {
-        this.reasonCodes = this.getLookupValues(this.eclConstant.LOOKUP_TYPE_ICMS_REASON_CODES);
-      }
+        this.loading = false;
+        resolve(true);
+      });    
+    })   
+  }
 
-      this.clients = response.data.clients.map(
-        element => {
-          return {
-            label: element.icmsValue,
-            value: element.icmsId
+  private readAndLoadCategory() {
+    this.util.getAllCategoriesByPromise(this.categories)
+      .then(() => this.categories.forEach((element: any) => {
+        this.medicalPolicies.push({
+          label: element.label,
+          value: {
+            name: element.label,
+            id: element.value.toString()
           }
         }
-      );
-      if (this.clients.length == 0) {
-        this.getAllClientInfo();
-      }
-
-    });
+        );
+      }));
   }
 
   private getAllLOBs(): void {
@@ -739,10 +890,10 @@ export class IcmsTemplateComponent implements OnInit {
     }
   }
 
-    /**
-   * Every time the duplicate checking changes we check if is a valid selection.
-   * @param event that has the current value.
-   */
+  /**
+ * Every time the duplicate checking changes we check if is a valid selection.
+ * @param event that has the current value.
+ */
   onDuplicateCheckingSelection(event): void {
     const duplicateCheckingSelected = this.requiredFields.find(el => el.name === 'Duplicate Checking');
 
@@ -820,7 +971,55 @@ export class IcmsTemplateComponent implements OnInit {
     return str;
   }
 
+  /**
+	 * This method is used for getting the id of the fist CCA who worked on the rule
+	 * @param ruleId
+	 * @param stageId
+	 * @return cca id
+	 */
+  getFirstCCAFromLibraryRule(ruleInfo: RuleInfo, stageId): Promise<number> {
+    let parentRuleId = ruleInfo.parentRuleId;
+    let lookupList = [Constants.PROV_DRAFT_STATUS_CODE];
+    return new Promise<number>((resolve) => {
+      this.ruleInfoService.getFirstCCAFromLibraryRule(parentRuleId, stageId, lookupList).subscribe((res: any) => {
+        let assignedTo = res.data[0].assignedTo.userId;
+        resolve(assignedTo);
+      });
+    });
+  }
+
   get creationName() { return this.createProjectForm.get('name'); }
   get creationSummary() { return this.createProjectForm.get('summary'); }
   get creationDescription() { return this.createProjectForm.get('description'); }
+
+  
+  /**
+   * Short by selection.
+   *
+   * @param field that we want to evaluate.
+   */
+  shortBySelection(field: string) {
+    if(field && field === 'Client Required'){
+      for(let i = 0; i < this.eclIcmsNotifiedRules.clients.length; i++){
+        let selected = this.eclIcmsNotifiedRules.clients[i];
+        for(let j = 0; j < this.clients.length; j++){
+          if(this.clients[j].value === selected){
+            this.array_move(this.clients, j, 0);
+            break;
+          }
+        }
+      } 
+    }
+  }
+
+  private array_move(arr: any, old_index : number, new_index :number) {
+    if (new_index >= arr.length) {
+        var k = new_index - arr.length + 1;
+        while (k--) {
+            arr.push(undefined);
+        }
+    }
+    arr.splice(new_index, 0, arr.splice(old_index, 1)[0]);
+    return arr;
+  }
 }

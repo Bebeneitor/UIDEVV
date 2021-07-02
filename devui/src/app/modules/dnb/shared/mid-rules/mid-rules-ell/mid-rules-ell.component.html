@@ -1,0 +1,36 @@
+<p-dialog
+  #dialog
+  [header]="title"
+  [(visible)]="openDialog"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content">
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="header" style="width: 10%">Midrule</th>
+          <th class="header" style="width: 90%">Description</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let midR of midRules">
+          <td>
+            {{ midR.midrule }}
+          </td>
+          <td>
+            {{ midR.description }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p-footer>
+    <button *ngIf="!readOnlyDialog" class="dnb-btn" (click)="addRules()">
+      Add
+    </button>
+    <button *ngIf="readOnlyDialog" class="dnb-btn" (click)="dialogHidden()">
+      Close
+    </button>
+  </p-footer>
+</p-dialog>

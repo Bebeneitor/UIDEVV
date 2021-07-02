@@ -15,10 +15,12 @@ import { ProvisionalRuleComponent } from 'src/app/modules/rule-creation/provisio
 import { DialogService } from 'primeng/api';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { CvpService } from '../cvp-template/services/cvp.service';
+import { CpeService } from '../cpe-template/services/cpe.service';
 import { ToastMessageService } from 'src/app/services/toast-message.service';
 import { BaseResponse } from 'src/app/shared/models/base-response';
 import { FileUploaderOptions } from 'src/app/shared/models/file-uploader-options.model';
 import { AuthService } from 'src/app/services/auth.service';
+import { EclAsyncFileDetails } from 'src/app/shared/components/ecl-table/model/ecl-async-file-details';
 
 const jsPDF = require('jspdf');
 require('jspdf-autotable');
@@ -30,10 +32,14 @@ require('jspdf-autotable');
 })
 export class IngestedRulesComponent implements OnInit, OnDestroy {
 
-  @ViewChild('cvpIngestionTable') cvpIngestionTable: EclTableComponent;
-  @ViewChild('icmsTable') assignedTable: EclTableComponent;
+  @ViewChild('cvpIngestionTable',{static: true}) cvpIngestionTable: EclTableComponent;
+  @ViewChild('icmsTable',{static: true}) assignedTable: EclTableComponent;
+  @ViewChild('cpeTable',{static: true}) cpeTable: EclTableComponent;
 
   tableConfig: EclTableModel;
+  cpeTableConfig: EclTableModel;
+
+  tableManager: EclTableColumnManager;
 
   pageTitle: string;
   loading = false;
@@ -58,11 +64,14 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
 
   userRoles: any[];
   userHasCvpRole;
+  comeFromLibraryRuleScreen: boolean = false;
+  ruleId: number;
 
   constructor(private router: Router, private route: ActivatedRoute, public ruleIngestionService: RuleIngestionService,
     private utils: AppUtils, private messageService: MessageService, private utilsService: UtilsService, private dialogService: DialogService,
-    private permissions: NgxPermissionsService, private cvpService: CvpService, private toast: ToastMessageService, private authService: AuthService) {
+    private permissions: NgxPermissionsService, private cvpService: CvpService, private cpeService: CpeService, private toast: ToastMessageService, private authService: AuthService) {
     this.tableConfig = new EclTableModel();
+    this.cpeTableConfig = new EclTableModel();
     this.cvRuleValues = [
       { label: 'select', value: '' },
       { label: 'Yes', value: '1' },
@@ -74,28 +83,23 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
    * We get the user info, also the page title and we check the local storage if we have saved filters.
    */
   ngOnInit() {
+    const user = this.authService.getLoggedUser();
     // Check if we have cvp admin role.
-    this.userRoles = this.authService.getLoggedUser().roles;
+    this.userRoles = user.roles;
     if (this.userRoles && this.userRoles.length > 0) {
       this.userHasCvpRole = this.userRoles.find(role => {
         return role.roleName === 'CVPA';
       });
     }
 
-    this.userId = this.utils.getLoggedUserId();
+    this.userId = user.userId;
     this.route.data.subscribe(params => this.pageTitle = params['pageTitle']);
 
     this.ruleIngestionService.cols.forEach(value => {
       this.columnsToExport.push(value.field);
     });
 
-    this.route.queryParams.subscribe(params => {
-      if (params['tab'] === Constants.ICMS_INGESTION_TAB) {
-        this.activeTab = 0;
-      } else if (params['tab'] === Constants.CVP_INGESTION_TAB) {
-        this.activeTab = 1;
-      }
-    });
+
 
     //Check permissions, if the user just has CVP_USER role only can view CVP tab
     if (this.permissions.getPermission('ROLE_CCA') != undefined ||
@@ -112,7 +116,31 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
     }
 
     this.createIcmsTable();
+    this.createCpeTable();
+    this.createCvpTable();
+    this.checkQueryParams();
 
+    this.fileUpladerOptions.allowExtensions = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
+  }
+
+  private checkQueryParams() {
+    this.route.queryParams.subscribe(params => {
+      if (params['tab'] === Constants.ICMS_INGESTION_TAB) {
+        this.activeTab = 0;
+      } else if (params['tab'] === Constants.CVP_INGESTION_TAB) {
+        this.activeTab = 1;
+      } else if (params['tab'] === Constants.CPE_INGESTION_TAB) {
+        this.activeTab = 2;
+      }
+      this.filterICMSectionByMidRuleAndRuleCode(params);
+      if (this.assignedTable) {
+        this.assignedTable.refreshTable();
+      }
+    });
+  }
+
+
+  private createCvpTable() {
     let manager = new EclTableColumnManager();
     manager.addTextColumn('cvpTemplateDetails.moduleName', 'Module Name', "12%", true, EclColumn.TEXT, true);
     manager.addTextColumn('cvpTemplateDetails.ruleName', 'Rule Name', "12%", true, EclColumn.TEXT, true);
@@ -121,7 +149,7 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
     manager.addTextColumn('cvpTemplateDetails.claimType.name', 'Claim Types', "10%", true, EclColumn.TEXT, true);
     manager.addTextColumn('cvpTemplateDetails.cvRule.selected', 'CV Rule', "6%", true, EclColumn.DROPDOWN, true);
     manager.addTextColumn('cvpTemplateDetails.defenseText', 'Defense Text', null, true, EclColumn.TEXT, true, 50);
-    manager.addTextColumn('cvpTemplateDetails.ruleCategoryEffectiveDate', 'Rule Category Effective Date', "10%", true, EclColumn.DATE, true);
+    manager.addDateColumn('cvpTemplateDetails.ruleCategoryEffectiveDate', 'Rule Category Effective Date', '10%', true, true, EclColumn.DATE, 'MM/dd/yyyy');
 
     this.cvpTableConfig = new EclTableModel();
     this.cvpTableConfig.url = RoutingConstants.CVP_INGESTION_TEMPLATE + "/";
@@ -132,8 +160,6 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
     this.cvpTableConfig.excelFileName = 'CVP Ingested Rules';
     this.cvpTableConfig.filterGlobal = true;
     this.cvpTableConfig.checkBoxSelection = true;
-
-    this.fileUpladerOptions.allowExtensions = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel';
   }
 
   createIcmsTable() {
@@ -144,7 +170,7 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
     icmsManager.addTextColumn('identifier', 'Mid Rule', '10%', true, EclColumn.TEXT, true);
     icmsManager.addTextColumn('subIdentifier', 'Version', '10%', true, EclColumn.TEXT, true, 100);
     icmsManager.addTextColumn('deactivatedYn', 'Deactivated Midrule Version', '10%', true, EclColumn.TEXT, true, 10);
-    icmsManager.addTextColumn('implementationDate', 'Implementation Date', '10%', true, EclColumn.TEXT, true, 100);
+    icmsManager.addDateColumn('implementationDate', 'Implementation Date', '10%', true, true, EclColumn.DATE, 'MM/dd/yyyy');
     icmsManager.addTextColumn('logic', 'Logic', null, true, EclColumn.TEXT, true, 100);
     icmsManager.addTextColumn('ruleHeaderDescription', 'Rule Header Description', '15%', true, EclColumn.TEXT, true, 100);
     icmsManager.addTextColumn('category', 'Category', '10%', true, EclColumn.TEXT, true, 100);
@@ -156,6 +182,28 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
     this.tableConfig.url = url;
     this.tableConfig.filterGlobal = true;
     this.tableConfig.excelFileName = 'ICMS Ingested Rules';
+    this.tableConfig.asyncDownload = true;
+    let asyncFileDetails = new EclAsyncFileDetails();
+    asyncFileDetails.fileName = 'Ingested_Rules';
+    asyncFileDetails.processCode = 'IRL_QUERY';
+    this.tableConfig.asyncFileDetails = asyncFileDetails;
+  }
+
+  createCpeTable() {
+    this.tableManager = new EclTableColumnManager();
+    const url = `${RoutingConstants.CPE_INGESTION_URL}/templates/filtered`;
+
+    this.tableManager.addLinkColumn('cpeTemplateDetails.editName', 'Edit Name', null, true, EclColumn.TEXT, true);
+    this.tableManager.addTextColumn('cpeTemplateDetails.editDescriptionProduct', 'Short Description', null, true, EclColumn.TEXT, true);
+    this.tableManager.addTextColumn('cpeTemplateDetails.editDescription', 'Edit Description', null, true, EclColumn.TEXT, true);
+
+    this.cpeTableConfig.columns = this.tableManager.getColumns();
+    this.cpeTableConfig.paginationSize = 10;
+    this.cpeTableConfig.lazy = true;
+    this.cpeTableConfig.url = url;
+    this.cpeTableConfig.filterGlobal = true;
+    this.cpeTableConfig.checkBoxSelection = true;
+    this.cpeTableConfig.excelFileName = 'CPE Ingested Rules';
   }
 
   handleChange(event: any) {
@@ -168,21 +216,23 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
 
   redirectToRule(event: any) {
     const row = event.row;
+    let isCustomRule: boolean = row.libraryCustomInternal == Constants.CUSTOM_RULE;
     this.dialogService.open(ProvisionalRuleComponent, {
       data: {
         ruleId: row.ruleId,
         header: 'Library View',
         isSameSim: false,
         fromSameSimMod: true,
-        fromMaintenanceProcess: true,
         readOnlyView: true,
         provDialogDisable: true,
         provisionalRuleReview: true,
         readWrite: true,
         reviewStatus: [],
-        ruleReview: true
+        ruleReview: true,
+        isIngestedRule: true,
+        isCustomRule: isCustomRule
       },
-      header: 'Library Rule Details',
+      header: (isCustomRule ? 'Custom Rule' : 'Library Rule') + ' Details',
       width: '90%',
       height: '92%',
       closeOnEscape: false,
@@ -307,11 +357,18 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
   /**
    * Export CVP Selected Templates to Excel File by sending CVP Ingestion Id's to the service call.
    */
-  exportCVPTemplate() {
-    let cvpTemplateIds = this.cvpIngestionTable.selectedRecords.map(element => element.cvpIngestionId);
-    this.cvpService.exportCVPRules(cvpTemplateIds).subscribe((response: any) => {
-      this.createDownloadFileElement(response);
-      this.toast.messageSuccess(Constants.CVP_EXPORT_SUCCESS, Constants.EMPTY_MESSAGE, 4000, false);
+  exportTemplate(tableToExport: string, tableKey: string, service: string) {
+    const templateIds = this[tableToExport].selectedRecords.map(element => element[tableKey]);
+    const fileName = tableToExport === 'cvpIngestionTable' ? Constants.CVP_FILE_NAME : Constants.CPE_FILE_NAME;
+    const messageSuccess = tableToExport === 'cvpIngestionTable' ? Constants.CVP_EXPORT_SUCCESS : Constants.CPE_EXPORT_SUCCESS;
+
+    if (templateIds.length <= 0) {
+      return;
+    }
+
+    this[service].exportRules(templateIds).subscribe((response: any) => {
+      this.createDownloadFileElement(response, fileName);
+      this.toast.messageSuccess(messageSuccess, Constants.EMPTY_MESSAGE, 4000, false);
     });
   }
 
@@ -319,12 +376,12 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
    * Download the Excel File with the CVP Templates selected
    * @param response
    */
-  createDownloadFileElement(response: any) {
+  createDownloadFileElement(response: any, fileName: string) {
     var a = document.createElement("a");
     document.body.appendChild(a);
     let blob = new Blob([response], { type: Constants.FILE_TYPE }), url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = Constants.CVP_FILE_NAME;
+    a.download = fileName;
     a.click();
     window.URL.revokeObjectURL(url);
   }
@@ -336,6 +393,56 @@ export class IngestedRulesComponent implements OnInit, OnDestroy {
   onCvpTemplateUploadEnded(event) {
     this.ruleIngestionService.processCvpIngestionFile(event.data).subscribe((response: BaseResponse) => {
       this.toast.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, response.message);
+      this.cvpIngestionTable.refreshTable();
     });
   }
+
+  /**
+   * 
+   * @param event when the file is uploaded.
+   */
+  onCpeTemplateUploadEnded(event) {
+    this.ruleIngestionService.processCpeIngestionFile(event.data).subscribe((response: BaseResponse) => {
+      this.toast.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, response.message);
+    });
+  }
+
+  /**
+   * Redirects to the cpe ingestion page.
+   * @param event row object.
+   */
+  openCpeTemplate(event) {
+    this.router.navigate(['rule-ingestion/cpe-template/' + event.row.cpeIngestionId]);
+  }
+
+  /**
+   * This method is for load the icms table using specific midRule and ruleCode
+   * This method just works if the user comes from rule catalog screen
+   * @param midRule 
+   * @param ruleCode 
+   */
+  filterICMSectionByMidRuleAndRuleCode(params: any){
+    
+    let source = params['source'] as string;
+    
+    if(source && source === Constants.LIBRARY_RULE_SCREEN){
+
+      this.comeFromLibraryRuleScreen = true;
+      let ruleCode = params['RC'] as string;
+      let midRule = params['MR'] as string;
+      this.ruleId = params['RI'] as number;
+      this.tableConfig.criteriaFilters = {midRule: midRule}
+      this.tableConfig.url = `${RoutingConstants.RULE_INGESTION_URL}/${RoutingConstants.INGESTED_RULES_MID_RULE}?ruleEngine=ICMS`;
+      this.assignedTable.filtersColumns.identifier = midRule;
+      this.assignedTable.filters.identifier = midRule; 
+    }
+  }
+
+  returnPreviousScreen(){
+    if(this.comeFromLibraryRuleScreen){
+      this.router.navigate(['/item-detail', this.utils.encodeString(this.ruleId.toString()), 'RULE'],
+      { queryParams: { source: Constants.RULE_CATALOG_SCREEN } });      
+    }
+  }
+
 }

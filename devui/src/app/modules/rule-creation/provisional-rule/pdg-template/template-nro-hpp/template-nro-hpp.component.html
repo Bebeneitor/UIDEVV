@@ -1,0 +1,272 @@
+<div class="col-md-12 mt-3 nro" *ngIf="pdgOption">
+	<div class="row ">
+		<div class="template-head col-md-9">{{_pdgType}} </div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-12">
+			<label>Title<span class="required-field-color">*</span></label>
+			<textarea maxlength="250" class="text-area" [disabled]="provDialogDisable"
+				[(ngModel)]="_ruleInfo.ruleName"></textarea>
+		</div>
+	</div>
+	<div class="row mt-2"  [hidden]="!isHpp">
+		<div class="col-md-3">
+			<label>HPP MR<span class="required-field-color">*</span></label>
+				<input maxlength="50" type="text" [ngClass]="pdgOption === 'preview' ? 'readonly-field':'width100'"
+					[readonly]="pdgOption === 'preview'" (blur)="getRuleDescription()" [disabled]="provDialogDisable"
+					[(ngModel)]="_ruleInfo.pdgTemplateDto.hppMr">
+		</div>
+		<div class="col-md-9">
+			<label>HPP Rule Description<span class="required-field-color">*</span></label>
+			<textarea maxlength="500" class="text-area" [disabled]="provDialogDisable"
+				[(ngModel)]="_ruleInfo.pdgTemplateDto.hppRuleDesc"></textarea>
+		</div>
+	</div>
+	<div class="row mt-2 mssp-rev-row-height"  [hidden]="!isHpp"> 
+		<div class="col-md-12">
+			<label>MSSP Revisions<span class="required-field-color">*</span></label>
+			<div (mouseenter)="expandTextArea($event, textAreaType.msspRevisions)"  (mouseleave)="expandRevision = false">
+			<textarea id="txtMspRev" class="text-area" (keyup)="expandTextArea($event, textAreaType.msspRevisions)" [disabled]="provDialogDisable"
+				[(ngModel)]="_ruleInfo.pdgTemplateDto.revisions" maxlength="5000" cols="8"
+				[ngClass]="expandRevision ? 'expand-cols' : 'normal-cols'"
+				(paste)="validateCharacterLimit($event,'txtMspRev', _ruleInfo.pdgTemplateDto.revisions)"
+				(click)="expandTextArea($event, textAreaType.msspRevisions)" (blur)="expandRevision = false"></textarea>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-9">
+			<label>{{headingLabels.RULEDESC_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<div (mouseenter)="expandTextArea($event,  textAreaType.ruleLogic)" (mouseleave)="expandRuleLogic = false">
+				<textarea (keyup)="expandTextArea($event, textAreaType.ruleLogic)" maxlength="4000" class="text-area"  [disabled]="provDialogDisable"
+					[(ngModel)]="_ruleInfo.ruleLogicOriginal" [ngClass]="expandRuleLogic ? 'expand-cols' : 'normal-cols'"
+					(click)="expandTextArea($event, textAreaType.ruleLogic)" (blur)="expandRuleLogic = false"></textarea>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div>
+				<label>State<span class="required-field-color">*</span></label>
+				<p-dropdown [disabled]="provDialogDisable" [options]="optionStates"
+					[(ngModel)]="_selectedStates[0]" name="selectedStates"  [style]="{width:'100%'}"
+					(onChange)="_ruleInfo.pdgTemplateDto.states = _selectedStates;onStateSelection();"
+					pTooltip={{toolTips.selectedStateToolTip}} tooltipPosition="top" [tooltipZIndex]="999999999">
+				</p-dropdown>
+
+			</div>
+			<div>
+				<label>{{headingLabels.CLAIM_TYPE_LABEL(heading)}}<span class="required-field-color">*</span></label>
+				<p-multiSelect 
+					(onChange)="pdgUtil.setClaimTypeToolTip(pdgTemplateObj, _optionClaimTypes, toolTips)"
+					[options]="_optionClaimTypes" [disabled]="provDialogDisable"
+					[ngModel]="pdgTemplateObj?.claimTypesSelection"
+					(ngModelChange)="pdgTemplateObj.claimTypesSelection = $event; claimTypeChanged.emit($event)"
+					pTooltip={{toolTips.selectedClaimTypesToolTip}} tooltipPosition="top" [tooltipZIndex]="999999999">
+				</p-multiSelect>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-9">
+			<label>Code Description Examples<span class="required-field-color">*</span></label>
+			<div (mouseenter)="expandTextArea($event, textAreaType.codeDesc)"  (mouseleave)="expandCodeDesc = false">
+                <textarea id="txtCodeDesc" (keyup)="expandTextArea($event, textAreaType.codeDesc)"
+                    name="codeDesc" class="text-area text-area-codedec" [disabled]="provDialogDisable"
+                    [(ngModel)]="_ruleInfo.pdgTemplateDto.codeDesc" maxlength="32600" cols="8"
+                    [ngClass]="expandCodeDesc ? 'expand-cols' : 'normal-cols'" (click)="expandTextArea($event, textAreaType.codeDesc)"
+                    (blur)="expandCodeDesc = false"
+                    (paste)="expandTextArea($event, textAreaType.codeDesc); validateCharacterLimit($event, 'txtCodeDesc', _ruleInfo.pdgTemplateDto.codeDesc);"></textarea>
+            </div>
+		</div>
+		<div class="col-md-3">
+			<div>
+				<label>Sub Rule DOS From<span class="required-field-color">*</span></label>
+				<p-calendar appendTo="body" type="date" id="dosFrom" name="dosFrom" [disabled]="provDialogDisable"
+				[monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRange" dateFormat="mm/dd/yy"
+				placeholder="mm/dd/yyyy"
+				(onSelect)="pdgUtil.transformDosFromDate($event, _ruleInfo.pdgTemplateDto)" (change)="pdgUtil.transformDosFromDate(dosFrom, _ruleInfo.pdgTemplateDto)"
+				 [(ngModel)]="dosFrom" showButtonBar="true" (onClearClick)="pdgUtil.transformDosFromDate(dosFrom, _ruleInfo.pdgTemplateDto)">
+				</p-calendar>
+			</div>
+			<div>
+				<label>Sub Rule DOS To<span class="required-field-color">*</span></label>
+				<p-calendar appendTo="body" type="date" id="dosTo" name="dosTo" [disabled]="provDialogDisable"
+				[monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRange" dateFormat="mm/dd/yy"
+				placeholder="mm/dd/yyyy" 
+				(onSelect)="pdgUtil.transformDosToDate($event, _ruleInfo.pdgTemplateDto)" (change)="pdgUtil.transformDosToDate(dosTo, _ruleInfo.pdgTemplateDto)" 
+				[(ngModel)]="dosTo" showButtonBar="true" (onClearClick)="pdgUtil.transformDosToDate(dosTo, _ruleInfo.pdgTemplateDto)">
+				</p-calendar>
+			</div>
+		</div>
+	</div>
+
+	<app-prim-sec-details [provDialogDisable]="provDialogDisable" [optionsObj]="optionRefTitle" [pdgOption]="pdgOption"
+		[provDialogDisable]="provDialogDisable" [ruleInfo]="_ruleInfo"></app-prim-sec-details>
+	<div class="row mt-2">
+		<div class="col-md-6">
+			<label>CV Code<span class="required-field-color">*</span></label>
+			<p-dropdown [style]="{'width':'100%'}" [disabled]="provDialogDisable"
+				[options]="_optionCvCodes" [ngModel]="cvCodeSelected" (ngModelChange)="_ruleInfo.cvCode=$event"></p-dropdown>
+			
+		</div>
+		<div class="col-md-3">
+			<label>LOB<span class="required-field-color">*</span></label>
+			<input type="text" value="Medicaid" class="width100" [disabled]="true"/>
+		</div>
+		<div class="col-md-3">
+			<label>{{headingLabels.REASON_CODE_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<p-dropdown [options]="_optionReasonCodes"
+				(onChange)="pdgUtil.setReasonCodeToolTip(_ruleInfo, _optionReasonCodes, toolTips)"
+				pTooltip={{toolTips.selectedRCodeToolTip}} tooltipPosition="top" [disabled]="provDialogDisable"
+				[style]="{'width':'100%'}" [tooltipZIndex]="9999999999"
+				[ngModel]="reasonCodeSelected" (ngModelChange)="_ruleInfo.pdgTemplateDto.reasonCodeAndDescription=$event" [filter]="true" filterBy="label,value"
+				[virtualScroll]="true" itemSize="30" appendTo="body"></p-dropdown>
+		</div>
+	</div>
+	<div class="row mt-2">
+
+		<div class="col-md-6">
+			<label>Industry Update Required<span class="required-field-color">*</span></label>
+			<p-dropdown [options]="_optionIndustryUpdate" [disabled]="provDialogDisable"
+			[ngModel]="industryUpdateSelected" (ngModelChange)="_ruleInfo.pdgTemplateDto.industryUpdateRequired=$event" [style]="{'width':'100%'}"></p-dropdown>
+		</div>
+		<div class="col-md-6">
+			<label>{{headingLabels.SCRIPT_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<textarea class="text-area" [disabled]="provDialogDisable"
+				[(ngModel)]="_ruleInfo.scriptRationale"></textarea>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-6">
+			<label>{{headingLabels.RATIONALE_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<textarea class="text-area"[disabled]="provDialogDisable"
+				[(ngModel)]="_ruleInfo.clientRationale"></textarea>
+		</div>
+		<div class="col-md-6">
+			<label>{{headingLabels.NOTE_LABEL(heading)}}</label>
+			<div (mouseenter)="expandTextArea($event, textAreaType.notes)" (mouseleave)="expandSubRuleNotes = false">
+				<textarea id="txtSubRuleNotes" (keyup)="expandTextArea($event, textAreaType.notes)" class="text-area" maxlength="4000" [disabled]="provDialogDisable"
+					[(ngModel)]="_ruleInfo.pdgTemplateDto.notes?.ruleNotesDto.notes"
+					[ngClass]="expandSubRuleNotes ? 'expand-cols' : 'normal-cols'"
+					(click)="expandTextArea($event, textAreaType.notes)" (blur)="expandSubRuleNotes = false"
+					(paste)="expandTextArea($event, textAreaType.notes);validateCharacterLimit($event, 'txtSubRuleNotes', _ruleInfo.pdgTemplateDto.notes?.ruleNotesDto.notes)"
+					></textarea>
+			</div>
+		</div>
+	</div>
+	<div class="mt-2">
+		<div class="mb-2"><label>Duplicate Check<span class="required-field-color">*</span></label></div>
+		<div class="row">
+			<div class="col-md-3">
+				<label class="mr-3">CCI</label>
+				<span>
+					<input type="radio" id="cciY" name="cci" value="Y" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isCciDuplicate" />
+					<label for="cciY" class="pl-1 mr-2">Yes</label>
+					<input type="radio" id="cciN" name="cci" value="N" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isCciDuplicate" />
+					<label for="cciN" class="pl-1 mr-2">No</label>
+					<input type="radio" id="cciNil" name="cci" [value]="null"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isCciDuplicate" [disabled]="provDialogDisable" />
+					<label for="cciNil" class="pl-1">NA</label>
+				</span>
+			</div>
+			<div class="col-md-3 p-0">
+				<label class="mr-3">RMI</label>
+				<span>
+					<input type="radio" id="rmiY" name="rmi" value="Y" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isRmiDuplicate" />
+					<label for="rmiY" class="pl-1 mr-2">Yes</label>
+					<input id="rmiN" type="radio" name="rmi" value="N" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isRmiDuplicate" />
+					<label for="rmiN" class="pl-1 mr-2">No</label>
+					<input id="rmiNil" type="radio" name="rmi" [value]="null"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isRmiDuplicate" [disabled]="provDialogDisable" />
+					<label for="rmiNil" class="pl-1">NA</label>
+				</span>
+			</div>
+			<div class="col-md-3">
+				<label class="mr-3">BO</label>
+				<span>
+					<input type="radio" id="boY" name="bo" value="Y" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isBoDuplicate" />
+					<label for="boY" class="pl-1 mr-2">Yes</label>
+					<input id="boN" type="radio" name="bo" value="N" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isBoDuplicate" />
+					<label for="boN" class="pl-1 mr-2">No</label>
+					<input type="radio" id="boNil" name="bo" [value]="null"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isBoDuplicate" [disabled]="provDialogDisable" />
+					<label for="boNil" class="pl-1">NA</label>
+				</span>
+			</div>
+			<div class="col-md-3">
+				<label class="mr-3">Max Units</label>
+				<span>
+					<input type="radio" id="maxUY" name="maxU" value="Y" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isMaxUnitsDuplicate" />
+					<label for="maxUY" class="pl-1 mr-2">Yes</label>
+					<input type="radio" id="maxUN" name="maxU" value="N" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isMaxUnitsDuplicate" />
+					<label for="maxUN" class="pl-1 mr-2">No</label>
+					<input type="radio" id="maxUNil" name="maxU" [value]="null"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isMaxUnitsDuplicate" [disabled]="provDialogDisable">
+					<label for="maxUNil" class="pl-1">NA</label>
+				</span>
+			</div>
+		</div>
+		<div class="row mt-2">
+			<div class="col-md-3">
+				<label class="mr-3">Rules Search</label>
+				<span>
+					<input type="radio" id="rulesY" name="rules" value="Y" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isRulesSearchDuplicate" />
+					<label for="rulesY" class="pl-1 mr-2">Yes</label>
+					<input id="rulesN" type="radio" name="rules" value="N" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isRulesSearchDuplicate" />
+					<label for="rulesN" class="pl-1 mr-2">No</label>
+					<input id="rulesNil" type="radio" name="rules" [value]="null"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isRulesSearchDuplicate" [disabled]="provDialogDisable" />
+					<label for="rulesNil" class="pl-1">NA</label>
+				</span>
+			</div>
+			<div class="col-md-3 p-0">
+				<label class="mr-3">Temp Rule Database</label>
+				<span>
+					<input id="tmpY" type="radio" name="tmp" value="Y" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isTempRuleDbDuplicate" />
+					<label for="tmpY" class="pl-1 mr-2">Yes</label>
+					<input id="tmpN" type="radio" name="tmp" value="N" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isTempRuleDbDuplicate" />
+					<label for="tmpN" class="pl-1 mr-2">No</label>
+					<input id="tmpNil" type="radio" name="tmp" [value]="null"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isTempRuleDbDuplicate" [disabled]="provDialogDisable" />
+					<label for="tmpNil" class="pl-1">NA</label>
+				</span>
+			</div>
+			<div class="col-md-4">
+				<label class="mr-3">PDG Tracker Report</label>
+				<span>
+					<input id="pdgY" type="radio" name="tracker" value="Y" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isPdgTrackerReportDuplicate" />
+					<label for="pdgY" class="pl-1 mr-2">Yes</label>
+					<input id="pdgN" type="radio" name="tracker" value="N" [disabled]="provDialogDisable"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isPdgTrackerReportDuplicate" />
+					<label for="pdgN" class="pl-1 mr-2">No</label>
+					<input id="pdgNil" type="radio" name="tracker" [value]="null"
+						[(ngModel)]="_ruleInfo.pdgTemplateDto.isPdgTrackerReportDuplicate"
+						[disabled]="provDialogDisable" />
+					<label for="pdgNil" class="pl-1">NA</label>
+				</span>
+			</div>
+		</div>
+	</div>
+	<app-reference [provDialogDisable]="provDialogDisable" [pdgOption]="pdgOption" [stage]="stage"
+		[ruleInfo]="_ruleInfo" [refSourceOpts]="_refSourceOpts" [selectedReferences]="_selectedReferences"></app-reference>
+	<app-pdg-additional-info [provDialogDisable]="provDialogDisable" [pdgOption]="pdgOption" [ruleInfo]="_ruleInfo"
+	(cgFilesChanged)="addedClientGridFiles=$event" (codeFilesChanged)="addedCodeCovFiles=$event"
+	(claimTypeFilesChanged)="addedClaimTypeFiles=$event" (dosFilesChanged)="addedSubRuleDosFiles=$event"
+	(otherInfoFilesChanged)="addedOtherInfoFiles=$event" (cptFilesChanged)="addedCptFiles=$event" (ituFilesChanged)="addedItuFiles=$event"
+	(onCopyPaste)="validateCharacterLimit($event.event, $event.textId, $event.value)">		
+	</app-pdg-additional-info>
+
+
+</div>

@@ -18,7 +18,7 @@ import { Constants } from 'src/app/shared/models/constants';
   styleUrls: ['./mid-rule.component.css']
 })
 export class MidRuleComponent implements OnInit {
-  @ViewChild('eclTable') eclTable: EclTableComponent;
+  @ViewChild('eclTable',{static: true}) eclTable: EclTableComponent;
 
   tableConfig: EclTableModel;
   enabledEclTable: boolean;

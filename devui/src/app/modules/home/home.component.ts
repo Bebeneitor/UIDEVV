@@ -3,6 +3,8 @@ import { MessageService, DialogService } from 'primeng/api';
 import { DashboardService } from 'src/app/services/dashboard.service';
 import { AppUtils } from 'src/app/shared/services/utils';
 import { SettingsDasbhoardComponent } from 'src/app/shared/components/settings-dasbhoard/settings-dasbhoard.component';
+import { BaseResponse } from 'src/app/shared/models/base-response';
+import { OktaAuthService } from '@okta/okta-angular';
 
 @Component({
   selector: 'app-home',
@@ -27,15 +29,29 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   suscriptionDashboards : any = undefined;
 
+  availableWidgets: any[];
+
+  isAuthenticated: boolean;
+
   constructor(private dashboardService: DashboardService, private messageService: MessageService,
     private utils: AppUtils, private dialogService: DialogService,
-    private cdr : ChangeDetectorRef) { }
+    private cdr : ChangeDetectorRef,
+    private oktaAuth: OktaAuthService
+      ) {
+        
+        // subscribe to authentication state changes
+        this.oktaAuth.$authenticationState.subscribe(isAuthenticated => this.isAuthenticated = isAuthenticated);
+  
+    }
 
   ngOnDestroy() {
     this.suscriptionDashboards.unsubscribe();
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+    // get authentication state for immediate use
+    this.isAuthenticated = await this.oktaAuth.isAuthenticated();
+    
     if(this.suscriptionDashboards == undefined) {
       this.suscriptionDashboards = this.dashboardService.observableSave$.subscribe((response: any) => {
         let currentTimestamp = new Date().getTime();
@@ -72,16 +88,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   loadAll() {
-    this.dashboardService.getParameters(this.utils.getLoggedUserId()).then((response: any) => {
+
+    let userId = this.utils.getLoggedUserId();
+
+    this.dashboardService.getParameters(userId).then((response: any) => {
       this.pageTitle = '';
 
       this.cdr.detectChanges();
 
       this.pageTitle = response.title;      
 
-      this.loadWidgets().then(res => {
-        this.checkInterests();
-      });
+      this.dashboardService.getAvailableWidgetsByUser(userId).subscribe((response: BaseResponse) => {
+
+        this.availableWidgets = response.data.widgets;
+
+        this.loadWidgets().then(res => {
+          this.checkInterests();
+        });
+      });      
     });
   }
 
@@ -147,6 +171,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
       });
     });
+  }
+
+  isValidWidget(widgetReference: string) {
+    let widget = this.availableWidgets.find(a => a.widget.widgetReference === widgetReference);
+
+    return widget != null && widget != undefined;
   }
 
 }

@@ -1,0 +1,28 @@
+<div class="print-template">
+    <div class="side-container">
+        <button class="btn btn-primary sticky" (click)="print()">Print</button>
+        <button class="btn btn-primary sticky" (click)="endPrint()">Go Back</button>
+    </div>
+    <div class="wrapper">
+        <h4 class="print-title">{{printData.title}}</h4>
+        <p-table class="table-size" [columns]="printData.cols" [value]="printData.data" [reorderableColumns]="true" [responsive]="true"
+            [resizableColumns]="true" (sortFunction)="customSort($event)" [customSort]="true"> 
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th class="header-item" *ngFor="let col of columns" [ngStyle]="{'width': col.width}"
+                        [pSortableColumn]="col.field" pResizableColumn>
+                        {{col.header}}
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-data let-columns="columns">
+                <tr>
+                    <td *ngFor="let col of columns">
+                        <span class="break-word">{{data[col.field]}}</span>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <span *ngIf="count !== undefined" class="group">Record Count: {{count}} </span>
+    </div>
+</div>

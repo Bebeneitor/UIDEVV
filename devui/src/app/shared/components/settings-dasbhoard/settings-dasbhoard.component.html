@@ -1,0 +1,168 @@
+<div id="settingsDashboard" class="container-fluid" style="padding: 0px; max-height: 535px; overflow-y : auto; overflow-x: hidden;">
+  <div class="row">
+    <div class="col-12">
+
+      <p-tabView (onChange)="handleChange($event)">
+        <p-tabPanel header="Dashboards" leftIcon="fa fa-fw fa-columns" [selected]="startTab == 'widgets'">
+
+          <div class="container-fluid" style="padding: 0px;">
+            <div class="row">
+              <div class="col-md-4 col-sm-12">
+                <label class="title-ul">Available widgets</label>
+                <ul id="sortable1" class="sortable_list connectedSortable">
+                  <li class="ui-state-default" [attr.idWidget]="aw.id"
+                    [attr.widgetReference]="aw['widget-reference'] == undefined ? aw['widgetReference'] : aw['widget-reference']"
+                    *ngFor="let aw of availableWidgets">{{aw.title}}</li>
+                </ul>
+              </div>
+              <div class="col-md-4 col-sm-12">
+                <label class="title-ul">Dashboard (Column 1)</label>
+                <ul id="sortable2" class="sortable_list connectedSortable">
+                  <li class="ui-state-default" [attr.idWidget]="aw.id"
+                    [attr.widgetReference]="aw['widget-reference'] == undefined ? aw['widgetReference'] : aw['widget-reference']"
+                    *ngFor="let aw of widgets1">{{aw.title}}</li>
+                </ul>
+              </div>
+              <div class="col-md-4 col-sm-12">
+                <label class="title-ul">Dashboard (Column 2)</label>
+                <ul id="sortable3" class="sortable_list connectedSortable">
+                  <li class="ui-state-default" [attr.idWidget]="aw.id"
+                    [attr.widgetReference]="aw['widget-reference'] == undefined ? aw['widgetReference'] : aw['widget-reference']"
+                    *ngFor="let aw of widgets2">{{aw.title}}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </p-tabPanel>
+        <p-tabPanel header="Interests" leftIcon="fa fa-fw fa-list-ol" (click)="loadInterestsTab()"
+          [selected]="startTab == 'interests'">
+          <div class="container-fluid" style="padding: 0px">
+            <div class="row">
+              <div class="col-md-3 col-12">
+                <label>LOB:</label>
+                <select class="form-control" [(ngModel)]="interest.lob" (change)="checkLob()">
+                  <option value="0"></option>
+                  <option *ngFor="let l of lobs" [value]="l.value">{{l.label}}</option>
+                </select>
+              </div>
+              <div class="col-md-3 col-12">
+                <label>State:</label>
+                <select class="form-control" [(ngModel)]="interest.state" [disabled]="interest.lob !== '1'">
+                  <option value="0"></option>
+                  <option *ngFor="let l of states" [value]="l.value">{{l.label}}</option>
+                </select>
+              </div>
+              <div class="col-md-3 col-12">
+                <label>Jurisdiction:</label>
+                <select class="form-control" [(ngModel)]="interest.jurisdiction" [disabled]="interest.lob !== '2'">
+                  <option value="0"></option>
+                  <option *ngFor="let l of jurisdictions" [value]="l.value">{{l.label}}</option>
+                </select>
+              </div>
+              <div class="col-md-3 col-12">
+                <label>Category:</label>
+                <div class="input-group mb-3">
+                  <select class="form-control" [(ngModel)]="interest.category">
+                    <option value="0"></option>
+                    <option *ngFor="let l of categories" [value]="l.value">{{l.label}}</option>
+                  </select>
+                  <div class="input-group-append">
+                    <button class="btn btn-primary btn-sm" type="button" (click)="addInerest(true)"><i
+                        class="fa fa-plus"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row" *ngIf="errorList.length > 0">
+              <div class="col-12">
+                <div class="alert alert-danger">
+                  <ul class="errorList">
+                    <li *ngFor="let e of errorList">{{e}}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12">
+                <p-table #dt [columns]="cols" [value]="data" [paginator]="true" [rows]="5" [responsive]="true">
+                  <ng-template pTemplate="header" let-columns>
+                    <tr>
+                      <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                        [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}">
+                        {{col.header}}
+                        <p-sortIcon [field]="col.field" *ngIf="col.field != 'options'" ariaLabel="Activate to sort"
+                          ariaLabelDesc="Activate to sort in descending order"
+                          ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+                      </th>
+                    </tr>
+                    <tr>
+                      <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center"
+                        [ngStyle]="{'width': col.width}">
+                        <input pInputText type="text" *ngIf="col.field != 'options'"
+                          style="width : 100%; padding : 5px; border-radius: 5px"
+                          (input)="dt.filter($event.target.value, col.field, 'contains')"
+                          [placeholder]="'Search by ' + col.header">
+                      </th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-i="rowIndex" let-rowData let-columns="columns"
+                    let-rowIndex="rowIndex">
+                    <tr [pSelectableRow]="rowData">
+                      <td *ngFor="let col of columns">
+
+                        <span class="ui-column-title">{{col.header}}</span>
+
+                        <span *ngIf="col.field != 'options'">
+                          {{rowData[col.field]}}
+                        </span>
+
+                        <span style="display: block; text-align: center" *ngIf="col.field == 'options'">
+                          <button class="btn btn-sm btn-danger btn-block" type="button" (click)="removeInterest(i)"><i
+                              class="fa fa-trash"></i></button>
+                        </span>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+        <p-tabPanel header="Parameters" leftIcon="fa fa-fw fa-files-o" [selected]="startTab == 'parameters'">
+          <div class="container-fluid" style="padding: 0px">
+            <div class="row">
+              <div class="col-md-3 col-sm-12">
+                <label>Dashboard Title:</label>
+                <input type="text" class="form-control" placeholder="HOME PAGE"
+                  [(ngModel)]="parameters.title" maxlength="35"/>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 col-sm-12">
+                <label>Items to view:</label>
+                <input type="text" onlyNumbers class="form-control" placeholder="#"
+                  [(ngModel)]="parameters.rulesView" maxlength="4"/>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+    <div class="col-12">
+      <br>
+      <div class="float-right">
+        <button type="button" class="btn btn-sm btn-primary" (click)="save()"><i class="fa fa-save"></i>
+          Save</button>
+
+        <p-confirmDialog [style]="{width: '25vw'}" [appendTo]="body" [baseZIndex]="1003" [autoZIndex]="false">
+        </p-confirmDialog>
+        <button type="button" class="btn btn-sm btn-secondary" (click)="close()" style='margin-left : 5px;'><i
+            class="fa fa-remove"></i>
+          Close</button>
+      </div>
+    </div>
+  </div>
+</div>

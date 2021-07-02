@@ -30,11 +30,11 @@ const REF_COMMENTS_FILE2 = 2;
 })
 export class ProvisionalReferencesComponent implements OnInit, OnChanges {
 
-  @ViewChild('uploadControl') uploadControl: FileUpload;
-  @ViewChild('uploadControl1') uploadControl1: FileUpload;
-  @ViewChild('uploadControl2') uploadControl2: FileUpload;
-  @ViewChild('commentUpload1') commentUpload1: FileUpload;
-  @ViewChild('commentUpload2') commentUpload2: FileUpload;
+  @ViewChild('uploadControl',{static: false}) uploadControl: FileUpload;
+  @ViewChild('uploadControl1',{static: false}) uploadControl1: FileUpload;
+  @ViewChild('uploadControl2',{static: false}) uploadControl2: FileUpload;
+  @ViewChild('commentUpload1',{static: false}) commentUpload1: FileUpload;
+  @ViewChild('commentUpload2',{static: false}) commentUpload2: FileUpload;
   @Input() readOnlyView: boolean;
   @Input() ruleId: number;
   @Input() ruleInfo: RuleInfo;
@@ -684,6 +684,17 @@ export class ProvisionalReferencesComponent implements OnInit, OnChanges {
       this.clearFileUploadSelection(this.uploadControl2, 3);
       this.clearFileUploadSelection(this.commentUpload1, 4);
       this.clearFileUploadSelection(this.commentUpload2, 5);
+
+      if (this.reference && this.reference.pdgRefDto) {
+        this.eclRef.comments = '';
+        if (this.reference.pdgRefDto.comments1) {
+          this.eclRef.comments = `Screenshot1:\n${this.reference.pdgRefDto.comments1}\n`;
+        }
+        if (this.reference.pdgRefDto.comments2) {
+          this.eclRef.comments = `${this.eclRef.comments}Screenshot2:\n${this.reference.pdgRefDto.comments2}`;
+        }
+      }
+      
     }
   }
 

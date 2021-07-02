@@ -1,0 +1,5 @@
+.validate-button{
+    min-width: 150px !important; 
+    height: 30px !important;  
+    width: max-content !important;
+}

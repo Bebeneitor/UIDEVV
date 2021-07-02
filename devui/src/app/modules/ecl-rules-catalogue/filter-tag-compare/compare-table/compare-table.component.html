@@ -1,0 +1,92 @@
+<p-table #eclTable class="eclTable" [columns]="tableModel.columns" [value]="value"
+	[paginator]="tableModel.showPaginator" [rows]="tableModel.paginationSize"
+	[rowsPerPageOptions]="tableModel.showPaginatorOptions ? [10,50,100,500,1000] : null" [(selection)]="selectedRecords"
+	[totalRecords]="totalRecords" [lazy]="tableModel.lazy" (onLazyLoad)="loadData($event)"
+	[loading]="loading" [paginatorDropdownAppendTo]="paginatorReference" [sortField]="tableModel.sortBy" [sortOrder]="tableModel.sortOrder"
+	(onRowSelect)="onRowSelect($event)" (onRowUnselect)="onRowUnselect($event)" [dataKey]="tableModel.dataKey"
+	[responsive]='true' [scrollable]="tableModel.scrollable"
+	[scrollHeight]="tableModel.verticalScrollable ? tableModel.scrollHeight : 0" [(first)]="this.firstIndex">
+
+	<ng-template *ngIf="tableModel.horizontalScrollable" pTemplate="colgroup" let-columns>
+		<colgroup>
+		<col *ngFor="let col of columns" [style.width]="(tableModel.horizontalScrollable && col.width !=null) ? col.width : '250px'">
+		</colgroup>
+	</ng-template>
+
+	<ng-template pTemplate="header" let-columns>
+		<tr>
+			<th class="col-checkbox" *ngIf="tableModel.checkBoxSelection">
+				&nbsp;
+			</th>
+			<th *ngFor="let col of columns" [style.width]="col.width" [pSortableColumn]="col.field" class="text-center"
+				[pSortableColumnDisabled]="!col.sort || col.columnType == templateColumnsConstant.ICON || col.columnType == templateColumnsConstant.BUTTONS">
+				{{col.header}}
+				<p-sortIcon
+				*ngIf="tableModel.sort && (col.sort && col.columnType != templateColumnsConstant.ICON && col.columnType != templateColumnsConstant.BUTTONS)"
+				[field]="col.field" ariaLabel="Activate to sort" ariaLabelDesc="Activate to sort in descending order"
+				ariaLabelAsc="Activate to sort in ascending order">
+				</p-sortIcon>
+			</th>
+		</tr>
+		<tr *ngIf="filterRow">
+			<th class="col-checkbox" *ngIf="tableModel.checkBoxSelection">&nbsp;</th>
+			<th *ngFor="let col of columns" [style.width]="col.width">
+				<input *ngIf="col.filter && col.filterType == templateColumnsConstant.TEXT"
+				[(ngModel)]="filtersColumns[col.field]" class="form-control" type="text"
+				(input)="filter($event.target.value, col.field)" [placeholder]="'Search by ' + col.header"
+				[disabled]="keywordSearch != ''" maxlength="200">
+		
+				<div class="input-group" *ngIf="col.filter && col.filterType == templateColumnsConstant.DATE">
+					<p-calendar appendTo="body" [(ngModel)]="filtersColumns[col.field]"
+						(onSelect)="filter($event, col.field, col.filterType)" [readonlyInput]="true" [monthNavigator]="true"
+						[yearNavigator]="true" placeholder="mm/dd/yyyy" dateFormat="mm/dd/yy" [yearRange]="yearValidRangeEft"
+						[disabled]="keywordSearch != ''">
+					</p-calendar>
+					<div class="input-group-append group-absolute">
+						<button class="btn btn-secondary btn-sm" type="button" title="Clear Data"><i class="fa fa-eraser"
+							(click)="filter(null, col.field, col.filterType)"></i></button>
+					</div>
+				</div>
+			</th>
+		</tr>
+	</ng-template>
+	
+	<ng-template pTemplate="body" let-rowData let-columns="columns">
+		<tr [pSelectableRow]="rowData">
+			<td *ngFor="let col of columns" [style.width]="col.width" class="break-all">
+				<span class="ui-column-title">{{col.header}}</span>
+				<div [ngClass]="'text-' + col.alignment">
+					<ng-container *ngIf="rowData[col.field] != undefined && col.columnType == templateColumnsConstant.TEXT && col.maxLength > 0 
+						&& splitAttributes(rowData, col.field).length >= col.maxLength; else elseTemplate">
+						<span [pTooltip]="splitAttributes(rowData, col.field)" tooltipPosition="right"
+						[tooltipZIndex]="999999">{{ (splitAttributes(rowData, col.field) | slice:0:col.maxLength) + '...' }}</span>
+					</ng-container>
+					<ng-template #elseTemplate>
+						<span *ngIf="col.columnType == templateColumnsConstant.TEXT" [innerHTML]="splitAttributes(rowData, col.field)">
+						</span>
+						<span *ngIf="col.field === 'ruleCode' && rowData.newOrDeleted !== undefined && rowData.newOrDeleted === 'new'" class="newRule">N</span>
+							<span *ngIf="col.field === 'ruleCode' && rowData.newOrDeleted !== undefined && rowData.newOrDeleted === 'deleted'" class="deletedRule">D</span>
+					</ng-template>
+					<span *ngIf="col.columnType == templateColumnsConstant.DATE"
+          class="icon-column">{{(col.pipeName == null || col.pipeFormat == null) ? (splitAttributes(rowData, col.field) | date: 'MM/dd/yyyy') : (splitAttributes(rowData, col.field) | date: col.pipeFormat)}}</span>
+
+				</div>
+			</td>
+		</tr>
+	</ng-template>
+	
+	<ng-template pTemplate="paginatorright" let-state *ngIf="tableModel.showRecords" #paginatorReference>
+		<span *ngIf="state.totalRecords > 0" class="pagination-ecl-table">
+			Showing <b>{{(state.page * state.rows) + 1}}</b> -
+			<b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+			of <b>{{state.totalRecords}}</b>
+		</span>
+		<span class="pagination-ecl-table" *ngIf="state.totalRecords < 1">No records found.</span>
+	</ng-template>
+</p-table>
+
+<p-blockUI [blocked]="loading">
+	<div class="img-loading text-center">
+	  <img src="assets/img/loading.gif"/>
+	</div>
+</p-blockUI>

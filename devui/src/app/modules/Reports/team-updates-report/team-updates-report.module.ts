@@ -1,3 +1,6 @@
+import { NewIdeaResearchModule } from './../../rule-creation/new-idea-research/new-idea-research.module';
+import { NewIdeaResearchComponent } from './../../rule-creation/new-idea-research/new-idea-research.component';
+import { ProvisionalRuleModule } from './../../rule-creation/provisional-rule/provisional-rule.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PanelModule } from 'primeng/panel';
@@ -10,6 +13,8 @@ import { EclTableModule } from '../../../shared/components/ecl-table/ecl-table.m
 import { CalendarModule } from 'primeng/calendar';
 import { ChartModule } from 'primeng/chart';
 import { BlockUIModule } from 'primeng/blockui';
+import { DialogService } from "primeng/api";
+import { ProvisionalRuleComponent } from '../../rule-creation/provisional-rule/provisional-rule.component';
 
 @NgModule({
   declarations: [TeamUpdatesReportComponent],
@@ -23,7 +28,17 @@ import { BlockUIModule } from 'primeng/blockui';
     EclTableModule,
     CalendarModule,
     ChartModule,
-    BlockUIModule
+    BlockUIModule,
+    ProvisionalRuleModule,
+    NewIdeaResearchModule
+  ],
+  providers: [
+    DialogService
   ]
+  ,
+  entryComponents: [
+    ProvisionalRuleComponent,
+    NewIdeaResearchComponent
+   ]
 })
 export class TeamUpdatesReportModule { }

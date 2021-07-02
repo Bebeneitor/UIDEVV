@@ -39,7 +39,14 @@
             <div class="col-md-11 col-sm-12 dpdownDiv">
               <label>Filters</label>
               <p-dropdown [resetFilterOnHide]="true" [autoDisplayFirst]="false" [options]="filterDPList" [(ngModel)]="selectedFilter" (onChange)="showFilterInfo(true)"
-                [filter]="true" ></p-dropdown>
+                [filter]="true" >
+                <ng-template let-filter pTemplate="item">
+                  <div class="ui-helper-clearfix">                    
+                    <i *ngIf="!filter.value.isEditDeleteAllowed" class="fa fa-link options-assoc-icon"></i>
+                    <div class="select-options">{{filter.label}}</div>
+                  </div>
+              </ng-template>
+              </p-dropdown>
             </div>
           </div>
           <div class="row">

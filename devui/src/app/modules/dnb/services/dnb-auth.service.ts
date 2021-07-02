@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from "src/environments/environment";
 import { apiMap, apiPath } from "../models/path/api-path.constant";
+import { map } from "rxjs/operators";
 const BASE_URL = environment.restServiceDnBUrl;
 
 @Injectable({
@@ -21,5 +22,29 @@ export class DnbAuthService {
       {},
       { headers: headers }
     );
+  }
+
+  getRolePermissions(roleCode: string) {
+    return this.http
+      .get<any>(
+        `${BASE_URL}${apiMap.restServiceDnbAuth}${apiPath.roles}${roleCode}${apiPath.permissions}`
+      )
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      );
+  }
+
+  getDnbPermissions(userName: string) {
+    return this.http
+      .get<any>(
+        `${BASE_URL}${apiMap.restServiceDnbAuth}${apiPath.authUsers}${userName}${apiPath.permissions}`
+      )
+      .pipe(
+        map((response) => {
+          return response;
+        })
+      );
   }
 }

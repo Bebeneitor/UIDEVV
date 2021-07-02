@@ -65,7 +65,7 @@ h3 {
   display: inline-block;
   position: relative;
   top: 4px;
-  min-width: 10px;
+  min-width: 15px;
 }
 
 .codes-input ::ng-deep app-cell-editor .ql-container {
@@ -82,18 +82,18 @@ h3 {
   margin: 0 0 10px;
 }
 
-.disable-section {
+.toggle-section {
   padding: 0 5px;
 }
 
-.disable-section ::ng-deep p-inputSwitch .ui-inputswitch {
+.toggle-section ::ng-deep p-inputSwitch .ui-inputswitch {
   width: 1.75em !important;
   height: 1.25em !important;
   position: relative;
-  top: 2px;
+  top: 4px;
 }
 
-.disable-section
+.toggle-section
   ::ng-deep
   p-inputSwitch
   .ui-inputswitch
@@ -104,10 +104,89 @@ h3 {
   bottom: 0.25em !important;
 }
 
-.disable-section
+.toggle-section
   ::ng-deep
   p-inputSwitch
   .ui-inputswitch.ui-inputswitch-checked
   .ui-inputswitch-slider:before {
   transform: translateX(0.5em) !important;
+}
+
+.is-text.pin {
+  padding: 0 5px;
+  position: relative;
+}
+
+.dnb-progress-checkbox ::ng-deep p-checkbox .ui-chkbox .ui-chkbox-box {
+  width: 16px;
+  height: 16px;
+}
+
+.dnb-progress-checkbox
+  ::ng-deep
+  p-checkbox
+  .ui-chkbox
+  .ui-chkbox-box
+  .ui-chkbox-icon {
+  font-size: 14px;
+}
+
+.dnb-progress-checkbox
+  ::ng-deep
+  p-checkbox
+  .ui-chkbox
+  .ui-chkbox-box.ui-state-active {
+  border-color: #009688 !important;
+  background-color: #8bc34a !important;
+}
+
+.feedback-warning {
+  color: #ff9800;
+  font-size: 15px !important;
+  width: 20px;
+}
+
+.ell-btn {
+  padding: 0 3px;
+  line-height: 20px;
+  height: 20px;
+}
+
+.hideSection {
+  display: none;
+}
+
+.ell-wrap {
+  position: relative;
+  padding: 5px 8px 5px 14px;
+  display: inline-block;
+}
+
+.ell-wrap:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border: 1px solid #31006f;
+  border-radius: 30px;
+}
+
+.ell-wrap:after {
+  content: "ELL";
+  background: #f2f3f7;
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 25px;
+  font-size: 10px;
+  text-align: center;
+}
+
+.ell-wrap .ell-btn,
+.ell-wrap .toggle-section {
+  position: relative;
 }

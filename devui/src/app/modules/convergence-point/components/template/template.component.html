@@ -1,0 +1,67 @@
+<div class="div-template">
+  <p-tabView *ngIf="parentPage == 'CRC'" class="tab-template" [activeIndex]="activeIndex" (onChange)="changeTabTemplate($event)">
+    <p-tabPanel header="Primary Requirement">
+    </p-tabPanel>
+    <p-tabPanel header="Section">
+    </p-tabPanel>
+  </p-tabView>
+
+
+  <div style="padding : 5px">
+    <span *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP']">
+      <p-radioButton name="type" value="U" [label]="activeIndex == 0 ? 'Upload Primary Requirement Template' : 'Upload Section Template'" [(ngModel)]="type" inputId="upload"></p-radioButton>
+      &nbsp;&nbsp;
+    </span>
+    <p-radioButton name="type" value="D" (onClick)="loadTemplate()" [label]="activeIndex == 0 ? 'Download Primary Requirement Template' : 'Download Section Template'" [(ngModel)]="type" inputId="download">
+    </p-radioButton>
+
+    <hr>
+
+    <div *ngIf="activeIndex == 1">
+      <div class="ui-g" style="width:100%;">       
+        <div class="ui-g-12">
+          <p-radioButton name="subType" (onClick)="loadTemplate()" [value]="'CLIENT_CONTEXT' + screenAI" label="Section - Client Context" [(ngModel)]="subType">
+          </p-radioButton>
+        </div>
+        <div class="ui-g-12">
+          <p-radioButton name="subType" (onClick)="loadTemplate()" [value]="'DEFENSE_MATRIZ' + screenAI" label="Section - Defense Matrix" [(ngModel)]="subType">
+          </p-radioButton>
+        </div>
+        <div class="ui-g-12">
+          <p-radioButton name="subType" (onClick)="loadTemplate()" [value]="'OPTIMIZER' + screenAI" label="Section - Optimizer Hierarchies" [(ngModel)]="subType">
+          </p-radioButton>
+        </div>
+        <div class="ui-g-12">
+          <p-radioButton name="subType" (onClick)="loadTemplate()" [value]="'RULE_CATEGORIES' + screenAI" label="Section - Rule Categories" [(ngModel)]="subType">
+          </p-radioButton>
+        </div>       
+      </div>
+      <hr>
+    </div>
+
+    <div *ngIf="type == 'U'">
+      <app-file-loader (onFileLoad)="loadFile($event)"></app-file-loader>
+    </div>
+
+    <div *ngIf="type == 'D'">
+      <div *ngIf="loadedTemplate != null" style="color: #31006F;">
+        <i class="fa fa-file"></i> {{loadedTemplate.name}}
+        <hr>
+      </div>
+      <div *ngIf="loadedTemplate == null && loadTemplate != undefined" class="alert alert-danger f-11">
+        No template exist, please upload it first.
+      </div>
+    </div>
+
+    <hr *ngIf="type == 'U'">
+
+    <div class="div-buttons">
+      <button (click)="cancel()" type="button" class="btn btn-primary btn-template f-11">Cancel</button>
+      <button [disabled]="fileLoaded == null" (click)="upload()" type="button" class="btn btn-primary btn-template f-11"
+        *ngIf="type == 'U'">Upload
+        Template</button>
+      <button (click)="download()" type="button" class="btn btn-primary btn-template f-11" *ngIf="type == 'D'">Download
+        Template</button>
+    </div>
+  </div>
+</div>

@@ -1,3 +1,26 @@
-<p>
-  drugs-in-approval-process works!
-</p>
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
+<div class="dnb-page-header">
+  <h1 class="dnb-title">Drugs In Approval Process</h1>
+</div>
+<p-tabView (onChange)="reloadData($event)">
+  <ng-container>
+    <p-tabPanel [selected]="true" header="My Work">
+      <app-my-work #myWork></app-my-work>
+    </p-tabPanel>
+  </ng-container>
+  <ng-container *ngIf="isEditor || isDNBAdmin">
+    <p-tabPanel header="In Progress">
+      <app-in-progress #inProgress></app-in-progress>
+    </p-tabPanel>
+  </ng-container>
+  <ng-container *ngIf="isEditor || isApprover || isDNBAdmin">
+    <p-tabPanel header="Submitted for Review">
+      <app-submitted-for-review #submittedForReview></app-submitted-for-review>
+    </p-tabPanel>
+  </ng-container>
+  <ng-container *ngIf="isApprover || (isEditor && isApprover) || isDNBAdmin">
+    <p-tabPanel header="In Review">
+      <app-in-review #inReview></app-in-review>
+    </p-tabPanel>
+  </ng-container>
+</p-tabView>

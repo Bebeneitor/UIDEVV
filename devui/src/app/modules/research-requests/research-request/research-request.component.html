@@ -1,0 +1,660 @@
+<p-blockUI [blocked]="loading">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+<form #researchRequestForm="ngForm">
+
+  <div class="research-request">
+    <h2>
+      <span class="nav-page-title" (click)="navigateBack()">
+        {{navPageTitle}}
+      </span>
+      <span class="fa fa-chevron-right" aria-hidden="true"></span>
+      <span> {{rrCode}}</span>
+    </h2>
+    <div class="research-request-form">
+      <div class="row rr-rows">
+        <div class="col-6"><span class="font-weight-bold">CI JIRA: </span>{{jiraId}}</div>
+      </div>
+      <div class="row rr-rows">
+        <div class="col-6">
+          <h2>{{researchRequestObj.requestSummary | titlecase }}</h2>
+        </div>
+        <div class="col-6 flex-rr-btn">
+          <button class="btn btn-primary mr-2" name="projectRequest" (click)="openProjectRequest()"
+            [disabled]="checkProjectRequestBtnDisabled() || searchDisable">Project Request</button>
+          <button class="btn btn-primary mr-2" name="cloneButton" (click)="showCloneDialog(true)"
+            [disabled]="searchDisable">Clone</button>
+          <button class="btn btn-primary mr-2" name="rrStartButton" value="StartResearch"
+            [disabled]="rrButtonsDisable || rrReadOnly || startRrDisable" (click)="startResearch()">Start
+            Research</button>
+          <button name="rrRefreshButton" class="btn btn-primary" value="Refresh"
+            [disabled]="rrButtonsDisable && rrReadOnly" (click)="refreshRequest()">CI Jira Sync</button>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="col-8">
+          <div class="row">
+            <div class="container">
+              <div class="row rr-rows">
+                <div class="col-12">
+                  <h3>Details</h3>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2">
+                  <label><span class="required-field-color">*</span>Request Type:</label>
+                </div>
+                <div class="col-8">
+                  <p-dropdown name="issueType" placeholder="Choose" [style]="dropDownStyles" [options]="issueTypeList"
+                    [(ngModel)]="researchRequestObj.issueType" [disabled]="rrReadOnly">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label><span class="required-field-color">*</span>Client(s):</label></div>
+                <div class="col-8">
+                  <p-multiSelect id="client" name="rrClients" placeholder="Choose" [style]="dropDownStyles"
+                    [options]="clientsList" [(ngModel)]="researchRequestObj.clientSelected"
+                    (onChange)="populateClientAndPayers();setClientToolTip()" [disabled]="rrReadOnly"
+                    pTooltip="{{clientToolTip}}" tooltipPosition="bottom">
+                  </p-multiSelect>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label>Super Payer(s):</label></div>
+                <div class="col-8">
+                  <p-multiSelect name="rrSuperPayers" placeholder="Choose" [style]="dropDownStyles"
+                    [options]="superPayerList" [(ngModel)]="researchRequestObj.superPayersSelected"
+                    (onChange)="setSuperPayersToolTip()" [disabled]="rrReadOnly || isClient"
+                    pTooltip="{{superPayerSelToolTip}}" tooltipPosition="bottom">
+                  </p-multiSelect>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label>Payer Status:</label></div>
+                <div class="col-8">
+                  <p-dropdown name="rrPayers" placeholder="Choose" (onChange)="populatePayersByPayerStatus()"
+                    [style]="dropDownStyles" [options]="payerStatusList"
+                    [(ngModel)]="researchRequestObj.selectedPayerStatus" [disabled]="rrReadOnly || isClient">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label><span class="required-field-color">*</span>Payer(s):</label></div>
+                <div class="col-8">
+                  <p-multiSelect name="rrPayers" placeholder="Choose" [style]="dropDownStyles" [options]="payerList"
+                    [(ngModel)]="researchRequestObj.selectedPayerList" (onChange)="setPayersToolTip()"
+                    [disabled]="rrReadOnly || isClient" pTooltip="{{selPayListToolTip}}" tooltipPosition="bottom">
+                  </p-multiSelect>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label><span class="required-field-color">*</span>Team</label></div>
+                <div class="col-8">
+                  <p-dropdown id="teamName" name="teamName" placeholder="Choose" (onChange)="getTeamMembersList(true)"
+                    [style]="teamStyle" [options]="teamsList" [(ngModel)]="researchRequestObj.team"
+                    [disabled]="rrReadOnly && teamDisable">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label>Team Supervisor(s):</label></div>
+                <div class="col-8">
+                  <div class="col-field-box">
+                    <span class="span-supervisor" *ngFor="let user of teamSupervisors">
+                      {{user.label}}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label><span class="required-field-color" [hidden]="teamDisable">*</span>Team
+                    Assignee:</label></div>
+                <div class="col-8">
+                  <p-dropdown name="teamAssignee" placeholder="Choose" [style]="dropDownStyles"
+                    [options]="teamAssigneeList" [(ngModel)]="researchRequestObj.teamAssignee"
+                    [disabled]="rrReadOnly && teamDisable" (onChange)="changeAssigneeField()">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label><span class="required-field-color">*</span>Policy Research Request
+                    Type:</label></div>
+                <div class="col-8">
+                  <p-dropdown name="policyRRType" placeholder="Choose" [style]="dropDownStyles"
+                    [options]="policyTypeList" [(ngModel)]="researchRequestObj.policyType" [disabled]="rrReadOnly">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"><label>SD Priority</label></div>
+                <div class="col-8">
+                  <p-dropdown name="SDPriority" placeholder="Choose" [style]="dropDownStyles" [options]="SDPriorityList"
+                    [(ngModel)]="researchRequestObj.sdPriority" [disabled]="rrReadOnly">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div *ngIf="researchRequestObj.requestLink" class="row rr-rows">
+                <div class="col-2"><label>Link</label></div>
+                <div class="col-8">
+                  <div *ngIf="this.rrReadOnly">
+                    <span class="link-read-wrap" *ngFor="let link of researchRequestObj.requestLink.split(' ')">
+                      <a style="font-size:12px;color: #007ad9;" (click)="redirectToUrl(link)">
+                        {{link}}</a>
+                    </span>
+                  </div>
+                  <div *ngIf="!this.rrReadOnly">
+                    <div *ngIf="hoverEdit" (mouseleave)="linkHoverOut()">
+                      <input class="form-control" [(ngModel)]="researchRequestObj.requestLink" type="text"
+                        name="refUrl1" pattern="^[a-z0-9_-]{8,15}$" #url1="ngModel" maxlength="1000" />
+                      <div *ngIf="url1.invalid && (url1.dirty || url1.touched)" class="alert alert-danger">
+                        <div *ngIf="url1.errors.pattern">
+                          Must start with http:// or https:// and one or more characters
+                        </div>
+                      </div>
+                    </div>
+                    <div *ngIf="!hoverEdit" class="input-link">
+                      <div class="link-overflow">
+                        <span class="link-wrap" *ngFor="let link of researchRequestObj.requestLink.split(' ')">
+                          <a style="font-size:12px;color: #007ad9;" (click)="redirectToUrl(link);linkHoverIn()">
+                            {{link}}</a>
+                        </span>
+                      </div>
+                      <span class="link-wrap-img">
+                        <i class="fa fa-pencil" aria-hidden="true" (click)="linkHoverIn()"></i>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row rr-rows" *ngIf="researchRequestObj.attachmentCategory">
+                <div class="col-2"><label>Attachment Category</label></div>
+                <div class="col-8">
+                  <p-dropdown name="attachmentCategory" placeholder="Choose" [style]="dropDownStyles"
+                    [options]="attachmentCategoryList" [(ngModel)]="researchRequestObj.attachmentCategory"
+                    [disabled]="rrReadOnly">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows" *ngIf="researchRequestObj.labels">
+                <div class="col-2"><label>Labels</label></div>
+                <div class="col-8">
+                  <input type="text" maxlength="500" name="labels" [(ngModel)]="researchRequestObj.labels"
+                    [disabled]="rrReadOnly" />
+                </div>
+              </div>
+              <div class="row rr-rows" *ngIf="researchRequestObj.eLLCommittee">
+                <div class="col-2"><label>eLL Committee QA Review Complete?(eLL Use Only)</label></div>
+                <div class="col-8">
+                  <p-dropdown name="eLLCommittee" placeholder="Choose" [style]="dropDownStyles"
+                    [options]="eLLCommitteeList" [(ngModel)]="researchRequestObj.eLLCommittee" [disabled]="rrReadOnly">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows" *ngIf="researchRequestObj.qaReason">
+                <div class="col-2"><label>QA Result Reason(eLL Use Only)</label></div>
+                <div class="col-8">
+                  <p-dropdown name="QAResultReason" placeholder="Choose" [style]="dropDownStyles"
+                    [options]="QAReasonList" [(ngModel)]="researchRequestObj.qaReason" [disabled]="rrReadOnly">
+                  </p-dropdown>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-2"> <label>Line Of Business</label></div>
+                <div class="col-8">
+                  <p-multiSelect name="lineOfBusiness" [style]="dropDownStyles" [options]="lineOfBusinessList"
+                    [(ngModel)]="researchRequestObj.lineOfBusiness" [disabled]="rrReadOnly"
+                    pTooltip="{{lineOfBusinessTooltip}}" tooltipPosition="bottom">
+                  </p-multiSelect>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="row">
+            <div class="container">
+              <div class="row rr-rows">
+                <div class="col-12">
+                  <h3>Status</h3>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Status:</label></div>
+                <div class="col-9"><label>{{researchRequestObj.rrStatus}}</label></div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Resolution:</label></div>
+                <div class="col-9"><label>{{researchRequestObj.rrResolution}}</label></div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Route To:</label></div>
+                <div class="col-9">
+                  <select class="form-control" name="rrRouteTo" id="route-to-list" (change)="showAssigneeList()"
+                    [(ngModel)]="researchRequestObj.rrRouteTo" [disabled]="rrReadOnly && rrButtonsDisable">
+                    <option *ngFor="let listItem of routeToList" [value]="listItem.value" [style]="labelStyle"
+                      [disabled]="validateRouteToOptions(listItem.label)">
+                      {{listItem.label}}
+                    </option>
+                  </select>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="container">
+              <div class="row rr-rows">
+                <div class="col-12">
+                  <h3>People</h3>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Assignee:</label></div>
+                <div class="col-9">
+                  <select class="form-control" id="assignee-list" (change)="checkRrCommentsAreMandatory()"
+                    [(ngModel)]="researchRequestObj.assignee" name="assignee"
+                    [disabled]="(rrReadOnly && rrButtonsDisable) || disableAssigneeList">
+                    <option *ngFor="let listItem of assigneeList" [value]="listItem.value">
+                      {{listItem.label}}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Reporter:</label></div>
+                <div class="col-9"><label>{{rrReporter}}</label></div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Internal CC List:</label></div>
+                <div class="col-9">
+                  <div class="col-field-box">
+                    <div class="span-cc-list-search"><input type="text" list="user-list" (keyup)="searchCCUsers()"
+                        [(ngModel)]="searchUser" (change)="searchCCUsers()" placeholder="Type to Search.."
+                        [ngModelOptions]="{standalone: true}" class="form-control input-rule-search" />
+                      <div *ngIf="userSearchList">
+                        <datalist id="user-list">
+                          <option *ngFor="let user of userSearchList" [value]="user.firstName">
+                            {{user.email}}
+                          </option>
+                        </datalist>
+                      </div>
+                    </div>
+                    <div class="span-cc-list-selection" *ngIf="selectedCCUsersList">
+                      <span class="span-cc-selected-user" *ngFor="let user of selectedCCUsersList">
+                        <span>{{user.firstName}}</span>
+                        <span class="fa fa-times" aria-hidden="true" (click)="removeSelectedCCUser(user)"></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Watchers:</label></div>
+                <div class="col-9">
+                  <div class="col-field-box">
+                    <div class="span-cc-list-search"><input type="text" list="user-watcher-list"
+                        (keyup)="searchWatcherUsers()" [(ngModel)]="searchWatcherUser" (change)="searchWatcherUsers()"
+                        placeholder="Type to Search.." [ngModelOptions]="{standalone: true}"
+                        class="form-control input-rule-search" />
+                      <div *ngIf="userSearchWatcherList">
+                        <datalist id="user-watcher-list">
+                          <option *ngFor="let user of userSearchWatcherList" [value]="user.firstName">
+                            {{user.email}}
+                          </option>
+                        </datalist>
+                      </div>
+                    </div>
+                    <div class="span-cc-list-selection" *ngIf="selectedWatcherUsersList">
+                      <span class="span-cc-selected-user" *ngFor="let user of selectedWatcherUsersList">
+                        <span>{{user.firstName}}</span>
+                        <span class="fa fa-times" aria-hidden="true" (click)="removeSelectedWatcherUser(user)"></span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="container">
+              <div class="row rr-rows">
+                <div class="col-12">
+                  <h3>Dates</h3>
+                </div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3">
+                  <label><span class="required-field-color">*</span>Due:</label>
+                </div>
+                <div class="col-9"> <input class="form-control" name="requestDueDate"
+                    [(ngModel)]="researchRequestObj.requestDueDate" min="{{currentDate | date:'yyyy-MM-dd'}}"
+                    type="date" [disabled]="(rrReadOnly && rrButtonsDisable && rrDueDateEnable)" /></div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Created:</label></div>
+                <div class="col-9"><label>{{researchRequestObj.rrCreatedDate}}</label></div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Updated:</label></div>
+                <div class="col-9"><label>{{researchRequestObj.rrUpdatedDate}}</label></div>
+              </div>
+              <div class="row rr-rows">
+                <div class="col-3"><label>Resolved:</label></div>
+                <div class="col-9"><label>N/A</label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="container rr-container">
+          <div class="row rr-rows">
+            <div class="col-12">
+              <h3><span class="required-field-color">*</span>Description</h3>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-12">
+              <textarea name="requestDescription" class="form-control input-textarea"
+                [(ngModel)]="researchRequestObj.requestDescription" rows="8" [disabled]="rrReadOnly"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="container rr-container">
+          <div class="row rr-rows">
+            <div class="col-12">
+              <h3>Resolution</h3>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-1"><label><span *ngIf="checkStatusforRequestorReview()"
+                  class="required-field-color">*</span>Resolution Comments:</label></div>
+            <div class="col-11"><textarea id="rrResoComments" name="rrResolutionComments"
+                class="form-control input-textarea" rows="8" [disabled]="(rrButtonsDisable && rrReadOnly)"
+                [(ngModel)]="researchRequestObj.rrResolutionComments"
+                (input)="removeRedOutline('rrResoComments')"></textarea>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-1"><label><span *ngIf="checkStatusforRequestorReview()"
+                  class="required-field-color">*</span>Request Classification:</label></div>
+            <div class="col-3">
+              <p-dropdown name="requestClassification" [style]="dropDownStyles" [options]="requestClassificationList"
+                placeholder="Choose" [disabled]="(rrButtonsDisable && rrReadOnly) || disableResolution()"
+                [(ngModel)]="researchRequestObj.rrReqClassificationId">
+              </p-dropdown>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-1"><label><span *ngIf="enableReason" class="required-field-color">*</span>Reason:</label>
+            </div>
+            <div class="col-3">
+              <p-dropdown #sendBackReason name="sendBackReason" [style]="dropDownStyles" [options]="sendBackReasonList"
+                placeholder="Choose" [disabled]="(rrReadOnly)" [(ngModel)]="researchRequestObj.sendBackReasonId">
+              </p-dropdown>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <input #rrFileInput type="file" name="rrfiles" (change)="addFiles($event)" class="file-upload" multiple="true">
+        <div class="container rr-container">
+          <div class="row rr-rows">
+            <div class="col-12 rr-attachment-header">
+              <span [class]="rrFileSelectionStyle" (click)="clickFileUpload()">Add
+                Attachments</span>
+              <span class="span-rr-file-header">
+                <h3>Attachments</h3>
+              </span>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-12">
+              <div class="col-field-row">
+                <div *ngIf="researchRequestObj.requestAttachments">
+                  <div *ngFor="let file of researchRequestObj.requestAttachments">
+                    <div class="selected-file" *ngIf="!file.deleted">
+                      <span class="fa fa-file" aria-hidden="true"></span>
+                      <span class="file-name"
+                        (click)="downloadSavedFile(file.fileId, file.fileName)">{{file.fileName}}</span>
+                      <span class="fa fa-times rr-file" aria-hidden="true" *ngIf="!rrButtonsDisable"
+                        (click)="removeSavedFile(file.eclRrAttachmentsId, file.fileName)"></span>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="filesList">
+                  <div class="selected-file" *ngFor="let file of filesList">
+                    <span class="fa fa-file" aria-hidden="true"></span><span class="file-name">{{file.name}}</span><span
+                      class="fa fa-times rr-file" aria-hidden="true" (click)="removeSelectedFile(file)"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="col-12" style="padding: 0">
+          <rr-issue [setRequest]="researchRequestObj" [pageSetup]="pageSetup" [rrCode]="rrCode"></rr-issue>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="container rr-container">
+          <div class="row rr-rows">
+            <div class="col-12 d-flex justify-content-end search-btns">
+              <button name="rrSearchRuleIdButton" class="btn btn-primary rr-btn rr-new-pr-btn"
+                value="New Idea/Provisional Rule" [disabled]="rrButtonsDisable && rrReadOnly"
+                (click)='searchRuleIds()'>Search Rule IDs</button>
+              <button name="rrNewPR" class="btn btn-primary rr-btn rr-submit-btn" value="New Idea/Provisional Rule"
+                [disabled]="rrButtonsDisable && rrReadOnly" (click)="createNewIdeaRR()">New Idea/Provisional
+                Rule</button>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-12">
+              <h3>Rule Response</h3>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-1">
+              <fieldset class="version-legend">
+                <legend style="font-size: 9px; margin: 0; width: 55%">Version</legend>
+                <span style="color: red">Old</span>
+                <span style="color: blue">Current</span>
+              </fieldset>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <p-table class="rule-response-table" #viewGrid [columns]="cols" [value]="ruleResponses"
+                [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+                sortField="updatedOn" sortOrder="-1">
+                <ng-template pTemplate="header" let-columns>
+                  <tr>
+                    <th id="colHeaders" class="small-th" style="text-align: center" *ngFor="let col of columns"
+                      [ngStyle]="{'width': col.width}" pResizableColumn>
+                      <span *ngIf="col.field === 'reviewComment'" class="required-field-color">*</span>
+                      {{col.header}}
+                    </th>
+                    <th id="colHeaderAction" class="small-th" style="text-align: center">Action</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex" let-columns="columns">
+                  <tr>
+                    <td *ngFor="let col of columns"
+                      [ngStyle]="{'width': col.width, 'background-color': 'rgba(255, 255, 255, 1)'}">
+                      <span *ngIf="col.field === 'engine'">{{rowData.engine}} </span>
+                      <span *ngIf="col.field === 'ruleCode'">
+                        <span *ngIf="!rowData.cvpCpeRuleLink">
+                          <div *ngIf="rowData.previousVersionLibraryRulePresent == true" style="padding-bottom: 17px;">
+                            <span class="prev-code">{{updateRuleCode(rowData.ruleCode, 0)}}</span>
+                            <span class="curr-code"
+                              (click)="viewRuleModal(rowData)">{{updateRuleCode(rowData.ruleCode,1)}}
+                            </span>
+                          </div>
+                          <div *ngIf="!rowData.previousVersionLibraryRulePresent">
+                            <span class="active-link" (click)="viewRuleModal(rowData)">{{rowData.ruleCode}}</span>
+                          </div>
+                        </span>
+                        <span *ngIf="rowData.cvpCpeRuleLink">{{rowData.ruleCode}}</span>
+                      </span>
+                      <span *ngIf="col.field === 'ruleName'">{{rowData.ruleName}}</span>
+                      <span *ngIf="col.field === 'icmsId'">{{rowData.icmsId}}</span>
+                      <span *ngIf="col.field == 'changeType'" class="span-centered">
+                        <select class="form-control" [name]="'changeType' + rowIndex" [(ngModel)]="rowData.changeType"
+                          [disabled]="(rrButtonsDisable && rrReadOnly ) || disableChangeType(rowData)">
+                          <option *ngFor="let listItem of getChangeTypeValues(rowData)" [value]="listItem.value"
+                            [style]="labelStyle">
+                            {{listItem.label}}
+                          </option>
+                        </select>
+                      </span>
+
+                      <span *ngIf="col.field == 'ruleStatus'" class="span-centered">
+                        {{rowData.ruleStatus}}
+                      </span>
+
+                      <span *ngIf="col.field == 'approvalStatus'" class="span-centered">
+                        {{rowData.approvalStatus}}
+                      </span>
+
+                      <span *ngIf="col.field == 'rrRuleStatus'" class="span-centered">
+                        <p-dropdown [disabled]="(rrButtonsDisable && rrReadOnly) || disableRRRuleStatus(rowData)"
+                          appendTo='body' [options]="ruleResponseStatus" [(ngModel)]="rowData.rrRuleStatus"
+                          name="rrRuleStatus{{rowIndex}}" [style]="{'width':'100%'}"
+                          (onChange)="getSelectedRejectRule(rowData)">
+                        </p-dropdown>
+                      </span>
+
+                      <span *ngIf="col.field === 'reviewComments'">
+                        <span
+                          *ngIf="!rejectCommentEnable(rowData) && !disableRRRuleStatus(rowData) && !ruleCommentReadOnly()"
+                          class="required-field-color">*</span>
+                        <input type="text" [name]="'reviewComments' + rowIndex"
+                          [disabled]="disableRRRuleStatus(rowData) || ruleCommentReadOnly()" style="width:80%;"
+                          [(ngModel)]="rowData.reviewComments" (keydown)="openWindow(rowData, $event)" />
+                        <span *ngIf="rrRowRuleCommentEdit" [className]="(disableRRRuleStatus(rowData) || ruleCommentReadOnly())?
+                                                                        'edit-inactive': 'edit-active'">
+                          <i class="fa fa-edit" (click)="openWindow(rowData, $event)"></i>
+                        </span>
+                      </span>
+                    </td>
+                    <td [ngStyle]="{'background-color': 'rgba(255, 255, 255, 1)'}">
+                      <span [ngSwitch]="validateAction(rowData)">
+                        <span *ngSwitchCase="0" [ngClass]="deleteIconStyle" aria-hidden="true"
+                          (click)="deleteRule(rowData)"></span>
+                        <span *ngSwitchCase="1" [ngClass]="activeLink"
+                          (click)="updateRule(rowData)">{{ccaClaimLabel}}</span>
+                        <span *ngSwitchCase="2" class="active-link" (click)="updateRule(rowData)">Initiate</span>
+                        <span *ngSwitchCase="3" class="active-link" (click)="updateRule(rowData)">Assign</span>
+                        <span *ngSwitchDefault class="inactive-link">Assigned</span>
+                      </span>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-12">
+              <div class="col-field-row">
+                <span class="col-field-row-block">
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="container rr-container">
+          <div class="row rr-rows">
+            <div class="col-12">
+              <h3><span *ngIf="enableComment" class="required-field-color">*</span>Comments</h3>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-12"><textarea id="txtComments" name="txtComments" class="form-control input-textarea"
+                rows="8" [disabled]="searchDisable" [(ngModel)]="researchRequestObj.rrComments"
+                (input)="removeRedOutline('txtComments')"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="container rr-container">
+          <div class="row rr-rows">
+            <div class="col-12">
+              <h3>Activity</h3>
+            </div>
+          </div>
+          <div class="row rr-rows">
+            <div class="col-12">
+              <p-tabView id="rrTabView" [(activeIndex)]="rrTabIndex">
+                <p-tabPanel header="Comments">
+                  <app-research-request-comments #rrComments [rrId]="rrId"
+                    (onCommentsDialogClosed)="onCommentsDialogClosed($event)"></app-research-request-comments>
+                </p-tabPanel>
+                <p-tabPanel header="History">
+                  <app-research-request-history #rrHistory [rrId]="rrId"></app-research-request-history>
+                </p-tabPanel>
+              </p-tabView>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row rr-rows">
+        <div class="col-12 d-flex justify-content-between">
+          <button #saveButton name="rrSaveButton" class="btn btn-primary rr-btn rr-save-btn" value="Save"
+            [disabled]="searchDisable" (click)="updateResearchRequest(saveAction)">Save</button>
+          <button name="exit" *ngIf="showExitButton()" (click)="navigateBack()"
+            class="btn btn-primary rr-btn">Exit</button>
+          <button name="rrSubmit" class="btn btn-primary rr-btn rr-submit-btn" value="Submit"
+            [disabled]="(rrButtonsDisable && rrReadOnly) || validateSubmitBtn()"
+            (click)="showConfirmationForRCDialog(submitAction)">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</form>
+<p-confirmDialog [style]="{width: '35vw'}" key="confirmRCDialog"></p-confirmDialog>
+<p-confirmDialog #cd header="Confirm?" [style]="{width: '35vw'}" key="confirmAttachmentDialog">
+  <p-footer>
+    <button type="button" name="removeAttachmentCancelBtn" class="btn btn-primary" pButton (click)="cd.reject()"
+      label="Cancel"></button>
+    <button type="button" name="removeAttachmentDeletebtn" class="btn btn-primary" pButton (click)="cd.accept()"
+      label="Delete"></button>
+  </p-footer>
+</p-confirmDialog>
+
+
+
+<p-dialog header="Clone Research Request {{rrCode}}" [style]="{width: '35vw'}" class="clone-dialog"
+  [(visible)]="cloneVisability" draggable="false" modal="true" [closable]="false">
+  <div style="margin: 0 20px;">
+    <label>Summary</label>
+    <textarea maxLength="2000" style="width: 100%; height: 80px;" [(ngModel)]="tempSummary"
+      (paste)="checkTextAreaMaxLength($event)"></textarea>
+  </div>
+  <div class="dialog-flex-rr">
+    <p-checkbox name="cloneCheck" *ngIf="checkFileLength()" [binary]="true" [(ngModel)]="cloneAttachBool"
+      label="Clone Attachments"></p-checkbox>
+    <p-checkbox name="cloneCheck" *ngIf="checkRuleResponseLength()" [binary]="true" [(ngModel)]="cloneRuleRespBool"
+      label="Clone Rule Responses">
+    </p-checkbox>
+  </div>
+  <p-footer>
+    <div class="row justify-se">
+      <button name="removeAttachmentDeletebtn" style="width: 40%; margin-left: 7px;" class="btn btn-primary" pButton
+        (click)="showCloneDialog(false)" label="Cancel"></button>
+      <button name="removeAttachmentCancelBtn" style="width: 40%;" class="btn btn-primary" pButton
+        (click)="startCloneProcess()" label="Ok"></button>
+    </div>
+  </p-footer>
+</p-dialog>

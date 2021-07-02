@@ -1,0 +1,97 @@
+.ecl-keyword-search {
+    max-width:150px; 
+    border-radius: 5px; 
+    display: inline-block;
+}
+
+.ecl-keyword-icon {
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 5px; 
+    margin-left: 5px;
+}
+
+.display-multiline {
+  display: block;
+  min-height: 18px;
+}
+
+::ng-deep .hyperlink {
+    color: #3273dc;
+    text-decoration: underline #3273dc;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+::ng-deep p-table.eclTable > div.ui-table.ui-widget > .ui-table-caption.ui-widget-header {
+    padding: 5px !important;
+}
+
+::ng-deep p-table.eclTable .ui-table .ui-table-thead > tr > th {
+    background-color: #fff;
+}
+
+::ng-deep .col-checkbox { 
+    width: 4em !important;
+}
+::ng-deep .col-checkbox-hor { 
+    width: 44px !important;
+}
+
+::ng-deep .pagination-ecl-table {
+    position: absolute; 
+    right: 10px;
+}
+
+::ng-deep .link-column {
+    cursor: pointer; 
+    text-decoration: underline;
+}
+
+::ng-deep .icon-column {
+    display: block; 
+    width: 100%; 
+    text-align: center;
+}
+
+::ng-deep .icon-item {
+    cursor: pointer; 
+    font-size: 19px; 
+    color: #31006F;
+}
+
+::ng-deep .break-all {
+    word-break: break-all;
+}
+
+::ng-deep .f-18 {
+    font-size: 18px;
+}
+
+::ng-deep .btn-ecl-table {
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+span.counter-icon {
+    text-align: center;
+    font-size: 10px;
+    color: white;
+    border-radius: 50%;
+    display: inline-block;
+    background: #9179b7;
+    width: 15px;
+    line-height: 15px;
+    height: 15px;
+    margin-left: 3px;
+}
+
+::ng-deep  .added {
+    color: blue !important;
+}
+
+::ng-deep .deleted {
+    color: red !important;
+    text-decoration: line-through !important;
+}

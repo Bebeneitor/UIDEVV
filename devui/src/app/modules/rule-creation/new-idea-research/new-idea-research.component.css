@@ -37,9 +37,9 @@ h5 {
     margin-bottom: 20px;
     justify-content: flex-end;
     justify-items: flex-end;
-} 
+}
 
-.button-container { 
+.button-container {
     display: flex;
     justify-content: space-between;
 }
@@ -65,4 +65,15 @@ h5 {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+.nav-page-title {
+  cursor: pointer;
+  text-decoration: underline;
+  margin-right: 0.6%;
+  white-space: pre;
+}
+
+.fa-chevron-right {
+  margin-right: 0.6%;
+  font-size: 14px;
 }

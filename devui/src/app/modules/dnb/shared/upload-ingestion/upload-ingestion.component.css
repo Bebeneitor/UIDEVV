@@ -1,0 +1,191 @@
+.fileUpload {
+  position: relative;
+  width: 315px;
+}
+
+.fileUpload .upload-box {
+  border: 2px dashed #b39ddb;
+  border-radius: 10px;
+  text-align: center;
+  background: #ede7f6;
+  padding: 10px;
+  height: 138px;
+}
+
+.fileUpload .upload-box.upload-ready {
+  background: #dcedc8;
+  border: 2px dashed #8bc34a;
+}
+
+.fileUpload .upload-header {
+  padding-bottom: 10px;
+}
+
+.fileUpload .upload-header h2 {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.fileUpload .upload-header input {
+  font-size: 12px;
+  font-weight: bold;
+  display: block;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid #b39ddb;
+  width: 100%;
+}
+
+.fileUpload .upload-header input:read-only {
+  background: #eaeaea;
+}
+
+.fileUpload .upload-header h2 sup {
+  color: red;
+}
+
+.fileUpload .upload-box p {
+  font-weight: bold;
+}
+
+.fileUpload .upload-box .fa {
+  color: #31006f;
+  margin-bottom: 10px;
+}
+
+.fileUpload .upload-box.upload-ready .fa {
+  color: #4caf50;
+}
+
+.fileUpload .upload-footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.fileUpload .upload-footer .simple-link {
+  background: transparent;
+  border: 0;
+  color: #31006f;
+  font-weight: bold;
+  text-decoration: underline;
+  font-size: 12px;
+}
+
+.fileUpload .ui-fileupload {
+  position: relative;
+}
+
+.fileUpload .ui-fileupload-buttonbar {
+  height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.fileUpload .ui-fileupload-choose {
+  position: absolute;
+  top: 88px;
+  z-index: 99999;
+  left: 5px;
+  right: 5px;
+  height: 138px;
+  opacity: 0;
+  margin: 0 !important;
+}
+
+.fileUpload .overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100000;
+  background: rgb(128 128 128 / 90%);
+  text-align: center;
+  color: #fff;
+  display: flex;
+}
+
+.fileUpload .overlay > div {
+  width: 270px;
+  margin: auto;
+}
+
+.fileUpload .overlay p {
+  font-weight: bold;
+  font-size: 14px;
+  margin: 15px 0 0;
+}
+
+.fileUpload .ui-fileupload-files,
+.fileUpload .ui-progressbar {
+  display: none !important;
+}
+
+.fileUpload .ui-fileupload .ui-fileupload-content {
+  padding: 5px;
+  border: 0;
+}
+
+.fileUpload h3 {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.fileUpload .sections-box .notes li {
+  display: flex;
+  align-items: center;
+  padding-left: 5px;
+}
+
+.fileUpload .sections-box .sections-content {
+  overflow-y: auto;
+  max-height: 160px;
+  border: 1px solid gray;
+  border-radius: 3px;
+  padding: 5px;
+  margin-bottom: 5px;
+}
+
+.fileUpload .sections-box .checkmarks {
+  list-style: none;
+  padding: 0;
+  font-size: 12px;
+  margin: 0;
+}
+
+.fileUpload .sections-box .notes {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.fileUpload .sections-box .checkmarks .ingested-yes {
+  background: #4caf50;
+  color: #fff;
+  padding: 0px 3px;
+  border-radius: 2px;
+  margin-right: 3px;
+}
+
+.fileUpload .sections-box .checkmarks .ingested-no {
+  background: #e91e63;
+  color: #fff;
+  padding: 0px 3px;
+  border-radius: 2px;
+  margin-right: 3px;
+}
+
+.fileUpload .sections-box p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.upload-footer .dnb-btn.cancel {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #d0d0d0;
+}

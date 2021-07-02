@@ -1,31 +1,18 @@
 import { async, TestBed } from "@angular/core/testing";
 import { SectionCode } from "../models/constants/sectioncode.constant";
-import {
-  AgeTemplate,
-  DailyMaximumDoseTemplate,
-  DailyMaxUnitsTemplate,
-  DiagnosisCodeSummaryTemplate,
-  GenderTemplate,
-  GeneralInformationTemplate,
-  GlobalReviewCodesTemplate,
-  IndicationsTemplate,
-  LCDTemplate,
-  ManifestationCodesTemplate,
-  MaximumFrequencyTemplate,
-  MedicalJournalTemplate,
-  NotesTemplate,
-  ReferenceTemplate,
-} from "../models/constants/templates.constant";
+import { GlobalReviewCodesTemplate } from "../models/constants/templates.constant";
 import {
   AgeTemplateResponse,
   CombinationTherapyResponse,
+  CommentItemsList,
   DailyMaximumDoseTemplateResponse,
-  DailyMaxUnitsTemplateResponse,
+  DailyMaxUnitsGroupedTemplateResponse,
   DiagnosisCodeOverlapsResponse,
   DiagnosisCodesTemplateResponse,
   DiagnosisCodeSummaryTemplateResponse,
   DosingPatternsResponse,
   GenderTemplateResponse,
+  GeneralInformationTemplateResponse,
   GlobalReviewCodesResponse,
   GlobalReviewIndicationsResponse,
   IndicationsTemplateResponse,
@@ -47,7 +34,6 @@ import {
 } from "../models/interfaces/uibase";
 import {
   AgeConvertAPItoUI,
-  aggregatorInformation,
   clearNewSection,
   CombinationTherapyAPItoUI,
   convertSectionNameToID,
@@ -75,7 +61,153 @@ import {
   versionInformation,
   VisitOverTimeConvertAPItoUI,
 } from "./convertAPIToUI.utils";
+const feedback = {
+  beginIndex: 0,
+  createdBy: "test",
+  createdById: 0,
+  endIndex: 0,
+  feedback: "test",
+  feedbackStatusCode: "test",
+  itemId: 0,
+  sectionRowUuid: "test",
+  sourceText: "test",
+  uiColumnAttribute: "Item",
+};
 
+const comment: CommentItemsList = {
+  beginIndex: 0,
+  endIndex: 0,
+  sectionRowUuid: "test",
+  sectionCode: "",
+  documentNote: "",
+  uiColumnAttribute: "Item",
+};
+const feedbackList = [
+  feedback,
+  {
+    ...feedback,
+    uiColumnAttribute: "Item Details",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Comments",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Comment",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "LCD",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "MAC Name",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Reference Type",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Reference Details",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Citation",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Drug Label",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Clinical Pharmacology",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "CitatiMicromedex DrugDexon",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "NCCN",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "Lexi-Drugs",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "AHFS-DI",
+  },
+  {
+    ...feedback,
+    uiColumnAttribute: "LCD",
+  },
+];
+const commmentList: CommentItemsList[] = [
+  {
+    ...comment,
+    uiColumnAttribute: "Item Details",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Comments",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Comment",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "LCD",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "MAC Name",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Reference Type",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Reference Details",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Citation",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Drug Label",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Clinical Pharmacology",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "CitatiMicromedex DrugDexon",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "NCCN",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "Lexi-Drugs",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "AHFS-DI",
+  },
+  {
+    ...comment,
+    uiColumnAttribute: "LCD",
+  },
+];
+const valuesCorresponding = ["CMS Prof MUE", "CMS OP MUE"];
 // #region 'Const responses'
 const LCDResponse: LCDTemplateResponse = {
   drugVersionCode: "58714459-c73a-4240-9847-ea358f9f0b5e",
@@ -89,17 +221,26 @@ const LCDResponse: LCDTemplateResponse = {
       comments: ["Comment 1", "Comment 2"],
       lcd: "None",
       macName: "LCD Details",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
     },
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
       comments: [],
       lcd: "None",
       macName: "LCD Details 2",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
-const generalInformationResponse = {
+const generalInformationResponse: GeneralInformationTemplateResponse = {
   drugVersionCode: "d73cdb40-c206-4109-97d5-0aa7bb631eb8",
   section: {
     code: SectionCode.GeneralInformation,
@@ -107,26 +248,44 @@ const generalInformationResponse = {
   },
   data: [
     {
-      code: "111f6444-ce58-4b5b-b3d8-8285bb42e093",
-      comments: ["Comment 01", "Comment 02", "Comment 03"],
       item: {
         code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
         name: "[HCPCS] (Descriptor)",
       },
-      itemDetails: "9171 (Injection, docetaxel, 1 mg)",
+      data: [
+        {
+          code: "111f6444-ce58-4b5b-b3d8-8285bb42e093",
+          itemDetails: "9171 (Injection, docetaxel, 1 mg)",
+          comments: ["Comment 01", "Comment 02", "Comment 03"],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
     {
-      code: "c2a34103-db76-4e48-b392-7c5529bf0ce0",
-      comments: [],
       item: {
         code: "e06dce9e-d5cc-4480-ad1c-5739fe33e72d",
         name: "Administration codes",
       },
-      itemDetails: "96413, 96415, 96417",
+      data: [
+        {
+          code: "c2a34103-db76-4e48-b392-7c5529bf0ce0",
+          itemDetails: "96413, 96415, 96417",
+          comments: ["Comment 01", "Comment 02", "Comment 03"],
+          order: 1,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
-
 const referenceResponse: ReferencesTemplateResponse = {
   drugVersionCode: "58714459-c73a-4240-9847-ea358f9f0b5e",
   section: {
@@ -135,62 +294,127 @@ const referenceResponse: ReferencesTemplateResponse = {
   },
   data: [
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: ["Comment 1", "Comment 2"],
       referenceSourceDto: {
-        code: "PI1",
+        code: "",
         name: "Drug Label",
       },
-      referenceDetails:
-        "Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: ["Comment 1", "Comment 2"],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          referenceSourceDto: {
+            code: "PI1",
+            name: "Drug Label",
+          },
+          referenceDetails:
+            "Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "CP1",
+        code: "",
         name: "Clinical Pharmacology",
       },
-      referenceDetails: "Clinical Pharmacology, docetaxel, January 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          referenceSourceDto: {
+            code: "CP1",
+            name: "Clinical Pharmacology",
+          },
+          referenceDetails: "Clinical Pharmacology, docetaxel, January 2019",
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "DD1",
+        code: "",
         name: "Micromedex DrugDex",
       },
-      referenceDetails: "Micromedex DrugDex, docetaxel, May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          referenceSourceDto: {
+            code: "DD1",
+            name: "Micromedex DrugDex",
+          },
+          referenceDetails: "Micromedex DrugDex, docetaxel, May 2019",
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "NCCN1",
+        code: "",
         name: "NCCN",
       },
-      referenceDetails: "NCCN, docetaxel, May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          referenceSourceDto: {
+            code: "NCCN1",
+            name: "NCCN",
+          },
+          referenceDetails: "NCCN, docetaxel, May 2019",
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "LEXI1",
+        code: "",
         name: "Lexi-Drugs",
       },
-      referenceDetails:
-        "Lexi-Drugs, docetaxel, May 2019Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          referenceSourceDto: {
+            code: "LEXI1",
+            name: "Lexi-Drugs",
+          },
+          referenceDetails:
+            "Lexi-Drugs, docetaxel, May 2019Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "AHFS1",
+        code: "",
         name: "AHFS-DI",
       },
-      referenceDetails: "Lexi-Drugs, docetaxel, May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          referenceSourceDto: {
+            code: "AHFS1",
+            name: "AHFS-DI",
+          },
+          referenceDetails: "Lexi-Drugs, docetaxel, May 2019",
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const notesResponse: NotesTemplateResponse = {
@@ -198,37 +422,48 @@ const notesResponse: NotesTemplateResponse = {
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
       comments: [],
-      note:
-        "Drug Label: Should not be given if neutrophil counts are <1500 cells/mm3. Obtain frequent blood counts to monitor for neutropenia.",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
+      note: "Drug Label: Should not be given if neutrophil counts are <1500 cells/mm3. Obtain frequent blood counts to monitor for neutropenia.",
     },
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d63",
       comments: [],
-      note:
-        "Drug Label: Should not be given if bilirubin >ULN, or if AST and/or ALT >1.5 x ULN concomitant with alkaline phosphatase >2.5 x ULN. LFT elevations increase risk of severe or life-threatening complications. Obtain LFTs before each treatment cycle.",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
+      note: "Drug Label: Should not be given if bilirubin >ULN, or if AST and/or ALT >1.5 x ULN concomitant with alkaline phosphatase >2.5 x ULN. LFT elevations increase risk of severe or life-threatening complications. Obtain LFTs before each treatment cycle.",
     },
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d64",
       comments: [],
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       note: "Drug Label: Premedicate with oral corticosteroids.",
     },
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d65",
       comments: [],
-      note:
-        "Drug Label: The safety and effectivness of Docetaxel Injection in pediatric patients have not been established.",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
+      note: "Drug Label: The safety and effectivness of Docetaxel Injection in pediatric patients have not been established.",
     },
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
       comments: [],
-      note:
-        "Clinical Pharmacology: The suggested maximum tolerated dose (MTD) for docetaxel is dependent on performance status, other chemotherapy agents or radiation given in combination, and disease state. The optimal dose or infusion duration of docetaxel has not been determined. Therefore, dosing may vary from protocol to protocol.",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
+      note: "Clinical Pharmacology: The suggested maximum tolerated dose (MTD) for docetaxel is dependent on performance status, other chemotherapy agents or radiation given in combination, and disease state. The optimal dose or infusion duration of docetaxel has not been determined. Therefore, dosing may vary from protocol to protocol.",
     },
   ],
   drugVersionCode: "58714459-c73a-4240-9847-ea358f9f0b5e",
   section: {
     code: "UI-S-NOTE",
     name: "Notes",
+  },
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
   },
 };
 
@@ -241,7 +476,8 @@ const indicationsResponse: IndicationsTemplateResponse = {
   data: [
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       drugLabel: "drugLabel",
       clinicalPharmacology: "clinicalPharmacology",
       micromedexDrugDex: "micromedexDrugDex",
@@ -251,6 +487,11 @@ const indicationsResponse: IndicationsTemplateResponse = {
       lcd: "lcd",
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const medicalJournalResponse: MedicalJournalTemplateResponse = {
@@ -263,9 +504,16 @@ const medicalJournalResponse: MedicalJournalTemplateResponse = {
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
       citation: "citation",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       comments: ["comment1", "comment2"],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const diagnosisCodeSummaryResponse: DiagnosisCodeSummaryTemplateResponse = {
@@ -277,11 +525,20 @@ const diagnosisCodeSummaryResponse: DiagnosisCodeSummaryTemplateResponse = {
   data: [
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      indication: "indication",
+      indication: { code: "", label: "indication" },
       comments: [],
       icd10Codes: ["C48.0", "C48.1-C48.8", "C49-C49.9"],
+      invalidIcd10Codes: [],
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+    warningMessagesList: [],
+  },
 };
 
 const diagnosisCodeResponse: DiagnosisCodesTemplateResponse = {
@@ -294,6 +551,8 @@ const diagnosisCodeResponse: DiagnosisCodesTemplateResponse = {
     {
       code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
       comments: [],
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       indication: "test",
       nccnIcdsCodes: [
         {
@@ -302,6 +561,7 @@ const diagnosisCodeResponse: DiagnosisCodesTemplateResponse = {
           description: "test",
         },
       ],
+      nccnIcdsCodesInvalid: [],
       lcdIcdsCodes: [
         {
           icd10Code: "test",
@@ -309,11 +569,18 @@ const diagnosisCodeResponse: DiagnosisCodesTemplateResponse = {
           description: "test",
         },
       ],
+      lcdIcdsCodesInvalid: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+    warningMessagesList: [],
+  },
 };
 
-const dailyMaxUnitsResponse: DailyMaxUnitsTemplateResponse = {
+const dailyMaxUnitsResponse: DailyMaxUnitsGroupedTemplateResponse = {
   drugVersionCode: "58714459-c73a-4240-9847-ea358f9f0b5e",
   section: {
     code: SectionCode.DailyMaxUnits,
@@ -322,33 +589,57 @@ const dailyMaxUnitsResponse: DailyMaxUnitsTemplateResponse = {
   codes: ["code"],
   data: [
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       dmuvItemDto: {
         code: "cmsprofmue",
         name: "",
       },
-      currentValues: "test nccn",
-      newValues: "test lcd",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          currentValues: "test nccn",
+          newValues: "test lcd",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const maximumFrequencyResponse: MaximumFrequencyTemplateResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.MaximumFrequency,
-    name: "Maximum Frequency",
+    name: "Maximum Frequency (Standard)",
   },
   data: [
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
       indication: "indication",
-      maximumFrequency: "maximumFrequency",
-      comments: [],
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          maximumFrequency: "maximumFrequency",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
+
 const manifestationCodesResponse: ManifestationCodesTemplateResponse = {
   drugVersionCode: "",
   section: {
@@ -363,12 +654,18 @@ const manifestationCodesResponse: ManifestationCodesTemplateResponse = {
         description: "",
       },
       code: "",
-      indication: "indeictaion",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
+      indication: { code: "", label: "indeictaion" },
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
-
 const ageResponse: AgeTemplateResponse = {
   drugVersionCode: "02760dff-dae3-47c7-92c3-a12eb8618623",
   section: {
@@ -377,205 +674,345 @@ const ageResponse: AgeTemplateResponse = {
   },
   data: [
     {
-      code: "3338b688-6e91-47dd-9dbf-51079e721c97",
-      comments: ["Lexi-Drugs"],
       indication: {
         code: "49d2b743-dc8b-4fc6-b6bc-c3d0d5112018",
         label: "angiosarcoma",
       },
-      age: "Infants, children and adults",
+      data: [
+        {
+          code: "3338b688-6e91-47dd-9dbf-51079e7c97",
+          comments: ["Lexi-Drugs"],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          age: "Infants, children and adults",
+        },
+      ],
     },
     {
-      code: "bbc41bfc-65b9-4d79-96de-bf2efe436b79",
-      comments: [],
       indication: {
         code: "87dfe534-4598-4759-b4b3-9c36e1313a33",
         label: "bladder cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "bbc41bfc-65b9-4d79-96de-bf2efe436b79",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "d86518d6-1be6-4a72-95b2-c8ed5eadeafa",
-      comments: [],
       indication: {
         code: "097cbaff-620c-4eb1-bfe0-c791dece38b3",
         label: "breast cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "88daecb7-8c10-4c0e-afb4-d1d98c487d71",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "88daecb7-8c10-4c0e-afb4-d1d98c487d71",
-      comments: [],
-      indication: {
-        code: "c51e3810-b336-441f-b85e-e83d22c91557",
-        label: "endometrial carcinoma",
-      },
-      age: "18 years of age and older",
-    },
-    {
-      code: "4645d184-045a-4b1e-9653-3cf2f6c8be6e",
-      comments: [],
       indication: {
         code: "d55c12f2-6f2d-4192-aedd-7403413fbf14",
         label: "esophageal cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "4645d184-045a-4b1e-9653-3cf2f6c8be6e",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "69dd704a-80ed-4458-98e0-1d21bf1b762a",
-      comments: [],
       indication: {
         code: "d513e9a7-fef0-4836-868c-032623944ea9",
         label: "esophagogastric junction cancers",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "69dd704a-80ed-4458-98e0-1dbf1b762a",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "e2094d43-863d-4d06-b271-e1a7c4179391",
-      comments: ["Lexi-Drugs\nInfants (1 month-2 years)"],
       indication: {
         code: "4f4b61d0-0fd9-4f4f-a937-bde5d6531bd0",
         label: "Ewingâ€™s sarcoma",
       },
-      age: "Infants, children and adults",
+      data: [
+        {
+          code: "e2094d43-863d-4d06-b271-e1a7c4179391",
+          comments: ["Lexi-Drugs\nInfants (1 month-2 years)"],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "Infants, children and adults",
+        },
+      ],
     },
     {
-      code: "5c2a0dd3-3ee4-4a01-aad7-ba0ee20b11b9",
-      comments: [],
       indication: {
         code: "c959bbe2-88bf-4416-a98f-70f0c5f9d585",
         label: "gastric cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "5c2a0dd3-3ee4-4a01-aad7-ba0ee20b11b9",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "10dc04f2-8495-408a-b702-7acf89f00f63",
-      comments: [],
       indication: {
         code: "05703116-7733-48e4-9404-2678cdf73e73",
         label: "harvesting of peripheral blood stem cells, mobilization",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "10dc04f2-8495-408a-b702-7acf89f00f63",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "b3603094-0dfd-4b86-af1b-fa4f7f7ea4f4",
-      comments: [],
       indication: {
         code: "c01c494a-6cbc-46c1-be6f-f366e3f87866",
         label: "head and neck cancer",
       },
-      age: "18 years of age and older",
+
+      data: [
+        {
+          code: "b3603094-0dfd-4b86-af1b-fa4f7f7ea4f4",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "bae57d13-a100-4098-b489-328ae2dc9d21",
-      comments: [],
       indication: {
         code: "b101423d-8825-4a39-8f6e-67aa6802e415",
         label: "melanoma",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "bae57d13-a100-4098-b489-328ae2dc9d",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "8727adb4-6373-4293-af1d-48f388e91697",
-      comments: [],
       indication: {
         code: "bc6ceb4d-8c9d-4c4b-8dad-620bf18c8882",
         label: "non-small cell lung cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "8727adb4-6373-4293-af1d-48f388e91697",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "8da3b7b8-62cc-4f05-9bc3-f4532d9034a2",
-      comments: [],
       indication: {
-        code: "ce1c76dd-b605-4340-a325-2144c4808231",
+        code: "ce1c76dd-b605-4340-a325-44c4808231",
         label: "occult primary",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "8da3b7b8-62cc-4f05-9bc3-f4532d9034a2",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "fee1006a-b99b-4eb7-a55f-6bf2933f78a6",
-      comments: ["Lexi-Drugs"],
       indication: {
         code: "2c768c67-3d8c-4eb2-ad44-f76ecc205f23",
         label: "osteosarcoma",
       },
-      age: "Infants, children and adults",
+      data: [
+        {
+          code: "fee1006a-b99b-4eb7-a55f-6bf2933f78a6",
+          comments: ["Lexi-Drugs"],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "Infants, children and adults",
+        },
+      ],
     },
     {
-      code: "02a10a5f-5ada-4b2d-9912-362cddfa88bd",
-      comments: [],
       indication: {
         code: "88acc301-592c-4278-957d-222eea68f2c8",
         label: "ovarian cancer/fallopian tube cancer/primary peritoneal cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "02a10a5f-5ada-4b2d-9912-362cddfa88bd",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "dbf08df9-7f72-4fba-85a9-8806a25995c2",
-      comments: [],
       indication: {
-        code: "7da5b228-d037-455f-b214-1b7ea213736b",
+        code: "7da5b228-d037-455f-b4-1b7ea3736b",
         label: "prostate cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "dbf08df9-7f72-4fba-85a9-8806a25995c2",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "98942dc7-f2b0-40a4-a72a-62d817e531d9",
-      comments: ["Lexi-Drugs"],
       indication: {
         code: "3b618cc3-e723-4baf-81dd-5240ef03e779",
         label: "rhabdomyosarcoma",
       },
-      age: "Infants, children and adults",
+      data: [
+        {
+          code: "98942dc7-f2b0-40a4-a72a-62d817e531d9",
+          comments: ["Lexi-Drugs"],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "Infants, children and adults",
+        },
+      ],
     },
     {
-      code: "892281fa-2ace-42d9-9d66-5735f261e1bf",
-      comments: [],
       indication: {
         code: "95e0d850-7903-41dc-a373-89adf91ab13b",
         label: "small cell lung cancer",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "892281fa-2ace-42d9-9d66-5735f261e1bf",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "a8ac3e0e-a759-41da-8285-7700bb202658",
-      comments: ["Lexi-Drugs"],
       indication: {
-        code: "cd214c5c-ac26-4480-9bc6-7abe7d4dedf9",
+        code: "cd4c5c-ac26-4480-9bc6-7abe7d4dedf9",
         label:
           "soft tissue sarcoma (extremity/superficial trunk, head/neck) (retroperitoneal/intra-abdominal)",
       },
-      age: "Infants, children and adults",
+      data: [
+        {
+          code: "a8ac3e0e-a759-41da-8285-7700bb202658",
+          comments: ["Lexi-Drugs"],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "Infants, children and adults",
+        },
+      ],
     },
     {
-      code: "0e8f7321-cd15-4baa-9db5-ae76bb0f5a78",
-      comments: [],
       indication: {
         code: "f52dff11-715a-42a1-a2f6-f0ddd884ce5c",
         label: "thyroid carcinoma- anaplastic carcinoma",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "0e8f73-cd15-4baa-9db5-ae76bb0f5a78",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "6edb8d01-3050-4fa7-ae04-0a781301fdca",
-      comments: [],
       indication: {
         code: "3d8c6ea6-075c-42a1-b137-4add792bffee",
         label: "urothelial carcinoma",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "6edb8d01-3050-4fa7-ae04-0a781301fdca",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
     {
-      code: "8b6ede9a-bab5-4e96-8be7-16f02a8d388e",
-      comments: [],
       indication: {
         code: "f526858a-29cc-4b9c-9b8c-a41e9233558d",
         label: "uterine sarcoma",
       },
-      age: "18 years of age and older",
+      data: [
+        {
+          code: "8b6ede9a-bab5-4e96-8be7-16f02a8d388e",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+
+          age: "18 years of age and older",
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const dailyMaximumDoseResponse: DailyMaximumDoseTemplateResponse = {
@@ -586,18 +1023,28 @@ const dailyMaximumDoseResponse: DailyMaximumDoseTemplateResponse = {
   },
   data: [
     {
-      code: "",
-
       indication: {
         code: "code",
         label: "label",
       },
-      maximumDosingPattern: "maximumDosingPattern",
-      maximumDose: "maximumDose",
-      maximumUnits: "maximumUnits",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumDosingPattern: "maximumDosingPattern",
+          maximumDose: "maximumDose",
+          maximumUnits: "maximumUnits",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 const genderResponse: GenderTemplateResponse = {
   drugVersionCode: "02760dff-dae3-47c7-92c3-a12eb8618623",
@@ -607,8 +1054,10 @@ const genderResponse: GenderTemplateResponse = {
   },
   data: [
     {
-      code: "3338b688-6e91-47dd-9dbf-51079e721c97",
+      code: "3338b688-6e91-47dd-9dbf-51079e7c97",
       comments: ["Lexi-Drugs"],
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       indication: {
         code: "49d2b743-dc8b-4fc6-b6bc-c3d0d5112018",
         label: "angiosarcoma",
@@ -618,6 +1067,8 @@ const genderResponse: GenderTemplateResponse = {
     {
       code: "bbc41bfc-65b9-4d79-96de-bf2efe436b79",
       comments: [],
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       indication: {
         code: "87dfe534-4598-4759-b4b3-9c36e1313a33",
         label: "bladder cancer",
@@ -625,56 +1076,90 @@ const genderResponse: GenderTemplateResponse = {
       gender: "Female",
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const unitsOverTimeResponse: UnitsOverTimeTemplateResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.UnitsOverTime,
-    name: "Units over time",
+    name: "Units Over Time (Standard)",
   },
   data: [
     {
-      code: "code",
       indication: {
         code: "code",
         label: "",
       },
-      units: "units",
-      interval: "interval",
-      comments: [],
+      data: [
+        {
+          code: "code",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          units: "units",
+          interval: "interval",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "code",
       indication: {
         code: "code",
-        label: "label",
+        label: "",
       },
-      units: "units",
-      interval: "interval",
-      comments: [],
+      data: [
+        {
+          code: "code",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          units: "units",
+          interval: "interval",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "code",
       indication: {
         code: "code",
-        label: "label",
+        label: "",
       },
-      units: "units",
-      interval: "interval",
-      comments: [],
+      data: [
+        {
+          code: "code",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          units: "units",
+          interval: "interval",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "code",
       indication: {
         code: "code",
-        label: "label",
+        label: "",
       },
-      units: "units",
-      interval: "interval",
-      comments: [],
+      data: [
+        {
+          code: "code",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          units: "units",
+          interval: "interval",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const VisitOverTimeResponse: VisitOverTimeTemplateResponse = {
@@ -685,16 +1170,27 @@ const VisitOverTimeResponse: VisitOverTimeTemplateResponse = {
   },
   data: [
     {
-      code: "3338b688-6e91-47dd-9dbf-51079e721c97",
       indication: {
         code: "49d2b743-dc8b-4fc6-b6bc-c3d0d5112018",
         label: "breast cancer",
       },
-      visits: "13",
-      interval: "26 weeks",
-      comments: [],
+      data: [
+        {
+          code: "3338b688-6e91-47dd-9dbf-51079e721c97",
+          visits: "13",
+          interval: "26 weeks",
+          comments: [],
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const diagnosisCodeOverlapsResponse: DiagnosisCodeOverlapsResponse = {
@@ -706,196 +1202,107 @@ const diagnosisCodeOverlapsResponse: DiagnosisCodeOverlapsResponse = {
 
   data: [
     {
-      order: 0,
-      code: "",
       icd10Code: {
-        description: "",
         icd10Code: "",
       },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: false,
-      comments: [],
+      data: [
+        {
+          order: 0,
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          hasBorder: false,
+          comments: [],
+        },
+      ],
     },
     {
-      order: 0,
-      code: "",
       icd10Code: {
-        description: "",
         icd10Code: "",
       },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: true,
-      comments: [],
+      data: [
+        {
+          order: 0,
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          hasBorder: true,
+          comments: [],
+        },
+      ],
     },
     {
-      order: 0,
-      code: "",
       icd10Code: {
-        description: "",
         icd10Code: "",
       },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: false,
-      comments: [],
+      data: [
+        {
+          order: 0,
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          hasBorder: false,
+          comments: [],
+        },
+      ],
     },
     {
-      order: 0,
-      code: "",
       icd10Code: {
-        description: "",
         icd10Code: "",
       },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: true,
-      comments: [],
-    },
-    {
-      order: 0,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: false,
-      comments: [],
-    },
-    {
-      order: 0,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: true,
-      comments: [],
-    },
-    {
-      order: 0,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: false,
-      comments: [],
-    },
-    {
-      order: 0,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: true,
-      comments: [],
-    },
-    {
-      order: 0,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: false,
-      comments: [],
-    },
-    {
-      order: 0,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      hasBorder: true,
-      comments: [],
+      data: [
+        {
+          order: 0,
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          hasBorder: false,
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const combinationTherapyResponse: CombinationTherapyResponse = {
@@ -913,6 +1320,8 @@ const combinationTherapyResponse: CombinationTherapyResponse = {
       data: [
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           comments: [],
           combination: "",
           codes: [],
@@ -927,6 +1336,8 @@ const combinationTherapyResponse: CombinationTherapyResponse = {
       data: [
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           comments: [],
           combination: "",
           codes: [],
@@ -934,6 +1345,11 @@ const combinationTherapyResponse: CombinationTherapyResponse = {
       ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const GlobalReviewIndicationsResponse: GlobalReviewIndicationsResponse = {
@@ -947,11 +1363,18 @@ const GlobalReviewIndicationsResponse: GlobalReviewIndicationsResponse = {
     {
       code: "",
       order: 0,
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       indication: { code: "", label: "" },
       globalReviewIndication: "",
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const GlobalReviewCodesResponse: GlobalReviewCodesResponse = {
@@ -963,6 +1386,8 @@ const GlobalReviewCodesResponse: GlobalReviewCodesResponse = {
   data: [
     {
       code: "",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       currentIcd10CodeRange: {
         icd10CodeId: 0,
         icd10Code: "",
@@ -975,6 +1400,8 @@ const GlobalReviewCodesResponse: GlobalReviewCodesResponse = {
     },
     {
       code: "",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       currentIcd10CodeRange: {
         icd10CodeId: 0,
         icd10Code: "",
@@ -986,6 +1413,11 @@ const GlobalReviewCodesResponse: GlobalReviewCodesResponse = {
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
@@ -1005,6 +1437,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
       data: [
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1017,6 +1451,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1029,6 +1465,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1041,6 +1479,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1053,76 +1493,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-      ],
-    },
-    {
-      malignancyIcdsCodes: [
-        {
-          icd10Code: "",
-        },
-      ],
-      secondarySite: "",
-      data: [
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1145,6 +1517,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
       data: [
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1157,6 +1531,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1169,6 +1545,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1181,6 +1559,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1193,6 +1573,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1215,6 +1597,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
       data: [
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1227,6 +1611,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1239,6 +1625,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1251,6 +1639,8 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1263,6 +1653,88 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
         },
         {
           code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          order: 0,
+          hasBorder: false,
+          primaryMalignancy: "",
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+      ],
+    },
+    {
+      malignancyIcdsCodes: [
+        {
+          icd10Code: "",
+        },
+      ],
+      secondarySite: "",
+      data: [
+        {
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          order: 0,
+          hasBorder: false,
+          primaryMalignancy: "",
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          order: 0,
+          hasBorder: false,
+          primaryMalignancy: "",
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          order: 0,
+          hasBorder: false,
+          primaryMalignancy: "",
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          order: 0,
+          hasBorder: false,
+          primaryMalignancy: "",
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          code: "",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           order: 0,
           hasBorder: false,
           primaryMalignancy: "",
@@ -1276,6 +1748,11 @@ const SecondaryMalignancyResponse: SecondaryMalignancyResponse = {
       ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
   codes: ["10"],
 };
 
@@ -1294,6 +1771,8 @@ const dosingPatternsResponse: DosingPatternsResponse = {
       data: [
         {
           code: "text",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
           drugLabel: "text",
           clinicalPharma: "text",
           micromedex: "text",
@@ -1305,6 +1784,11 @@ const dosingPatternsResponse: DosingPatternsResponse = {
       ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const diangosiCodesOverlapsResponse: DiagnosisCodeOverlapsResponse = {
@@ -1315,20 +1799,31 @@ const diangosiCodesOverlapsResponse: DiagnosisCodeOverlapsResponse = {
   },
   data: [
     {
-      code: "text",
-      icd10Code: { description: "text", icd10Code: "code" },
-      indication: {
-        code: "text",
-        label: "text",
-      },
-      units: "text",
-      frequency: "text",
-      unitsOverTime: "text",
-      visitsOverTime: "text",
-      age: "text",
-      comments: [],
+      icd10Code: { icd10Code: "code" },
+      data: [
+        {
+          code: "text",
+          feedbackItemsList: feedbackList,
+          documentNoteList: commmentList,
+          indication: {
+            code: "text",
+            label: "text",
+          },
+          units: "text",
+          frequency: "text",
+          unitsOverTime: "text",
+          visitsOverTime: "text",
+          age: "text",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const globalReviewIndicationResponse: GlobalReviewIndicationsResponse = {
@@ -1340,11 +1835,18 @@ const globalReviewIndicationResponse: GlobalReviewIndicationsResponse = {
   data: [
     {
       code: "text",
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       indication: { code: "text", label: "code" },
       globalReviewIndication: "text",
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 const rulesResponse: RulesTemplateResponse = {
@@ -1355,12 +1857,19 @@ const rulesResponse: RulesTemplateResponse = {
   },
   data: [
     {
+      feedbackItemsList: feedbackList,
+      documentNoteList: commmentList,
       code: "text",
       description: "text",
       rule: "text",
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [feedback],
+  },
 };
 
 // #endregion 'Const responses'
@@ -1376,17 +1885,17 @@ fdescribe("convertAPIToUI", () => {
       generalInformationResponse
     );
 
-    expect(section.rows.length).toBe(generalInformationResponse.data.length);
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups.length).toBe(generalInformationResponse.data.length);
+    expect(section.groups[0].names[0].value).toBe(
       `${generalInformationResponse.data[0].item.name}\n`
     );
   });
 
   it("should convert reference API response to UI elements", () => {
     const section = referencesConvertAPIToUI(referenceResponse);
-    expect(section.rows.length).toBe(referenceResponse.data.length);
+    expect(section.groups.length).toBe(referenceResponse.data.length);
 
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups[0].names[0].value).toBe(
       `${referenceResponse.data[0].referenceSourceDto.name}\n`
     );
   });
@@ -1428,11 +1937,14 @@ fdescribe("convertAPIToUI", () => {
   });
 
   it("should convert Daily Max Units API response to UI elements", () => {
-    const section = DailyMaxUnitsConvertAPItoUI(dailyMaxUnitsResponse);
+    const section = DailyMaxUnitsConvertAPItoUI(
+      dailyMaxUnitsResponse,
+      valuesCorresponding
+    );
 
-    expect(section.rows.length).toBe(dailyMaxUnitsResponse.data.length);
+    expect(section.groups.length).toBe(dailyMaxUnitsResponse.data.length);
 
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups[0].names[0].value).toBe(
       `${dailyMaxUnitsResponse.data[0].dmuvItemDto.name}\n`
     );
   });
@@ -1455,16 +1967,18 @@ fdescribe("convertAPIToUI", () => {
     expect(section.rows.length).toBe(diagnosisCodeSummaryResponse.data.length);
 
     expect(section.rows[0].columns[0].value).toBe(
-      `${diagnosisCodeSummaryResponse.data[0].indication}\n`
+      `${diagnosisCodeSummaryResponse.data[0].indication.label}\n`
     );
   });
 
   it("should convert Maximum frequency API response to UI elements", () => {
     const section = MaximumFrecuencyConvertAPItoUI(maximumFrequencyResponse);
 
-    expect(section.rows.length).toBe(maximumFrequencyResponse.data.length);
+    expect(section.groups[0].rows.length).toBe(
+      maximumFrequencyResponse.data.length
+    );
 
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups[0].names[0].value).toBe(
       `${maximumFrequencyResponse.data[0].indication}\n`
     );
   });
@@ -1484,9 +1998,9 @@ fdescribe("convertAPIToUI", () => {
   it("should convert Age API response to UI elements", () => {
     const section = AgeConvertAPItoUI(ageResponse);
 
-    expect(section.rows.length).toBe(ageResponse.data.length);
+    expect(section.groups[0].rows.length).toBe(ageResponse.data[0].data.length);
 
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups[0].names[0].value).toBe(
       `${ageResponse.data[0].indication.label}\n`
     );
   });
@@ -1494,9 +2008,11 @@ fdescribe("convertAPIToUI", () => {
   it("should convert Daily Maximum Dose API response to UI elements", () => {
     const section = DailyMaximumDoseConvertAPItoUI(dailyMaximumDoseResponse);
 
-    expect(section.rows.length).toBe(dailyMaximumDoseResponse.data.length);
+    expect(section.groups[0].rows.length).toBe(
+      dailyMaximumDoseResponse.data.length
+    );
 
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups[0].names[0].value).toBe(
       `${dailyMaximumDoseResponse.data[0].indication.label}\n`
     );
   });
@@ -1514,9 +2030,9 @@ fdescribe("convertAPIToUI", () => {
   it("should convert Units over time  API response to UI elements", () => {
     const section = UnitsOverTimeConvertAPItoUI(unitsOverTimeResponse);
 
-    expect(section.rows.length).toBe(unitsOverTimeResponse.data.length);
+    expect(section.groups.length).toBe(unitsOverTimeResponse.data.length);
 
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups[0].names[0].value).toBe(
       `${unitsOverTimeResponse.data[0].indication.label}\n`
     );
   });
@@ -1524,9 +2040,9 @@ fdescribe("convertAPIToUI", () => {
   it("should convert Visit Over time API response to UI elements", () => {
     const section = VisitOverTimeConvertAPItoUI(VisitOverTimeResponse);
 
-    expect(section.rows.length).toBe(VisitOverTimeResponse.data.length);
+    expect(section.groups.length).toBe(VisitOverTimeResponse.data.length);
 
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups[0].names[0].value).toBe(
       `${VisitOverTimeResponse.data[0].indication.label}\n`
     );
   });
@@ -1561,8 +2077,10 @@ fdescribe("convertAPIToUI", () => {
     const section = DiagnosisCodeOverlapsConvertAPItoUI(
       diangosiCodesOverlapsResponse
     );
-    expect(section.rows.length).toBe(diangosiCodesOverlapsResponse.data.length);
-    expect(section.rows[0].columns[0].value).toBe(
+    expect(section.groups.length).toBe(
+      diangosiCodesOverlapsResponse.data.length
+    );
+    expect(section.groups[0].names[0].value).toBe(
       `${diangosiCodesOverlapsResponse.data[0].icd10Code.icd10Code}\n`
     );
   });
@@ -1601,247 +2119,6 @@ fdescribe("convertAPIToUI", () => {
   });
 
   // #endregion 'Section Tests'
-
-  it("should create sections from aggregator", () => {
-    const LCDUISection = aggregatorInformation(LCDResponse);
-    expect(LCDUISection.id).toBe("lcds");
-    expect((LCDUISection.current as Section).rows[0].columns[0].value).toEqual(
-      `${LCDResponse.data[0].lcd}\n`
-    );
-    expect((LCDUISection.new as Section).rows[0].columns[0].value).toEqual(
-      `${LCDTemplate.data[0].lcd}\n`
-    );
-
-    const GISection = aggregatorInformation(generalInformationResponse);
-    expect(GISection.id).toBe("general_information");
-    expect((GISection.current as Section).rows[0].columns[0].value).toEqual(
-      `${generalInformationResponse.data[0].item.name}\n`
-    );
-    expect((GISection.new as Section).rows[0].columns[0].value).toEqual(
-      `${GeneralInformationTemplate.data[0].item.name}\n`
-    );
-
-    const RefUISection = aggregatorInformation(referenceResponse);
-    expect(RefUISection.id).toBe("references");
-    expect((RefUISection.current as Section).rows[0].columns[0].value).toEqual(
-      `${referenceResponse.data[0].referenceSourceDto.name}\n`
-    );
-    expect((RefUISection.new as Section).rows[0].columns[0].value).toEqual(
-      `${ReferenceTemplate.data[0].referenceSourceDto.name}\n`
-    );
-
-    const NotesUISection = aggregatorInformation(notesResponse);
-    expect(NotesUISection.id).toBe("notes");
-    expect(
-      (NotesUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${notesResponse.data[0].note}\n`);
-    expect((NotesUISection.new as Section).rows[0].columns[0].value).toEqual(
-      `${NotesTemplate.data[0].note}\n`
-    );
-
-    const IndicationsUISection = aggregatorInformation(indicationsResponse);
-    expect(IndicationsUISection.id).toBe("indications");
-    expect(
-      (IndicationsUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${indicationsResponse.data[0].drugLabel}\n`);
-    expect(
-      (IndicationsUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`${IndicationsTemplate.data[0].drugLabel}\n`);
-
-    const medicalJournalUISection = aggregatorInformation(
-      medicalJournalResponse
-    );
-
-    expect(medicalJournalUISection.id).toBe("medical_journal");
-    expect(
-      (medicalJournalUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${medicalJournalResponse.data[0].citation}\n`);
-
-    expect(
-      (medicalJournalUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`${MedicalJournalTemplate.data[0].citation}\n`);
-
-    const dailyMaxUnitsUISection = aggregatorInformation(dailyMaxUnitsResponse);
-    expect(dailyMaxUnitsUISection.id).toBe(
-      "daily_maximum_units_values_for_hcpcs"
-    );
-
-    expect(
-      (dailyMaxUnitsUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${dailyMaxUnitsResponse.data[0].dmuvItemDto.name}\n`);
-
-    expect(
-      (dailyMaxUnitsUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`${DailyMaxUnitsTemplate.data[0].dmuvItemDto.name}\n`);
-
-    const diagnosisCodeUISection = aggregatorInformation(diagnosisCodeResponse);
-    expect(diagnosisCodeUISection.id).toBe("diagnosis_codes");
-    expect(
-      (diagnosisCodeUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${diagnosisCodeResponse.data[0].indication}\n`);
-
-    expect(
-      (diagnosisCodeUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`\n`);
-
-    const diagnosisCodeSUmmaryUISection = aggregatorInformation(
-      diagnosisCodeSummaryResponse
-    );
-    expect(diagnosisCodeSUmmaryUISection.id).toBe("diagnosis_code_summary");
-    expect(
-      (diagnosisCodeSUmmaryUISection.current as Section).rows[0].columns[0]
-        .value
-    ).toEqual(`${diagnosisCodeSummaryResponse.data[0].indication}\n`);
-
-    expect(
-      (diagnosisCodeSUmmaryUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`${DiagnosisCodeSummaryTemplate.data[0].indication}\n`);
-
-    const maximumFrequencyUISection = aggregatorInformation(
-      maximumFrequencyResponse
-    );
-    expect(maximumFrequencyUISection.id).toBe("maximum_frequency");
-    expect(
-      (maximumFrequencyUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${maximumFrequencyResponse.data[0].indication}\n`);
-
-    expect(
-      (maximumFrequencyUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`${MaximumFrequencyTemplate.data[0].indication}\n`);
-
-    const manifestationCodesUISection = aggregatorInformation(
-      manifestationCodesResponse
-    );
-    expect(manifestationCodesUISection.id).toBe("manifestation_codes");
-    expect(
-      (manifestationCodesUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${manifestationCodesResponse.data[0].icd10Code.icd10Code}\n`);
-
-    expect(
-      (manifestationCodesUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`${ManifestationCodesTemplate.data[0].icd10Code.icd10Code}\n`);
-
-    const ageUISection = aggregatorInformation(ageResponse);
-    expect(ageUISection.id).toBe("age");
-    expect((ageUISection.current as Section).rows[0].columns[0].value).toEqual(
-      `${ageResponse.data[0].indication.label}\n`
-    );
-
-    expect((ageUISection.new as Section).rows[0].columns[0].value).toEqual(
-      `${AgeTemplate.data[0].indication.label}\n`
-    );
-
-    const DailyMaxDoseUISection = aggregatorInformation(
-      dailyMaximumDoseResponse
-    );
-    expect(DailyMaxDoseUISection.id).toBe("daily_maximum_dose");
-    expect(
-      (DailyMaxDoseUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${dailyMaximumDoseResponse.data[0].indication.label}\n`);
-
-    expect(
-      (DailyMaxDoseUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(`${DailyMaximumDoseTemplate.data[0].indication.label}\n`);
-
-    const genderUISection = aggregatorInformation(genderResponse);
-    expect(genderUISection.id).toBe("gender");
-    expect(
-      (genderUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${genderResponse.data[0].indication.label}\n`);
-
-    expect((genderUISection.new as Section).rows[0].columns[0].value).toEqual(
-      `${GenderTemplate.data[0].indication.label}\n`
-    );
-
-    const unitsOverTimeUISection = aggregatorInformation(unitsOverTimeResponse);
-    expect(unitsOverTimeUISection.id).toBe("units_over_time");
-    expect(
-      (unitsOverTimeUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${unitsOverTimeResponse.data[0].indication.label}\n`);
-
-    expect((genderUISection.new as Section).rows[0].columns[0].value).toEqual(
-      `${unitsOverTimeResponse.data[0].indication.label}\n`
-    );
-
-    const globalReviewCodesUISection = aggregatorInformation(
-      GlobalReviewCodesTemplate
-    );
-    expect(globalReviewCodesUISection.id).toBe("global_review_-_icd-10_codes");
-    expect(
-      (globalReviewCodesUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(
-      `${GlobalReviewCodesTemplate.data[0].currentIcd10CodeRange.icd10Code}\n`
-    );
-
-    expect(
-      (globalReviewCodesUISection.new as Section).rows[0].columns[0].value
-    ).toEqual(
-      `${GlobalReviewCodesTemplate.data[0].globalReviewIcd10Code.icd10Code}\n`
-    );
-
-    const combinationTherapyUISection = aggregatorInformation(
-      combinationTherapyResponse
-    );
-    expect(combinationTherapyUISection.id).toBe("combination_therapy");
-    expect(
-      (combinationTherapyUISection.current as GroupedSection).groups[0].names[0]
-        .value
-    ).toEqual(`${combinationTherapyResponse.data[0].indication.label}\n`);
-
-    const visitsUISection = aggregatorInformation(VisitOverTimeResponse);
-    expect(visitsUISection.id).toBe("visits_over_time");
-    expect(
-      (visitsUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${VisitOverTimeResponse.data[0].indication.label}\n`);
-
-    const dosignPatternsUISection = aggregatorInformation(
-      dosingPatternsResponse
-    );
-    expect(dosignPatternsUISection.id).toBe("dosing_patterns");
-    expect(
-      (dosignPatternsUISection.current as GroupedSection).groups[0].names[0]
-        .value
-    ).toEqual(`${dosingPatternsResponse.data[0].indication.label}\n`);
-
-    const diagnosisCodeverlapsUISection = aggregatorInformation(
-      diagnosisCodeOverlapsResponse
-    );
-    expect(diagnosisCodeverlapsUISection.id).toBe("diagnosis_code_overlaps");
-    expect(
-      (diagnosisCodeverlapsUISection.current as Section).rows[0].columns[0]
-        .value
-    ).toEqual(`${diagnosisCodeOverlapsResponse.data[0].icd10Code.icd10Code}\n`);
-
-    const globalReviewIndicationsUISection = aggregatorInformation(
-      globalReviewIndicationResponse
-    );
-    expect(globalReviewIndicationsUISection.id).toBe(
-      "global_review_indications"
-    );
-    expect(
-      (globalReviewIndicationsUISection.current as Section).rows[0].columns[0]
-        .value
-    ).toEqual(`${globalReviewIndicationResponse.data[0].indication.label}\n`);
-
-    const rulesUISection = aggregatorInformation(rulesResponse);
-    expect(rulesUISection.id).toBe("rules");
-    expect(
-      (rulesUISection.current as Section).rows[0].columns[0].value
-    ).toEqual(`${rulesResponse.data[0].rule}\n`);
-
-    const secondaryUISection = aggregatorInformation(
-      SecondaryMalignancyResponse
-    );
-    expect(secondaryUISection.id).toBe(
-      "secondary_malignancy(c77-c79.9)_icd-10_codes"
-    );
-    expect(
-      (secondaryUISection.current as GroupedSection).groups[0].names[0].value
-    ).toEqual(
-      `${SecondaryMalignancyResponse.data[0].malignancyIcdsCodes[0].icd10Code}\n`
-    );
-  });
-
   it("should create only one version section", () => {
     const LCDUISection = versionInformation(LCDResponse);
     expect(LCDUISection.id).toBe("lcds");
@@ -1851,14 +2128,14 @@ fdescribe("convertAPIToUI", () => {
 
     const GISection = versionInformation(generalInformationResponse);
     expect(GISection.id).toBe("general_information");
-    expect((GISection as Section).rows[0].columns[0].value).toEqual(
+    expect((GISection as GroupedSection).groups[0].names[0].value).toEqual(
       `${generalInformationResponse.data[0].item.name}\n`
     );
 
     const RefUISection = versionInformation(referenceResponse);
     expect(RefUISection.id).toBe("references");
-    expect((RefUISection as Section).rows[0].columns[0].value).toEqual(
-      `${referenceResponse.data[0].referenceSourceDto.name}\n`
+    expect((RefUISection as GroupedSection).groups[0].names[0].value).toEqual(
+      `${referenceResponse.data[0].data[0].referenceSourceDto.name}\n`
     );
 
     const NotesUISection = versionInformation(notesResponse);
@@ -1886,7 +2163,7 @@ fdescribe("convertAPIToUI", () => {
     );
 
     expect(
-      (dailyMaxUnitsUISection as Section).rows[0].columns[0].value
+      (dailyMaxUnitsUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`${dailyMaxUnitsResponse.data[0].dmuvItemDto.name}\n`);
 
     const diagnosisCodeUISection = versionInformation(diagnosisCodeResponse);
@@ -1901,14 +2178,14 @@ fdescribe("convertAPIToUI", () => {
     expect(diagnosisCodeSUmmaryUISection.id).toBe("diagnosis_code_summary");
     expect(
       (diagnosisCodeSUmmaryUISection as Section).rows[0].columns[0].value
-    ).toEqual(`${diagnosisCodeSummaryResponse.data[0].indication}\n`);
+    ).toEqual(`${diagnosisCodeSummaryResponse.data[0].indication.label}\n`);
 
     const maximumFrequencyUISection = versionInformation(
       maximumFrequencyResponse
     );
-    expect(maximumFrequencyUISection.id).toBe("maximum_frequency");
+    expect(maximumFrequencyUISection.id).toBe("maximum_frequency_(standard)");
     expect(
-      (maximumFrequencyUISection as Section).rows[0].columns[0].value
+      (maximumFrequencyUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`${maximumFrequencyResponse.data[0].indication}\n`);
 
     const manifestationCodesUISection = versionInformation(
@@ -1921,15 +2198,15 @@ fdescribe("convertAPIToUI", () => {
 
     const ageUISection = versionInformation(ageResponse);
     expect(ageUISection.id).toBe("age");
-    expect((ageUISection as Section).rows[0].columns[0].value).toEqual(
+    expect((ageUISection as GroupedSection).groups[0].names[0].value).toEqual(
       `${ageResponse.data[0].indication.label}\n`
     );
 
     const DailyMaxDoseUISection = versionInformation(dailyMaximumDoseResponse);
     expect(DailyMaxDoseUISection.id).toBe("daily_maximum_dose");
-    expect((DailyMaxDoseUISection as Section).rows[0].columns[0].value).toEqual(
-      `${dailyMaximumDoseResponse.data[0].indication.label}\n`
-    );
+    expect(
+      (DailyMaxDoseUISection as GroupedSection).groups[0].names[0].value
+    ).toEqual(`${dailyMaximumDoseResponse.data[0].indication.label}\n`);
 
     const genderUISection = versionInformation(genderResponse);
     expect(genderUISection.id).toBe("gender");
@@ -1938,9 +2215,9 @@ fdescribe("convertAPIToUI", () => {
     );
 
     const unitsOverTimeUISection = versionInformation(unitsOverTimeResponse);
-    expect(unitsOverTimeUISection.id).toBe("units_over_time");
+    expect(unitsOverTimeUISection.id).toBe("units_over_time_(standard)");
     expect(
-      (unitsOverTimeUISection as Section).rows[0].columns[0].value
+      (unitsOverTimeUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`${unitsOverTimeResponse.data[0].indication.label}\n`);
 
     const globalReviewCodesUISection = versionInformation(
@@ -1963,9 +2240,9 @@ fdescribe("convertAPIToUI", () => {
 
     const visitsUISection = versionInformation(VisitOverTimeResponse);
     expect(visitsUISection.id).toBe("visits_over_time");
-    expect((visitsUISection as Section).rows[0].columns[0].value).toEqual(
-      `${VisitOverTimeResponse.data[0].indication.label}\n`
-    );
+    expect(
+      (visitsUISection as GroupedSection).groups[0].names[0].value
+    ).toEqual(`${VisitOverTimeResponse.data[0].indication.label}\n`);
 
     const dosignPatternsUISection = versionInformation(dosingPatternsResponse);
     expect(dosignPatternsUISection.id).toBe("dosing_patterns");
@@ -1978,7 +2255,7 @@ fdescribe("convertAPIToUI", () => {
     );
     expect(diagnosisCodeverlapsUISection.id).toBe("diagnosis_code_overlaps");
     expect(
-      (diagnosisCodeverlapsUISection as Section).rows[0].columns[0].value
+      (diagnosisCodeverlapsUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`${diagnosisCodeOverlapsResponse.data[0].icd10Code.icd10Code}\n`);
 
     const globalReviewIndicationsUISection = versionInformation(
@@ -2018,13 +2295,13 @@ fdescribe("convertAPIToUI", () => {
       ""
     );
     expect(GISection.id).toBe("general_information");
-    expect((GISection as Section).rows[0].columns[0].value).toEqual(
+    expect((GISection as GroupedSection).groups[0].names[0].value).toEqual(
       `[HCPCS] (Descriptor)\n`
     );
 
     const RefUISection = clearNewSection(referenceResponse.section.code, "");
     expect(RefUISection.id).toBe("references");
-    expect((RefUISection as Section).rows[0].columns[0].value).toEqual(
+    expect((RefUISection as GroupedSection).groups[0].names[0].value).toEqual(
       `Drug Label\n`
     );
 
@@ -2060,7 +2337,7 @@ fdescribe("convertAPIToUI", () => {
     );
 
     expect(
-      (dailyMaxUnitsUISection as Section).rows[0].columns[0].value
+      (dailyMaxUnitsUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`CMS Prof MUE\n`);
 
     const diagnosisCodeUISection = clearNewSection(
@@ -2085,9 +2362,9 @@ fdescribe("convertAPIToUI", () => {
       maximumFrequencyResponse.section.code,
       ""
     );
-    expect(maximumFrequencyUISection.id).toBe("maximum_frequency");
+    expect(maximumFrequencyUISection.id).toBe("maximum_frequency_(standard)");
     expect(
-      (maximumFrequencyUISection as Section).rows[0].columns[0].value
+      (maximumFrequencyUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`\n`);
 
     const manifestationCodesUISection = clearNewSection(
@@ -2101,16 +2378,18 @@ fdescribe("convertAPIToUI", () => {
 
     const ageUISection = clearNewSection(ageResponse.section.code, "");
     expect(ageUISection.id).toBe("age");
-    expect((ageUISection as Section).rows[0].columns[0].value).toEqual(`\n`);
+    expect(
+      (ageUISection as GroupedSection).groups[0].rows[0].columns[0].value
+    ).toEqual(`\n`);
 
     const DailyMaxDoseUISection = clearNewSection(
       dailyMaximumDoseResponse.section.code,
       ""
     );
-    expect(DailyMaxDoseUISection.id).toBe("daily_maximum_dose");
-    expect((DailyMaxDoseUISection as Section).rows[0].columns[0].value).toEqual(
-      `\n`
-    );
+    expect(DailyMaxDoseUISection.id).toBe("daily_maximum_dose_(standard)");
+    expect(
+      (DailyMaxDoseUISection as GroupedSection).groups[0].names[0].value
+    ).toEqual(`\n`);
 
     const genderUISection = clearNewSection(genderResponse.section.code, "");
     expect(genderUISection.id).toBe("gender");
@@ -2120,9 +2399,9 @@ fdescribe("convertAPIToUI", () => {
       unitsOverTimeResponse.section.code,
       ""
     );
-    expect(unitsOverTimeUISection.id).toBe("units_over_time");
+    expect(unitsOverTimeUISection.id).toBe("units_over_time_(standard)");
     expect(
-      (unitsOverTimeUISection as Section).rows[0].columns[0].value
+      (unitsOverTimeUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`\n`);
 
     const globalReviewCodesUISection = clearNewSection(
@@ -2147,8 +2426,10 @@ fdescribe("convertAPIToUI", () => {
       VisitOverTimeResponse.section.code,
       ""
     );
-    expect(visitsUISection.id).toBe("visits_over_time");
-    expect((visitsUISection as Section).rows[0].columns[0].value).toEqual(`\n`);
+    expect(visitsUISection.id).toBe("visits_over_time_(standard)");
+    expect(
+      (visitsUISection as GroupedSection).groups[0].names[0].value
+    ).toEqual(`\n`);
 
     const dosignPatternsUISection = clearNewSection(
       dosingPatternsResponse.section.code,
@@ -2163,9 +2444,9 @@ fdescribe("convertAPIToUI", () => {
       diagnosisCodeOverlapsResponse.section.code,
       ""
     );
-    expect(diagnosisCodeverlapsUISection.id).toBe("diagnosis_code_overlaps");
+    expect(diagnosisCodeverlapsUISection.id).toBe("diagnosis_code_overlaps_(standard)");
     expect(
-      (diagnosisCodeverlapsUISection as Section).rows[0].columns[0].value
+      (diagnosisCodeverlapsUISection as GroupedSection).groups[0].names[0].value
     ).toEqual(`\n`);
 
     const globalReviewIndicationsUISection = clearNewSection(
@@ -2188,7 +2469,7 @@ fdescribe("convertAPIToUI", () => {
       ""
     );
     expect(secondaryUISection.id).toBe(
-      "secondary_malignancy_(c77-c79.9)_icd-10_codes"
+      "secondary_malignancy_(c77-c79.9)_icd-10_codes_(standard)"
     );
     expect(
       (secondaryUISection as GroupedSection).groups[0].names[0].value
@@ -2204,6 +2485,7 @@ fdescribe("convertAPIToUI", () => {
         name: "test",
       },
       headers: [],
+      headersUIWidth: [],
       rows: [],
     };
     const sections: UISection[] = [

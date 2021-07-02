@@ -26,9 +26,36 @@ import { ChangeSourcesComponent } from './change-sources/change-sources.componen
 import { CptCodeComponent } from './cpt-code/cpt-code.component';
 import { IcdCodeComponent } from './icd-code/icd-code.component';
 import { LibraryStatusCodesComponent } from './library-status-codes/library-status-codes.component';
+import { PayerCatalogComponent } from './payer-catalog/payer-catalog.component';
+import { PolicyTypesComponent } from './policy-types/policy-types.component';
+import { ReasonCodeComponent } from './reason-code/reason-code.component';
+import { ProjectCategoriesComponent } from './project-categories/project-categories.component';
+import { ReferenceSourcesComponent } from './reference-sources/reference-sources.component';
+import { ReferenceTitleComponent } from './reference-title/reference-title.component';
+import { SubRuleContainerComponent } from './sub-rule-container/sub-rule-container.component';
 
 @NgModule({
-    declarations: [CptCodeComponent,SubRuleSearchComponent, MidRuleComponent, PayerRuleComponent, MidRuleKeyComponent, LibraryRuleComponent, SubRuleDetailComponent, ChangeTypesComponent, ChangeLogGroupsComponent, ChangeSourcesComponent, IcdCodeComponent, LibraryStatusCodesComponent],
+    declarations: [
+        CptCodeComponent,
+        SubRuleSearchComponent,
+        MidRuleComponent,
+        PayerRuleComponent,
+        MidRuleKeyComponent,
+        LibraryRuleComponent,
+        SubRuleDetailComponent,
+        ChangeTypesComponent,
+        ChangeLogGroupsComponent,
+        ChangeSourcesComponent,
+        IcdCodeComponent,
+        LibraryStatusCodesComponent,
+        PayerCatalogComponent,
+        PolicyTypesComponent,
+        ReasonCodeComponent,
+        ProjectCategoriesComponent,
+        ReferenceSourcesComponent,
+        ReferenceTitleComponent,
+        SubRuleContainerComponent
+    ],
     imports: [
         SubRuleSearchRoutingModule,
         TableModule,

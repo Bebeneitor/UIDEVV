@@ -50,7 +50,7 @@ export class IdeasGeneratedComponent implements OnInit {
 
   groupBy: string = "category";
 
-  @ViewChild("dt") dt;
+  @ViewChild("dt",{static: true}) dt;
 
   yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
 
@@ -73,6 +73,7 @@ export class IdeasGeneratedComponent implements OnInit {
       this.categories = res;
       this.cols = [
         { field: 'id', header: 'Idea ID' },
+        { field: 'provId', header: 'Provisional Rule ID' },
         { field: 'name', header: 'Idea Name' },
         { field: 'category', header: 'Category' },
         { field: 'type', header: 'Type' },
@@ -205,9 +206,11 @@ export class IdeasGeneratedComponent implements OnInit {
 
               this.data.push({
                 "id": dataService.data[i].ideaCode,
+                "provId": dataService.data[i].provisionalRuleCode,
                 "name": dataService.data[i].ideaName,
                 "category": dataService.data[i].categoryDesc == null ? 'Uncategorized' : dataService.data[i].categoryDesc,
                 "ideaId": dataService.data[i].ideaId,
+                "provisionalRuleId": dataService.data[i].provisionalRuleId,
                 "status": dataService.data[i].eclStatusDesc,
                 "type": dataService.data[i].eclStageDesc
               });
@@ -286,12 +289,18 @@ export class IdeasGeneratedComponent implements OnInit {
    * Navigate to detail
    * @param id
    */
-  redirect(rowData,type) {        
-    if(rowData.type === this.eclConstantsService.RULE_STAGE_PROVISIONAL_RULE_DESCRIPTION){
+  redirect(rowData,type) {   
+    let id = rowData.ideaId;
+    if(type == 'IDEA' && rowData.type != 'Draft'){
+      this.router.navigate(['newIdea', this.util.encodeString(id)]);
+    } else if (rowData.type === this.eclConstantsService.RULE_STAGE_PROVISIONAL_RULE_DESCRIPTION && type != 'IDEA'){
       type=this.eclConstantsService.RULE_STAGE_DESCRIPTION;
-    }
+      id = rowData.provisionalRuleId;
+      this.router.navigate(['item-detail', this.util.encodeString(id), type]);
+     } else {
+      this.router.navigate(['item-detail', this.util.encodeString(id), type]);
+     }
     this.storageService.set("PARENT_NAVIGATION", "IDEAS_GENERATED", false);
-    this.router.navigate(['item-detail', this.util.encodeString(rowData.ideaId), type]);
   }
 
   /**

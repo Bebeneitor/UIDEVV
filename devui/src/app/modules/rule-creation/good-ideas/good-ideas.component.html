@@ -1,86 +1,13 @@
-<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
-<div>
-
-  <p-table id="tableGoodIdeas" #viewGrid [columns]="cols" [value]="goodIdeas" [paginator]="true"
-    [resizableColumns]="true" [reorderableColumns]="true" [rows]="10" [rowsPerPageOptions]="eclConstantsService.ROWS_PER_PAGE_OPTIONS"
-    [responsive]="true">
-    <ng-template pTemplate="caption">
-      <app-grid-tools [primeTableLocalReference]="viewGrid"
-        [pageTitle]="pageTitle">
-      </app-grid-tools>
-      <div style="text-align: right">
-        <input #inputKey type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
-          (input)="viewGrid.filterGlobal($event.target.value, 'contains')" style="width:150px; border-radius: 5px">
-        <span style="cursor: pointer"><i *ngIf="keywordSearch !== ''" (click)="viewGrid.reset();inputKey.value = '';"
-            style="cursor: pointer" class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
-        <i *ngIf="keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
-      </div>
-    </ng-template>
-
-    <ng-template pTemplate="header" let-columns>
-      <tr>
-        <th class="small-th" style="text-align: center" *ngFor="let col of columns" [pSortableColumn]="col.field"
-          [ngStyle]="{'width': col.width}" pResizableColumn>
-          {{col.header}}
-          <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
-            ariaLabelDesc="Activate to sort in descending order" ariaLabelAsc="Activate to sort in ascending order">
-          </p-sortIcon>
-        </th>
-      </tr>
-      <tr>
-        <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center" [ngStyle]="{'width': col.width}">
-
-          <input *ngIf="col.field != 'categoryDesc' && col.field != 'creationDate'" pInputText type="text"
-            style="width : 100%; padding : 5px; border-radius: 5px"
-            (input)="viewGrid.filter($event.target.value, col.field, 'contains')" [placeholder]="col.header">
-
-          <p-dropdown *ngIf="col.field == 'categoryDesc'" appendTo='body' [options]="categories"
-            [style]="{'width':'100%'}" (onChange)="viewGrid.filter($event.value, col.field, 'equals')">
-          </p-dropdown>
-
-          <div class="input-group"*ngIf="col.field == 'creationDate'">
-            <p-calendar appendTo="body" [(ngModel)]="calendarValue"
-              (onSelect)="filter($event, 'equals')" [readonlyInput]="true" [monthNavigator]="true"
-              [yearNavigator]="true" placeholder="mm/dd/yy" dateFormat="mm/dd/yy" [yearRange]="yearValidRangeEft">
-            </p-calendar>
-            <div class="input-group-append group-absolute">
-              <button class="btn btn-secondary btn-sm" type="button"
-                title="Clear Data"><i class="fa fa-eraser" (click)="filter(null, 'equals')"></i></button>
-            </div>
-          </div>
-        </th>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="body" let-rule let-columns="columns">
-      <tr>
-        <td class="small-td" *ngFor="let col of columns">
-          <span *ngIf="col.field == 'ruleCode'" class="span-centered">
-            <a style="text-decoration: underline; cursor: pointer; color:inherit" nghref="#"
-              (click)="redirect(rule.ruleId, 'GOODIDEA')">{{rule.ruleCode}}</a>
-          </span>
-
-          <span *ngIf="col.field != 'ruleCode'">
-            {{rule[col.field]}}
-          </span>
-        </td>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="paginatorright" let-state>
-      <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
-        Showing <b>{{(state.page * state.rows) + 1}}</b> -
-        <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
-        of <b>{{state.totalRecords}}</b>
-      </span>
-      <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
-    </ng-template>
-  </p-table>
-
-  <br>
-
-  <div class="float-right">
-    <button class="btn btn-primary btn-sm" (click)="loadData()" style="width: 80px;">Refresh</button>
+<div class="good-ideas">
+  <div>
+    <h5>Good Ideas</h5>
+  </div>
+  <div>
+    <ecl-table #goodIdeasTable *ngIf="enabledEclTable" [tableModel]='tableConfig' (onAcctionLink)="redirect($event.row)"> </ecl-table>
+  </div>
+  <div class="btn-container">
+    <button class="btn btn-primary btn-sm" (click)="refreshEclTable()" style="width: 80px;">Refresh</button>
     &nbsp;
     <button class="btn btn-primary btn-sm" onclick="javascript:history.back();" style="width: 80px;">Exit</button>
   </div>
+</div>

@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { Constants } from 'src/app/shared/models/constants';
 import { StorageService } from 'src/app/services/storage.service';
 import { GoodIdeasServiceService } from 'src/app/services/good-ideas-service.service';
+import { EclLookupsService } from 'src/app/services/ecl-lookups.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-my-tasks',
@@ -34,7 +36,8 @@ export class MyTasksComponent implements OnInit {
 
   constructor(private dashboardService: DashboardService, private util: AppUtils,
     private permissions: NgxPermissionsService, private router: Router,
-    private storageService: StorageService, private goodIdeaService : GoodIdeasServiceService) { }
+    private storageService: StorageService, private goodIdeaService: GoodIdeasServiceService,
+    private lookupService: EclLookupsService) { }
 
   ngOnInit() {
 
@@ -133,7 +136,13 @@ export class MyTasksComponent implements OnInit {
   /**
    * Get data for widget and parse to correct structre in front end
    */
-  loadData() {
+  async loadData() {
+    // Check if rule prcess should be accesible.
+    const ruleMaintenanceVisible = await this.lookupService.searchNoPromise('VISIBILITY_FLAG', 'SHOW_RULE_MAINTENANCE_MENU', '1').pipe(map(response => {
+      const showRuleMaintenance = response.find(lu => lu.statusId === 1);
+      return (showRuleMaintenance && showRuleMaintenance.lookupDesc === '1');
+    })).toPromise();
+
     this.userId = this.util.getLoggedUserId();
     this.getIdeasForCheck(this.userId).then((response: any) => {
 
@@ -151,7 +160,7 @@ export class MyTasksComponent implements OnInit {
       let existingRulesNeedMedicalReassignment = 0;
       let rulesNeedMoreInfo = 0;
 
-      this.tasks = [];            
+      this.tasks = [];
       let goodIdeas = 0;
 
       //Permissions for validate, the user only can view the categories in base of permissions
@@ -179,7 +188,7 @@ export class MyTasksComponent implements OnInit {
             case 41:
               provisionalRulesApproval = provisionalRulesApproval + response.data.accountStatus[i].count;
               break;
-            case 65:              
+            case 65:
               break;
             case 60:
             case 287:
@@ -189,8 +198,9 @@ export class MyTasksComponent implements OnInit {
               break;
           }
         }
-
+        //ECL-13477
         if (permissionMedicalDirector) {
+
           this.tasks.push({
             "id": 3,
             "name": "Provisional rule needing peer approval",
@@ -198,13 +208,17 @@ export class MyTasksComponent implements OnInit {
             "color": "primary",
             "cssColor": Constants.AVAILABLE_COLORS[0]
           });
-          this.tasks.push({
-            "id": 7,
-            "name": "Existing/new version needing peer review",
-            "count": medicalReviewMaintenance,
-            "color": "danger",
-            "cssColor": Constants.AVAILABLE_COLORS[1]
-          });
+
+          // ECL-13477
+          if (ruleMaintenanceVisible) {
+            this.tasks.push({
+              "id": 7,
+              "name": "Existing/new version needing peer review",
+              "count": medicalReviewMaintenance,
+              "color": "danger",
+              "cssColor": Constants.AVAILABLE_COLORS[1]
+            });
+          }
         }
 
         if (permissionPolicyOwner) {
@@ -215,13 +229,17 @@ export class MyTasksComponent implements OnInit {
             "color": "success",
             "cssColor": Constants.AVAILABLE_COLORS[2]
           });
-          this.tasks.push({
-            "id": 6,
-            "name": "New/existing version needing approval",
-            "count": rulesNeedsApproval,
-            "color": "secondary",
-            "cssColor": Constants.AVAILABLE_COLORS[3]
-          });
+
+          //ECL-13477
+          if (ruleMaintenanceVisible) {
+            this.tasks.push({
+              "id": 6,
+              "name": "New/existing version needing approval",
+              "count": rulesNeedsApproval,
+              "color": "secondary",
+              "cssColor": Constants.AVAILABLE_COLORS[3]
+            });
+          }
         }
 
         if (permissionResearchAnalysis) {
@@ -239,13 +257,17 @@ export class MyTasksComponent implements OnInit {
             "color": "danger",
             "cssColor": Constants.AVAILABLE_COLORS[1]
           });
-          this.tasks.push({
-            "id": 5,
-            "name": "Rules needing impact analysis",
-            "count": rulesNeedsAnalysis,
-            "color": "success",
-            "cssColor": Constants.AVAILABLE_COLORS[2]
-          });
+
+          //ECL-13477
+          if (ruleMaintenanceVisible) {
+            this.tasks.push({
+              "id": 5,
+              "name": "Rules needing impact analysis",
+              "count": rulesNeedsAnalysis,
+              "color": "success",
+              "cssColor": Constants.AVAILABLE_COLORS[2]
+            });
+          }
         }
 
         if (permissionPolicyOwner) {
@@ -257,13 +279,16 @@ export class MyTasksComponent implements OnInit {
             "cssColor": Constants.AVAILABLE_COLORS[3]
           });
 
-          this.tasks.push({
-            "id": 10,
-            "name": "Existing version needing reassignment",
-            "count": existingVersionsNeedReassignment,
-            "color": "primary",
-            "cssColor": Constants.AVAILABLE_COLORS[0]
-          });
+          //ECL-13477
+          if (ruleMaintenanceVisible) {
+            this.tasks.push({
+              "id": 10,
+              "name": "Existing version needing reassignment",
+              "count": existingVersionsNeedReassignment,
+              "color": "primary",
+              "cssColor": Constants.AVAILABLE_COLORS[0]
+            });
+          }
 
           this.tasks.push({
             "id": 9,
@@ -274,7 +299,8 @@ export class MyTasksComponent implements OnInit {
           });
         }
 
-        if (permissionMedicalDirector) {
+        //ECL-13477
+        if (ruleMaintenanceVisible && permissionMedicalDirector) {
           this.tasks.push({
             "id": 11,
             "name": "New rule needing peer reassignment",
@@ -302,7 +328,8 @@ export class MyTasksComponent implements OnInit {
           });
         }
 
-        if(permissionResearchAnalysis){
+        //ECL-13477
+        if (ruleMaintenanceVisible && permissionResearchAnalysis) {
           this.tasks.push({
             "id": 14,
             "name": "Rule needs more info",
@@ -349,8 +376,8 @@ export class MyTasksComponent implements OnInit {
    */
   clickItem(id) {
     switch (id) {
-      case 1: 
-        this.router.navigate(["/ideas-needing-research"], {queryParams: {tab: Constants.ASSIGNED_TAB}});
+      case 1:
+        this.router.navigate(["/ideas-needing-research"], { queryParams: { tab: Constants.ASSIGNED_TAB } });
         break;
       case 2:
         this.router.navigate(["/ruleApproval"]);
@@ -358,11 +385,11 @@ export class MyTasksComponent implements OnInit {
       case 3:
         this.router.navigate(["/mdApprovalPR"]);
         break;
-      case 4: 
-        this.router.navigate(["/ideas-needing-research"], {queryParams: {tab: Constants.RETURNED_TAB}});
+      case 4:
+        this.router.navigate(["/ideas-needing-research"], { queryParams: { tab: Constants.RETURNED_TAB } });
         break;
       case 5:
-        this.router.navigate(["/ruleForImpactAnalysis"], {queryParams: {tab: Constants.ASSIGNED_TAB}});
+        this.router.navigate(["/ruleForImpactAnalysis"], { queryParams: { tab: Constants.ASSIGNED_TAB } });
         break;
       case 6:
         this.router.navigate(["/ruleForPOApproval"]);
@@ -370,7 +397,7 @@ export class MyTasksComponent implements OnInit {
       case 7:
         this.router.navigate(["/mdApprovalRM"]);
         break;
-      case 8:        
+      case 8:
         this.router.navigate(["/reAssignForRuleApprovalReturned"]);
         break;
       case 9:
@@ -380,17 +407,17 @@ export class MyTasksComponent implements OnInit {
         this.router.navigate(["/reAssignForRuleUpdateApproval"]);
         break;
       case 11:
-        this.router.navigate(["/assignForMDApprovalNR"], {queryParams: {tab: Constants.RETURNED_TAB}});
+        this.router.navigate(["/assignForMDApprovalNR"], { queryParams: { tab: Constants.RETURNED_TAB } });
         break;
       case 12:
-        this.router.navigate(["/assignForMDApprovalRM"], {queryParams: {tab: Constants.RETURNED_TAB}});
+        this.router.navigate(["/assignForMDApprovalRM"], { queryParams: { tab: Constants.RETURNED_TAB } });
         break;
-      case 13: 
+      case 13:
         this.router.navigate(["/good-ideas"]);
         break;
       case 14:
-        this.router.navigate(["/ruleForImpactAnalysis"], {queryParams: {tab: Constants.RETURNED_TAB}});
-        break;  
+        this.router.navigate(["/ruleForImpactAnalysis"], { queryParams: { tab: Constants.RETURNED_TAB } });
+        break;
     }
   }
 
@@ -423,9 +450,9 @@ export class MyTasksComponent implements OnInit {
    */
   redirect(id, type, goodIdeaDate) {
 
-    if(type == "IDEA" && goodIdeaDate) {
+    if (type == "IDEA" && goodIdeaDate) {
       //Call service to remove good idea date beacause with the redirection we consider the user review it
-      this.goodIdeaService.updateStatusToReviewedInGoodIdeas(Number(this.util.decodeString(id))).then((response : any) => {
+      this.goodIdeaService.updateStatusToReviewedInGoodIdeas(Number(this.util.decodeString(id))).then((response: any) => {
 
         //Redirect after remove from good ideas
         this.storageService.set("PARENT_NAVIGATION", "MY_TASKS", false);
@@ -434,6 +461,6 @@ export class MyTasksComponent implements OnInit {
     } else {
       this.storageService.set("PARENT_NAVIGATION", "MY_TASKS", false);
       this.router.navigate(['item-detail', id, type]);
-    }    
+    }
   }
 }

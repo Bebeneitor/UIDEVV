@@ -1,0 +1,35 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h3>Dates</h3>
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3">
+      <label><span class="required-field-color">*</span>Desired Completion Date:</label>
+    </div>
+    <div class="col-9"> <input class="form-control fs-12" name="desiredCompletionDate" [(ngModel)]="request.requestDueDate"
+        min="{{currentDate | date:'yyyy-MM-dd'}}" type="date" [disabled]="readOnly && rrButtonsDisable" />
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3">
+      <label>Target Release Date:</label>
+    </div>
+    <div class="col-9"> <input class="form-control fs-12" name="targetReleaseDt" [(ngModel)]="request.targetReleaseDt"
+        min="{{currentDate | date:'yyyy-MM-dd'}}" type="date" [disabled]="readOnly && rrButtonsDisable" />
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3"><label>Created:</label></div>
+    <div class="col-9"><label>{{request.rrCreatedDate}}</label></div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3"><label>Updated:</label></div>
+    <div class="col-9"><label>{{request.rrUpdatedDate}}</label></div>
+  </div>
+  <div class="row p-2">
+    <div class="col-3"><label>Resolved:</label></div>
+    <div class="col-9"><label>N/A</label></div>
+  </div>
+</div>

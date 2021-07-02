@@ -129,4 +129,15 @@ export class RuleIngestionService {
     const requestParams = new HttpParams().append('eclFileId', fileId.toString());
     return this.http.post<BaseResponse>(apiUrl, requestBody, { params: requestParams });
   }
+
+  /**
+   * Processes the cpe file template for the cpe ingestion process.
+   * @param fileId to be processed.
+   */
+  processCpeIngestionFile(fileId: number): Observable<BaseResponse> {
+    const requestBody = { eclFileId: fileId }
+    const apiUrl = `${environment.restServiceUrl}${RoutingConstants.CPE_INGESTION_URL}/${RoutingConstants.PROCESS_CPE_INGESTION_FILE}`;
+    const requestParams = new HttpParams().append('eclFileId', fileId.toString());
+    return this.http.post<BaseResponse>(apiUrl, requestBody, { params: requestParams });
+  }
 }

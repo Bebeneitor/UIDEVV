@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService, Message } from 'primeng/api';
 import { UtilsService } from 'src/app/services/utils.service';
 import { SavingsService } from 'src/app/services/savings.service'
 import { AppUtils } from 'src/app/shared/services/utils';
 import { SavingsResponse } from 'src/app/shared/models/savings-response';
 import { SavingsRequest } from 'src/app/shared/models/savings-request';
+import { Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
+import { interval } from 'rxjs';
 
 const ENABLE: string = "enable";
 const DISABLE: string = "disable";
@@ -710,7 +713,7 @@ export class SavingsForRulesComponent implements OnInit {
         report.notGenerated = false;
       });
       this.savingReports.forEach((savingReport: any) => {
-        this.savingService.generateExcelReport(this.engineName.toLowerCase(), savingReport.requestBody).subscribe((response: any) => {
+        this.savingService.generateExcelReport(savingReport.engineName, savingReport.requestBody).subscribe((response: any) => {
           savingReport.excelReport = response;
         });
       });
@@ -780,6 +783,8 @@ export class SavingsForRulesComponent implements OnInit {
               requestBody: requestEngineBody,
               progress: 0,
               notGenerated: true,
+              engineName: this.engineName.toLowerCase(),
+              reportName: this.getReportName(),
               excelReport: null
             });
             this.progressValue = this.progressValue == 100 ? 0 : this.progressValue;
@@ -793,6 +798,8 @@ export class SavingsForRulesComponent implements OnInit {
           requestBody: requestEngineBody,
           progress: 0,
           notGenerated: true,
+          engineName: this.engineName.toLowerCase(),
+          reportName: this.getReportName(),
           excelReport: null
         });
         this.progressValue = this.progressValue == 100 ? 0 : this.progressValue;
@@ -801,6 +808,17 @@ export class SavingsForRulesComponent implements OnInit {
     } else {
       this.messageService.add({ severity: 'warn', summary: 'Warning', detail: "Only 4 reports at once are allowed", life: 5000, closable: true });
     }
+  }
+
+  getReportName() {
+    let occurrences: number = 0;
+    let newReportName: string = this.engineName + "_Savings_" + this.currentDate.replace(/\ /gi, "_");
+    this.savingReports.forEach((savingReport: any, index: number) => {
+      if(savingReport.reportName == newReportName) {
+        occurrences++;
+      }
+    });
+    return newReportName + (occurrences != 0 ? " (" + occurrences + ")" : "") + ".xlsx";
   }
 
   closeSavingMessage() {
@@ -814,11 +832,13 @@ export class SavingsForRulesComponent implements OnInit {
         reportsToGenerate.push(index);
       }
     });
-    this.loadReportProgress(reportsToGenerate);
+    this.loadReportProgressBar(reportsToGenerate);
     this.savingReports.forEach((savingReport: any) => {
       if (savingReport.progress == 0) {
-        this.savingService.generateExcelReport(this.engineName.toLowerCase(), savingReport.requestBody).subscribe((response: any) => {
+        this.savingService.generateExcelReport(savingReport.engineName, savingReport.requestBody).subscribe((response: any) => {
           savingReport.excelReport = response;
+          savingReport.progress = 100;
+          savingReport.notGenerated = false;
         });
       }
     });
@@ -827,19 +847,23 @@ export class SavingsForRulesComponent implements OnInit {
     sessionStorage.setItem("engineId", this.radioEngine.toString());
   }
 
-  loadReportProgress(reportsToGenerate: any) {
+  loadReportProgressBar(reportsToGenerate: any) {
     let progressValue = 0;
     let interval = setInterval(() => {
       progressValue = progressValue + Math.floor(Math.random() * 10) + 1;
       reportsToGenerate.forEach((reportIndex: number) => {
-        this.savingReports[reportIndex].progress = progressValue;
-        if (progressValue >= 100) {
+        if(progressValue >= 80 && this.savingReports[reportIndex].excelReport == null) {
+          this.savingReports[reportIndex].progress = 80;
+        } else if (this.savingReports[reportIndex].progress != 100){
+          this.savingReports[reportIndex].progress = progressValue;
+        }
+        if (progressValue >= 100 && this.savingReports[reportIndex].excelReport != null) {
           this.savingReports[reportIndex].progress = 100;
           this.savingReports[reportIndex].notGenerated = false;
           clearInterval(interval);
         }
       });
-    }, 500);
+    }, 1000);
   }
 
   downloadExcelReport(index: number) {
@@ -848,7 +872,7 @@ export class SavingsForRulesComponent implements OnInit {
       header: 'Download Excel Report File',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.createDownloadFileElement(this.savingReports[index].excelReport);
+        this.createDownloadFileElement(this.savingReports[index].reportName, this.savingReports[index].excelReport);
         this.savingReports.splice(index, 1);
         sessionStorage.setItem("savingReports", JSON.stringify(this.savingReports));
         sessionStorage.setItem("engineId", this.radioEngine.toString());
@@ -857,12 +881,12 @@ export class SavingsForRulesComponent implements OnInit {
     });
   }
 
-  createDownloadFileElement(response: any) {
+  createDownloadFileElement(reportName: string, response: any) {
     var a = document.createElement("a");
     document.body.appendChild(a);
     let blob = new Blob([response], { type: "fileType" }), url = window.URL.createObjectURL(blob);
     a.href = url;
-    a.download = this.engineName + "_Savings_" + this.currentDate + ".xlsx";
+    a.download = reportName;
     a.click();
     window.URL.revokeObjectURL(url);
   }

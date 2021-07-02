@@ -1,0 +1,139 @@
+.has-sticky-header .sticky-sections {
+  top: 45px;
+}
+
+.page-content {
+  margin-left: auto;
+  width: calc(100% - 150px);
+  padding: 15px 50px;
+}
+.navigation-closed .page-content {
+  width: calc(100% - 50px);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.navigation-toggle {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 95vh;
+  border: 0;
+}
+
+.dnb-modal {
+  width: 50vh;
+  max-width: 500px;
+}
+
+.dnb-toggle {
+  position: relative;
+}
+
+.sections-container {
+  padding-top: 20px !important;
+}
+
+.drug-name {
+  border-bottom: 1px solid #9179b7;
+  padding: 3px;
+  padding: 3px;
+  display: inline-block;
+  color: black;
+  font-weight: normal;
+  position: relative;
+  top: 6px;
+  min-width: 140px;
+  display: block;
+}
+
+.drug-name .ql-container {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #31006f;
+}
+
+.drug-name .ql-editor.ql-blank::before {
+  right: 0;
+  left: 0;
+  font-style: normal;
+}
+
+.button.is-text.pin {
+  padding: 0 5px;
+}
+
+.section-titles {
+  padding-top: 20px !important;
+}
+
+.dnb-progress-checkbox
+  ::ng-deep
+  p-checkbox
+  .ui-chkbox
+  .ui-chkbox-box
+  .ui-chkbox-icon {
+  font-size: 14px;
+}
+
+.dnd-label-percentage {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: bold;
+  color: #31006f;
+}
+
+.inges-btn {
+  margin-left: 5px;
+  padding: 0 5px !important;
+  width: 60px !important;
+  display: flex;
+  flex: 0 0 60px;
+  align-items: center;
+  justify-content: center;
+}
+
+.inges-btn .fa {
+  padding-right: 5px;
+}
+
+.ingest-overlay {
+  top: 34px !important;
+  left: auto !important;
+  right: 12px;
+}
+
+.ingest-overlay:before {
+  margin-right: -2px;
+}
+
+.ingest-overlay:before,
+.ingest-overlay:after {
+  left: auto;
+  right: 1.25em;
+}
+
+.sticky-header {
+  background-color: #f2f3f7 !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 10px 0 5px;
+}
+
+.has-sticky-header .sticky-header {
+  border-bottom: 1px solid #31006f;
+}
+
+.dnd-label-autosave {
+  font-size: 12px;
+  font-style: normal;
+  color: #31006f;
+  padding: 6px;
+}
+
+.autosave-toggle {
+  margin: auto 0;
+}

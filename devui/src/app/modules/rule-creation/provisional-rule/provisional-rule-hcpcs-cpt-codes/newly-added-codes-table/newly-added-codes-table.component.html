@@ -1,0 +1,25 @@
+<div class="cpt-tab">
+	<div class="mt-3">
+		<div class="row">
+			<div class="col-md-6 text-left">
+				<h4>Newly Added Codes</h4>
+			</div>
+			<div class="col-md-6 text-right" id="legend">
+				<span id="square"></span><label>Deleted</label>
+			</div>
+		</div>
+
+		<div class="section-table">
+			<ecl-table #procedureCodesTable [tableModel]="tableConfig"
+				(onSelectRecord)="onRowSelect($event)"
+				(onUnSelectRecord)="onRowUnselect($event)"
+				(onHoverColumn)="showOverlayPanel($event)"
+				(onTrashButtonCall)="deleteSelection($event)"
+				(onRecoveryButtonCall)="recoverSelection($event)">
+			</ecl-table>
+		</div>
+
+		<p-confirmDialog key="confimDelete">
+		</p-confirmDialog>
+	</div>
+</div>

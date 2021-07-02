@@ -49,7 +49,7 @@
           <div class=""
             style="width : 100%; padding : 12px; padding-top : 0px;">
             <p-tabView (onChange)="handleChange($event)">
-              <p-tabPanel header="Rules" [selected]="selectedTab == 'rules'">
+              <p-tabPanel header="Rules" [selected]="selectedTab == 'rules'" *ngIf="!isDefaultUser">
                 <div *ngIf="dataRules.length == 0" class="div-no-data" style="margin-top: 0px;">
                   <img src="assets/img/no-data.png" class="img-no-data" />
                   <p class="no-data">NO DATA FOUND</p>

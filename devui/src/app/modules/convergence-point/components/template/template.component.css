@@ -1,0 +1,21 @@
+.div-template {
+    width: 510px;
+}
+
+.div-template h5 {
+    font-size: 14px;
+}
+
+.div-template .btn-template {
+    width: 48%;
+    margin-right: 2px;
+    margin-left: 2px;
+}
+
+.div-template .div-buttons {
+    margin-bottom: 10px;
+}
+
+::ng-deep .div-template .tab-template .ui-tabview-panels {
+    display: none !important;
+}

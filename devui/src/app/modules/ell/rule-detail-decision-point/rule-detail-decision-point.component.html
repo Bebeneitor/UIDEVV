@@ -36,19 +36,19 @@
       </table>
     </div>
   </div>
-  <br>
+  <br><br>
   <div class="row">
     <div class="col-12">
       <div class="text-right">
         <button *ngIf="!blockedDocument && !this.config.data" type="button" (click)="returnPreviousScreen()"
-          class="btn btn-primary btn-sm btn-sm f-11"><i class="fa fa-reply"></i> Return </button>
+          class="btn btn-primary btn-sm btn-sm f-11 btn-ell-return"><i class="fa fa-reply"></i> Return </button>
       </div>
     </div>
   </div>
 </div>
-<p-blockUI baseZIndex="10001" [blocked]="blockedDocument">
+<p-blockUI [blocked]="blockedDocument">
   <div class="img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" />
+    <img src="assets/img/loading.gif"/>
     <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
   </div>
 </p-blockUI>

@@ -12,17 +12,12 @@
             <strong>Required</strong>.</small>
         </div>
 
-        <div class="p-col-2" style="margin-top: auto;">
-          <p-triStateCheckbox formControlName="activeMatch" [label]="'Active match'">
-          </p-triStateCheckbox>
-        </div>
-        <div class="p-col-2" style="margin-top: auto;">
-          <p-triStateCheckbox formControlName="exactMatch" [label]="'Exact match'">
-          </p-triStateCheckbox>
+        <div class="p-col" style="margin-top: auto;" *ngIf="unbTable">
+          <p-checkbox formControlName="exactMatch" binary="false" inputId="exactMatch"></p-checkbox>
+          <label for="exactMatch" style="margin: 0 0 0 .5em; font-weight: bold;">Exact Match</label>
         </div>
 
-
-        <div class="p-col-2" style="text-align: right; padding-top: 25px;">
+        <div class="p-col" style="text-align: right; padding-top: 25px;">
           <button type="button" class="btn-transparent" (click)="clear()" title="Clear Criteria">
             <em class="fa fa-eraser"></em>
           </button>
@@ -36,45 +31,89 @@
 
       <div class="p-grid">
         <div class="p-field p-col" formArrayName="searchCriteria"
-          *ngFor="let searchCriteriaElement of searchCriteriaElements; index as j">
-
-          <label for="attributes">
-            <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
-            {{searchCriteriaElement.attributeName}}: </label>
+          *ngFor="let searchCriteriaElement of searchCriteriaElements; index as key">
 
           <div [ngSwitch]="searchCriteriaElement.uiDataType">
+
             <div *ngSwitchCase="'range_text'">
-              <input type="text" pInputText style="height: 30px; min-width: 150px;" [formControlName]="j">
+              <div
+                [ngClass]="searchCriteriaElement.attributeName.includes('From') ? 'p-grid-group-right' : 'p-grid-group-left'">
+                <label for="attributes">
+                  <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                  {{searchCriteriaElement.attributeName}}: </label>
+                <input type="text" pInputText style="height: 30px; min-width: 150px;" [formControlName]="key">
+              </div>
             </div>
 
             <div *ngSwitchCase="'text'">
-              <input type="text" pInputText style="height: 30px; min-width: 150px;" [formControlName]="j">
+              <label for="attributes">
+                <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                {{searchCriteriaElement.attributeName}}: </label>
+              <input type="text" pInputText style="height: 30px; min-width: 150px;" [formControlName]="key">
+            </div>
+
+            <div *ngSwitchCase="'number'">
+              <label for="attributes">
+                <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                {{searchCriteriaElement.attributeName}}: </label>
+              <input type="number" step="any" pInputText style="height: 30px; min-width: 150px;" [formControlName]="key">
             </div>
 
             <div *ngSwitchCase="'range_date'">
-              <p-calendar [style]="{'min-width': '150px'}" [yearRange]="yearValidRange" [monthNavigator]="true"
-                [yearNavigator]="true" [formControlName]="j">
-              </p-calendar>
+              <div
+                [ngClass]="searchCriteriaElement.attributeName.includes('From') ? 'p-grid-group-right' : 'p-grid-group-left'">
+                <label for="attributes">
+                  <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                  {{searchCriteriaElement.attributeName}}: </label>
+                <p-calendar [style]="{'min-width': '150px'}" [yearRange]="yearValidRange" [monthNavigator]="true"
+                  [yearNavigator]="true" [formControlName]="key">
+                </p-calendar>
+              </div>
             </div>
 
             <div *ngSwitchCase="'date'">
+              <label for="attributes">
+                <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                {{searchCriteriaElement.attributeName}}: </label>
               <p-calendar [style]="{'min-width': '150px'}" [yearRange]="yearValidRange" [monthNavigator]="true"
-                [yearNavigator]="true" [formControlName]="j">
+                [yearNavigator]="true" [formControlName]="key">
               </p-calendar>
             </div>
 
-            <div *ngSwitchCase="'check_box'">
-              <p-triStateCheckbox [formControlName]="j" [label]="searchCriteriaElement.attributeName">
-              </p-triStateCheckbox>
+            <div *ngSwitchCase="'checkbox'">
+              <div class="row" style="padding-left: 10px;">
+
+                <label for="attributes">
+                  <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                  {{searchCriteriaElement.attributeName}}: </label>
+              </div>
+              <div class="row" style="padding-left: 10px; padding-top: 10px;">
+
+                <p-triStateCheckbox [formControlName]="key">
+                </p-triStateCheckbox>
+              </div>
             </div>
 
             <div *ngSwitchCase="'dropdown'">
-              <p-multiSelect id="dataset" [style]="{'height':'30px', 'min-width': '300px'}" [options]="dataSet"
-                [formControlName]="j" [maxSelectedLabels]="3">
+              <label for="attributes">
+                <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                {{searchCriteriaElement.attributeName}}: </label>
+              <p-multiSelect id="dataset" [style]="{'height':'30px', 'min-width': '300px'}"
+                [options]="searchCriteriaElement.dropDownElements" [formControlName]="key" [maxSelectedLabels]="3">
               </p-multiSelect>
             </div>
-          </div>
 
+            <div *ngSwitchCase="'radio_button'">
+              <div [class]="setRadioButtonStyles(key)">
+                <label for="attributes" style="display: none;" [class]="setVisibleLabelRadioButtons(key)"> {{searchCriteriaElement.columnName}} </label><br>
+                  <label for="attributes">
+                    <span *ngIf="searchCriteriaElement.mandatory" class="text-danger">*</span>
+                    {{searchCriteriaElement.attributeName}}: </label>&nbsp;
+                  <p-radioButton  (onClick)="setRadioButtonValue(key, searchCriteriaElement)" [formControlName]="key" [value]="searchCriteriaElement.attributeName">
+                  </p-radioButton>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </form>
@@ -92,7 +131,22 @@
 
 <p-blockUI [blocked]="blocked">
   <div class="img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" />
+    <img src="assets/img/loading.gif"/>
     <p style="font-size: 12px;color: #fff;">{{blockedMessage}}</p>
   </div>
 </p-blockUI>
+
+<p-dialog [header]="headerText" [(visible)]="saveDisplay" appendTo="body" [draggable]="false" [resizable]="false"
+  [modal]="true">
+  <p>{{message}}</p>
+  <p-footer>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="text-center">
+          <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check" (click)="saveDialog()"
+            label="OK"></button>
+        </div>
+      </div>
+    </div>
+  </p-footer>
+</p-dialog>

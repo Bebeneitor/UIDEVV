@@ -69,6 +69,7 @@ label {
 }
 
 ::ng-deep .dpdownDiv .ui-dropdown {min-width: 100% !important;}
+::ng-deep .dpdownDiv .ui-dropdown-label {padding-top: 6px !important;}
 ::ng-deep .rule-table .ui-table .ui-table-tbody > tr {height : 31px !important;}
 .rule-table .table-header { 
     font-family: "Open Sans", "Helvetica Neue", sans-serif;
@@ -80,7 +81,8 @@ label {
 .expDate {font-weight: bold; text-align: left;margin-left:-10px;}
 .fullwidth {width : 100%;}
 .right-10 {margin-right : 10px;}
-.img-loading img {width : 60%;}
 .filterCondDiv {margin-top :40px;}
 .txtareaheight {height : 90px !important;}
 .btn.btn-primary:disabled {cursor : default;}
+.options-assoc-icon {color : grey; font-size: 13px; float:left; margin-top: 3px; transform :rotate(80deg);}
+.select-options {margin-left : 20px; font-size: 13px;}

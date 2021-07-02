@@ -1,8 +1,16 @@
-<h5>New Idea Research</h5>
+<h5 *ngIf="rrCode">
+  <span class="nav-page-title" (click)="navigateBackResearch()">{{navPageTitle}}</span>
+  <span class="fa fa-chevron-right" aria-hidden="true"></span>
+  <span class="nav-page-title" (click)="navigateBackResearchId()">{{rrCode}}</span>
+  <span class="fa fa-chevron-right" aria-hidden="true"></span>
+  <span>New Idea Research</span>
+</h5>
+<h5 *ngIf="!rrCode">New Idea Research</h5>
 
 <form #parentDiv class="form-container">
     <NirSearchForm [ideaId]="ideaId" [ruleId]="ruleId" [ruleCreationStatus]="ruleCreationStatus"
-        [(provisionalBtnDisable)]="provisionalBtnDisable" [readOnlyView]="readOnlyView">
+        [(provisionalBtnDisable)]="provisionalBtnDisable" [readOnlyView]="readOnlyView"
+        [isPdgMedicaidRule]="isPdgMedicaidRule">
     </NirSearchForm>
     <p-tabView [activeIndex]="index" (onChange)="indexShift($event)">
         <!------------------ Duplicate & Valid Check ------------------->
@@ -12,7 +20,8 @@
         <!-------------------- Reference Detail ------------------------>
         <p-tabPanel header="Reference Detail">
             <nirReferenceDetail [(ruleCreationStatus)]="ruleCreationStatus" [ideaId]="ideaId"
-                [readOnlyView]="readOnlyView"></nirReferenceDetail>
+                [readOnlyView]="readOnlyView" [pdgMedicaidIdea]="isPdgMedicaidRule" [viewReferences]="viewReferences">
+            </nirReferenceDetail>
         </p-tabPanel>
     </p-tabView>
 
@@ -31,7 +40,7 @@
             [disabled]='returnDisabled' (click)="showReturnDialog()">Return</button>
     </div>
 
-    <!--   Confirmation Dialog -->
+    <!--   Confirmation Dialogs -->
     <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
     <p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
         <p>{{message}}</p>
@@ -44,5 +53,7 @@
             </div>
         </p-footer>
     </p-dialog>
+
+    <p-confirmDialog header="Confirmation" key="codesTabNewIdea"></p-confirmDialog>
 </form>
 <p-toast [baseZIndex]="999999"></p-toast>

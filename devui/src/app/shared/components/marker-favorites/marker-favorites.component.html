@@ -1,0 +1,11 @@
+<div style="width: 100%; padding-right: 15px; padding-left: 15px;" class="text-right">
+  <a nghref="#" class="favorites" *ngIf="selected" (click)="unselectRule()">
+    <i class="fa fa-heart"></i>
+  </a>
+
+  <a nghref="#" class="favorites" *ngIf="!selected" (click)="selectRule()">
+    <i class="fa fa-heart-o"></i>
+  </a>
+</div>
+
+<p-toast [baseZIndex]="99999"></p-toast>

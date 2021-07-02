@@ -1,0 +1,26 @@
+<div style="width: 250px;">
+  <label style="display: block;">PO/CCA:</label>
+  <div class="ui-inputgroup">
+    <p-dropdown [options]="users" placeholder="Select user" [(ngModel)]="selectedUser" [filter]="true" class="w-100"
+      [style]="{'width': '100%'}" [resetFilterOnHide]="true"></p-dropdown>
+    <button pButton (click)="addApprover()" type="button" class="btn btn-primary btn-xs"
+      [disabled]="selectedUser == null" style="height: 30px;"><i class="fa fa-plus"></i></button>
+  </div>
+
+  <hr>
+  <div *ngIf="loadedApprovers.length == 0" class="div-no-data">
+    <img src="assets/img/no-data.png" class="img-no-data" />
+    <p class="no-data">NO USERS ADDED</p>
+  </div>
+  <table *ngIf="loadedApprovers.length > 0" class="table table-hover table-striped table-bordered">
+    <tbody>
+      <tr *ngFor="let la of loadedApprovers; let i = index">
+        <td>{{la.firstName}}</td>
+        <td class="text-center" style="width: 10%;">
+          <button title="Remove" (click)="removeApprover(i, la.userId)" type="button" class="btn btn-xs btn-danger"><i
+              class="fa fa-trash"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

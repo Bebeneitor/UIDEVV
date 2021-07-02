@@ -22,9 +22,9 @@ import { EclAsyncFileDetails } from 'src/app/shared/components/ecl-table/model/e
 export class PayerRuleComponent implements OnInit {
   
   ellSearchDto  : EllSearchDto;
-  @ViewChild('payerTableView') payerTableView: EclTableComponent;
-  @ViewChild('resultTableView') resultTableView: EclTableComponent;
-  @ViewChild('accordion') accordion: Accordion;
+  @ViewChild('payerTableView',{static: true}) payerTableView: EclTableComponent;
+  @ViewChild('resultTableView',{static: true}) resultTableView: EclTableComponent;
+  @ViewChild('accordion',{static: true}) accordion: Accordion;
   
   payers: String[] = [];
   loadPayers:boolean = false;

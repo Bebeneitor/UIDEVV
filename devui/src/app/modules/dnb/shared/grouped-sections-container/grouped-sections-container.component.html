@@ -1,9 +1,9 @@
 <div class="row">
   <div class="old-version col-6" *ngIf="showCurrent">
     <div class="table-header">
-      <ng-container *ngIf="isSecondaryMalignancy; else simpleCurrentTitle">
+      <ng-container *ngIf="isSecondaryMalignancy; else dailyMax">
         <h3>
-          {{ currentVersion.section.name | slice: 0:20 }}
+          {{ currentVersion.section.name | slice: 0:22 }}
           <span class="codes-input input-read-only">
             <app-cell-editor
               [attr.slm-id]="'seconday_malignancy_current_codes_text'"
@@ -13,9 +13,25 @@
               [isReadOnly]="true"
             ></app-cell-editor>
           </span>
-          {{ currentVersion.section.name | slice: -12 }}
+          {{ currentVersion.section.name | slice: -25 }}
         </h3>
       </ng-container>
+      <ng-template #dailyMax>
+        <ng-container *ngIf="isDailyMaxUnits; else simpleCurrentTitle">
+          <h3>
+            {{ currentVersion.section.name }}
+            <span class="codes-input input-read-only">
+              <app-cell-editor
+                [attr.slm-id]="'daily_max_codes_text'"
+                [column]="currentVersion.codesColumn"
+                [searchInfo]="currentVersion.codesColumn.searchData"
+                [highLight]="currentVersion.codesColumn.highlight"
+                [isReadOnly]="true"
+              ></app-cell-editor>
+            </span>
+          </h3>
+        </ng-container>
+      </ng-template>
       <ng-template #simpleCurrentTitle>
         <h3>{{ currentVersion.section.name }}</h3>
       </ng-template>
@@ -27,48 +43,162 @@
           data-toggle="tooltip"
           data-placement="top"
           title="Undo Copy to New For This Section Only"
+          tabindex="-1"
         >
           {{ shouldShowUndo ? "Undo Copy to New" : "Redo Copy to New" }}
         </button>
-        <button
-          class="button is-text"
-          (click)="confirmCopySectionGroup()"
-          *ngIf="_enableEditing"
-          [disabled]="currentVersion.groups.length == 0"
+        <ng-container
+          *ngIf="
+            enableEditing && !sectionsChildsAutopopulate.includes(newVersion.id)
+          "
         >
-          Copy To New
-        </button>
+          <button
+            class="button is-text"
+            (click)="confirmCopySectionGroup()"
+            *ngIf="newVersion.enabled"
+            [disabled]="currentVersion.groups.length == 0"
+            tabindex="-1"
+          >
+            Copy To New
+          </button>
+        </ng-container>
       </div>
     </div>
   </div>
   <div class="new-version" [ngClass]="showCurrent ? 'col-6' : 'col-12'">
     <div class="table-header">
-      <ng-container *ngIf="isSecondaryMalignancy; else simpleTitle">
-        <h3 (click)="consoleResponseGroup()">
-          {{ currentVersion.section.name | slice: 0:20 }}
-          <span class="codes-input">
-            <app-cell-editor
-              [attr.slm-id]="'seconday_malignancy_new_codes_text'"
-              [column]="newVersion.codesColumn"
-              [searchInfo]="newVersion.codesColumn.searchData"
-              [highLight]="newVersion.codesColumn.highlight"
-              [isReadOnly]="!_enableEditing"
-            ></app-cell-editor>
+      <h3>
+        <ng-container *ngIf="isSecondaryMalignancy; else dailyMaxNew">
+          <span>
+            {{ currentVersion.section.name | slice: 0:22 }}
+            <span class="codes-input">
+              <app-cell-editor
+                [attr.slm-id]="'seconday_malignancy_new_codes_text'"
+                [column]="newVersion.codesColumn"
+                [sectionPosition]="createSectionCodesPosition()"
+                [searchInfo]="newVersion.codesColumn.searchData"
+                [highLight]="newVersion.codesColumn.highlight"
+                [(focus)]="newVersion.codesColumn.focus"
+                (cellNavigate)="cellNavigate($event)"
+                [isReadOnly]="
+                  enableEditing === false ? !enableEditing : !newVersion.enabled
+                "
+              ></app-cell-editor>
+            </span>
+            {{ currentVersion.section.name | slice: -25 }}
           </span>
-          {{ currentVersion.section.name | slice: -12 }}
-        </h3>
-      </ng-container>
-      <ng-template #simpleTitle>
-        <h3 (click)="consoleResponseGroup()">{{ newVersion.section.name }}</h3>
-      </ng-template>
-      <ul class="table-options">
-        <ng-container *ngIf="_enableEditing">
+        </ng-container>
+        <ng-template #dailyMaxNew>
+          <ng-container *ngIf="isDailyMaxUnits; else simpleTitle">
+            <span>{{ newVersion.section.name }}</span>
+            <span class="codes-input">
+              <app-cell-editor
+                [attr.slm-id]="'daily_max_codes_text'"
+                [column]="newVersion.codesColumn"
+                [sectionPosition]="createSectionCodesPosition()"
+                [searchInfo]="newVersion.codesColumn.searchData"
+                [highLight]="newVersion.codesColumn.highlight"
+                [(focus)]="newVersion.codesColumn.focus"
+                (cellNavigate)="cellNavigate($event)"
+                [isReadOnly]="
+                  enableEditing === false ? !enableEditing : !newVersion.enabled
+                "
+              ></app-cell-editor>
+            </span>
+          </ng-container>
+        </ng-template>
+        <ng-template #simpleTitle>
+          <span>{{ newVersion.section.name }}</span>
+        </ng-template>
+        <ng-container *ngIf="newSectionFeedbackCount > 0">
+          <span
+            [ngClass]="
+              newSectionUnsolvedFeedbackCount > 0
+                ? 'feedback-left'
+                : 'feedback-cleared'
+            "
+          >
+            <ng-container
+              *ngIf="newSectionUnsolvedFeedbackCount > 0; else check"
+            >
+              {{ newSectionUnsolvedFeedbackCount }}
+            </ng-container>
+            <ng-template #check>
+              <i class="fa fa-check"></i>
+            </ng-template>
+          </span>
+        </ng-container>
+        <span class="dnb-progress-checkbox" *ngIf="hideDisableToggle">
+          <p-checkbox
+            [ngModel]="newVersion.completed"
+            (onChange)="completeToggle($event)"
+            [inputId]="'enabled' + newVersion.id"
+            [disabled]="
+              enableEditing === false ? !enableEditing : !newVersion.enabled
+            "
+            binary="true"
+            tabindex="-1"
+          ></p-checkbox>
+          <label [for]="'enabled' + newVersion.id">Completed</label>
+        </span>
+      </h3>
+      <ul
+        class="table-options"
+        *ngIf="!enableEditing && isApproverReviewing && feedbackComplete"
+      >
+        <li
+          class="padli"
+          *ngIf="newVersion.feedbackData && newVersion.feedbackData.length > 0"
+        >
+          <button
+            class="button is-text feedback-warning"
+            (click)="openSectionFeedback(editSection)"
+            [attr.slm-id]="'section_feedback_btn'"
+            tabindex="-1"
+          >
+            <i class="fa fa-exclamation-triangle"></i>
+          </button>
+        </li>
+      </ul>
+      <ul class="table-options" *ngIf="enableEditing">
+        <li
+          class="padli"
+          *ngIf="newVersion.feedbackData && newVersion.feedbackData.length > 0"
+        >
+          <button
+            class="button is-text feedback-warning"
+            (click)="openSectionFeedback(editSection)"
+            [attr.slm-id]="'section_feedback_btn'"
+            tabindex="-1"
+          >
+            <i class="fa fa-exclamation-triangle"></i>
+          </button>
+        </li>
+        <ng-container *ngIf="newVersion.enabled">
+          <li
+            class="padli"
+            *ngIf="sectionsAutopopulate.includes(newVersion.section.code)"
+          >
+            <button
+              class="button is-text"
+              (click)="autopopulate()"
+              [ngClass]="{ 'arrow-rotate': expandSection }"
+              [attr.slm-id]="'section_autopopulate_btn'"
+              tabindex="-1"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Auto-populate Overlaps"
+            >
+              <i class="fa fa-link"></i>
+            </button>
+          </li>
           <li class="padli">
             <button
               class="button is-text"
               (click)="collapseSection()"
               [ngClass]="{ 'arrow-rotate': expandSection }"
               [attr.slm-id]="'section_copy_btn'"
+              tabindex="-1"
             >
               <i class="fa fa-chevron-right"></i>
             </button>
@@ -78,6 +208,7 @@
               (click)="stickSection()"
               class="button is-text pin is-pulled-right"
               [attr.slm-id]="'page_section_pin_toggle_btn'"
+              tabindex="-1"
             >
               <i class="fa fa-map-pin"></i>
             </button>
@@ -88,11 +219,12 @@
             ></span>
           </li>
         </ng-container>
-        <li class="disable-section" *ngIf="hideDisableToggle">
+        <li class="toggle-section" *ngIf="hideDisableToggle">
           <p-inputSwitch
             (onChange)="disableChange($event)"
-            [(ngModel)]="shouldDisableSection"
+            [(ngModel)]="newVersion.enabled"
             [attr.slm-id]="'disable_section_btn'"
+            tabindex="-1"
           ></p-inputSwitch>
         </li>
       </ul>
@@ -110,12 +242,12 @@
     </ng-container>
     <ng-template #section>
       <app-dnb-grouped-section
-        *ngIf="expandSection"
+        [ngClass]="{ hideSection: !expandSection }"
         [section]="currentVersion"
         (behaviorEvnt)="behavior($event)"
         [isReadOnly]="true"
         [isComparing]="isComparing"
-        [enableEditing]="_enableEditing"
+        [sectionEnable]="enableEditing"
       ></app-dnb-grouped-section>
     </ng-template>
   </div>
@@ -130,13 +262,20 @@
     <ng-template #section>
       <app-dnb-grouped-section
         #editSection
-        *ngIf="expandSection"
+        [sectionIndex]="sectionIndex"
+        [ngClass]="{ hideSection: !expandSection }"
         [(section)]="newVersion"
         (behaviorEvnt)="behavior($event)"
         [isReadOnly]="false"
+        [isApproverReviewing]="isApproverReviewing"
+        [feedbackComplete]="feedbackComplete"
         [isComparing]="isComparing"
-        [enableEditing]="_enableEditing"
-        [disabled]="shouldDisableSection"
+        [sectionEnable]="newVersion.enabled && enableEditing"
+        [disabled]="!newVersion.enabled"
+        [focusType]="focusType"
+        (focusTypeChange)="focusTypeChanged($event)"
+        (sectionNavigate)="sectionNavigateEvt($event)"
+        (feedbackUpdate)="feedbackUpdateEvt($event)"
       ></app-dnb-grouped-section>
     </ng-template>
   </div>

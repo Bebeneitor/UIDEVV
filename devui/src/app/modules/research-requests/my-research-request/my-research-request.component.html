@@ -1,0 +1,89 @@
+<p-blockUI [blocked]="loading">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif"/>
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+<div class="myResearchForm">
+
+  <p-table #viewGrid [columns]="cols" [value]="filteredData" [paginator]="true" [resizableColumns]="true" columnResizeMode="fit"
+           [reorderableColumns]="true" [rows]="10" [rowsPerPageOptions]="eclConstantsService.ROWS_PER_PAGE_OPTIONS" [loading]="loading" [responsive]="true"
+           [style]="{'margin-top': '15px'}">
+
+    <ng-template pTemplate="caption">
+      <app-grid-tools [primeTableLocalReference]="viewGrid"
+                      [pageTitle]="pageTitle">
+      </app-grid-tools>
+      <div style="text-align: right">
+          <span class="radio-space">
+            <input type="radio" name="assignedRequestInd" [value]="'0'" [(ngModel)]="myRequestFilterInd"
+                   (change)="filterMyRequestDataByInd(); viewGrid.reset()" >
+            <label class="radio-space-left">Assigned Requests</label>
+            <input type="radio" name="initiatedRequestInd" [value]="'1'" [(ngModel)]="myRequestFilterInd"
+                   (change)="filterMyRequestDataByInd(); viewGrid.reset()">
+            <label class="radio-space-left">Initiated Requests</label>
+          </span>
+
+        <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
+               (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+               style="width:150px; border-radius: 5px">
+        <span style="cursor: pointer"><i *ngIf = "keywordSearch !== ''" (click)="viewGrid.reset();" style="cursor: pointer" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i></span>
+        <i *ngIf = "keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+            [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+          {{col.header}}
+          <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                      ariaLabelDesc="Activate to sort in descending order"
+                      ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+        </th>
+      </tr>
+      <tr>
+        <th *ngFor="let col of columns; let index = index" class="text-center" [ngStyle]="{'width': col.width}">
+          <input pInputText Type="text" (input)="viewGrid.filter($event.target.value, col.field, 'contains')" [(ngModel)]='filters[index]'
+                 [placeholder]="col.header" class="ui-column-filter" style="width : 100%; padding : 5px; border-radius: 5px">
+        </th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-myResearch let-columns="columns">
+
+      <tr>
+        <td class="small-td" *ngFor="let col of columns" >
+         <!-- <span *ngIf="col.field == 'researchId'" class="span-centered">
+            <a style="text-decoration: underline; cursor: pointer" nghref="#"
+                   (click)="redirect(myResearch.researchId)">{{myResearch.researchId}}</a>
+          </span> -->
+          <span *ngIf="col.field == 'researchCode'" class="span-centered rr-code" (click)="navigateRequest(myResearch)">{{myResearch.researchCode}}</span>
+          <span *ngIf="col.field == 'jiraId'" class="span-centered">{{myResearch.jiraId}}</span>
+          <span *ngIf="col.field == 'summary'" class="span-centered">{{myResearch.summary}}</span>
+          <span *ngIf="col.field == 'daysOld'" class="span-centered">{{myResearch.daysOld}}</span>
+          <span *ngIf="col.field == 'requestType'" class="span-centered">{{myResearch.requestType}}</span>
+          <span *ngIf="col.field == 'teamName'" class="span-centered">{{myResearch.teamName}}</span>
+          <span *ngIf="col.field == 'researchStatus'" class="span-centered">{{myResearch.researchStatus}}</span>
+          <span *ngIf="col.field == 'createdBy'" class="span-centered">{{myResearch.createdBy}}</span>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="paginatorright" let-state>
+            <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+              Showing <b>{{(state.page * state.rows) + 1}}</b> - <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+              of <b>{{state.totalRecords}}</b>
+        </span>
+      <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+    </ng-template>
+  </p-table>
+  <div class="space"></div>
+  <div class="float-right">
+    <button type="button" value="Refresh" style="width: 90%; cursor: pointer;"
+            class="btn btn-primary btn-default-height small-td"
+            (click)="viewGrid.reset(); refreshData()">Refresh
+    </button>
+  </div>
+  <div class="space"></div>
+</div>

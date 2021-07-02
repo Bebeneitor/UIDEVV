@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { DynamicDialogConfig } from 'primeng/api';
 import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column';
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
 import { ActivatedRoute } from '@angular/router';
 import { AppUtils } from 'src/app/shared/services/utils';
+import { SameSimService } from 'src/app/services/same-sim.service';
+import { Constants } from 'src/app/shared/models/constants';
 
 @Component({
   selector: 'app-lunch-box',
@@ -14,8 +15,10 @@ import { AppUtils } from 'src/app/shared/services/utils';
 })
 export class LunchBoxComponent implements OnInit {
   codesTablesConfig;
+  codesType:string;
   public config;
-  constructor(private activatedRoute: ActivatedRoute, private appUtils: AppUtils) { }
+  constructor(private activatedRoute: ActivatedRoute, private appUtils: AppUtils, 
+    private sameSimService:SameSimService) { }
 
   /**
    * When the component initialize we crate the tables configuration object.
@@ -24,7 +27,17 @@ export class LunchBoxComponent implements OnInit {
     // Get the ruleId and instanceId from url.
     const ruleId = this.appUtils.decodeString(this.activatedRoute.snapshot.queryParams.ruleId);
     const instanceId = this.appUtils.decodeString(this.activatedRoute.snapshot.queryParams.instanceId);
-
+    this.sameSimService.getInstanceById(instanceId).subscribe((response:any) => {
+      let instance:any = response.data;
+      if (instance !== null) {
+        this.codesTablesConfig = this.createTableModelsConfig(ruleId, instanceId, instance.codesType);
+      }
+    })
+  }
+  createTableModelsConfig(ruleId:string, instanceId:string, codesType:string):any {
+    if (Constants.ICD_CODE_TYPE === codesType) {
+      return this.createTableModelsConfigIcd(ruleId, instanceId);
+    }
     const tableModels = [];
     let manager = new EclTableColumnManager();
     let tableConfig = new EclTableModel();
@@ -140,9 +153,74 @@ export class LunchBoxComponent implements OnInit {
       tabHeader: 'Resequenced',
       selected: false
     });
+    return tableModels; 
+  }
+
+  createTableModelsConfigIcd(ruleId:string, instanceId:string):any {
+    const tableModels = [];
+    let manager = new EclTableColumnManager();
+    let tableConfig = new EclTableModel();
+    let url = `${RoutingConstants.SAME_SIM}/${RoutingConstants.SAME_SIM_GET_CODES_BY_RULE}/${ruleId}?sameSimInstanceId=${instanceId}&type=`;
+
+    manager.addTextColumn('code', 'ICD Code', '10%', true, EclColumn.TEXT, false);
+    manager.addTextColumn('icd10Code', 'ICD-10 Code', '10%', true, EclColumn.TEXT, false);
+    manager.addTextColumn('longDescription', 'Long Description', '20%', true, EclColumn.TEXT, false, 100);
+    manager.addTextColumn('similarCode', 'Similar Code', null, true, EclColumn.TEXT, false);
+    manager.addTextColumn('similarCodeDescription', 'Similar Code Description', '10%', true, EclColumn.TEXT, false, 100);
+    manager.addTextColumn('mdComments', 'Reviewer Comments', '10%', true, EclColumn.TEXT, false, 100);
+
+    tableConfig.columns = manager.getColumns();
+    tableConfig.paginationSize = 5;
+    tableConfig.excelFileName = 'New Codes';
+    tableConfig.url = `${url}SSIM_ICD_TYPE_NEW`;
+    tableConfig.lazy = true;
+
+    tableModels.push({
+      model: tableConfig,
+      tabHeader: 'New',
+      selected: true
+    });
 
 
-    this.codesTablesConfig = tableModels;
+    tableConfig = new EclTableModel();
+    manager = new EclTableColumnManager();
+    manager.addTextColumn('code', 'ICD Code', '10%', true, EclColumn.TEXT, false);
+    manager.addTextColumn('longDescription', 'Long Description', '20%', true, EclColumn.TEXT, false, 100);
+    manager.addTextColumn('mdComments', 'Reviewer Comments', '10%', true, EclColumn.TEXT, false, 100);
 
+    tableConfig.columns = manager.getColumns();
+    tableConfig.paginationSize = 5;
+    tableConfig.excelFileName = 'Deleted Codes';
+    tableConfig.url = `${url}SSIM_ICD_TYPE_DEL`;
+    tableConfig.lazy = true;
+
+    tableModels.push({
+      model: tableConfig,
+      tabHeader: 'Deleted',
+      selected: false
+    });
+
+
+    tableConfig = new EclTableModel();
+    manager = new EclTableColumnManager();
+    manager.addTextColumn('action', 'Action', '10%', true, EclColumn.TEXT, false);
+    manager.addTextColumn('code', 'ICD Code', null, true, EclColumn.TEXT, false);
+    manager.addTextColumn('longDescription', 'Long Description', '20%', true, EclColumn.TEXT, false, 100);
+    manager.addTextColumn('change', 'Change', null, true, EclColumn.TEXT, false);
+    manager.addTextColumn('loadYn', 'Load Y/N', null, true, EclColumn.TEXT, false);
+
+    tableConfig.columns = manager.getColumns();
+    tableConfig.paginationSize = 5;
+    tableConfig.excelFileName = 'Revised Codes';
+    tableConfig.url = `${url}SSIM_ICD_TYPE_REVISED`;
+    tableConfig.lazy = true;
+
+    tableModels.push({
+      model: tableConfig,
+      tabHeader: 'Revised',
+      selected: false
+    });
+
+    return tableModels; 
   }
 }

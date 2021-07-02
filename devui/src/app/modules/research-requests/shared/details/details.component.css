@@ -1,0 +1,34 @@
+.rr-rows {
+  padding-top: 20px;
+}
+
+input {
+  border: 1px solid #31006F;
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 4px;
+  width: 100%;
+  font-size: 11px;
+  height: 30px;
+}
+
+.col-field-box {
+  border: 1px solid #31006F;
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 4px;
+  font-size: 12px;
+  height: 190px;
+  overflow: auto;
+}
+
+.span-supervisor {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  padding: 6px;
+  font-size: 12px;
+}
+
+::ng-deep .rr-container .ui-multiselect .ui-multiselect-trigger {
+  width: 1.8rem;
+}

@@ -1,0 +1,22 @@
+.active-blue{
+    color:#31006F;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.hcpcs-cpt-codes input.search-header {
+    width: 100%;
+}
+
+.hcpcs-cpt-codes .top-bar{
+    padding-top:16px;
+}
+
+.hcpcs-cpt-codes .line-height-header {
+    line-height: 30px !important;
+    margin-top: -8px;
+}
+
+.hcpcs-cpt-codes .label-text {
+    padding-top:10px;
+}

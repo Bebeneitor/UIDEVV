@@ -1,0 +1,18 @@
+::ng-deep p-dialog .ui-dialog-content.ui-widget-content {
+  padding: 15px !important;
+}
+
+.dialog-content {
+  overflow-y: auto;
+  max-height: 80vh;
+  max-width: 80vw;
+}
+
+table {
+  margin: 0;
+  font-size: 12px;
+}
+
+table tr {
+  cursor: pointer;
+}

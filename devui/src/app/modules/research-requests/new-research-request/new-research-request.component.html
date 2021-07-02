@@ -1,0 +1,432 @@
+<p-blockUI [blocked]="loading">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+
+<form #newResearchRequestForm="ngForm" class="new-research-request">
+  <h2 class="top-header-text">New Request</h2>
+  <fieldset class="new-research-request-form">
+    <div class="row rr-rows">
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Project</label>
+            <p-dropdown name="projectName" placeholder="Choose" [style]="dropDownStyles" [options]="projectsList"
+              [(ngModel)]="researchRequestObj.project">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Request Type</label>
+            <p-dropdown name="issueType" placeholder="Choose" [style]="dropDownStyles" [options]="issueTypeList"
+              [(ngModel)]="researchRequestObj.issueType">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Client(s)</label>
+            <p-multiSelect name="rrClients" placeholder="Choose" [style]="dropDownStyles" [options]="clientsList"
+              [(ngModel)]="researchRequestObj.clientSelected" (onChange)="onClientSelection()">
+            </p-multiSelect>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row rr-rows">
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>Super Payer(s)</label>
+            <p-multiSelect name="rrSuperPayers" placeholder="Choose" [style]="dropDownStyles" [options]="superPayerList"
+              [(ngModel)]="researchRequestObj.superPayersSelected" [disabled]="superPayerDisabled">
+            </p-multiSelect>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="col-12 rr-nested-cols">
+          <label>Payer status</label>
+          <p-dropdown name="rrPayerStatus" placeholder="Choose" [style]="dropDownStyles" [options]="payerStatusList"
+            [(ngModel)]="researchRequestObj.selectedPayerStatus" (onChange)="updatePayerList()">
+          </p-dropdown>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="col-12 rr-nested-cols">
+          <label><span class="required-field-color">*</span>Payer(s)</label>
+          <p-multiSelect name="rrPayers" placeholder="Choose" [style]="dropDownStyles" [options]="payerList"
+            [(ngModel)]="researchRequestObj.selectedPayerList" [disabled]="payerDisabled">
+          </p-multiSelect>
+        </div>
+      </div>
+    </div>
+    <div class="row rr-rows">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Summary</label>
+            <input name="summary" class="form-control" maxlength="2000" [(ngModel)]="researchRequestObj.requestSummary" type="text" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row rr-rows">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Description</label>
+            <textarea name="description" class="form-control input-textarea" [(ngModel)]="researchRequestObj.requestDescription"
+              rows="8"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row rr-rows">
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Team</label>
+            <p-dropdown name="teamName" placeholder="Choose" (onChange)="getTeamMembersList()" [style]="dropDownStyles"
+              [options]="teamsList" [(ngModel)]="researchRequestObj.team">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Policy Research Request Type</label>
+            <p-dropdown name="policyRRType" placeholder="Choose" [style]="dropDownStyles" [options]="policyTypeList"
+              [(ngModel)]="researchRequestObj.policyType">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>Attachment Category</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p-dropdown name="attachmentCategory" placeholder="Choose" [style]="dropDownStyles"
+              [options]="attachmentCategoryList" [(ngModel)]="researchRequestObj.attachmentCategory">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row rr-rows">
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>Team Supervisors(s)</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="col-payer">
+              <div *ngIf="teamSupervisors">
+                <span class="span-supervisor" *ngFor="let user of teamSupervisors">
+                  {{user.label}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>Internal CC List</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="col-payer">
+              <div class="span-cc-list-search"><input name="ccListSearch" type="text" list="user-list" (keyup)="searchCCUsers()"
+                  [(ngModel)]="searchUser" (change)="searchCCUsers()" placeholder="Type to Search.."
+                  class="form-control input-rule-search" />
+                <div *ngIf="userSearchList">
+                  <datalist id="user-list">
+                    <option *ngFor="let user of userSearchList" [value]="user.firstName">
+                      {{user.email}}
+                    </option>
+                  </datalist>
+                </div>
+              </div>
+              <div class="span-cc-list-selection" *ngIf="selectedCCUsersList">
+                <span class="span-cc-selected-user" *ngFor="let user of selectedCCUsersList">
+                  <span>{{user.firstName}}</span>
+                  <span class="fa fa-times" aria-hidden="true" (click)="removeSelectedCCUser(user)"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <input #rrFileInput type="file" name="rrfiles" (change)="addFiles($event)" class="file-upload" multiple="true">
+        <div class="row">
+          <div class="col-12">
+            <label>Attachment</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="col-payer" (drop)="addDropFiles($event)" (dragover)="preventDropFilesOpen($event)">
+              <div class="file-selection">
+                <span class="span-file-text">
+                  <span>Drop files to attach, or </span>
+                  <span class="span-file-selection" (click)="clickFileUpload()">browse</span>
+                </span>
+              </div>
+              <div class="drop-file-list">
+                <div *ngIf="researchRequestObj.requestAttachments">
+                  <div *ngFor="let file of researchRequestObj.requestAttachments">
+                    <div class="selected-file" *ngIf="!file.deleted">
+                      <span class="fa fa-file" aria-hidden="true"></span>
+                      <span class="file-name"
+                        (click)="downloadSavedFile(file.fileId, file.fileName)">{{file.fileName}}</span>
+                      <span class="fa fa-times rr-file" aria-hidden="true"
+                        (click)="removeSavedFile(file.eclRrAttachmentsId, file.fileName)"></span>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="filesList">
+                  <div class="selected-file" *ngFor="let file of filesList">
+                    <span class="fa fa-file" aria-hidden="true"></span><span class="file-name">{{file.name}}</span><span
+                      class="fa fa-times" aria-hidden="true" (click)="removeSelectedFile(file)"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row rr-rows">
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>Team Assignee</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p-dropdown name="teamAssignee" placeholder="Choose" [style]="dropDownStyles" [options]="teamAssigneeList"
+              [(ngModel)]="researchRequestObj.teamAssignee">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>Labels</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <input type="text" maxlength="500" name="labels" [(ngModel)]="researchRequestObj.labels"/>
+          </div>
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="row">
+          <div class="col-12">
+            <label><span class="required-field-color">*</span>Due Date</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <input class="form-control" name="requestDueDate" [(ngModel)]="researchRequestObj.requestDueDate"
+              min="{{currentDate | date:'yyyy-MM-dd'}}" type="date" />
+          </div>
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="row">
+          <div class="col-12">
+            <label>SD Priority</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p-dropdown name="SDPriority" placeholder="Choose" [style]="dropDownStyles" [options]="SDPriorityList"
+              [(ngModel)]="researchRequestObj.sdPriority">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row rr-rows">
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>eLL Committee QA Review Complete?(eLL Use Only)</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p-dropdown name="eLLCommittee" placeholder="Choose" [style]="dropDownStyles" [options]="eLLCommitteeList"
+              [(ngModel)]="researchRequestObj.eLLCommittee">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>QA Result Reason(eLL Use Only)</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p-dropdown name="QAResultReason" placeholder="Choose" [style]="dropDownStyles" [options]="QAReasonList"
+              [(ngModel)]="researchRequestObj.qaReason">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="row">
+          <div class="col-12">
+            <label>Line Of Business</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p-multiSelect name="lineOfBusiness" [style]="dropDownStyles" [options]="lineOfBusinessList"
+              [(ngModel)]="researchRequestObj.lineOfBusiness">
+            </p-multiSelect>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row rr-rows">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-12">
+            <label>Link</label><span class="info-text"> (Add links separated by space)</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <input class="form-control" [(ngModel)]="researchRequestObj.requestLink" type="text" name="refUrl1"
+              pattern="https?://.+" #url1="ngModel" maxlength="1000" />
+            <div *ngIf="url1.invalid && (url1.dirty || url1.touched)" class="alert alert-danger">
+              <div *ngIf="url1.errors.pattern">
+                Must start with http:// or https:// and one or more characters
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row rr-rows">
+      <div class="col-2">
+        <div class="row">
+          <div class="col-12">
+            <label>Engine</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <p-dropdown name="ruleEngine" placeholder="Choose" [style]="dropDownStyles" [options]="ruleEngineList"
+              [(ngModel)]="researchRequestObj.ruleEngine">
+            </p-dropdown>
+          </div>
+        </div>
+      </div>
+      <div class="col-10">
+        <div class="row">
+          <div class="col-12">
+            <label>RULES</label><span class="info-text"> (Choose Engine, Type Active Rule Id(s) with Versions separated by comma(s) and 
+              press Enter key)</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12" style="height: 31px;">
+            <mid-rule-box (midTextOutput)="updateSearchRules($event)" (enterTrigger)="searchRuleIdSub.next($event)"
+              (midTextLengthOutput)="showInvalidLength($event)"[loading]="loadMidBox"></mid-rule-box>
+            <div [ngClass]="showInvalid"><i class="info-text fa fa-info-circle"></i> You have {{invalidRuleLength}}
+              invalid</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row rr-rows">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-12">
+            <p-table [columns]="cols" [value]="searchedDisplayData" [responsive]='true' [scrollable]="true"
+              scrollHeight="250px" class="display-table">
+              <ng-template pTemplate="header" let-columns>
+                <tr>
+                  <th *ngFor="let col of columns" [ngStyle]="{'width': col.width, 'border-bottom':'none'}" [pSortableColumn]="col.field"
+                    class="text-center">
+                    {{col.header}}
+                  </th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-searchedDisplayData let-columns="columns">
+                <tr>
+                  <td *ngFor="let col of cols" [ngStyle]="{'width': col.width}">
+                    <span *ngIf="col.field != 'del'">{{searchedDisplayData[col.field]}}</span>
+                    <span *ngIf="col.field == 'del'" class="active-link-trash fa fa-trash"
+                      (click)="removeSearchRuleItem(searchedDisplayData)"></span>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage" let-columns>
+                <tr>
+                  <td class="empty-table-msg" [attr.colspan]="columns.length">
+                    No Records Found
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row rr-rows">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-4">
+            <button name="rrSaveButton" class="btn btn-primary save-btn" value="Save"
+              (click)="createResearchRequest(saveAction)" [disabled]="fieldDisable">Save</button>
+          </div>
+          <div class="col-4">
+            <button name="rrRefreshButton" class="btn btn-primary refresh-btn" value="Refresh"
+              (click)="exitBack()" [disabled]="fieldDisable">Exit</button>
+          </div>
+          <div class="col-4">
+            <button name="rrSubmitButton" class="btn btn-primary submit-btn" value="Submit" [disabled]="fieldDisable"
+              (click)="createResearchRequest(submitAction)">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</form>
+
+<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>

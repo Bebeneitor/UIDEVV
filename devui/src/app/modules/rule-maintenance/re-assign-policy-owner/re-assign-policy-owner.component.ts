@@ -14,6 +14,8 @@ import { Constants } from 'src/app/shared/models/constants';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column';
+import {ResearchRequestSearchedRuleDto} from "../../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../../services/research-request.service";
 
 const LIBRARY_VIEW = 'Library View';
 const returnFromScreen = Constants.RETURNED_TAB;
@@ -27,7 +29,7 @@ const RETURNED_IND = 1;
   styleUrls: ['./re-assign-policy-owner.component.css']
 })
 export class ReAssignPolicyOwnerComponent implements OnInit {
-  
+
   ruleStatus = Constants.ECL_LIBRARY_STAGE; //Library Rule
   pageTitle: string;
   reviewStatus = "Potentially Impacted";
@@ -43,16 +45,17 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
   comments: any[] = [{ label: "Select Comment", value: null }];
   tabIndex = 0;
 
-  @ViewChild('tableAssigned') tableAssigned;
-  @ViewChild('tableReturned') tableReturned;
+  @ViewChild('tableAssigned',{static: true}) tableAssigned;
+  @ViewChild('tableReturned',{static: true}) tableReturned;
 
   assignedTableConfig: EclTableModel;
   returnedTableConfig: EclTableModel;
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
 
 
   constructor(private route: ActivatedRoute, private utils: AppUtils, private ruleInfoService: RuleInfoService,
     private dialogService: DialogService, private http: HttpClient, private eclConstants: ECLConstantsService,
-    private messageService: MessageService, private utilService: UtilsService) { }
+    private messageService: MessageService, private utilService: UtilsService, private rrService: ResearchRequestService) { }
 
   ngOnInit() {
 
@@ -75,7 +78,7 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
   }
 
   /**
- * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT  
+ * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT
  */
   private getAllReassignComments() {
     this.comments = [];
@@ -103,7 +106,7 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
 
     let columnManager = new EclTableColumnManager();
 
-    columnManager.addLinkColumn('ruleCode', 'Rule ID', '13%', true, EclColumn.TEXT, true, 'center');
+    columnManager.addLinkColumnWithIcon('ruleCode', 'Rule ID', '13%', true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     columnManager.addTextColumn('ruleName', 'Rule Name', '28%', true, EclColumn.TEXT, true, 100);
     columnManager.addTextColumn('categoryDesc', 'Category', '17%', true, EclColumn.TEXT, true, 100, 'center');
     columnManager.addTextColumn('daysOld', 'Days Old', '10%', true, EclColumn.TEXT, true, 100, 'center');
@@ -128,7 +131,7 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
 
     let columnManager = new EclTableColumnManager();
 
-    columnManager.addLinkColumn('ruleCode', 'Rule ID', '13%', true, EclColumn.TEXT, true, 'center');
+    columnManager.addLinkColumnWithIcon('ruleCode', 'Rule ID', '13%', true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     columnManager.addTextColumn('ruleName', 'Rule Name', '28%', true, EclColumn.TEXT, true, 100);
     columnManager.addTextColumn('categoryDesc', 'Category', '17%', true, EclColumn.TEXT, true, 100, 'center');
     columnManager.addTextColumn('daysOld', 'Days Old', '10%', true, EclColumn.TEXT, true, 100, 'center');
@@ -144,6 +147,14 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
 
   viewRuleModal(rowInfo: any) {
     let draftRuleId = 0;
+    let ruleResponseIndicator: boolean = false;
+    let rrId: string = '';
+    this.getRuleResponseIndicator(rowInfo.ruleId).then((res: any) => {
+      if (res && res.ruleResponseIndicator && res.ruleResponseIndicator !== undefined) {
+        ruleResponseIndicator = (res.ruleResponseIndicator === 'Y') ? true : false;
+        rrId = res.ruleCode;
+      }
+    });
     this.ruleInfoService.getRulesByParentId(rowInfo.ruleId).subscribe((response: any) => {
       response.data.forEach(rule => {
         if (rule.ruleStatusId.ruleStatusId === this.eclConstants.RULE_STATUS_IMPACTED)
@@ -161,8 +172,11 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
           provisionalRuleCreation: false,
           fromMaintenanceProcess: true,
           readWrite: false,
-          readOnlyView: true
+          readOnlyView: true,
+          ruleResponseInd: ruleResponseIndicator,
+          researchRequestId: rrId
         },
+        showHeader: !ruleResponseIndicator,
         header: 'Library Rule Details',
         width: '80%',
         height: '92%',
@@ -173,7 +187,9 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
           'overflow': 'auto',
           'padding-top': '0',
           'padding-bottom': '0',
-          'border': 'none'
+          'border': 'none',
+          'padding-left': '0',
+          'padding-right': '0'
         }
       });
       ref.onClose.subscribe((ri: any) => {
@@ -188,6 +204,18 @@ export class ReAssignPolicyOwnerComponent implements OnInit {
       });
     })
 
+  }
+
+  async getRuleResponseIndicator(ruleId: number) {
+    this.ruleResponseSearchDto = new ResearchRequestSearchedRuleDto();
+    return new Promise((resolve, reject) => {
+      this.rrService.getRuleResponseIndicator(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined && resp.data !== {}) {
+          this.ruleResponseSearchDto = resp.data;
+        }
+        resolve(this.ruleResponseSearchDto);
+      });
+    });
   }
 
   getReviewStatus(rowInfo: any): any {

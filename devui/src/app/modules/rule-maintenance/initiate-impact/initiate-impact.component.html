@@ -1,11 +1,10 @@
-<p-blockUI [blocked]="loading">
-  <div class="block-img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" />
-    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
-  </div>
-</p-blockUI>
-
 <div>
+  <p-blockUI [blocked]="loading">
+    <div style="position: absolute; top: 43%; left: 46%; width: 120px;">
+      <img src="assets/img/loading.gif"/>
+      <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+    </div>
+  </p-blockUI>
   <h2>Initiate Impact Analysis Process</h2> <span id="errMessage"></span>
 
   <p-tabView [activeIndex]="index" (onChange)="indexShift($event)">
@@ -100,7 +99,7 @@
         <div class="row row-div">
           <div class="col-12 button-submit">
             <button class="btn btn-primary" name="action" [disabled]="disableInitiateBtn" type="submit"
-              (click)="initate()">​Initiate impact Analysis</button>
+              (click)="initiate()">​Initiate impact Analysis</button>
           </div>
         </div>
       </div>
@@ -109,7 +108,11 @@
     <!-- Reference change Request Tab-panel-view -->
 
     <p-tabPanel header="Reference Change">
-      <app-reference-change></app-reference-change>
+      <app-reference-change (toggleLoader)="onToggleLoader($event)"></app-reference-change>
+    </p-tabPanel>
+    <p-tabPanel header="Uploaded BO Report">
+      <app-impact-bo-report #boReport (onRuleDetails)="viewRuleModal($event)"
+        (onInitiateImpact)="initiateImpactAnalysis($event)"></app-impact-bo-report>
     </p-tabPanel>
 
   </p-tabView>

@@ -1,8 +1,10 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
 <div class="dnb-page-btns pull-right">
   <button
     (click)="createNewVersion()"
     [disabled]="!shouldEnabledCreate"
     [attr.slm-id]="'create_new_version_btn'"
+    *ngIf="isEditor"
   >
     Create New Drug Version
   </button>
@@ -10,10 +12,7 @@
 <h1 class="dnb-title">
   Review Drug Versions <span class="drug-version-name">{{ drugName }}</span>
 </h1>
-<p>
-  Click on a record to view the drug version information or in Approved ones to
-  make editorial changes
-</p>
+<p>Click on a record to view the drug version information.</p>
 <div class="table-container">
   <ecl-table
     #versionTable
@@ -27,13 +26,6 @@
 </div>
 <div class="dnb-page-btns">
   <button
-    routerLink="/dnb/select-drug"
-    class="back-button"
-    [attr.slm-id]="'back_btn'"
-  >
-    Back
-  </button>
-  <button
     [attr.slm-id]="'compare_versions_btn'"
     [disabled]="!shouldEnableCompare"
     (click)="compare()"
@@ -41,9 +33,3 @@
     Compare Drug Versions
   </button>
 </div>
-
-<dnb-app-dialog
-  [(openDialog)]="shouldOpenDownload"
-  (selectionSet)="downloadSelected($event)"
-  [setUpDialog]="setUpDialog"
-></dnb-app-dialog>

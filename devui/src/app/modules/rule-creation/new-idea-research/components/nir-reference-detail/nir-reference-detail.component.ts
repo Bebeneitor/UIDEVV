@@ -32,12 +32,13 @@ const REF_COMMENTS_FILE2 = 2;
 })
 export class NirReferenceDetailComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('uploadControl') uploadControl: FileUpload;
-  @ViewChild('uploadControl1') uploadControl1: FileUpload;
-  @ViewChild('uploadControl2') uploadControl2: FileUpload;
-  @ViewChild('uploadControl3') uploadControl3: FileUpload;
-  @ViewChild('uploadControl4') uploadControl4: FileUpload;
+  @ViewChild('uploadControl',{static: false}) uploadControl: FileUpload;
+  @ViewChild('uploadControl1',{static: false}) uploadControl1: FileUpload;
+  @ViewChild('uploadControl2',{static: false}) uploadControl2: FileUpload;
+  @ViewChild('uploadControl3',{static: false}) uploadControl3: FileUpload;
+  @ViewChild('uploadControl4',{static: false}) uploadControl4: FileUpload;
   @Input() readOnlyView;
+  @Input() viewReferences;
   @Input() ideaId: number;
 
   /*  Boolean value to check if the it is at idea or provisional rule level 
@@ -45,6 +46,7 @@ export class NirReferenceDetailComponent implements OnInit, AfterViewInit {
   @False: provisional rule
   */
   @Input() ruleCreationStatus: boolean;
+  @Input() pdgMedicaidIdea: boolean;
 
   ruleStage: number;
 
@@ -400,7 +402,7 @@ export class NirReferenceDetailComponent implements OnInit, AfterViewInit {
    Function to fetch the selected EclReference details based on the Eclreference Id .
   */
   selectReference(eclReferenceId: number) {
-    if (!this.readOnlyView) {
+    if ((!this.readOnlyView || this.viewReferences) && !this.pdgMedicaidIdea) {
       this.eclReferenceService.getEclReference(eclReferenceId).subscribe(response => {
         if (response.message === SUCCESS) {
           this.selectedReferenceDetails(response.data);
@@ -460,11 +462,13 @@ export class NirReferenceDetailComponent implements OnInit, AfterViewInit {
         let fileNumber = REF_COMMENTS_FILE2;
         this.refcommentsFileDownload2 = environment.restServiceUrl + RoutingConstants.ECL_REFERENCES_URL + "/" + RoutingConstants.ATTACHMENT_DOWNLOAD + "/" + eclRefId + "/" + fileNumber;
       }
-      this.clearFileUploadSelection(this.uploadControl, 1);
-      this.clearFileUploadSelection(this.uploadControl1, 2);
-      this.clearFileUploadSelection(this.uploadControl2, 3);
-      this.clearFileUploadSelection(this.uploadControl3, 4);
-      this.clearFileUploadSelection(this.uploadControl4, 5);
+      if(!this.viewReferences) {
+        this.clearFileUploadSelection(this.uploadControl, 1);
+        this.clearFileUploadSelection(this.uploadControl1, 2);
+        this.clearFileUploadSelection(this.uploadControl2, 3);
+        this.clearFileUploadSelection(this.uploadControl3, 4);
+        this.clearFileUploadSelection(this.uploadControl4, 5);
+      }
     }
   }
 

@@ -1,0 +1,22 @@
+<p-blockUI [blocked]="loading">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif"/>
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>
+<div class="row">
+<div class="col-12">
+  <div class="file-template" (drop)="dropFileHandler($event)" (dragover)="$event.preventDefault()">
+    <div class="no-files-legend">Drop files to attach or <a nghref="#" (click)="fileTemplate.click()">browse</a></div>
+    <input type="file" hidden #fileTemplate
+      accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+      (change)="changeFile($event)" />
+  </div>
+</div>
+<div class="col-12">
+  <div><a nghref="#" style="font-size:11px; color:#007ad9 ; text-decoration:underline; float:right; padding:10px;"
+      (click)="downloadXslFile()">Download Template</a>
+   </div>
+
+</div>
+</div>

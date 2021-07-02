@@ -11,6 +11,7 @@ import { DialogService } from "primeng/api";
 import { ProvisionalRuleComponent } from "src/app/modules/rule-creation/provisional-rule/provisional-rule.component";
 import { ProvisionalRuleModule } from "../../../rule-creation/provisional-rule/provisional-rule.module";
 import { PipesModule } from "../../utils/pipes/pipes.module";
+import { ChooseOptionDialogComponentModule } from "src/app/shared/components/choose-option-dialog/choose-option-dialog.module";
 
 @NgModule({
   declarations: [DrugVersionsListComponent],
@@ -23,6 +24,7 @@ import { PipesModule } from "../../utils/pipes/pipes.module";
     CheckboxModule,
     ProvisionalRuleModule,
     PipesModule,
+    ChooseOptionDialogComponentModule,
   ],
   providers: [RuleManagerService, DialogService],
   entryComponents: [ProvisionalRuleComponent],

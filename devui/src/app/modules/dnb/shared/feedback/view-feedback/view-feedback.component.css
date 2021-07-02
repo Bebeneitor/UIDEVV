@@ -1,0 +1,79 @@
+.feedback-wrapper h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #c8c8c8;
+}
+
+.feedback-wrapper .fa {
+  top: 10px;
+  right: 10px;
+  color: black;
+  background: transparent;
+  position: absolute;
+  cursor: pointer;
+}
+
+.feedback-wrapper .feedback-item {
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.feedback-wrapper .feedback-item:last-child {
+  margin: 0;
+  border: 0;
+}
+
+.feedback-wrapper .fa:hover {
+  color: black;
+  background: transparent;
+}
+
+.feedback-wrapper .feedback-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.feedback-wrapper .feedback-footer button {
+  margin: 0;
+}
+
+.feedback-wrapper .feedback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feedback-wrapper .feedback-text {
+  padding: 10px;
+  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+    0 0 1px rgba(10, 10, 0, 0.2);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 120px;
+    overflow-y: scroll;
+}
+
+.feedback-wrapper .feedback-highlight {
+  background-color: #ff9800;
+  padding: 0px 3px;
+  border-radius: 3px;
+}
+
+.reopen-btn {
+  background-color: #f10000 !important;
+}
+
+.reopen-btn.resolved {
+  background-color: #8bc34a !important;
+}
+
+.feedback-wrapper .note {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 120px;
+  overflow-y: scroll;
+}

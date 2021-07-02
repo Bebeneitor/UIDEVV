@@ -4,8 +4,8 @@
     <p-tabPanel header="Assigned">
       <div class="rule-for-impact-analysis" *ngIf="tabIndex == 0">
         <ecl-table #assignedTableLRIA  [tableModel]='assignedTableConfigInLRIA'
-        (onSelectRecord)= "setSelectRecord($event)"  (onUnSelectRecord)= "setSelectRecord($event)"  
-        (onAcctionLink)="showRuleDialog($event.row)" >
+        (onSelectRecord)= "setSelectRecord($event)"  (onUnSelectRecord)= "setSelectRecord($event)"
+        (onAcctionLink)="showRuleDialog($event.row)" (onServiceCall)="onServiceCall($event)">
         </ecl-table>
       </div>
       <br>
@@ -55,10 +55,10 @@
       </div>
     </p-tabPanel>
     <p-tabPanel header="Returned">
-    
+
       <div class="rule-for-impact-analysis" *ngIf="tabIndex == 1">
         <ecl-table #returnedTableLRIA  [tableModel]='returnedTableConfigInLRIA'
-        (onSelectRecord)= "setSelectRecord($event)" (onUnSelectRecord)= "setSelectRecord($event)"  
+        (onSelectRecord)= "setSelectRecord($event)" (onUnSelectRecord)= "setSelectRecord($event)"
         (onAcctionLink)="showRuleDialog($event.row)">
         </ecl-table>
       </div>
@@ -115,11 +115,11 @@
     <div class="rule-for-impact-analysis">
       <ecl-table #approvalMaintenance  [tableModel]='policyOnwerApprovalTableConfig'
       (onSelectRecord)  = "setSelectRecordForPO($event)"
-      (onUnSelectRecord)= "setSelectRecordForPO($event)"             
+      (onUnSelectRecord)= "setSelectRecordForPO($event)"
       (onAcctionLink)="showRuleDialog($event.row)"
       (onServiceCall)="assingReviewStatus($event)" >
       </ecl-table>
-    </div> 
+    </div>
   <br>
   <br>
 

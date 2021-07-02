@@ -1,0 +1,152 @@
+<p-dialog
+  #dialog
+  styleClass="dnb-dialog"
+  appendTo="body"
+  [header]="'Indications without existing matches:'"
+  [(visible)]="openDialog"
+  [modal]="true"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content">
+    <table class="table midrules-pop-table">
+      <thead>
+        <tr>
+          <th style="width: 200px">Indication</th>
+          <ng-container *ngIf="shouldHideColumn(true)">
+            <th style="width: 220px">Fixed Indication</th>
+            <th style="width: 100px">Action</th>
+          </ng-container>
+          <ng-container *ngIf="shouldHideColumn(false)">
+            <th style="width: 220px">Global Review Indication</th>
+            <th style="width: 100px">Action</th>
+          </ng-container>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let indication of newIndications">
+          <td>
+            {{ indication.value }}
+          </td>
+          <ng-container *ngIf="shouldHideColumn(true)">
+            <td>
+              <p-dropdown
+                [options]="indicationCodeSummary"
+                [style]="{ width: '200px' }"
+                panelStyleClass="indicationPanel"
+                placeholder="{{ indicationChild.value }}"
+                (onClick)="getValueUsed(indicationChild.value)"
+                (onChange)="changeIndication(indicationChild.value)"
+                [disabled]="
+                  dataIndicationUsed.includes(indicationChild.value) ||
+                  dataIndicationUsed.includes(indication.value) ||
+                  indicationFixedNoActives.includes(indication.value.trim())
+                "
+                #indicationChild
+              ></p-dropdown>
+            </td>
+            <td>
+              <button
+                (click)="override(indication.value, indicationChild.value)"
+                [disabled]="
+                  enableDisableOverride(indicationChild.value, indication.value)
+                "
+                *ngIf="
+                  !dataIndicationOverride.includes(indicationChild.value) &&
+                  !dataIndicationUsed.includes(indication.value)
+                "
+                class="dnb-btn"
+              >
+                Replace
+              </button>
+              <button
+                (click)="addIndication(indication.value)"
+                *ngIf="
+                  (!dataIndicationUsed.includes(indication.value) &&
+                    !addIndicationDirectFixed.includes(
+                      indication.value.trim()
+                    ) &&
+                    indicationFixedNoActives.includes(indication.value)) ||
+                  (!dataIndicationUsed.includes(indication.value) &&
+                    !addIndicationDirectFixed.includes(indication.value) &&
+                    !indicationFixedNoActives.includes(indication.value.trim()))
+                "
+                class="dnb-btn"
+                [disabled]="activeProccessAddOverride"
+              >
+                Add
+              </button>
+            </td>
+          </ng-container>
+          <ng-container *ngIf="shouldHideColumn(false)">
+            <td>
+              <p-dropdown
+                [options]="indicationGlobalReview"
+                [style]="{ width: '200px' }"
+                panelStyleClass="indicationPanel"
+                placeholder="{{ indicationChildGlobalReview.value }}"
+                (onClick)="
+                  getValueUsedGlobal(indicationChildGlobalReview.value)
+                "
+                (onChange)="
+                  changeIndicationGlobal(indicationChildGlobalReview.value)
+                "
+                [disabled]="
+                  dataIndicationUsedGlobalReview.includes(
+                    indicationChildGlobalReview.value
+                  ) ||
+                  dataIndicationUsedGlobalReview.includes(indication.value) ||
+                  indicationGlobalNoActives.includes(indication.value.trim())
+                "
+                #indicationChildGlobalReview
+              ></p-dropdown>
+            </td>
+            <td>
+              <button
+                (click)="
+                  overrideGlobalReview(
+                    indication.value,
+                    indicationChildGlobalReview.value
+                  )
+                "
+                [disabled]="
+                  enableDisableOverrideGlobal(
+                    indicationChildGlobalReview.value,
+                    indication.value
+                  )
+                "
+                *ngIf="
+                  !dataIndicationOverrideGlobalReview.includes(
+                    indicationChildGlobalReview.value
+                  ) &&
+                  !dataIndicationUsedGlobalReview.includes(indication.value)
+                "
+                class="dnb-btn"
+              >
+                Replace
+              </button>
+              <button
+                (click)="addIndicationGlobalReview(indication.value)"
+                *ngIf="
+                  (!dataIndicationUsedGlobalReview.includes(indication.value) &&
+                    !addIndicationDirectGlobal.includes(
+                      indication.value.trim()
+                    ) &&
+                    indicationGlobalNoActives.includes(indication.value)) ||
+                  (!dataIndicationUsedGlobalReview.includes(indication.value) &&
+                    !addIndicationDirectGlobal.includes(indication.value) &&
+                    !indicationGlobalNoActives.includes(
+                      indication.value.trim()
+                    ))
+                "
+                class="dnb-btn"
+                [disabled]="activeProccessAddOverride"
+              >
+                Add
+              </button>
+            </td>
+          </ng-container>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</p-dialog>

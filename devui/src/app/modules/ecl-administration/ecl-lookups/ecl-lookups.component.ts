@@ -12,7 +12,7 @@ import { ToastMessageService } from 'src/app/services/toast-message.service';
 })
 export class EclLookupsComponent implements OnInit {
 
-  @ViewChild('viewGrid') viewGrid;
+  @ViewChild('viewGrid',{static: true}) viewGrid;
 
   cols: any = [];
   data: any = [];

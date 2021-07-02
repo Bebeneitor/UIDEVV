@@ -1,1 +1,12 @@
-<div class="mid-text-box" id="editable" #editable contenteditable="true" [eclModel]="midText" (eclModelChange)="updateModel($event)"></div>
+<blockable-div #blockMidBox class="blockable">
+    <div [ngClass]="_midTextBoxCss" #editable contenteditable="true" (copy)="cleanCopyHTML($event)" [eclModel]="midText"
+        (enterTrigger)="triggerEvent($event)" (eclModelChange)="updateModel($event)">
+    </div>
+</blockable-div>
+
+<p-blockUI [target]="blockMidBox" [blocked]="midLoading">
+    <div class="img-loading text-center">
+        <img src="assets/img/color-loading-img.gif" />
+        <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+    </div>
+</p-blockUI>

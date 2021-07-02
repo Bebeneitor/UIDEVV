@@ -1,0 +1,21 @@
+.compare-div{
+    margin-top: 50px;
+}
+.compare-head{
+    width: 100%;
+    background: #e1eaf2;
+    padding: .3em;
+    border: 1px solid #c8c8c8;
+    font-weight: bold;
+}
+::ng-deep .compare-div .ui-table .ui-table-tbody > tr {height : 33px !important;}
+::ng-deep .taggedResult .ui-table  { margin-right: -1px; }
+::ng-deep .newResult .ui-table    { border-left: 1px solid #31006f; }
+.tagged-result-head{ margin-right: -1px;} 
+.new-result-head { border-left: 1px solid #31006f;} 
+::ng-deep .compare-div .ui-table  .p-paginator 
+.ui-paginator-bottom .ui-paginator .ui-widget .ui-widget-header{
+    margin-right: -1px;
+}
+::ng-deep .newRule{float:right;color: #31006f;font-weight: 900;font-size: 13px;}
+::ng-deep .deletedRule{float:right;color: red;font-weight: 900;font-size: 13px;}

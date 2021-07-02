@@ -2,7 +2,7 @@ import {
   AgeTemplateResponse,
   CombinationTherapyResponse,
   DailyMaximumDoseTemplateResponse,
-  DailyMaxUnitsTemplateResponse,
+  DailyMaxUnitsGroupedTemplateResponse,
   DiagnosisCodeOverlapsResponse,
   DiagnosisCodesTemplateResponse,
   DiagnosisCodeSummaryTemplateResponse,
@@ -33,51 +33,133 @@ export const GeneralInformationTemplate: GeneralInformationTemplateResponse = {
   },
   data: [
     {
-      code: "",
-      comments: [],
       item: {
         code: "",
         name: "[HCPCS] (Descriptor)",
       },
-      itemDetails: "",
+      data: [
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       item: {
         code: "",
         name: "Route of administration",
       },
-      itemDetails: "",
+      data: [
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       item: {
         code: "",
         name: "Time of administration",
       },
-      itemDetails: "",
+      data: [
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       item: {
         code: "",
         name: "Administration codes",
       },
-      itemDetails: "",
+      data: [
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
+
     {
-      code: "",
-      comments: [],
       item: {
         code: "",
         name: "How supplied",
       },
-      itemDetails: "",
+      data: [
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+        {
+          code: "",
+          itemDetails: "",
+          comments: [],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
   ],
+
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const GeneralInformationHeaders = ["Item", "Item Details", "Comments"];
@@ -102,6 +184,11 @@ export const LCDTemplate: LCDTemplateResponse = {
       macName: "",
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const LCDHeaders = ["LCD", "MAC Name", "Comment"];
@@ -114,60 +201,167 @@ export const ReferenceTemplate: ReferencesTemplateResponse = {
   },
   data: [
     {
-      code: "",
-      comments: [],
       referenceSourceDto: {
         code: "",
         name: "Drug Label",
       },
-      referenceDetails: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Drug Label",
+          },
+          referenceDetails: "",
+        },
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Drug Label",
+          },
+          referenceDetails: "",
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       referenceSourceDto: {
         code: "",
         name: "Clinical Pharmacology",
       },
-      referenceDetails: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Clinical Pharmacology",
+          },
+          referenceDetails: "",
+        },
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Clinical Pharmacology",
+          },
+          referenceDetails: "",
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       referenceSourceDto: {
         code: "",
         name: "Micromedex DrugDex",
       },
-      referenceDetails: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Micromedex DrugDex",
+          },
+          referenceDetails: "",
+        },
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Micromedex DrugDex",
+          },
+          referenceDetails: "",
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       referenceSourceDto: {
         code: "",
         name: "NCCN",
       },
-      referenceDetails: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "NCCN",
+          },
+          referenceDetails: "",
+        },
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "NCCN",
+          },
+          referenceDetails: "",
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       referenceSourceDto: {
         code: "",
         name: "Lexi-Drugs",
       },
-      referenceDetails: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Lexi-Drugs",
+          },
+          referenceDetails: "",
+        },
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "Lexi-Drugs",
+          },
+          referenceDetails: "",
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       referenceSourceDto: {
         code: "",
         name: "AHFS-DI",
       },
-      referenceDetails: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "AHFS-DI",
+          },
+          referenceDetails: "",
+        },
+        {
+          code: "",
+          comments: [],
+          referenceSourceDto: {
+            code: "",
+            name: "AHFS-DI",
+          },
+          referenceDetails: "",
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const ReferenceHeaders = [
@@ -186,6 +380,11 @@ export const MedicalJournalTemplate: MedicalJournalTemplateResponse = {
     { code: "", citation: "", comments: [] },
     { code: "", citation: "", comments: [] },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const MedicalJournalHeaders = ["Citation", "Comment"];
@@ -239,6 +438,11 @@ export const IndicationsTemplate: IndicationsTemplateResponse = {
       lcd: "",
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const IndicationsHeaders = [
@@ -271,6 +475,11 @@ export const NotesTemplate: NotesTemplateResponse = {
       note: "",
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 export const DailyMaxUnitsHeaders = [
   "Source",
@@ -279,56 +488,134 @@ export const DailyMaxUnitsHeaders = [
   "Comment",
 ];
 
-export const DailyMaxUnitsTemplate: DailyMaxUnitsTemplateResponse = {
-  drugVersionCode: "",
-  section: {
-    code: SectionCode.DailyMaxUnits,
-    name: "Daily Maximum Units Values For HCPCS",
-  },
-  data: [
-    {
-      code: "",
-      comments: [],
-      dmuvItemDto: {
-        code: "cmsprofmue",
-        name: "CMS Prof MUE",
-      },
-      currentValues: "",
-      newValues: "",
+export const DailyMaxUnitsGroupedTemplate: DailyMaxUnitsGroupedTemplateResponse =
+  {
+    drugVersionCode: "",
+    section: {
+      code: SectionCode.DailyMaxUnits,
+      name: "Daily Maximum Units Values For HCPCS",
     },
-    {
-      code: "",
-      comments: [],
-      dmuvItemDto: {
-        code: "cotivitiprofdmu",
-        name: "Cotiviti Prof DMU",
+    data: [
+      {
+        dmuvItemDto: {
+          code: "cmsprofmue",
+          name: "CMS Prof MUE",
+        },
+        data: [
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 0,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 1,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+        ],
       },
-      currentValues: "",
-      newValues: "",
-    },
-    {
-      code: "",
-      comments: [],
-      dmuvItemDto: {
-        code: "cmsopmue",
-        name: "CMS OP MUE",
+      {
+        dmuvItemDto: {
+          code: "cotivitiprofdmu",
+          name: "Cotiviti Prof DMU",
+        },
+        data: [
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 0,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 1,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+        ],
       },
-      currentValues: "",
-      newValues: "",
-    },
-    {
-      code: "",
-      comments: [],
-      dmuvItemDto: {
-        code: "cotivitiopdmu",
-        name: "Cotiviti OP DMU",
+      {
+        dmuvItemDto: {
+          code: "cmsopmue",
+          name: "CMS OP MUE",
+        },
+        data: [
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 0,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 1,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+        ],
       },
-      currentValues: "",
-      newValues: "",
+      {
+        dmuvItemDto: {
+          code: "cotivitiopdmu",
+          name: "Cotiviti OP DMU",
+        },
+        data: [
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 0,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+          {
+            code: "",
+            comments: [],
+            feedbackItemsList: [],
+            documentNoteList: [],
+            order: 1,
+            hasBorder: false,
+            currentValues: "",
+            newValues: "",
+          },
+        ],
+      },
+    ],
+    uiDecorator: {
+      sectionActive: true,
+      sectionComplete: false,
+      deletedRowFeedbackItemList: [],
     },
-  ],
-  codes: ["HCPCS"],
-};
+    codes: ["HCPCS"],
+  };
 
 export const DiagnosisCodesHeaders = [
   "Indication",
@@ -355,7 +642,42 @@ export const DiagnosisCodesTemplate: DiagnosisCodesTemplateResponse = {
           description: "",
         },
       ],
+      nccnIcdsCodesInvalid: [],
       lcdIcdsCodes: [
+        {
+          icd10Code: "",
+          icd10CodeId: 0,
+          description: "",
+        },
+      ],
+      lcdIcdsCodesInvalid: [],
+    },
+    {
+      code: "",
+      comments: [],
+      indication: "",
+      nccnIcdsCodes: [
+        {
+          icd10Code: "",
+          icd10CodeId: 0,
+          description: "",
+        },
+      ],
+      nccnIcdsCodesInvalid: [
+        {
+          icd10Code: "",
+          icd10CodeId: 0,
+          description: "",
+        },
+      ],
+      lcdIcdsCodes: [
+        {
+          icd10Code: "",
+          icd10CodeId: 0,
+          description: "",
+        },
+      ],
+      lcdIcdsCodesInvalid: [
         {
           icd10Code: "",
           icd10CodeId: 0,
@@ -374,7 +696,21 @@ export const DiagnosisCodesTemplate: DiagnosisCodesTemplateResponse = {
           description: "",
         },
       ],
+      nccnIcdsCodesInvalid: [
+        {
+          icd10Code: "",
+          icd10CodeId: 0,
+          description: "",
+        },
+      ],
       lcdIcdsCodes: [
+        {
+          icd10Code: "",
+          icd10CodeId: 0,
+          description: "",
+        },
+      ],
+      lcdIcdsCodesInvalid: [
         {
           icd10Code: "",
           icd10CodeId: 0,
@@ -393,19 +729,7 @@ export const DiagnosisCodesTemplate: DiagnosisCodesTemplateResponse = {
           description: "",
         },
       ],
-      lcdIcdsCodes: [
-        {
-          icd10Code: "",
-          icd10CodeId: 0,
-          description: "",
-        },
-      ],
-    },
-    {
-      code: "",
-      comments: [],
-      indication: "",
-      nccnIcdsCodes: [
+      nccnIcdsCodesInvalid: [
         {
           icd10Code: "",
           icd10CodeId: 0,
@@ -413,6 +737,13 @@ export const DiagnosisCodesTemplate: DiagnosisCodesTemplateResponse = {
         },
       ],
       lcdIcdsCodes: [
+        {
+          icd10Code: "",
+          icd10CodeId: 0,
+          description: "",
+        },
+      ],
+      lcdIcdsCodesInvalid: [
         {
           icd10Code: "",
           icd10CodeId: 0,
@@ -421,6 +752,12 @@ export const DiagnosisCodesTemplate: DiagnosisCodesTemplateResponse = {
       ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+    warningMessagesList: [],
+  },
 };
 
 export const DiagnosisCodeSummaryHeaders = [
@@ -429,42 +766,65 @@ export const DiagnosisCodeSummaryHeaders = [
   "Comment",
 ];
 
-export const DiagnosisCodeSummaryTemplate: DiagnosisCodeSummaryTemplateResponse = {
-  drugVersionCode: "",
-  section: {
-    code: SectionCode.DiagnosticCodeSummary,
-    name: "Diagnosis Code Summary",
-  },
-  data: [
-    {
-      code: "",
-      indication: "",
-      icd10Codes: [],
-      comments: [],
+export const DiagnosisCodeSummaryTemplate: DiagnosisCodeSummaryTemplateResponse =
+  {
+    drugVersionCode: "",
+    section: {
+      code: SectionCode.DiagnosticCodeSummary,
+      name: "Diagnosis Code Summary",
     },
-    {
-      code: "",
-      indication: "",
-      icd10Codes: [],
-      comments: [],
+    data: [
+      {
+        code: "",
+        indication: {
+          code: "",
+          label: "",
+        },
+        icd10Codes: [],
+        invalidIcd10Codes: [],
+        comments: [],
+      },
+      {
+        code: "",
+        indication: {
+          code: "",
+          label: "",
+        },
+        icd10Codes: [],
+        invalidIcd10Codes: [],
+        comments: [],
+      },
+      {
+        code: "",
+        indication: {
+          code: "",
+          label: "",
+        },
+        icd10Codes: [],
+        invalidIcd10Codes: [],
+        comments: [],
+      },
+      {
+        code: "",
+        indication: {
+          code: "",
+          label: "",
+        },
+        icd10Codes: [],
+        invalidIcd10Codes: [],
+        comments: [],
+      },
+    ],
+    uiDecorator: {
+      sectionActive: true,
+      sectionComplete: false,
+      deletedRowFeedbackItemList: [],
+      warningMessagesList: [],
     },
-    {
-      code: "",
-      indication: "",
-      icd10Codes: [],
-      comments: [],
-    },
-    {
-      code: "",
-      indication: "",
-      icd10Codes: [],
-      comments: [],
-    },
-  ],
-};
+  };
 
 export const ManifestationCodesHeaders = [
-  "ICD-10 Codes",
+  "ICD-10 Code",
   "Indication",
   "Comment",
 ];
@@ -482,7 +842,7 @@ export const ManifestationCodesTemplate: ManifestationCodesTemplateResponse = {
         icd10Code: "",
         description: "",
       },
-      indication: "",
+      indication: { code: "", label: "" },
       comments: [],
     },
     {
@@ -492,7 +852,7 @@ export const ManifestationCodesTemplate: ManifestationCodesTemplateResponse = {
         icd10Code: "",
         description: "",
       },
-      indication: "",
+      indication: { code: "", label: "" },
       comments: [],
     },
     {
@@ -502,7 +862,7 @@ export const ManifestationCodesTemplate: ManifestationCodesTemplateResponse = {
         icd10Code: "",
         description: "",
       },
-      indication: "",
+      indication: { code: "", label: "" },
       comments: [],
     },
     {
@@ -512,44 +872,90 @@ export const ManifestationCodesTemplate: ManifestationCodesTemplateResponse = {
         icd10Code: "",
         description: "",
       },
-      indication: "",
+      indication: { code: "", label: "" },
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const MaximumFrequencyTemplate: MaximumFrequencyTemplateResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.MaximumFrequency,
-    name: "Maximum Frequency",
+    name: "Maximum Frequency (Standard)",
   },
   data: [
     {
-      code: "",
       indication: "",
-      maximumFrequency: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: "",
-      maximumFrequency: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: "",
-      maximumFrequency: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: "",
-      maximumFrequency: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumFrequency: "",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const MaximumFrquencyHeaders = [
@@ -566,24 +972,91 @@ export const AgeTemplate: AgeTemplateResponse = {
   },
   data: [
     {
-      code: "",
-      comments: [],
       indication: {
         code: "",
         label: "",
       },
-      age: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+      ],
     },
     {
-      code: "",
-      comments: [],
       indication: {
         code: "",
         label: "",
       },
-      age: "",
+      data: [
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+      ],
+    },
+    {
+      indication: {
+        code: "",
+        label: "",
+      },
+      data: [
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+      ],
+    },
+    {
+      indication: {
+        code: "",
+        label: "",
+      },
+      data: [
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+        {
+          code: "",
+          comments: [],
+
+          age: "",
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const AgeHeaders = ["Indication", "Age", "Comment"];
@@ -592,54 +1065,103 @@ export const DailyMaximumDoseTemplate: DailyMaximumDoseTemplateResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.DailyMaximumDose,
-    name: "Daily Maximum Dose",
+    name: "Daily Maximum Dose (Standard)",
   },
   data: [
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      maximumDosingPattern: "",
-      maximumDose: "",
-      maximumUnits: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      maximumDosingPattern: "",
-      maximumDose: "",
-      maximumUnits: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      maximumDosingPattern: "",
-      maximumDose: "",
-      maximumUnits: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      maximumDosingPattern: "",
-      maximumDose: "",
-      maximumUnits: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+        {
+          code: "",
+          maximumDosingPattern: "",
+          maximumDose: "",
+          maximumUnits: "",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const DailyMaximumDoseHeaders = [
@@ -667,6 +1189,11 @@ export const GenderTemplate: GenderTemplateResponse = {
       gender: "",
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const GenderHeaders = ["Indication", "Gender", "Comment"];
@@ -675,50 +1202,107 @@ export const UnitsOverTimeTemplate: UnitsOverTimeTemplateResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.UnitsOverTime,
-    name: "Units Over Time",
+    name: "Units Over Time (Standard)",
   },
   data: [
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      units: "",
-      interval: "",
-      comments: [],
+
+      data: [
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      units: "",
-      interval: "",
-      comments: [],
+
+      data: [
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      units: "",
-      interval: "",
-      comments: [],
+
+      data: [
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      units: "",
-      interval: "",
-      comments: [],
+
+      data: [
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+
+          units: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const UnistOverTimeHeaders = [
@@ -732,50 +1316,95 @@ export const VisitOverTimeTemplate: VisitOverTimeTemplateResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.VisitOverTime,
-    name: "Visits Over Time",
+    name: "Visits Over Time (Standard)",
   },
   data: [
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      visits: "",
-      interval: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      visits: "",
-      interval: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      visits: "",
-      interval: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
     {
-      code: "",
       indication: {
         code: "",
         label: "",
       },
-      visits: "",
-      interval: "",
-      comments: [],
+      data: [
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+        {
+          code: "",
+          visits: "",
+          interval: "",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const VisitOverTimeHeaders = [
@@ -804,14 +1433,6 @@ export const CombinationTherapyTemplate: CombinationTherapyResponse = {
           combination: "",
           codes: [],
         },
-      ],
-    },
-    {
-      indication: {
-        code: "",
-        label: "",
-      },
-      data: [
         {
           code: "",
           comments: [],
@@ -832,6 +1453,12 @@ export const CombinationTherapyTemplate: CombinationTherapyResponse = {
           combination: "",
           codes: [],
         },
+        {
+          code: "",
+          comments: [],
+          combination: "",
+          codes: [],
+        },
       ],
     },
     {
@@ -840,6 +1467,32 @@ export const CombinationTherapyTemplate: CombinationTherapyResponse = {
         label: "",
       },
       data: [
+        {
+          code: "",
+          comments: [],
+          combination: "",
+          codes: [],
+        },
+        {
+          code: "",
+          comments: [],
+          combination: "",
+          codes: [],
+        },
+      ],
+    },
+    {
+      indication: {
+        code: "",
+        label: "",
+      },
+      data: [
+        {
+          code: "",
+          comments: [],
+          combination: "",
+          codes: [],
+        },
         {
           code: "",
           comments: [],
@@ -849,6 +1502,11 @@ export const CombinationTherapyTemplate: CombinationTherapyResponse = {
       ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const CombinationTherapyHeaders = [
@@ -881,14 +1539,6 @@ export const DosingPatternsTemplate: DosingPatternsResponse = {
           ahfsDi: "",
           other: "",
         },
-      ],
-    },
-    {
-      indication: {
-        code: "",
-        label: "",
-      },
-      data: [
         {
           code: "",
           drugLabel: "",
@@ -917,6 +1567,16 @@ export const DosingPatternsTemplate: DosingPatternsResponse = {
           ahfsDi: "",
           other: "",
         },
+        {
+          code: "",
+          drugLabel: "",
+          clinicalPharma: "",
+          micromedex: "",
+          nccn: "",
+          lexiDrugs: "",
+          ahfsDi: "",
+          other: "",
+        },
       ],
     },
     {
@@ -925,6 +1585,44 @@ export const DosingPatternsTemplate: DosingPatternsResponse = {
         label: "",
       },
       data: [
+        {
+          code: "",
+          drugLabel: "",
+          clinicalPharma: "",
+          micromedex: "",
+          nccn: "",
+          lexiDrugs: "",
+          ahfsDi: "",
+          other: "",
+        },
+        {
+          code: "",
+          drugLabel: "",
+          clinicalPharma: "",
+          micromedex: "",
+          nccn: "",
+          lexiDrugs: "",
+          ahfsDi: "",
+          other: "",
+        },
+      ],
+    },
+    {
+      indication: {
+        code: "",
+        label: "",
+      },
+      data: [
+        {
+          code: "",
+          drugLabel: "",
+          clinicalPharma: "",
+          micromedex: "",
+          nccn: "",
+          lexiDrugs: "",
+          ahfsDi: "",
+          other: "",
+        },
         {
           code: "",
           drugLabel: "",
@@ -938,6 +1636,11 @@ export const DosingPatternsTemplate: DosingPatternsResponse = {
       ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const DosingPatternsHeaders = [
@@ -955,201 +1658,195 @@ export const DiagnosisCodeOverlapsTemplate: DiagnosisCodeOverlapsResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.DiagnosisCodeOverlaps,
-    name: "Diagnosis Code Overlaps",
+    name: "Diagnosis Code Overlaps (Standard)",
   },
-
   data: [
     {
-      order: 0,
-      hasBorder: false,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
-    },
-    {
-      order: 1,
+      icd10Code: { icd10Code: "" },
       hasBorder: true,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
+      data: [
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+      ],
     },
     {
-      order: 2,
-      hasBorder: false,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
-    },
-    {
-      order: 3,
+      icd10Code: { icd10Code: "" },
       hasBorder: true,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
+      data: [
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+      ],
     },
     {
-      order: 4,
-      hasBorder: false,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
-    },
-    {
-      order: 5,
+      icd10Code: { icd10Code: "" },
       hasBorder: true,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
+      data: [
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+      ],
     },
     {
-      order: 6,
-      hasBorder: false,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
-    },
-    {
-      order: 7,
+      icd10Code: { icd10Code: "" },
       hasBorder: true,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
+      data: [
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+      ],
     },
     {
-      order: 8,
-      hasBorder: false,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
-    },
-    {
-      order: 9,
+      icd10Code: { icd10Code: "" },
       hasBorder: true,
-      code: "",
-      icd10Code: {
-        description: "",
-        icd10Code: "",
-      },
-      indication: {
-        code: "",
-        label: "",
-      },
-      units: "",
-      frequency: "",
-      unitsOverTime: "",
-      visitsOverTime: "",
-      age: "",
-      comments: [],
+      data: [
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+        {
+          order: 0,
+          hasBorder: true,
+          code: "",
+          indication: {
+            code: "",
+            label: "",
+          },
+          units: "",
+          frequency: "",
+          unitsOverTime: "",
+          visitsOverTime: "",
+          age: "",
+          comments: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const DiagnosisCodeOverlapsHeaders = [
@@ -1163,56 +1860,62 @@ export const DiagnosisCodeOverlapsHeaders = [
   "Comment",
 ];
 
-export const GlobalReviewIndicationsTemplate: GlobalReviewIndicationsResponse = {
-  drugVersionCode: "",
-  section: {
-    code: SectionCode.GlobalReviewIndications,
-    name: "Global Review - Indications",
-  },
+export const GlobalReviewIndicationsTemplate: GlobalReviewIndicationsResponse =
+  {
+    drugVersionCode: "",
+    section: {
+      code: SectionCode.GlobalReviewIndications,
+      name: "Global Review - Indications",
+    },
 
-  data: [
-    {
-      code: "",
-      order: 0,
-      indication: {
+    data: [
+      {
         code: "",
-        label: "",
+        order: 0,
+        indication: {
+          code: "",
+          label: "",
+        },
+        globalReviewIndication: "",
+        comments: [],
       },
-      globalReviewIndication: "",
-      comments: [],
-    },
-    {
-      code: "",
-      order: 0,
-      indication: {
+      {
         code: "",
-        label: "",
+        order: 0,
+        indication: {
+          code: "",
+          label: "",
+        },
+        globalReviewIndication: "",
+        comments: [],
       },
-      globalReviewIndication: "",
-      comments: [],
-    },
-    {
-      code: "",
-      order: 0,
-      indication: {
+      {
         code: "",
-        label: "",
+        order: 0,
+        indication: {
+          code: "",
+          label: "",
+        },
+        globalReviewIndication: "",
+        comments: [],
       },
-      globalReviewIndication: "",
-      comments: [],
-    },
-    {
-      code: "",
-      order: 0,
-      indication: {
+      {
         code: "",
-        label: "",
+        order: 0,
+        indication: {
+          code: "",
+          label: "",
+        },
+        globalReviewIndication: "",
+        comments: [],
       },
-      globalReviewIndication: "",
-      comments: [],
+    ],
+    uiDecorator: {
+      sectionActive: true,
+      sectionComplete: false,
+      deletedRowFeedbackItemList: [],
     },
-  ],
-};
+  };
 
 export const GlobalReviewIndicationsHeaders = [
   "Current indication",
@@ -1224,7 +1927,7 @@ export const SecondaryMalignancyTemplate: SecondaryMalignancyResponse = {
   drugVersionCode: "",
   section: {
     code: SectionCode.SecondaryMalignancy,
-    name: "Secondary Malignancy (C77-C79.9) ICD-10 Codes",
+    name: "Secondary Malignancy (C77-C79.9) ICD-10 Codes (Standard)",
   },
   data: [
     {
@@ -1286,147 +1989,7 @@ export const SecondaryMalignancyTemplate: SecondaryMalignancyResponse = {
         {
           code: "",
           order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-      ],
-    },
-    {
-      malignancyIcdsCodes: [
-        {
-          icd10Code: "",
-        },
-      ],
-      secondarySite: "",
-      data: [
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-      ],
-    },
-    {
-      malignancyIcdsCodes: [
-        {
-          icd10Code: "",
-        },
-      ],
-      secondarySite: "",
-      data: [
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
-          primaryMalignancy: "",
-          units: "",
-          frequency: "",
-          unitsOverTime: "",
-          visitsOverTime: "",
-          age: "",
-          comments: [],
-        },
-        {
-          code: "",
-          order: 0,
-          hasBorder: false,
+          hasBorder: true,
           primaryMalignancy: "",
           units: "",
           frequency: "",
@@ -1508,7 +2071,12 @@ export const SecondaryMalignancyTemplate: SecondaryMalignancyResponse = {
       ],
     },
   ],
-  codes: ["(C77-C79.9)"],
+  codes: ["C77-C79.9"],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const SecondaryMalignancyHeaders = [
@@ -1580,6 +2148,11 @@ export const GlobalReviewCodesTemplate: GlobalReviewCodesResponse = {
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const GlobalReviewCodesHeaders = [
@@ -1638,6 +2211,11 @@ export const RulesTemplate: RulesTemplateResponse = {
       comments: [],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 export const RulesHeaders = ["Mid Rule", "Description", "Comments"];

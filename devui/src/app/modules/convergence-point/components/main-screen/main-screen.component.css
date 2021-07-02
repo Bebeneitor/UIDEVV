@@ -1,0 +1,116 @@
+.main-screen {
+    padding: 0px;
+}
+
+.main-screen h6 {
+    color: #31006F;
+}
+
+.main-screen .div-result {
+    background-color: #FFF;
+    padding: 5px;
+}
+
+.main-screen button.btn-main-screen {
+    width: 19%;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.main-screen .btn-error-message {
+    width: 50vw;
+}
+
+.main-screen .div-tree-table {
+    padding: 12px;
+}
+
+.main-screen .div-icons {
+    margin-bottom: 6px;
+}
+
+.main-screen .div-icons > div {
+    display: inline-block;
+}
+
+.main-screen .div-icons > div > div > a > i {
+    font-size: 18px;
+    color: #31006F;
+    margin-left: 8px;
+}
+
+::ng-deep .main-screen .ui-treetable .ui-treetable-tbody > tr > td .ui-treetable-toggler {
+    color: #31006F !important;
+}
+
+::ng-deep .main-screen .total-results {
+    display: block;
+    margin-right: 10px;
+}
+
+.main-screen .w-100 {
+    width: 100% !important;
+}
+
+.main-screen span > b.purple {
+    color: #31006F !important;
+    font-weight: bold;
+}
+
+.main-screen .buttons-div {
+    margin-bottom: 10px !important;
+}
+
+.main-screen p-dropdown {
+    width: 100% !important;
+}
+
+::ng-deep .main-screen input.ui-dropdown-filter.ui-inputtext.ui-widget.ui-state-default.ui-corner-all {
+    border-radius: 3px !important;
+    border: 1px solid #31006F !important;
+}
+
+::ng-deep .main-screen .ui-dropdown-filter-icon.pi.pi-search {
+    color: #31006F !important;
+}
+
+.main-screen .div-result .div-tree-table .div-icons .div-locked-files {
+    display: inline-block;
+    margin-right: 3px;
+    border-right: 1px solid #9179B7;
+    padding-right: 10px;
+    right: 135px;
+}
+
+::ng-deep .main-screen p-dialog.dialog-submit span.f-11,
+::ng-deep .main-screen p-dialog.dialog-review span.f-11 {
+    display: inline-block;
+    margin-top: 5px;
+}
+
+::ng-deep .main-screen p-dialog.dialog-submit span.f-11 > i.fa.fa-file.icon-submit,
+::ng-deep .main-screen p-dialog.dialog-review span.f-11 > i.fa.fa-file.icon-submit {
+    color: #9179B7;
+    font-size: 18px;
+    margin-right: 5px;
+}
+
+::ng-deep .main-screen p-dialog.dialog-submit div.footer-submit,
+::ng-deep .main-screen p-dialog.dialog-review div.footer-submit {
+    margin-bottom: 5px;
+}
+
+::ng-deep .main-screen a.ui-overlaypanel-close.ui-state-default {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    right: 0px !important;
+    top: 0px !important;
+}
+
+::ng-deep .main-screen span.ui-overlaypanel-close-icon.pi.pi-times {
+    color: #9179B7 !important;
+}
+
+::ng-deep .main-screen span.span-highlight {
+    background-color: yellow !important;
+}

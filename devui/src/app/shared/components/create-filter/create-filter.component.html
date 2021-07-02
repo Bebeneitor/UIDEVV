@@ -1,0 +1,35 @@
+<div class="fluid-dialog">
+  <div class="row">
+      <div class="col-8 fluid-column">        
+          <label style="font-size: 12px;">Filter Name</label>
+          <input name="newFilterName" pInputText [(ngModel)]="createNewFilterRequest.filterName"  placeholder="Enter New Filter Name" (keyup)="onTypeNewFilterName()"
+          style="width: 500px;font-size: 12px;"/>
+          <div *ngIf="showErrorMessage">
+            <span style="color: red;">{{duplicateMessage}}</span>
+          </div>
+      </div>
+      <div class="col-4 fluid-column" style="padding-left: 120px;">
+        <div class="fluid-radio"> 
+          <input type="radio" name="filterTypeGroup" value="Private"  [(ngModel)]="createNewFilterRequest.filterType">
+          <label class="fluid-radio-label">Private</label>
+        </div>
+        <div>
+          <input type="radio" name="filterTypeGroup" value="Public" [(ngModel)]="createNewFilterRequest.filterType">
+          <label class="fluid-radio-label">Public</label>
+        </div>
+      </div>       
+  </div>
+  <div class="row" style="margin: 1px;">
+    <div class= "fluid-column">
+      <label style="font-size: 12px;">Filter Conditions</label>
+      <textarea pInputTextarea class="text-box" type="text"  name="filterConditions" [(ngModel)]="displayFilterCondition"  
+      class="fluid-textarea" readonly style="font-size: 12px;"></textarea>
+    </div>  
+  </div>
+  <div class="row button-container" style="justify-content: space-evenly;">
+      <button class="btn btn-primary" (click)="cancelNewFilterDialog()">Cancel</button>
+      <button class="btn btn-primary" [disabled]="fieldSaveButton" (click)="saveNewFilter()">Save</button>
+  </div>  
+</div>  
+
+

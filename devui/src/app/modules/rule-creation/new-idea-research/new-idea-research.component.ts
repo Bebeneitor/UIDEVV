@@ -1,6 +1,7 @@
+import { DynamicDialogRef } from 'primeng/primeng';
 import { Component, OnInit, ViewChild, Input, AfterViewInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { DialogService, ConfirmationService, MessageService } from 'primeng/api';
+import { DialogService, ConfirmationService, MessageService, DynamicDialogConfig } from 'primeng/api';
 import { ReturnDialogComponent } from 'src/app/modules/rule-creation/new-idea-research/components/return-dialog/return-dialog.component';
 import { IdeaService } from 'src/app/services/idea.service';
 import { NewIdeaService } from 'src/app/services/new-idea.service';
@@ -19,7 +20,8 @@ import { Users } from 'src/app/shared/models/users';
 import { RuleInfoService } from 'src/app/services/rule-info.service';
 import { Constants } from 'src/app/shared/models/constants';
 import { ToastMessageService } from 'src/app/services/toast-message.service';
-
+import {ResearchRequestSearchedRuleDto} from "../../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../../services/research-request.service";
 
 const EXISTING_IDEA = Constants.EXISTING_IDEA;
 const INVALID_IDEA = Constants.INVALID_IDEA;
@@ -37,13 +39,14 @@ const IDEA_RESEARCH_TAB_RETURNED = 'RETURNED';
 
 export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
 
-  @ViewChild(NewIdeaResearchDuplicateCheckComponent) dup;
-  @ViewChild(NirSearchFormComponent) search;
-  @ViewChild(NirReferenceDetailComponent) refDetail;
+  @ViewChild(NewIdeaResearchDuplicateCheckComponent,{static: true}) dup;
+  @ViewChild(NirSearchFormComponent,{static: true}) search;
+  @ViewChild(NirReferenceDetailComponent,{static: true}) refDetail;
 
   @Input() ideaIdInp: number;
   @Input() readOnlyView: boolean;
 
+  head = 'New Idea Research';
   ideaId: number;
   ruleId: number;
   ideaInfo: IdeaInfo2;
@@ -73,19 +76,32 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
   submitState: boolean = false;
   returnDisabled: boolean = false;
   ruleCreationStatus: boolean;              // @True: idea level @False: provisional rule
+  assignmentForNewIdea: boolean = false;
   isIdeaReseachAssigned: boolean = false;
   isIdeaReseachReturned: boolean = false;
   isGoodIdea: boolean = false;
+  viewReferences: boolean = false;
   clearDisabled: boolean = true;
   refreshDisabled: boolean = true;
+
+  // Research Request
+  rrId: number;
+  rrCode: string;
+  navPageTitle: string = 'My Requests';
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
+  ruleResponseIndicator: boolean = false;  
+  isPdgMedicaidRule : boolean = false;
 
   constructor(private router: Router, private dialogService: DialogService, private ideaService: IdeaService,
     private newIdeaservice: NewIdeaService, private storage: StorageService, private utils: UtilsService,
     public route: ActivatedRoute, private app: AppUtils, private userService: UsersService,
     private confirmationService: ConfirmationService, private ruleService: RuleInfoService,
-    private messageService: MessageService, private toast: ToastMessageService) {
+    private messageService: MessageService, private toast: ToastMessageService,
+    private config: DynamicDialogConfig, public ref: DynamicDialogRef, private rrService: ResearchRequestService,
+    private storageService: StorageService) {
     this.ideaInfo = new IdeaInfo2();
     this.ideaDto = new NewIdeaResearchDto();
+    this.assignmentForNewIdea = this.storage.get('PARENT_NAVIGATION', false) == 'ASSIGNMENT_FOR_NEW_IDEA';
     this.isIdeaReseachAssigned = this.storage.get('PARENT_NAVIGATION', false) == 'IDEAS_RESEARCH_ASSIGNED';
     this.isIdeaReseachReturned = this.storage.get('PARENT_NAVIGATION', false) == 'IDEAS_RESEARCH_RETURNED';
     this.isGoodIdea = this.storage.get('PARENT_NAVIGATION', false) == 'GOOD_IDEAS';
@@ -97,12 +113,24 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
     this.saveDisabled = true;
     this.refreshDisabled = true;
     this.clearDisabled = true;
-    this.provisionalBtnDisable = true;
+    this.provisionalBtnDisable = true;  
+    this.isPdgMedicaidRule  = false;
+
+    if (this.config.data && this.config.data.ideaIdInp) {
+      //Just when is opened by Dialog Service.
+      this.ideaIdInp = this.config.data.ideaIdInp;
+      this.readOnlyView = this.config.data.readOnlyView;
+      this.head = Constants.EMPTY_MESSAGE;
+    }
+
     if (this.readOnlyView === undefined) {
       this.readOnlyView = false;
     }
+    this.viewReferences = this.assignmentForNewIdea || this.isIdeaReseachAssigned;
+
+    this.isPdgMedicaidRule = this.app.isPdgEnabled();
     this.route.data.subscribe(params => {
-      this.userId = this.app.getLoggedUserId()
+      this.userId = this.app.getLoggedUserId();
     });
     if (this.ideaIdInp > 0) {
       this.ideaId = this.ideaIdInp;
@@ -144,6 +172,12 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
     if (this.ideaIdInp > 0) {
       this.ideaId = this.ideaIdInp;
       let ruleCode: string;
+      this.getRuleResponseIndicatorAndRuleCode(this.ideaId).then((res: any) => {
+        if (res && res.ruleResponseIndicator && res.ruleResponseIndicator !== undefined) {
+          this.ruleResponseIndicator = (res.ruleResponseIndicator === 'Y') ? true : false;
+          this.rrCode = res.ruleCode;
+        }
+      });
       // Check if provisional Rule has been created.
       this.ruleService.getRulesByParentId(this.ideaIdInp).subscribe((response: any) => {
         if (response && response.data) {
@@ -231,6 +265,16 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
       let lobObj = lobs[lob]["lob"];
       this.search.selectedLobs.push(lobObj["lobId"]);
     }
+    if (this.isPdgMedicaidRule && !this.readOnlyView) {
+      if ((typeof this.search.selectedLobs == 'undefined') ||
+          (this.search.selectedLobs && this.search.selectedLobs.length == 0)) {
+            this.search.selectedLobs= [];
+            this.search.selectedLobs.push(Constants.MEDICAID);
+            this.search.selectedLobs = [...this.search.selectedLobs];
+            this.search.lobInput();
+      }
+    }
+
     let jurisdictions: any[] = idea["jurisdictions"];
     this.search.selectedJurs = [];
     for (let jurisdiction in jurisdictions) {
@@ -243,6 +287,7 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
       let stateObj = states[state]["state"];
       this.search.selectedStates.push(stateObj["stateId"]);
     }
+
     this.checkStateJurisdiction();
   }
 
@@ -312,25 +357,43 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
   ideaRefresh() {
     this.retrieveSavedIdeaDetails(this.ideaId);
   }
-  // Read Only Mode, should not have a confirmation but just direct them back to home
+
+  /**
+   * This method is used by the exit button.
+  */
   exit() {
-    this.confirmationService.confirm({
-      message: 'All unsaved changes will lost. Are you sure that you want to Exit?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        if (this.isIdeaReseachAssigned) {
-          this.navigateIdeasNeedingResearch(IDEA_RESEARCH_TAB_ASSIGNED);
-        } else if (this.isIdeaReseachReturned) {
-          this.navigateIdeasNeedingResearch(IDEA_RESEARCH_TAB_RETURNED);
-        } else if (this.isGoodIdea) {
-          this.navigateToGoodIdeas();
+    if (this.config.data && this.config.data.ideaIdInp) {
+      //Just when is opened by Dialog Service.
+      this.confirmationService.confirm({
+        key: 'codesTabNewIdea',
+        message: Constants.ARE_YOU_SURE_THAT_DO_YOU_WANT_EXIT_DIALOG,
+        header: Constants.CONFIRMATION_WORD,
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          this.ref.close();
         }
-        else {
-          this.navigateHome();
+      });
+    } else {
+      this.confirmationService.confirm({
+        message: Constants.ALL_UNSAVED_CHANGES_WILL_LOST_DO_YOU_WANT_EXIT,
+        header: Constants.CONFIRMATION_WORD,
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          if(this.assignmentForNewIdea) {
+            this.router.navigate(['/assignmentNewIdea']);
+          } else if (this.isIdeaReseachAssigned) {
+            this.navigateIdeasNeedingResearch(IDEA_RESEARCH_TAB_ASSIGNED);
+          } else if (this.isIdeaReseachReturned) {
+            this.navigateIdeasNeedingResearch(IDEA_RESEARCH_TAB_RETURNED);
+          } else if (this.isGoodIdea) {
+            this.navigateToGoodIdeas();
+          }
+          else {
+            this.navigateHome();
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   navigateHome() {
@@ -367,6 +430,7 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
       this.ideaDto.states = this.search.selectedStates;
       this.ideaDto.jurisdictions = this.search.selectedJurs;
       const catId = this.search.selectedCat;
+      this.ideaDto.policyPackages = this.search.policyPackageSelected;
       this.ideaDto.updatedOn = new Date;
       this.ideaDto.action = action;
       this.ideaDto.provisionalRuleId = this.provisionalRuleId;
@@ -400,10 +464,10 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
    */
   validateSaveSubmit() {
     let resp: boolean = true;
-    if (!this.validateCategoryCheck() || 
+    if (!this.validateCategoryCheck() ||
         !this.validateStateJurisdiction() ||
-        !this.validateDupValidCheck() || 
-        !this.validateReferenceSources() || 
+        !this.validateDupValidCheck() ||
+        !this.validateReferenceSources() ||
         !this.validateLineOfBusiness()
        ) {
         resp = false;
@@ -512,4 +576,35 @@ export class NewIdeaResearchComponent implements OnInit, AfterViewInit {
     });
   }
 
+  navigateBackResearch() {
+    this.router.navigate(['my-research-request']);
+  }
+
+  navigateBackResearchId() {
+    let rrPathParams = btoa(JSON.stringify({
+      'rrCode': this.rrCode,
+      'navPageTitle': this.navPageTitle,
+      'navPagePath': Constants.MY_RESEARCH_REQUEST_ROUTE,
+      'rrReadOnly': true,
+      'rrButtonsDisable': false
+    }));
+    let navigationPath = Constants.RESEARCH_REQUEST_ROUTE;
+
+    this.router.navigate([navigationPath], {
+      queryParams: {rrPathParams: rrPathParams}
+    });
+  }
+
+  // Source Link for Research Request
+  async getRuleResponseIndicatorAndRuleCode(ruleId: number) {
+    this.ruleResponseSearchDto = new ResearchRequestSearchedRuleDto();
+    return new Promise((resolve, reject) => {
+      this.rrService.getRuleResponseIndicator(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined && resp.data !== {}) {
+          this.ruleResponseSearchDto = resp.data;
+        }
+        resolve(this.ruleResponseSearchDto);
+      });
+    });
+  }
 }

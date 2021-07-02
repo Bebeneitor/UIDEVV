@@ -1,0 +1,87 @@
+<app-breadcrumb [path]="'ConVergence Point Documentation>Audit Log & Reports'"></app-breadcrumb>
+<hr>
+<div class="container-fluid audit-log-screen">
+  <div class="row">
+    <div class="col-12">
+      <h6>Audit Log & Reports</h6>
+
+      <div class="audit-log-filters">
+        <div class="row">
+          <div class="col-6">
+            <label>Primary Requirement(s)</label>
+            <p-multiSelect [options]="primaryRequirements" [(ngModel)]="selectedPrimaryRequirements" [style]="{'width': '100%'}" [filter]="true"></p-multiSelect>
+          </div>
+
+          <div class="col-3">
+            <label>Date From</label>
+            <p-calendar [(ngModel)]="startDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft" [minDate]="minDate" [maxDate]="endDate" placeholder="mm/dd/yyyy" dateFormat="mm/dd/yy"></p-calendar>
+          </div>
+
+          <div class="col-3">
+            <label>Date To</label>
+            <p-calendar [(ngModel)]="endDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft" [minDate]="startDate" placeholder="mm/dd/yyyy" dateFormat="mm/dd/yy"></p-calendar>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6">
+            <label>PO/CCA</label>
+            <p-multiSelect [options]="poCcas" [(ngModel)]="selectedPoCcas" [style]="{'width': '100%'}" [filter]="true"></p-multiSelect>
+          </div>
+
+          <div class="col-6">
+            <label>Action</label>
+            <p-multiSelect [options]="actions" [(ngModel)]="selectedActions" [style]="{'width': '100%'}" [filter]="true"></p-multiSelect>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-6">
+            <label>Performed By</label>
+            <p-multiSelect [options]="performedBys" [(ngModel)]="selectedPerformedBys" [style]="{'width': '100%'}" [filter]="true"></p-multiSelect>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <hr>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6 text-left">
+            <button type="button" class="btn btn-primary f-11 btn-sm cvp-button" (click)="refresh()">Refresh</button>
+          </div>
+
+          <div class="col-6 text-right">
+            <button type="button" class="btn btn-primary f-11 btn-sm cvp-button" (click)="view()">View</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      &nbsp;
+    </div>
+  </div>
+
+  <div class="row" *ngIf="displayGrid">
+    <div class="col-12">
+      <h6>Audit Log</h6>
+    </div>
+
+    <div class="col-12">
+      <div class="result-data">
+        <ecl-table #tableResults [tableModel]="tableConfig">
+        </ecl-table>
+          
+        <hr>
+        <div class="text-right">
+          <button type="button" class="btn btn-primary f-11 btn-sm cvp-button" (click)="generateReport()">Generate Report</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

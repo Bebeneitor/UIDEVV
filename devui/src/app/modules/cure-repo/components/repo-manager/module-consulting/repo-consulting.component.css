@@ -6,3 +6,35 @@
 .invalid-button{
     color: lightgrey !important;
 }
+
+.p-grid-group-right{
+    padding: 10px;
+    border:1px solid#d0cccc;
+    border-right: 0px;
+    border-radius: 5px 0px 0px 5px; 
+    margin-right: -10px;
+    position: relative;
+}
+
+.p-grid-group-center{
+    padding: 10px;
+    border:1px solid#d0cccc;
+    border-right: 0px;
+    border-left: 0px;
+    position: relative;
+    margin-left: -10px;
+    margin-right: -10px;
+}
+
+.p-grid-group-left{
+    padding: 10px;
+    border:1px solid#d0cccc;
+    border-left: 0px;
+    border-radius: 0px 5px 5px 0px; 
+    margin-left: -10px;
+    position: relative;
+}
+
+.radio-button-visible{
+    display: inline !important;
+}

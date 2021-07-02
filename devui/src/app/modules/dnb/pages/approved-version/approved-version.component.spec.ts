@@ -7,9 +7,13 @@ import {
   TestBed,
 } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
+import { RouterTestingModule } from "@angular/router/testing";
+import { OktaAuthService, OKTA_CONFIG } from "@okta/okta-angular";
+import { MessageService } from "primeng/api";
 import { InputSwitchModule } from "primeng/inputswitch";
 import { of } from "rxjs";
 import { StorageService } from "src/app/services/storage.service";
+import { SectionPosition } from "../../models/constants/actions.constants";
 import { SectionCode } from "../../models/constants/sectioncode.constant";
 import { storageDrug } from "../../models/constants/storage.constants";
 import { NavigationItem } from "../../models/interfaces/navigation";
@@ -36,64 +40,122 @@ const referenceResponse: ReferencesTemplateResponse = {
   },
   data: [
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: ["Comment 1", "Comment 2"],
       referenceSourceDto: {
-        code: "PI1",
+        code: "",
         name: "Drug Label",
       },
-      referenceDetails:
-        "Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: ["Comment 1", "Comment 2"],
+          referenceSourceDto: {
+            code: "PI1",
+            name: "Drug Label",
+          },
+          referenceDetails:
+            "Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+          feedbackItemsList: [],
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "CP1",
+        code: "",
         name: "Clinical Pharmacology",
       },
-      referenceDetails: "Clinical Pharmacology, docetaxel, January 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          referenceSourceDto: {
+            code: "CP1",
+            name: "Clinical Pharmacology",
+          },
+          referenceDetails: "Clinical Pharmacology, docetaxel, January 2019",
+          feedbackItemsList: [],
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "DD1",
+        code: "",
         name: "Micromedex DrugDex",
       },
-      referenceDetails: "Micromedex DrugDex, docetaxel, May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          referenceSourceDto: {
+            code: "DD1",
+            name: "Micromedex DrugDex",
+          },
+          referenceDetails: "Micromedex DrugDex, docetaxel, May 2019",
+          feedbackItemsList: [],
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "NCCN1",
+        code: "",
         name: "NCCN",
       },
-      referenceDetails: "NCCN, docetaxel, May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          referenceSourceDto: {
+            code: "NCCN1",
+            name: "NCCN",
+          },
+          referenceDetails: "NCCN, docetaxel, May 2019",
+          feedbackItemsList: [],
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "LEXI1",
+        code: "",
         name: "Lexi-Drugs",
       },
-      referenceDetails:
-        "Lexi-Drugs, docetaxel, May 2019Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          referenceSourceDto: {
+            code: "LEXI1",
+            name: "Lexi-Drugs",
+          },
+          referenceDetails:
+            "Lexi-Drugs, docetaxel, May 2019Drug Label, Docetaxel, (docetaxel injection, solution, concentrate), May 2019",
+          feedbackItemsList: [],
+        },
+      ],
     },
     {
-      code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
-      comments: [],
       referenceSourceDto: {
-        code: "AHFS1",
+        code: "",
         name: "AHFS-DI",
       },
-      referenceDetails: "Lexi-Drugs, docetaxel, May 2019",
+      data: [
+        {
+          code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
+          comments: [],
+          referenceSourceDto: {
+            code: "AHFS1",
+            name: "AHFS-DI",
+          },
+          referenceDetails: "Lexi-Drugs, docetaxel, May 2019",
+          feedbackItemsList: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
-
 const generalInformationResponse: GeneralInformationTemplateResponse = {
   drugVersionCode: "d73cdb40-c206-4109-97d5-0aa7bb631eb8",
   section: {
@@ -102,25 +164,45 @@ const generalInformationResponse: GeneralInformationTemplateResponse = {
   },
   data: [
     {
-      code: "111f6444-ce58-4b5b-b3d8-8285bb42e093",
-      comments: ["Comment 01", "Comment 02", "Comment 03"],
       item: {
         code: "bcda8e19-9629-46e3-a193-1fc542e46d62",
         name: "[HCPCS] (Descriptor)",
       },
-      itemDetails: "9171 (Injection, docetaxel, 1 mg)",
+      data: [
+        {
+          code: "111f6444-ce58-4b5b-b3d8-8285bb42e093",
+          itemDetails: "9171 (Injection, docetaxel, 1 mg)",
+          comments: ["Comment 01", "Comment 02", "Comment 03"],
+          order: 0,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
     {
-      code: "c2a34103-db76-4e48-b392-7c5529bf0ce0",
-      comments: [],
       item: {
         code: "e06dce9e-d5cc-4480-ad1c-5739fe33e72d",
         name: "Administration codes",
       },
-      itemDetails: "96413, 96415, 96417",
+      data: [
+        {
+          code: "c2a34103-db76-4e48-b392-7c5529bf0ce0",
+          itemDetails: "96413, 96415, 96417",
+          comments: ["Comment 01", "Comment 02", "Comment 03"],
+          order: 1,
+          feedbackItemsList: [],
+          documentNoteList: [],
+        },
+      ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
+
 const combinationTherapyResponse: CombinationTherapyResponse = {
   drugVersionCode: "",
   section: {
@@ -146,6 +228,7 @@ const combinationTherapyResponse: CombinationTherapyResponse = {
               code: "J0960",
             },
           ],
+          feedbackItemsList: [],
         },
         {
           code: "",
@@ -156,10 +239,16 @@ const combinationTherapyResponse: CombinationTherapyResponse = {
               code: "J1234",
             },
           ],
+          feedbackItemsList: [],
         },
       ],
     },
   ],
+  uiDecorator: {
+    sectionActive: true,
+    sectionComplete: false,
+    deletedRowFeedbackItemList: [],
+  },
 };
 
 const mockGetAggregator = [
@@ -189,6 +278,7 @@ class SectionsContainerStubComponent {
   @Input() currentVersion: Section;
   @Input() newVersion: Section;
   @Input() id: string;
+  @Input() sectionIndex: string;
   @Input() isComparing: boolean;
   @Input() hasRowHeading: boolean;
   @Input() showCurrent: boolean;
@@ -200,6 +290,7 @@ class GroupedSectionsContainerStubComponent {
   @Input() currentVersion: Section;
   @Input() newVersion: Section;
   @Input() id: string;
+  @Input() sectionIndex: string;
   @Input() isComparing: boolean;
   @Input() showCurrent: boolean;
   @Input() enableEditing: boolean;
@@ -210,12 +301,15 @@ class CellEditorStubComponent {
   @Input() column: Column = null;
   @Input() isComparing: boolean = false;
   @Input() searchInfo: SearchData = null;
+  @Input() sectionPosition: SectionPosition = null;
   @Input() highLight: number = null;
   @Input() isReadOnly = false;
   @Input() negativeDiff: any;
 
   getDifferences() {}
 }
+@Component({ selector: "app-dnb-breadcrumb", template: "" })
+class DnBBreadCrumbStubComponent {}
 
 // #endregion
 fdescribe("ApprovedVersionComponent", () => {
@@ -223,6 +317,11 @@ fdescribe("ApprovedVersionComponent", () => {
   let fixture: ComponentFixture<ApprovedVersionComponent>;
   let storageService: StorageService;
   let sections;
+  const oktaConfig = {
+    issuer: "https://{yourOktaDomain}/oauth2/default",
+    clientId: "{clientId}",
+    redirectUri: window.location.origin + "/login/callback",
+  };
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -233,9 +332,24 @@ fdescribe("ApprovedVersionComponent", () => {
         SectionNavigationStubComponent,
         CellEditorStubComponent,
         FindReplaceStubComponent,
+        DnBBreadCrumbStubComponent,
       ],
-      imports: [HttpClientTestingModule, InputSwitchModule, FormsModule],
-      providers: [DnbService, StorageService],
+      imports: [
+        HttpClientTestingModule,
+        RouterTestingModule,
+        InputSwitchModule,
+        FormsModule,
+      ],
+      providers: [
+        DnbService,
+        StorageService,
+        MessageService,
+        OktaAuthService,
+        {
+          provide: OKTA_CONFIG,
+          useValue: oktaConfig,
+        },
+      ],
     }).compileComponents();
   }));
 
@@ -265,12 +379,14 @@ fdescribe("ApprovedVersionComponent", () => {
     const references = component.sections[1];
     const combinationTherapy = component.sections[2];
     expect(component.sections.length).toBe(3);
-    expect((generalInformation.current as Section).rows.length).toBe(0);
-    expect((generalInformation.new as Section).rows.length).toBe(
+    expect((generalInformation.current as GroupedSection).groups.length).toBe(
+      0
+    );
+    expect((generalInformation.new as GroupedSection).groups.length).toBe(
       generalInformationResponse.data.length
     );
-    expect((references.current as Section).rows.length).toBe(0);
-    expect((references.new as Section).rows.length).toBe(
+    expect((references.current as GroupedSection).groups.length).toBe(0);
+    expect((references.new as GroupedSection).groups.length).toBe(
       referenceResponse.data.length
     );
     expect((combinationTherapy.current as GroupedSection).groups.length).toBe(
@@ -279,5 +395,18 @@ fdescribe("ApprovedVersionComponent", () => {
     expect((combinationTherapy.new as GroupedSection).groups.length).toBe(
       combinationTherapyResponse.data.length
     );
+  });
+
+  it("should valid icd codes", () => {
+    storageService.set(
+      storageDrug.drugDate,
+      "01/25/2021 09:18:22 PM UTC",
+      false
+    );
+    let dataSection = {
+      codesInvalid: ["C23, C45"],
+      sectionCode: "Diagnosis Code",
+    };
+    expect(component.validIcdCodes(dataSection)).toBeUndefined();
   });
 });

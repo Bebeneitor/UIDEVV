@@ -89,9 +89,8 @@
               </tr>
             </ng-template>
           </p-table>
-          <button style="margin-top: 10px;" *ngIf="selectedCategory != null && isClick"
-            class="btn btn-sm btn-block btn-primary" (click)="return()"><i class="fa fa-arrow-left"
-              aria-hidden="true"></i> Back</button>
+          <button style="margin-top: 10px;" *ngIf="isClick" class="btn btn-sm btn-block btn-primary" (click)="return()">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i> Back</button>
         </div>
       </div>
     </div>

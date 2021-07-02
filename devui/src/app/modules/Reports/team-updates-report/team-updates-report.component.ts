@@ -1,17 +1,22 @@
+import { PageTitleConstants } from 'src/app/shared/models/page-title-constants';
+import { NewIdeaResearchComponent } from './../../rule-creation/new-idea-research/new-idea-research.component';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { TeamUpdatesReportService } from 'src/app/services/team-updates-report.service';
 import { ActivatedRoute } from '@angular/router';
+import { SelectItem, DialogService } from 'primeng/api';
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
 import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column';
 import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
 import { Constants } from "src/app/shared/models/constants";
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
-import { SelectItem } from 'primeng/api';
+import { TeamUpdatesReportService } from 'src/app/services/team-updates-report.service';
 import { ToastMessageService } from 'src/app/services/toast-message.service';
-
+import { ProvisionalRuleComponent } from '../../rule-creation/provisional-rule/provisional-rule.component';
 
 const KEY_GLOBAL_VIEW = 0;
+const IDEA_STAGE_DESC = 'Idea';
+const RULE_STAGE_DESC = 'Library Rule';
+
 @Component({
   selector: 'app-team-updates-report',
   templateUrl: './team-updates-report.component.html',
@@ -19,14 +24,14 @@ const KEY_GLOBAL_VIEW = 0;
 })
 export class TeamUpdatesReportComponent implements OnInit {
 
-  @ViewChild('eclTableAllStatuses') eclTableAllStatuses: EclTableComponent;
-  @ViewChild('eclTableIdeasGenerated') eclTableIdeasGenerated: EclTableComponent;
-  @ViewChild('eclTableProvisionalRulesGenerated') eclTableProvisionalRulesGenerated: EclTableComponent;
-  @ViewChild('eclTableProvisionalRulesAssigned') eclTableProvisionalRulesAssigned: EclTableComponent;
-  @ViewChild('eclTableRulesGenerated') eclTableRulesGenerated: EclTableComponent;
-  @ViewChild('eclTableShelved') eclTableShelved: EclTableComponent;
-  @ViewChild('eclTableInvalid') eclTableInvalid: EclTableComponent;
-  @ViewChild('eclTableDuplicated') eclTableDuplicated: EclTableComponent;
+  @ViewChild('eclTableAllStatuses',{static: true}) eclTableAllStatuses: EclTableComponent;
+  @ViewChild('eclTableIdeasGenerated',{static: true}) eclTableIdeasGenerated: EclTableComponent;
+  @ViewChild('eclTableProvisionalRulesGenerated',{static: true}) eclTableProvisionalRulesGenerated: EclTableComponent;
+  @ViewChild('eclTableProvisionalRulesAssigned',{static: true}) eclTableProvisionalRulesAssigned: EclTableComponent;
+  @ViewChild('eclTableRulesGenerated',{static: true}) eclTableRulesGenerated: EclTableComponent;
+  @ViewChild('eclTableShelved',{static: true}) eclTableShelved: EclTableComponent;
+  @ViewChild('eclTableInvalid',{static: true}) eclTableInvalid: EclTableComponent;
+  @ViewChild('eclTableDuplicated',{static: true}) eclTableDuplicated: EclTableComponent;
   @ViewChild('calendar', undefined) calendar: any;
 
   localConstants = Constants;
@@ -68,7 +73,8 @@ export class TeamUpdatesReportComponent implements OnInit {
   constructor(
     private teamUpdatesReportService: TeamUpdatesReportService,
     private activatedRoute: ActivatedRoute,
-    private toastService: ToastMessageService) {
+    private toastService: ToastMessageService,
+    public dialogService: DialogService) {
 
     this.tableConfig = new EclTableModel();
     this.tableConfig.lazy = true;
@@ -326,7 +332,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.ALL_STATUSES:
         fileName = "All Statuses";
         status = "ALL_STATUS";
-        manager.addTextColumn('itemCode', 'ID',                            '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'ID',                            '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Name',                          '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemStageDesc', 'Stage',                    '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',              '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -335,7 +341,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.IDEAS_GENERATED:
         fileName = "Ideas Generated";
         status = "IDEA_CREATED";
-        manager.addTextColumn('itemCode', 'Idea ID',                       '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'Idea ID',                       '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Idea Name',                     '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemStageDesc', 'Stage',                    '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',              '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -344,7 +350,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.PROVISIONAL_RULES_GENERATED:
         fileName = "Provisional Rules Generated";
         status = "PROVISIONAL_RULE_CREATED";
-        manager.addTextColumn('itemCode', 'Provisional Rule ID',                       '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'Provisional Rule ID',                       '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Provisional Rule Name',                     '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemRuleStatusDesc', 'Status',                          '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',                          '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -353,7 +359,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.PROVISIONAL_RULES_ASSIGNED:
         fileName = "Provisional Rules Assigned";
         status = "PROVISIONAL_RULE_ASSIGNED";
-        manager.addTextColumn('itemCode', 'Provisional Rule ID',                       '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'Provisional Rule ID',                       '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Provisional Rule Name',                     '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemRuleStatusDesc', 'Status',                          '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',                          '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -362,7 +368,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.RULES_GENERATED:
         fileName = "Rules Generated";
         status = "RULE_CREATED";
-        manager.addTextColumn('itemCode', 'Rule ID',                       '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'Rule ID',                       '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Rule Name',                     '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemRuleStatusDesc', 'Status',              '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',              '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -371,7 +377,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.SHELVED:
         fileName = "Shelved";
         status = "SHELVED";
-        manager.addTextColumn('itemCode', 'Provisional Rule ID',                             '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'Provisional Rule ID',                             '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Provisional Rule Name',                           '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemRuleStatusDesc', 'Status',                                '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',                                '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -380,7 +386,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.INVALID:
         fileName = "Invalid";
         status = "INVALID";
-        manager.addTextColumn('itemCode', 'Idea ID',                      '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'Idea ID',                      '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Idea Name',                    '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemStageDesc', 'Stage',                   '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',             '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -389,7 +395,7 @@ export class TeamUpdatesReportComponent implements OnInit {
       case Constants.DUPLICATED:
         fileName = "Duplicated";
         status = "DUPLICATED";
-        manager.addTextColumn('itemCode', 'Idea ID',                       '20%', true, EclColumn.TEXT, true,  0, alignment);
+        manager.addLinkColumn('itemCode', 'Idea ID',                       '20%', true, EclColumn.TEXT, true, alignment);
         manager.addTextColumn('itemName', 'Idea Name',                     '30%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemStageDesc', 'Stage',                    '15%', true, EclColumn.TEXT, true,  0, alignment);
         manager.addTextColumn('itemCategoryDesc', 'Category',              '15%', true, EclColumn.TEXT, true,  0, alignment);
@@ -435,6 +441,58 @@ export class TeamUpdatesReportComponent implements OnInit {
     }
   }
 
+  /**
+   * This method is to show view modal for each status.
+  */
+  viewModal(item: any) {
+    if(item.itemStageDesc === IDEA_STAGE_DESC){
+      //This code is used to: Ideas, Invalid and Duplicated status.
+      let header = `${ item.itemStageDesc } Details`;
+      this.dialogService.open(NewIdeaResearchComponent, {
+        data: {
+          ideaIdInp: item.itemId,
+          readOnlyView: true,
+        },
+        header: header,
+        width: '80%',
+        height: '92%',
+        closeOnEscape: false,
+        closable: false,
+        contentStyle: {
+          'max-height': '92%',
+          'overflow': 'auto',
+          'padding-top': '0',
+          'padding-bottom': '0',
+          'border': 'none'
+        }
+      });
+    } else {
+      /*This code is used to: Provisional Rule Generated, Provisional Rule Assigned,
+      *                                  Rule Generated and Shelved status.
+      */
+      this.dialogService.open(ProvisionalRuleComponent, {
+        data: {
+          ruleId: item.itemId,
+          readOnlyView: true,
+          readWrite: false,
+          header: PageTitleConstants.PROVISIONAL_RULE_DETAIL_TITLE,
+          ruleReview: item.itemRuleStatusDesc === RULE_STAGE_DESC ? true : false,
+        },
+        header: `${ item.itemRuleStatusDesc } Details`,
+        width: '80%',
+        height: '92%',
+        closeOnEscape: false,
+        closable: false,
+        contentStyle: {
+          'max-height': '92%',
+          'overflow': 'auto',
+          'padding-top': '0',
+          'padding-bottom': '0',
+          'border': 'none'
+        }
+      });
+    }
+  }
 }
 
 interface EclTableParameters {

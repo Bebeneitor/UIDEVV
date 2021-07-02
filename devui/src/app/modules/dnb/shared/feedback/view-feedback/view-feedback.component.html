@@ -1,0 +1,28 @@
+<div class="feedback-wrapper">
+  <i class="fa fa-times" (click)="close()"></i>
+  <h3 class="dnb-title">Feedback Added</h3>
+
+  <div class="feedback-item" *ngFor="let feedback of feedbacks">
+    <ng-container *ngIf="!feedback.hidden">
+      <p class="feedback-header">
+        <span>By: {{ feedback.createdBy }}</span
+        ><span>{{ feedback.createdOn | date: 'MM/dd/yyyy h:mm a' }}</span>
+      </p>
+      <p class="note"><b>Note:</b> {{ feedback.feedback }}</p>
+      <p class="feedback-text" [innerHTML]="feedback.htmlSourceText"></p>
+    </ng-container>
+    <div class="feedback-footer dnb-page-btns">
+      <button (click)="feedback.hidden = !feedback.hidden">
+        {{ feedback.hidden ? "Show" : "Hide" }}
+      </button>
+      <button
+      *ngIf="!viewOnly"
+        (click)="toggleResolved(feedback)"
+        class="reopen-btn"
+        [ngClass]="{ 'resolved' : !feedback.resolved }"
+      >
+        {{ feedback.resolved ? "Reopen" : "Resolve" }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,19 +1,26 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
 <div class="dnb-page-header">
   <h1 class="dnb-title">Drug Library</h1>
+  <div class="dnb-page-btns" *ngxPermissionsOnly="['ROLE_DNBE']">
+    <button (click)="createNewDrug()">Create New Drug</button>
+  </div>
   <div class="dnb-filter-list">
     <app-dnb-filter-list (filter)="filter($event)"> </app-dnb-filter-list>
   </div>
 </div>
+
 <div class="table-container">
   <ecl-table
     #rulesTable
     [tableModel]="tableConfig"
     (onAcctionLink)="selectDrug($event)"
-    (onAcctionIcon)="openSelectType($event)"
+    (onAcctionIcon)="actionIcon($event)"
   ></ecl-table>
 </div>
-<dnb-app-dialog
-  [(openDialog)]="shouldOpenDownload"
-  (selectionSet)="downloadSelected($event)"
-  [setUpDialog]="setUpDialog"
-></dnb-app-dialog>
+
+<dnb-app-topic-mapping
+  [(openDialog)]="openEllMapping"
+  [ellTopic]="ellTopic"
+  (updateData)="filter('')"
+>
+</dnb-app-topic-mapping>

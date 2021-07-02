@@ -1,0 +1,87 @@
+<div class="container">
+    <div class="row">
+        <p-table #viewGrid [columns]="goodIdeasHeader" [value]="goodIdeasBody" [paginator]="true"
+            [resizableColumns]="true" columnResizeMode="fit" [reorderableColumns]="true" [rows]="10"
+            [rowsPerPageOptions]="[10,20,30]" [loading]="loading" [responsive]="true" sortField="daysold"
+            sortOrder="-1">
+            <ng-template pTemplate="caption">
+                <div style="padding-top: 20px">
+                    <p>If you consider this to be a good idea, you can set a reminder to come back at it and check it
+                        again</p>
+                </div>
+            </ng-template>
+            <div style="text-align: right">
+                <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
+                    (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+                    style="width:150px; border-radius: 5px">
+                <span style="cursor: pointer"><i *ngIf="keywordSearch !== ''"
+                        (click)="viewGrid.reset(); resethDataTable(viewGrid);" style="cursor: pointer"
+                        class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
+                <i *ngIf="keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+            </div>
+
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+                        [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+                        <span *ngIf="col.field === 'reviewComment' && isShelved" class="required-field-color">*</span>
+                        {{col.header}}
+                        <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                            ariaLabelDesc="Activate to sort in descending order"
+                            ariaLabelAsc="Activate to sort in ascending order">
+                        </p-sortIcon>
+                    </th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-rule let-columns="columns">
+                <tr [pSelectableRow]="rule">
+                    <td class="small-td" *ngFor="let col of columns">
+                        <span *ngIf="col.field == 'code'" class="span-centered"> {{rule.code}}</span>
+
+                        <span *ngIf="col.field == 'name'" class="span-centered">{{rule.name}}</span>
+
+                        <span *ngIf="col.field == 'category'" class="span-centered">{{rule.category}}</span>
+
+                        <span *ngIf="col.field == 'daysold'" class="span-centered">{{rule.daysold}}</span>
+
+                        <span *ngIf="col.field == 'creator'" class="span-centered">{{rule.creator}}</span>
+
+                        <span *ngIf="col.field == 'reviewComment'" class="span-centered">
+                            <input type="text" name="reviewComment" style="width:80%;" style="width:100%"
+                                [(ngModel)]="rule.reviewComment" disabled='true'>
+                        </span>
+
+                        <span *ngIf="col.field == 'goodIdeaDt'" class="span-centered">
+                            <p-calendar appendTo="body" [(ngModel)]="rule.goodIdeaDt" [readonlyInput]="false"
+                                [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+                                [minDate]="minDateGoodIdeas" placeholder="Optional Date" dateFormat="mm/dd/yy">
+                            </p-calendar>
+                        </span>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="paginatorright" let-state>
+                <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+                    Showing <b>{{(state.page * state.rows) + 1}}</b> -
+                    <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+                    of <b>{{state.totalRecords}}</b>
+                </span>
+                <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records
+                    found.</span>
+            </ng-template>
+        </p-table>
+    </div>
+    <div class="row" style="margin-top:30px">
+        <div class="col-md-12" style="padding:0px; padding-bottom: 20px">
+            <div class="float-right">
+                <button type="button" value="Submit" style="width:90%;" (click)="submitGoodIdeas()"
+                    class="btn btn-primary btn-default-height small-td" [disabled] = "isDisabledSubmit()">Submit
+                </button>
+
+                <button type="button" value="Exit" style="width:90%;;margin-left:20px;" (click)="exit()"
+                    class="btn btn-primary btn-default-height small-td">Exit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

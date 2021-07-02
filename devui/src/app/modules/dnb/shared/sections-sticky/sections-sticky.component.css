@@ -26,6 +26,7 @@ table tr td {
   border-left: 1px solid #dee2e6;
   border-right: 1px solid #dee2e6;
   border-bottom: 1px solid #dee2e6;
+  min-height: 26px;
 }
 
 .readonly-table {
@@ -46,7 +47,7 @@ table tr td {
 
 h3 {
   font-size: 14px;
-  color: #ffffff;
+  color: #3b1e7b;
   flex: 1 0 0;
   margin-bottom: 0;
 }
@@ -80,6 +81,6 @@ h3 {
 }
 
 table tr.border td:not([rowspan]),
-tbody.border td[rowspan]{
+tbody.border td[rowspan] {
   border-bottom: 10px solid #c0afea;
 }

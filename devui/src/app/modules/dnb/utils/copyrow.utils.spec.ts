@@ -1,7 +1,6 @@
 import { async, TestBed } from "@angular/core/testing";
 import {
   GroupedSection,
-  GroupRow,
   Row,
   Section,
   UISection,
@@ -15,13 +14,54 @@ fdescribe("copyRow", () => {
 
   it("should return valid data in copy row", () => {
     const newRows: Row[] = [
-      { hasBorder: false, columns: [{ value: "row 1", isReadOnly: false }] },
-      { hasBorder: false, columns: [{ value: "row 2", isReadOnly: false }] },
-      { hasBorder: false, columns: [{ value: "row 3", isReadOnly: false }] },
+      {
+        hasBorder: false,
+        columns: [
+          {
+            value: "row 1",
+            isReadOnly: false,
+            feedbackData: [],
+            feedbackLeft: 0,
+            diff: [[0, "row 1"]],
+          },
+        ],
+      },
+      {
+        hasBorder: false,
+        columns: [
+          {
+            value: "row 2",
+            isReadOnly: false,
+            feedbackData: [],
+            feedbackLeft: 0,
+            diff: [[0, "row 2"]],
+          },
+        ],
+      },
+      {
+        hasBorder: false,
+        columns: [
+          {
+            value: "row 3",
+            isReadOnly: false,
+            feedbackData: [],
+            feedbackLeft: 0,
+            diff: [[0, "row 3"]],
+          },
+        ],
+      },
     ];
     const copyRow: Row = {
       hasBorder: false,
-      columns: [{ value: "row 2", isReadOnly: false }],
+      columns: [
+        {
+          value: "row 2",
+          isReadOnly: false,
+          diff: [[0, "row 2"]],
+          feedbackData: [],
+          feedbackLeft: 0,
+        },
+      ],
     };
 
     const result = copyRowUtil(copyRow, newRows);
@@ -31,7 +71,15 @@ fdescribe("copyRow", () => {
     expect(result.backUpCopyRow).toEqual(newRows[expectedIndex]);
     const copyRow2: Row = {
       hasBorder: false,
-      columns: [{ value: "new value", isReadOnly: false }],
+      columns: [
+        {
+          value: "new value",
+          isReadOnly: false,
+          feedbackData: [],
+          feedbackLeft: 0,
+          diff: [[0, "new value"]],
+        },
+      ],
     };
 
     const result2 = copyRowUtil(copyRow2, newRows);
@@ -50,6 +98,7 @@ fdescribe("copyRow", () => {
         name: "",
       },
       headers: [],
+      headersUIWidth: [],
       rows: [
         {
           hasBorder: false,
@@ -57,6 +106,8 @@ fdescribe("copyRow", () => {
             {
               isReadOnly: true,
               value: "original value",
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
         },
@@ -71,6 +122,8 @@ fdescribe("copyRow", () => {
             {
               isReadOnly: false,
               value: "",
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
         },
@@ -84,7 +137,7 @@ fdescribe("copyRow", () => {
       grouped: false,
     };
 
-    copyCurrentToNewSection(sections, false);
+    copyCurrentToNewSection(sections, sections.new, false);
 
     expect((sections.current as Section).rows[0].columns[0].value).toEqual(
       (sections.current as Section).rows[0].columns[0].value
@@ -100,12 +153,15 @@ fdescribe("copyRow", () => {
         name: "",
       },
       headers: [],
+      headersUIWidth: [],
       groups: [
         {
           names: [
             {
               isReadOnly: true,
               value: "original group",
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -115,6 +171,8 @@ fdescribe("copyRow", () => {
                 {
                   isReadOnly: true,
                   value: "original value",
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
             },
@@ -130,6 +188,8 @@ fdescribe("copyRow", () => {
             {
               isReadOnly: true,
               value: "",
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -139,6 +199,8 @@ fdescribe("copyRow", () => {
                 {
                   isReadOnly: false,
                   value: "",
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
             },
@@ -154,7 +216,7 @@ fdescribe("copyRow", () => {
       grouped: true,
     };
 
-    copyCurrentToNewSection(sections, true);
+    copyCurrentToNewSection(sections, sections.new, true);
 
     expect(
       (sections.current as GroupedSection).groups[0].rows[0].columns[0].value

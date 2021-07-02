@@ -1,0 +1,33 @@
+<div class="table-container">
+  <ecl-table
+    #editorTable
+    [tableModel]="objEclTableModel"
+    (onAcctionIcon)="navigateToEditScreen($event)"
+    (onSelectRecord)="setSelectedEditor($event)"
+    (onUnSelectRecord)="setSelectedEditor($event)"
+  ></ecl-table>
+</div>
+
+<div *ngIf="isAdmin || (isEditor && isApprover)">
+  <label class="reassing-label"> Reassign to: </label>
+  <div class="reassign-box dnb-page-btns">
+    <p-dropdown
+      #dropList
+      [options]="editors$ | async"
+      [(ngModel)]="selectedEditor"
+      [filter]="true"
+      filterBy="label,value"
+      [style]="{ width: '150px' }"
+    ></p-dropdown>
+    <button
+      *ngIf="
+        (selectedEditorVersions && selectedEditorVersions.length > 0) ||
+        selectedEditor !== null
+      "
+      (click)="reassignEditorSelected()"
+    >
+      Reassign
+    </button>
+  </div>
+</div>
+<p-confirmDialog class="dnb-modal" key="inProgress"></p-confirmDialog>

@@ -1,12 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AppUtils } from 'src/app/shared/services/utils';
-import { DashboardService } from 'src/app/services/dashboard.service';
-import { GoodIdeasServiceService } from 'src/app/services/good-ideas-service.service';
 import { Router } from '@angular/router';
-import { BaseResponse } from 'src/app/shared/models/base-response';
-import {ECLConstantsService} from "../../../services/ecl-constants.service";
 import { Constants } from 'src/app/shared/models/constants';
-const GOOD_TITLE = "Good Idea";
+import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
+import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
+import { RoutingConstants } from 'src/app/shared/models/routing-constants';
+import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column';
+import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
+
+const GOOD_IDEA_TYPE = "GOODIDEA";
 
 @Component({
   selector: 'app-good-ideas',
@@ -14,97 +16,67 @@ const GOOD_TITLE = "Good Idea";
   styleUrls: ['./good-ideas.component.css']
 })
 export class GoodIdeasComponent implements OnInit {
+  
+  @ViewChild('goodIdeasTable',{static: true}) goodIdeasTable: EclTableComponent;
+  enabledEclTable: boolean;
+  tableConfig: EclTableModel;
 
-  @ViewChild('viewGrid') viewGrid;
-  goodIdeas: any[];
-  pageTitle = GOOD_TITLE;
-  columnsToExport: any[];
-  cols: any[];
-
-  categories: any[];
-
-  calendarValue: Date = null;
-
-  yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
-
-  constructor(private util: AppUtils, private dashboardService: DashboardService,
-    private goodIdeaService: GoodIdeasServiceService, private router: Router,
-              private eclConstantsService: ECLConstantsService) { }
+  constructor(private util: AppUtils, private router: Router) {
+  }
 
   ngOnInit() {
-
-    let is = this;
-
-    this.categories = [{ label: 'All', value: null }, { label: 'Uncategorized', value: 'Uncategorized' }];
-    this.util.getAllCategoriesWidgets(this.categories).then((res: any) => {
-      this.categories = res;
-      this.cols = [
-        { field: 'ruleCode', header: 'Provisional Rule ID' },
-        { field: 'ruleName', header: 'Provisional Rule Name' },
-        { field: 'ruleDescription', header: 'Provisional Rule Description' },
-        { field: 'categoryDesc', header: 'Category' },
-        { field: 'creationDate', header: 'Date' }
-      ];
-
-      this.columnsToExport = [];
-
-      this.cols.forEach(element => {
-        this.columnsToExport.push(element.field);
-      });
-
-      this.loadData();
-    });
+    this.enabledEclTable = false;
+    this.initializeTableConfig();
   }
 
   /**
-   * Load data from backend and fill into goodIdeas array
+   * This method is to initialize table config.
+   * 
    */
-  loadData() {
-    this.goodIdeas = [];
-
-    this.getGoodIdeasNotified().then((response: BaseResponse) => {
-      if (response.code == 200) {
-        this.goodIdeas = response.data;
-      }
-    });
-
-  }
-
-
-  /**
-   * Call service backend
-   */
-  private getGoodIdeasNotified() {
-
-    return new Promise((resolve) => {
-
-      let value: any = [];
-
-      this.goodIdeaService.getGoodIdeasNotified().then((data: []) => {
-        value = data;
-        resolve(value);
-      });
-
-    });
-
+  private initializeTableConfig() {
+    let eclTableParameters = this.getTableParameters();
+    let uri = `${RoutingConstants.GOOD_IDEA_URL}/${RoutingConstants.NOT_REVIEWED_GOOD_IDEA_URL}`;
+    this.tableConfig = new EclTableModel();
+    this.tableConfig.lazy = true;
+    this.tableConfig.url = uri;
+    this.tableConfig.columns = eclTableParameters.getColumns();
+    this.tableConfig.excelFileName = "Good Ideas";
+    this.enabledEclTable = true;
   }
 
   /**
-   * Redirect to new idea research and uncheck from good ideas
-   * @param id
-   * @param type
+   * This method is to get the table parameters.
    */
-  redirect(id, type) {
-      this.router.navigate(['item-detail', this.util.encodeString(id), type, 'r']);
+  private getTableParameters() {
+    const alignment = 'center';
+    let manager = new EclTableColumnManager();
+    manager.addLinkColumn('ruleCode'       ,'Provisional Rule ID'          ,'15%', true, EclColumn.TEXT, true,    alignment);
+    manager.addTextColumn('ruleName'       ,'Provisional Rule Name'        ,'20%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('ruleDescription','Provisional Rule Description' ,'20%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('categoryDesc'   ,'Category'                     ,'20%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('goodIdeaAuthor' ,'Good Idea Author'             ,'15%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addDateColumn('creationDate'   ,'Date'                         ,'10%', true, true, 'date', Constants.DATE_FORMAT_IN_ECL_TABLE);
+    return manager;
   }
 
   /**
-   * Filter by calendar date in grid
-   * @param value
-   * @param comparation
+   * Redirect to new idea research and uncheck from good ideas.
+   * @param row
    */
-  filter(value, comparation) {
-    this.viewGrid.filter(this.dashboardService.parseDate(value), 'creationDate', comparation);
-    if (value == null) { this.calendarValue = null; }
+  redirect(row : any) {
+    this.router.navigate(['item-detail', this.util.encodeString(row.ruleId), GOOD_IDEA_TYPE, 'r']);
   }
+
+  /**
+   * Refresh ecl-table. 
+   */
+  refreshEclTable() {
+    if (this.goodIdeasTable) {
+      this.goodIdeasTable.resetDataTable();
+      this.goodIdeasTable.refreshTable();
+      this.goodIdeasTable.selectedRecords = [];
+      this.goodIdeasTable.savedSelRecords = [];
+    }
+  }
+
 }

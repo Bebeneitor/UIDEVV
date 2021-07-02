@@ -1,0 +1,49 @@
+textarea {
+    background-color: #FFFFFF;
+    border: 1px solid #31006F;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    border-radius: 2px;
+    color: #333333;
+    overflow: auto;
+    resize: none;
+  }
+
+:host ::ng-deep .row-accessories {
+    background-color: #A480BD !important;
+    color: #ffffff !important;
+}
+
+p-table::ng-deep .ui-table tr.ui-state-highlight{
+  background-color: #31006F !important;
+}
+
+.invalid-show {
+  font-size: 11px !important;
+  color: #f22f2f;
+  visibility: visible;
+}
+.invalid-hide {
+  visibility: hidden;
+}
+.info-text {
+  padding-left: 10px;
+  font-size: 11px;
+  color: gray;
+  font-style: italic;
+}
+.invalid-info-text {
+  font-size: 12px;
+  color: gray;
+  font-style: italic;
+}
+
+.invalid-rule {
+  padding: 1px;
+  margin: 0 2px 0 2px;
+  font-size: 14px;
+  background-color: #E72B8A;
+  border: solid 1px #E72B8A;
+  border-radius: 4px;
+  color: white;
+}

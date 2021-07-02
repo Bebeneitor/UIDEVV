@@ -1,0 +1,70 @@
+<p-dialog
+  #dialog
+  styleClass="dnb-dialog"
+  appendTo="body"
+  [header]="'Icd 10 Codes without existing matches:'"
+  [(visible)]="openDialog"
+  [modal]="true"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ICD-10 Codes</th>
+          <th>Global Review ICD-10</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let icd10code of parentIcdCodes">
+          <td>
+            <pre>{{ icd10code.value }}</pre>
+          </td>
+          <td>
+            <p-dropdown
+              [options]="childsGlobalReviewicd10Code"
+              [style]="{ width: '200px' }"
+              panelStyleClass="icdCodePanel"
+              placeholder="{{ icd10CodeChild.value }}"
+              (onClick)="getValueUsed(icd10CodeChild.value)"
+              (onChange)="change(icd10CodeChild.value)"
+              [disabled]="
+                dataIcd10CodesUsed.includes(icd10CodeChild.value) ||
+                dataIcd10CodesUsed.includes(icd10code.value)
+              "
+              #icd10CodeChild
+            ></p-dropdown>
+          </td>
+          <td>
+            <button
+              (click)="override(icd10code.value, icd10CodeChild.value)"
+              *ngIf="
+                !dataIcd10CodesOverride.includes(icd10CodeChild.value) &&
+                !dataIcd10CodesUsed.includes(icd10code.value)
+              "
+              [disabled]="
+                checkDisabledOverride(icd10CodeChild.value, icd10code.value)
+              "
+              class="dnb-btn"
+            >
+              Replace
+            </button>
+            <button
+              (click)="add(icd10code.value)"
+              *ngIf="
+                !dataIcd10CodesOverride.includes(icd10CodeChild.value) &&
+                !dataIcd10CodesUsed.includes(icd10code.value)
+              "
+              class="dnb-btn"
+              [disabled]="activeProccessAddOverride"
+            >
+              Add
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</p-dialog>

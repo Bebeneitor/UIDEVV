@@ -73,7 +73,7 @@ h3 {
   display: inline-block;
   position: relative;
   top: 4px;
-  min-width: 10px;
+  min-width: 15px;
 }
 
 .codes-input ::ng-deep app-cell-editor .ql-container {
@@ -90,18 +90,18 @@ h3 {
   margin: 0 0 10px;
 }
 
-.disable-section {
+.toggle-section {
   padding: 0 5px;
 }
 
-.disable-section ::ng-deep p-inputSwitch .ui-inputswitch {
+.toggle-section ::ng-deep p-inputSwitch .ui-inputswitch {
   width: 1.75em !important;
   height: 1.25em !important;
   position: relative;
-  top: 2px;
+  top: 4px;
 }
 
-.disable-section
+.toggle-section
   ::ng-deep
   p-inputSwitch
   .ui-inputswitch
@@ -112,10 +112,48 @@ h3 {
   bottom: 0.25em !important;
 }
 
-.disable-section
+.toggle-section
   ::ng-deep
   p-inputSwitch
   .ui-inputswitch.ui-inputswitch-checked
   .ui-inputswitch-slider:before {
   transform: translateX(0.5em) !important;
+}
+
+.is-text.pin {
+  padding: 0 5px;
+  position: relative;
+}
+
+.dnb-progress-checkbox ::ng-deep p-checkbox .ui-chkbox .ui-chkbox-box {
+  width: 16px;
+  height: 16px;
+}
+
+.dnb-progress-checkbox
+  ::ng-deep
+  p-checkbox
+  .ui-chkbox
+  .ui-chkbox-box
+  .ui-chkbox-icon {
+  font-size: 14px;
+}
+
+.dnb-progress-checkbox
+  ::ng-deep
+  p-checkbox
+  .ui-chkbox
+  .ui-chkbox-box.ui-state-active {
+  border-color: #009688 !important;
+  background-color: #8bc34a !important;
+}
+
+.feedback-warning {
+  color: #ff9800;
+  font-size: 15px !important;
+  width: 20px;
+}
+
+.hideSection {
+  display: none;
 }

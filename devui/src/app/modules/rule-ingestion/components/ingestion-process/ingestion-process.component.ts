@@ -12,7 +12,7 @@ import { RuleIngestionService } from '../../services/rule-ingestion.service';
   encapsulation: ViewEncapsulation.None
 })
 export class IngestionProcessComponent implements OnInit {
-  @ViewChild('uploadControl') uploadControl: FileUpload;
+  @ViewChild('uploadControl',{static: false}) uploadControl: FileUpload;
   // General component properties.
   pageTitle: string = '';
   userId: number;

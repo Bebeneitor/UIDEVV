@@ -19,7 +19,7 @@ import { Constants } from 'src/app/shared/models/constants';
 })
 export class LibraryRuleComponent implements OnInit {
 
-  @ViewChild('eclTable') eclTable: EclTableComponent;
+  @ViewChild('eclTable',{static: true}) eclTable: EclTableComponent;
 
   tableConfig: EclTableModel;
   enabledEclTable: boolean;

@@ -1,10 +1,14 @@
 <quill-editor
   #editor
   class="quill-editor"
-  [readOnly]="isReadOnly" 
+  [readOnly]="isReadOnly"
+  [modules]="quillConfig"
   [ngModel]="startValue"
+  [placeholder]="placeholder"
   (onContentChanged)="editorChanged($event)"
   (onEditorCreated)="editorStarted($event)"
   (onSelectionChanged)="selectionChanged($event)"
+  (keyup)="keyup($event)"
+  (keydown)="keydown($event)"
 >
 </quill-editor>

@@ -7,6 +7,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { GoodIdeasRoutingModule } from './good-ideas.routing';
 import { GoodIdeasComponent } from './good-ideas.component';
 import { CalendarModule } from 'primeng/primeng';
+import { EclTableModule } from '../../../shared/components/ecl-table/ecl-table.module';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { CalendarModule } from 'primeng/primeng';
     TableModule,
     DropdownModule,
     SharedModule,
-    CalendarModule
+    CalendarModule,
+    EclTableModule
   ],
   providers : []
 })

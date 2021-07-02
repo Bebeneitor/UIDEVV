@@ -1,0 +1,239 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
+<p-toast [baseZIndex]="999999"></p-toast>
+<div class="topnav">
+    <div class="topnav-right">
+        <a routerLink="{{baseUrl}}"><u>Drug Search</u></a>
+        <a routerLink="{{listDrugsUrl}}"><u>Drug List</u></a>
+    </div>
+</div>
+<div class="row pt-5">
+    <span *ngIf="router == addDrugsUrl">
+        <h6 class="heading">Add Drug</h6>
+    </span>
+    <span *ngIf="router == updateDrugUrl">
+        <h6 class="heading">Update Drug</h6>
+    </span>
+    <span *ngIf="router == addBiosimilarUrl">
+        <h6 class="heading">Add BioSimilar</h6>
+    </span>
+</div>
+<div class="mt-4" *ngFor="let eachdrug of addDrugs;let j=index;">
+    <p-table [value]="addDrug" [autoLayout]="true">
+        <ng-template pTemplate="header">
+            <tr style="width:100%;">
+                <th rowspan="2">Drug Code</th>
+                <th rowspan="2">Drug Name</th>
+                <th rowspan="2">Alternate Name</th>
+                <th colspan="7">Websites to crawl</th>
+                <th rowspan="2" *ngIf="router == addDrugsUrl || router == addBiosimilarUrl">Has
+                    BioSimilar/Brand</th>
+                <th rowspan="2" *ngIf="router == addDrugsUrl"></th>
+            </tr>
+            <tr>
+                <th *ngFor="let col of cols">{{col.header}}</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+            <tr>
+                <td style="min-width:120px;">
+                    <div *ngIf="router == addDrugsUrl || router== updateDrugUrl" class="p-field p-grid">
+                        <div class="p-col">
+                            <input id="eachdrug.drugCode" class="single-input" type="text" pInputText
+                                [(ngModel)]="eachdrug.drugData.drugCode">
+                            <span *ngIf="eachdrug.drugData?.drugCode?.length==0 && isEmpty" class="errorStyle">*Mandatory</span>
+                        </div>
+                    </div>
+                    <div *ngIf="router == addBiosimilarUrl" id="eachdrug.drugcode" class="single-text">
+                        {{eachdrug.drugData.drugCode}}</div>
+                </td>
+                <td style="min-width:120px;">
+                    <div *ngIf="router== addDrugsUrl || router== updateDrugUrl" class="p-field p-grid">
+                        <div class="p-col">
+                            <input id="eachdrug.drugName" class="single-input" type="text" pInputText
+                                [(ngModel)]="eachdrug.drugData.drugName">
+                            <span *ngIf="eachdrug.drugData?.drugName?.length==0 && isEmpty" class="errorStyle">*Mandatory</span>
+                        </div>
+                    </div>
+                    <div *ngIf="router == addBiosimilarUrl" id="eachdrug.drugName" class="single-text">
+                        {{eachdrug.drugData.drugName}}</div>
+                </td>
+                <td style="min-width:120px;">
+                    <div *ngIf="router== addDrugsUrl || router==updateDrugUrl" class="p-field p-grid">
+                        <div class="p-col">
+                            <input id="eachdrug.alternateName" class="single-input" type="text" pInputText
+                                [(ngModel)]="eachdrug.drugData.alternateName">
+                        </div>
+                    </div>
+                    <div *ngIf="router == addBiosimilarUrl" id="eachdrug.alternatename" class="single-text">
+                        {{eachdrug.drugData.alternateName}}</div>
+                </td>
+                <td *ngFor="let col of cols" style="min-width:100px;">
+                    <input type="checkbox" [(ngModel)]="eachdrug.drugData[col.field]"
+                         [disabled]="isDisabled">
+                        <input *ngIf="eachdrug.drugData[col.field] && (router== addDrugsUrl || router==updateDrugUrl)" class="single-input"
+                        [(ngModel)]="eachdrug.drugData[col.field+'SearchName']" type="text" placeholder="SearchName(if any)" pInputText>
+                        <input *ngIf="eachdrug.drugData[col.field] && router == addBiosimilarUrl" class="single-input"
+                        [(ngModel)]="eachdrug.drugData[col.field+'SearchName']" type="text" pInputText disabled>
+                </td>
+                <td *ngIf="router == addDrugsUrl || router == addBiosimilarUrl">
+                    <input type="checkbox" [(ngModel)]="eachdrug.hassimilar"
+                        (change)="hasSimilars(eachdrug.hassimilar,j,eachdrug)" [disabled]="disableSimilar">
+                </td>
+                <td *ngIf="router == addDrugsUrl"><i (click)="addMultipleDrugs()" *ngIf="j==addDrugs.length-1"
+                        class="fa fa-plus-circle plus-icon"></i>
+                    <i (click)="removeDrugs(j)" *ngIf="j!=addDrugs.length-1" class="fa fa-minus-circle minus-icon"></i>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <div style="width:100%;" class="row justify-content-end"
+        *ngIf="router != 'updateDrugUrl' &&  !!eachdrug.showBrandTable">
+        <p-table [value]="addDrug" [autoLayout]="true" [style]="{width:'100%'}">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th colspan="7" class="table-head">Add BioSimilar/Brand</th>
+                </tr>
+                <tr>
+                    <th *ngFor="let col of bioSimilarCols">{{col.header}}</th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body">
+                <tr *ngFor="let container of eachdrug.biosimilar;let i=index;">
+                    <td>
+                        <div class="p-field p-grid">
+                            <div class="p-col">
+                                <input id="{{i}}" class="single-input" type="text" pInputText
+                                    [(ngModel)]="container.drugName" required>
+                                <span *ngIf="container.drugName?.length==0 && isEmpty" class="errorStyle">*Mandatory</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="p-field p-grid">
+                            <div class="p-col">
+                                <input id="website{{i}}" class="single-input" type="text" pInputText
+                                    [(ngModel)]="container.portal">
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="p-field p-grid">
+                            <div class="p-col">
+                                <input id="nccnName{{i}}" class="single-input" type="text" pInputText
+                                    [(ngModel)]="container.nccnName">
+                            </div>
+                        </div>
+                    </td>
+                    <td style="width:98px;">
+                        <div class="p-field p-grid">
+                            <div class="p-col">
+                                <input id="dailymed{{i}}" type="checkbox" [(ngModel)]="container.dailymedAvailability">
+                            </div>
+                        </div>
+                    </td>
+                    <td style="width:98px;">
+                        <div class="p-field p-grid">
+                            <div class="p-col">
+                                <input id="drugfda{{i}}" type="checkbox" [(ngModel)]="container.drugfdaAvailability">
+                            </div>
+                        </div>
+                    </td>
+                    <td><button type="button" class="buttonStyle"
+                            *ngIf="!container.actionProcess || container.actionProcess?.length==0"
+                            (click)="addActionsTable(i,container)">Add Actions</button>
+                        <input id="action{{i}}" *ngIf="!!container.actionProcess && container.actionProcess?.length>0"
+                            class="single-input" type="text" pInputText [(ngModel)]="container.actionProcess">
+                    </td>
+                    <td><i (click)="add(eachdrug.biosimilar)" *ngIf="i==eachdrug.biosimilar.length-1"
+                            class="fa fa-plus-circle plus-icon"></i>
+                        <i (click)="remove(eachdrug.biosimilar,i)" *ngIf="i!=eachdrug.biosimilar.length-1"
+                            class="fa fa-minus-circle minus-icon"></i>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+<div class="row pt-4 pb-2 justify-content-end" style="width:100%;">
+    <span *ngIf="router == updateDrugUrl" class="pr-3"><button class="backButtonStyle"
+            (click)="cancelUpdateDrug()">Cancel</button></span>
+    <span *ngIf="router == updateDrugUrl"><button type="button" class="buttonStyle" (click)="addComments()">Update
+            Drug</button></span>
+</div>
+<div class="row pt-2 justify-content-end" style="width:100%;">
+    <span *ngIf="router == addDrugsUrl" class="pr-3"><button class="backButtonStyle"
+            (click)="cancelAddDrugDetails()">Cancel</button></span>
+    <span *ngIf="router == addDrugsUrl"><button type="button" class="buttonStyle" (click)="addDrugDetails()">Add
+            Drug</button></span>
+</div>
+<div class="row pt-2 pb-2 justify-content-end" style="width:100%;">
+    <span *ngIf="router == addBiosimilarUrl" class="pr-3"><button class="backButtonStyle"
+            (click)="cancelBiosimDetails()">Cancel</button></span>
+    <span *ngIf="router == addBiosimilarUrl"><button type="button" class="buttonStyle" (click)="addBiosimDetails()">Add
+            BioSimilar</button></span>
+</div>
+
+<p-dialog [(visible)]="displayDialog" [focusOnShow]="false" showEffect="fade" [modal]="true" header="Add Actions"
+    [style]="{width: '60%'}">
+    <div class="p-grid ui-fluid">
+        <div class="row mt-2 t-style" style="font-size:12px;">
+            <i>Provide step by step click actions to download the pdf</i></div>
+        <div class="mt-3 mb-3" style="width:100%;">
+            <p-table [value]="addDrug" [autoLayout]="true">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th class="table-head">Step #</th>
+                        <th class="table-head" colspan="2">Actions</th>
+                        <th class="table-head"></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body">
+                    <tr *ngFor="let container of actions;let i=index;">
+                        <td>Step {{i+1}}</td>
+                        <td>
+                            <p-dropdown id="action{{i}}" appendTo="body" [options]="clickActions"
+                                [(ngModel)]="container.action" editable="true" placeholder=""></p-dropdown>
+                        </td>
+                        <td>
+                            <div class="p-field p-grid">
+                                <div class="p-col">
+                                    <input id="process{{i}}" class="single-input" type="text" pInputText
+                                        [(ngModel)]="container.process">
+                                </div>
+                            </div>
+                        </td>
+                        <td><i (click)="addaction()" *ngIf="i==actions.length-1"
+                                class="fa fa-plus-circle plus-icon"></i>
+                            <i (click)="removeaction(i)" *ngIf="i!=actions.length-1"
+                                class="fa fa-minus-circle minus-icon"></i>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+    <p-footer>
+        <div class="ui-dialog-buttonpane ui-helper-clearfix">
+            <button type="button" pButton (click)="close()" label="Close"></button>
+        </div>
+    </p-footer>
+</p-dialog>
+
+<p-dialog [(visible)]="commentsDialog" [focusOnShow]="false" showEffect="fade" header="Comments" [modal]="true"
+    [style]="{width: '50%'}">
+    <div class="p-grid ui-fluid">
+        <div class="row mt-2 t-style" style="font-size:12px;">
+            <i>Please explain why editing is required</i></div>
+        <div class="p-field justify-content-center mt-2" style="width:100%;">
+            <textarea id="comment" style="width:100%;" [(ngModel)]="comments" type="text" rows="8"
+                pInputTextarea></textarea>
+        </div>
+    </div>
+    <p-footer>
+        <div class="ui-dialog-buttonpane ui-helper-clearfix mb-2 mt-2">
+            <button type="button" pButton [disabled]="!comments" (click)="updateComments()" label="Update"></button>
+        </div>
+    </p-footer>
+</p-dialog>

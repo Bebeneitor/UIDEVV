@@ -1,12 +1,19 @@
-<p-blockUI baseZIndex="10001" [blocked]="loading">
-    <div class="block-img-loading text-center">
-        <img src="assets/img/loading.gif" style="width: 60%" />
+<p-blockUI [blocked]="loading">
+    <div class="img-loading text-center">
+        <img src="assets/img/loading.gif"/>
         <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
     </div>
 </p-blockUI>
 
 <div class="newIdeaPage">
-    <h2>New Idea</h2>
+    <h2 *ngIf="rrCode">
+        <span class="nav-page-title" (click)="navigateBackResearch()">{{navPageTitle}}</span>
+        <span class="fa fa-chevron-right" aria-hidden="true"></span>
+        <span class="nav-page-title" (click)="navigateBackResearchId()">{{rrCode}}</span>
+        <span class="fa fa-chevron-right" aria-hidden="true"></span>
+        <span>New Idea</span>
+    </h2>
+    <h2 *ngIf="!rrCode">New Idea</h2>
     <div class="newIdeaForm">
         <form #newIdeaForm="ngForm" enctype="multipart/form-data" method="POST">
             <div class="row">
@@ -19,7 +26,7 @@
                         <input type="hidden" name="ideaId" [(ngModel)]="ideaInfo.ideaId" />
 
                         <input type="text" style="width: 100%" id="ideaName" maxlength="250" name="ideaName"
-                            [(ngModel)]="ideaInfo.ideaName" [disabled]="readOnlyView"/>
+                            [(ngModel)]="ideaInfo.ideaName" [disabled]="readOnlyView" />
                     </div>
                 </div>
                 <div class="col">
@@ -27,7 +34,8 @@
                         <label>Create Date</label>
                     </div>
                     <div class="row"><input type="text" name="ideaCreatorDt" id="ideaCreatorDt" class="disable"
-                            readonly="readonly" value="{{ideaInfo.createdDt | date: 'MM/dd/yyyy' }}"  [disabled]="readOnlyView" />
+                            readonly="readonly" value="{{ideaInfo.createdDt | date: 'MM/dd/yyyy' }}"
+                            [disabled]="readOnlyView" />
                     </div>
                 </div>
             </div>
@@ -48,6 +56,33 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="row">
+                        <label>Idea Comments</label>
+                    </div>
+                    <div class="row">
+                        <textarea name="ideaComments" style="width: 100%" [(ngModel)]="newCommentsDto.comments"
+                            id="ideaNotes" rows="3" cols="118" maxlength="4000" [disabled]="readOnlyView"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <label>Policy Packages</label>
+                    </div>
+                    <div class="row policy-packages">
+                            <div class="col-md-3">
+                                <p-multiSelect [options]="policyPackageValues" [style]="{'width':'140px'}" 
+                                    [filter]="false" name="selectedPP" [(ngModel)]="policyPackageSelected" [disabled]="readOnlyView">
+                                </p-multiSelect>
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
                         <label>Reference Details1</label>
                     </div>
                     <div class="refDetails">
@@ -57,19 +92,20 @@
                             </div>
                             <div class="col-md-12">
 
-                                <input type="hidden" name="referenceId1"
-                                    [(ngModel)]="referenceDetails1.referenceId" />
+                                <input type="hidden" name="referenceId1" [(ngModel)]="referenceDetails1.referenceId" />
                                 <input type="text" style="width: 100%" maxlength="1000" name="referenceSourceName1"
-                                    [(ngModel)]="referenceDetails1.referenceName" id="referenceSourceName1" [disabled]="readOnlyView"/>
+                                    [(ngModel)]="referenceDetails1.referenceName" id="referenceSourceName1"
+                                    [disabled]="readOnlyView" />
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <label>URL</label>
                             </div>
-                            <div class="col-md-12"><input type="text" style="width: 100%" name="refUrl1" pattern="https?://.+" #url1="ngModel"
-                                    [(ngModel)]="referenceDetails1.referenceURL" maxlength="1000"
-                                    placeholder="Type or Paste Reference URL..." [readonly]="refValuesEditable" [disabled]="readOnlyView"/>
+                            <div class="col-md-12"><input type="text" style="width: 100%" name="refUrl1"
+                                    pattern="https?://.+" #url1="ngModel" [(ngModel)]="referenceDetails1.referenceURL"
+                                    maxlength="1000" placeholder="Type or Paste Reference URL..."
+                                    [readonly]="refValuesEditable" [disabled]="readOnlyView" />
                                 <div *ngIf="url1.invalid && (url1.dirty || url1.touched)" class="alert alert-danger">
                                     <div *ngIf="url1.errors.pattern">
                                         Must start with http:// or https:// and one or more characters
@@ -79,18 +115,11 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6" [hidden]="readOnlyView">
-                                <p-fileUpload
-                                    [disabled]="uploadControlDisabled"
-                                    (onClear)="onClearFile(1)"
-                                    (onRemove)="onRemove($event, 1)"
-                                    (onSelect)="onSelect($event, 1)"
-                                    #uploadControl
-                                    customUpload="true"
-                                    maxFileSize="10245760"
-                                    [showUploadButton]="false"
+                                <p-fileUpload [disabled]="uploadControlDisabled" (onClear)="onClearFile(1)"
+                                    (onRemove)="onRemove($event, 1)" (onSelect)="onSelect($event, 1)" #uploadControl
+                                    customUpload="true" maxFileSize="10245760" [showUploadButton]="false"
                                     invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
-                                    [fileLimit]="uploadControlFileLimit"
-                                    [multiple]="true">
+                                    [fileLimit]="uploadControlFileLimit" [multiple]="true">
                                     <ng-template pTemplate="toolbar">
                                         <div>Attachments (Up to 2 files)</div>
                                     </ng-template>
@@ -102,20 +131,24 @@
                                     <legend>Files</legend>
                                     <ul>
                                         <li *ngIf="referenceDetails1.refUrlFileName != null">
-                                          <a style="width:20%;padding-right:5%;text-decoration: underline;" (click) = "referenceFileDownload(referenceDetails1.referenceId,referenceDetails1.refUrlFileName,referenceDetails1.refUrlFileType)" >{{referenceDetails1.refUrlFileName}}</a>
-                                          <span (click)="deleteReferenceFile(1)">
-                                            <a>
-                                                <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
-                                            </a>
-                                          </span>
+                                            <a style="width:20%;padding-right:5%;text-decoration: underline;"
+                                                (click)="referenceFileDownload(referenceDetails1.referenceId,referenceDetails1.refUrlFileName,referenceDetails1.refUrlFileType)">{{referenceDetails1.refUrlFileName}}</a>
+                                            <span (click)="deleteReferenceFile(1)" [hidden] = "readOnlyView">
+                                                <a>
+                                                    <i class="fa fa-times" aria-hidden="true"
+                                                        style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                                </a>
+                                            </span>
                                         </li>
                                         <li *ngIf="referenceDetails1.refDocFileName1 != null">
-                                          <a style="width:20%;padding-right:5%;text-decoration: underline;" (click) = "referenceFileDownload2(referenceDetails1.referenceId,referenceDetails1.refDocFileName1,referenceDetails1.refDocFileType1)" >{{referenceDetails1.refDocFileName1}}</a>
-                                          <span (click)="deleteReferenceFile(2)">
-                                            <a>
-                                                <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
-                                            </a>
-                                          </span>
+                                            <a style="width:20%;padding-right:5%;text-decoration: underline;"
+                                                (click)="referenceFileDownload2(referenceDetails1.referenceId,referenceDetails1.refDocFileName1,referenceDetails1.refDocFileType1)">{{referenceDetails1.refDocFileName1}}</a>
+                                            <span (click)="deleteReferenceFile(2)" [hidden] = "readOnlyView">
+                                                <a>
+                                                    <i class="fa fa-times" aria-hidden="true"
+                                                        style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                                </a>
+                                            </span>
                                         </li>
                                     </ul>
                                 </fieldset>
@@ -128,16 +161,16 @@
 
             <div class="row">
                 <div class="col-md-12">
-                        <label (click)="showRef()" *ngIf="plusSign">
-                            <a class="pi pi-plus-circle">
-                                <span>Add 2 Additional References</span>
-                            </a>
-                        </label>
-                        <label (click)="hideRef()" *ngIf="negSign">
-                            <a class="pi pi-minus-circle">
-                                <span>Add 2 Additional References</span>
-                            </a>
-                        </label>
+                    <label (click)="showRef()" *ngIf="plusSign">
+                        <a class="pi pi-plus-circle">
+                            <span>Add 2 Additional References</span>
+                        </a>
+                    </label>
+                    <label (click)="hideRef()" *ngIf="negSign">
+                        <a class="pi pi-minus-circle">
+                            <span>Add 2 Additional References</span>
+                        </a>
+                    </label>
                 </div>
             </div>
 
@@ -156,19 +189,20 @@
 
                                     <input type="hidden" name="referenceId2"
                                         [(ngModel)]="referenceDetails2.referenceId" />
-                                    <input type="text" style="width: 100%" maxlength="1000"
-                                        name="referenceSourceName2" [(ngModel)]="referenceDetails2.referenceName"
-                                        id="referenceSourceName2" [disabled]="readOnlyView"/>
+                                    <input type="text" style="width: 100%" maxlength="1000" name="referenceSourceName2"
+                                        [(ngModel)]="referenceDetails2.referenceName" id="referenceSourceName2"
+                                        [disabled]="readOnlyView" />
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <label>URL</label>
                                 </div>
-                                <div class="col-md-12"><input type="text" style="width: 100%" name="refUrl2" pattern="https?://.+" #url2="ngModel"
-                                        maxlength="1000" placeholder="Type or Paste Reference URL..."
-                                        [(ngModel)]="referenceDetails2.referenceURL"
-                                        [readonly]="refValuesEditable" [disabled]="readOnlyView"/>
+                                <div class="col-md-12"><input type="text" style="width: 100%" name="refUrl2"
+                                        pattern="https?://.+" #url2="ngModel" maxlength="1000"
+                                        placeholder="Type or Paste Reference URL..."
+                                        [(ngModel)]="referenceDetails2.referenceURL" [readonly]="refValuesEditable"
+                                        [disabled]="readOnlyView" />
                                 </div>
                                 <div *ngIf="url2.invalid && (url2.dirty || url2.touched)" class="alert alert-danger">
                                     <div *ngIf="url2.errors.pattern">
@@ -179,18 +213,12 @@
                             <div class="row">
 
                                 <div class="col-md-6" [hidden]="readOnlyView">
-                                    <p-fileUpload
-                                        [disabled]="uploadControl1Disabled"
-                                        (onClear)="onClearFile(2)"
-                                        (onRemove)="onRemove($event, 2)"
-                                        (onSelect)="onSelect($event, 2)"
-                                        #uploadControl1
-                                        customUpload="true"
-                                        maxFileSize="10245760"
+                                    <p-fileUpload [disabled]="uploadControl1Disabled" (onClear)="onClearFile(2)"
+                                        (onRemove)="onRemove($event, 2)" (onSelect)="onSelect($event, 2)"
+                                        #uploadControl1 customUpload="true" maxFileSize="10245760"
                                         [showUploadButton]="false"
                                         invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
-                                        [fileLimit]="uploadControl1FileLimit"
-                                        [multiple]="true">
+                                        [fileLimit]="uploadControl1FileLimit" [multiple]="true">
                                         <ng-template pTemplate="toolbar">
                                             <div>Attachments(Up to 2 files )</div>
                                         </ng-template>
@@ -202,20 +230,24 @@
                                         <legend>Files</legend>
                                         <ul>
                                             <li *ngIf="referenceDetails2.refUrlFileName != null">
-                                              <a style="width:20%;padding-right:5%;text-decoration: underline;" (click) = "referenceFileDownload(referenceDetails2.referenceId,referenceDetails2.refUrlFileName,referenceDetails2.refUrlFileType)" >{{referenceDetails2.refUrlFileName}}</a>
-                                              <span (click)="deleteReferenceFile(3)">
-                                                <a>
-                                                    <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
-                                                </a>
-                                              </span>
+                                                <a style="width:20%;padding-right:5%;text-decoration: underline;"
+                                                    (click)="referenceFileDownload(referenceDetails2.referenceId,referenceDetails2.refUrlFileName,referenceDetails2.refUrlFileType)">{{referenceDetails2.refUrlFileName}}</a>
+                                                <span (click)="deleteReferenceFile(3)" [hidden] = "readOnlyView">
+                                                    <a>
+                                                        <i class="fa fa-times" aria-hidden="true"
+                                                            style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                                    </a>
+                                                </span>
                                             </li>
                                             <li *ngIf="referenceDetails2.refDocFileName1 != null">
-                                              <a style="width:20%;padding-right:5%;text-decoration: underline;" (click) = "referenceFileDownload2(referenceDetails2.referenceId,referenceDetails2.refDocFileName1,referenceDetails2.refDocFileType1)">{{referenceDetails2.refDocFileName1}}</a>
-                                              <span (click)="deleteReferenceFile(4)">
-                                                <a>
-                                                    <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
-                                                </a>
-                                              </span>
+                                                <a style="width:20%;padding-right:5%;text-decoration: underline;"
+                                                    (click)="referenceFileDownload2(referenceDetails2.referenceId,referenceDetails2.refDocFileName1,referenceDetails2.refDocFileType1)">{{referenceDetails2.refDocFileName1}}</a>
+                                                <span (click)="deleteReferenceFile(4)" [hidden] = "readOnlyView">
+                                                    <a>
+                                                        <i class="fa fa-times" aria-hidden="true"
+                                                            style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                                    </a>
+                                                </span>
                                             </li>
                                         </ul>
                                     </fieldset>
@@ -238,19 +270,20 @@
                                 <div class="col-md-12">
                                     <input type="hidden" name="referenceId3"
                                         [(ngModel)]="referenceDetails3.referenceId" />
-                                    <input type="text" style="width: 100%" name="referenceSourceName3"
-                                        maxlength="1000" [(ngModel)]="referenceDetails3.referenceName"
-                                        id="referenceSourceName3" [disabled]="readOnlyView"/>
+                                    <input type="text" style="width: 100%" name="referenceSourceName3" maxlength="1000"
+                                        [(ngModel)]="referenceDetails3.referenceName" id="referenceSourceName3"
+                                        [disabled]="readOnlyView" />
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <label>URL</label>
                                 </div>
-                                <div class="col-md-12"><input type="text" style="width: 100%" name="refUrl3" pattern="https?://.+" #url3="ngModel"
-                                        id="refUrl3" maxlength="1000" [(ngModel)]="referenceDetails3.referenceURL"
-                                        placeholder="Type or Paste Reference URL..."
-                                        [readonly]="refValuesEditable" [disabled]="readOnlyView"/>
+                                <div class="col-md-12"><input type="text" style="width: 100%" name="refUrl3"
+                                        pattern="https?://.+" #url3="ngModel" id="refUrl3" maxlength="1000"
+                                        [(ngModel)]="referenceDetails3.referenceURL"
+                                        placeholder="Type or Paste Reference URL..." [readonly]="refValuesEditable"
+                                        [disabled]="readOnlyView" />
                                 </div>
                                 <div *ngIf="url3.invalid && (url3.dirty || url3.touched)" class="alert alert-danger">
                                     <div *ngIf="url3.errors.pattern">
@@ -261,18 +294,12 @@
                             <div class="row">
 
                                 <div class="col-md-6" [hidden]="readOnlyView">
-                                    <p-fileUpload
-                                        [disabled]="uploadControl2Disabled"
-                                        (onClear)="onClearFile(3)"
-                                        (onRemove)="onRemove($event, 3)"
-                                        (onSelect)="onSelect($event, 3)"
-                                        #uploadControl2
-                                        customUpload="true"
-                                        maxFileSize="10245760"
+                                    <p-fileUpload [disabled]="uploadControl2Disabled" (onClear)="onClearFile(3)"
+                                        (onRemove)="onRemove($event, 3)" (onSelect)="onSelect($event, 3)"
+                                        #uploadControl2 customUpload="true" maxFileSize="10245760"
                                         [showUploadButton]="false"
                                         invalidFileSizeMessageDetail="Maximum FileUpload Size is 10 MB"
-                                        [fileLimit]="uploadControl2FileLimit"
-                                        [multiple]="true">
+                                        [fileLimit]="uploadControl2FileLimit" [multiple]="true">
                                         <ng-template pTemplate="toolbar">
                                             <div>Attachments(Up to 2 files )</div>
                                         </ng-template>
@@ -283,22 +310,26 @@
                                     <fieldset>
                                         <legend>Files</legend>
                                         <ul>
-                                          <li *ngIf="referenceDetails3.refUrlFileName != null">
-                                            <a style="width:20%;padding-right:5%;text-decoration: underline;" (click) = "referenceFileDownload(referenceDetails3.referenceId,referenceDetails3.refUrlFileName,referenceDetails3.refUrlFileType)" >{{referenceDetails3.refUrlFileName}}</a>
-                                            <span (click)="deleteReferenceFile(5)">
-                                                <a>
-                                                    <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
-                                                </a>
-                                              </span>
-                                          </li>
-                                          <li *ngIf="referenceDetails3.refDocFileName1 != null">
-                                            <a style="width:20%;padding-right:5%;text-decoration: underline;" (click) = "referenceFileDownload2(referenceDetails3.referenceId,referenceDetails3.refDocFileName1,referenceDetails3.refDocFileType1)">{{referenceDetails3.refDocFileName1}}</a>
-                                            <span (click)="deleteReferenceFile(6)">
-                                                <a>
-                                                    <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
-                                                </a>
-                                              </span>
-                                          </li>
+                                            <li *ngIf="referenceDetails3.refUrlFileName != null">
+                                                <a style="width:20%;padding-right:5%;text-decoration: underline;"
+                                                    (click)="referenceFileDownload(referenceDetails3.referenceId,referenceDetails3.refUrlFileName,referenceDetails3.refUrlFileType)">{{referenceDetails3.refUrlFileName}}</a>
+                                                <span (click)="deleteReferenceFile(5)" [hidden] = "readOnlyView">
+                                                    <a>
+                                                        <i class="fa fa-times" aria-hidden="true"
+                                                            style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                                    </a>
+                                                </span>
+                                            </li>
+                                            <li *ngIf="referenceDetails3.refDocFileName1 != null">
+                                                <a style="width:20%;padding-right:5%;text-decoration: underline;"
+                                                    (click)="referenceFileDownload2(referenceDetails3.referenceId,referenceDetails3.refDocFileName1,referenceDetails3.refDocFileType1)">{{referenceDetails3.refDocFileName1}}</a>
+                                                <span (click)="deleteReferenceFile(6)" [hidden] = "readOnlyView">
+                                                    <a>
+                                                        <i class="fa fa-times" aria-hidden="true"
+                                                            style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                                    </a>
+                                                </span>
+                                            </li>
                                         </ul>
                                     </fieldset>
                                 </div>
@@ -308,51 +339,44 @@
                     </div>
                 </div>
             </div>
-            <div class="row" *ngIf="!readOnlyView">
-                <div class="col" >
-                    <input class="btn submit-btn btn-section" name="action" type="submit" (click)="ideaSave()"
-                        value="Save" [disabled]="ideaSubmitDisabled"/>​ ​
-                </div>
-                ​ <div class="col">
-                    <button class="btn submit-btn btn-section" [disabled]="ideaSubmitDisabled"  name="action" type="submit" (click)="ideaSubmit()" value="Submit">Submit</button>
-                </div>
-                <div class="col">
-                    <input *ngIf="clear" class="btn submit-btn btn-section" id="cancelBtn" (click)="onClear()"
-                        name="action" type="button" value="Clear" />
-                    <input *ngIf="refresh" class="btn submit-btn btn-section" (click)="onRefresh()" name="action"
-                        type="submit" value="Refresh" />
-                </div>
-                <div class="col">
-                    <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
-                    <p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
-                        <p>{{message}}</p>
-                        <p-footer>
-                            <div class="row">
-                                <div class="col-md-9">
-                                    <button name="cancelDialogbtn" class="confirmation-btn btn submit-btn"
-                                    (click)="saveDisplay=false"
-                                    value="OK">OK</button>
-                                </div>
-                            </div>
-                        </p-footer>
-                    </p-dialog>
-                    <p-dialog header="File Removal Message" [class]="saveDisplay2" [(visible)]="saveDisplay2">
-                            <p>{{message}}</p>
-                        </p-dialog>
-                    ​<input class="" name="action" class="btn submit-btn btn-section" (click)="exit()" type="submit"
-                        value="Exit" />​
-                </div>
+            <div class="btn-row" *ngIf="!readOnlyView">
+                <button class="btn-section" name="save" type="save" (click)="ideaSave()"
+                [disabled]="ideaSubmitDisabled">Save</button>
+                <button class="btn-section" name="submit" type="submit" (click)="ideaSubmit()"
+                [disabled]="ideaSubmitDisabled">Submit</button>
+                <button class="btn-section" *ngIf="clear" type="button" (click)="onClear()"
+                name="clear">Clear</button>
+                <button class="btn-section" *ngIf="refresh" type="button" (click)="onRefresh()"
+                name="refresh">Refresh</button>
+                <button class="btn-section" type="button" (click)="exit()" name="exit">Exit</button>
             </div>
             <div class="row" *ngIf="readOnlyView">
                 <div class="col">
                     ​<input class="" name="action" class="btn btn-primary" (click)="exitReadOnly()" type="submit"
-                    style="width:100%" value="Exit" />​
+                        style="width:100%" value="Exit" />​
                 </div>
             </div>
         </form>
     </div>
-    <p-toast class="idea-custom-toast" [baseZIndex]="999999"></p-toast>
 </div>
+<p-toast class="idea-custom-toast" [baseZIndex]="999999"></p-toast>
+
+<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+<p-dialog header="Confirmation" [class]="saveDisplay" [(visible)]="saveDisplay">
+    <p>{{message}}</p>
+    <p-footer>
+        <div class="row">
+            <div class="col-md-9">
+                <button name="cancelDialogbtn" class="confirmation-btn btn submit-btn" (click)="saveDisplay=false"
+                    value="OK">OK</button>
+            </div>
+        </div>
+    </p-footer>
+</p-dialog>
+
+<p-dialog header="File Removal Message" [class]="saveDisplay2" [(visible)]="saveDisplay2">
+    <p>{{message}}</p>
+</p-dialog>
 
 
 <p-dialog header="Are you sure?" [class]="confirmDialog" [(visible)]="removeAttachmentDisplay">

@@ -17,10 +17,6 @@ export class EllSearchService {
     return this.http.get(environment.restServiceUrl + RoutingConstants.ELL_URL + '/' + RoutingConstants.ELL_DECISION_URL + '/' + RoutingConstants.ELL_LAST_RELEASE_KEY);
   }
 
-  loadPolicies(releaseLogKey: number) {
-    return this.http.get(environment.restServiceUrl + RoutingConstants.ELL_URL + '/' + RoutingConstants.ELL_POLICY + '/' + RoutingConstants.ELL_GET_POLICIES + '/' + releaseLogKey);
-  }
-
   loadTopics(policyId: number, releaseLogKey: number) {
     return this.http.get(environment.restServiceUrl + RoutingConstants.ELL_URL + '/' + RoutingConstants.ELL_TOPIC + '/' + RoutingConstants.ELL_GET_TOPICS + '/' + policyId + '/' + releaseLogKey);
   }

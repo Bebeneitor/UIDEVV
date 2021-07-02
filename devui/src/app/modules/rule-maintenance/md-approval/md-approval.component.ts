@@ -12,6 +12,7 @@ import { ReturnDialogComponent } from 'src/app/modules/rule-creation/new-idea-re
 import { UsersService } from "../../../services/users.service";
 import { ECLConstantsService } from "../../../services/ecl-constants.service";
 import { Constants as consts, Constants } from "../../../shared/models/constants";
+import { PageTitleConstants as ptc } from "src/app/shared/models/page-title-constants";
 import { RuleInfo } from 'src/app/shared/models/rule-info';
 import { GoodIdeasDto } from 'src/app/shared/models/dto/good-ideas-dto';
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
@@ -20,7 +21,8 @@ import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column'
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
 import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
-import { PageTitleConstants as ptc } from 'src/app/shared/models/page-title-constants';
+import {ResearchRequestSearchedRuleDto} from "../../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../../services/research-request.service";
 
 const LIBRARY_RULE = "Library Rule";
 const SHELVED = "Shelved";
@@ -66,8 +68,8 @@ const RETIRE_PENDING_APPROVAL = consts.RETIRE_PENDING_APPROVAL;
 
 export class MdApprovalComponent implements OnInit {
 
-  @ViewChild('eclTable') eclTable: EclTableComponent;
-  @ViewChild('dt') dtEclTable: EclTableComponent;
+  @ViewChild('eclTable',{static: false}) eclTable: EclTableComponent;
+  @ViewChild('dt',{static: false}) dtEclTable: EclTableComponent;
 
   formatedData: any[] = [];
   cols: any[];
@@ -119,6 +121,7 @@ export class MdApprovalComponent implements OnInit {
   isDtEclTableCharged: boolean = false;
 
   validStatusDropDown: any[];
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
 
   validStatusDW: any = [
     { label: 'select', value: '' },
@@ -130,7 +133,8 @@ export class MdApprovalComponent implements OnInit {
     private router: Router, private http: HttpClient, private confirmationService: ConfirmationService,
     private dialogService: DialogService, private usersService: UsersService,
     private eclConstants: ECLConstantsService, private messageService: MessageService,
-    private toastService: ToastMessageService) {
+    private toastService: ToastMessageService,
+    private rrService: ResearchRequestService) {
     this.tableConfig = new EclTableModel();
     this.dtTableConfig = new EclTableModel();
   }
@@ -238,20 +242,28 @@ export class MdApprovalComponent implements OnInit {
   }
 
   callRuleDetailScreen(rowData: any) {
+    let ruleResponseIndicator: boolean = false;
+    let rrId: string = '';
+    this.getRuleResponseIndicator(rowData.ruleId).then((rrCode: any) => {
+      if (rrCode !== null && rrCode != "" ) {
+        ruleResponseIndicator = true;
+        rrId = rrCode;
+      }
+    });
     this.ruleService.getRulesByParentId(rowData.ruleId).subscribe((response: any) => {
       let draftRuleId: number = 0;
       response.data.forEach((rule: any) => {
         draftRuleId = rule.ruleId;
       });
       if (draftRuleId > 0 && this.ruleStatus > PROVISIONAL_RULE_STAGE) {
-        this.callMaintenanceRuleDetail(rowData, draftRuleId);
+        this.callMaintenanceRuleDetail(rowData, draftRuleId, ruleResponseIndicator, rrId);
       } else {
-        this.viewProvisionalModal(rowData);
+        this.viewProvisionalModal(rowData, ruleResponseIndicator, rrId);
       }
     })
   }
 
-  private callMaintenanceRuleDetail(rowData: any, draftId: any) {
+  private callMaintenanceRuleDetail(rowData: any, draftId: any, ruleResponseIndicator: boolean, rrId: string) {
 
     const ref = this.dialogService.open(ProvisionalRuleComponent, {
       data: {
@@ -263,8 +275,12 @@ export class MdApprovalComponent implements OnInit {
         workFlowStatusId: this.getRuleDetailStatus(rowData.reviewStatus, ""),
         reviewComments: rowData.reviewComment,
         readWrite: true,
-        pageTitle: ptc.PEER_REVIEWER_APPROVAL_TITLE
+        pageTitle: ptc.PEER_REVIEWER_APPROVAL_TITLE,
+        ruleResponseInd: ruleResponseIndicator,
+        researchRequestId: rrId,
+        hideMyRequestLink: true
       },
+      showHeader: !ruleResponseIndicator,
       header: 'Library Rule Details',
       width: '80%',
       height: '92%',
@@ -284,21 +300,37 @@ export class MdApprovalComponent implements OnInit {
     });
   }
 
-  viewProvisionalModal(rule: any) {
+  async getRuleResponseIndicator(ruleId: number) {
+    let rrCode = "";
+    return new Promise((resolve, reject) => {
+      this.rrService.isRuleCreatedFromRR(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined ) {
+          rrCode = resp.data;
+        }
+        resolve(rrCode);
+      });
+    });
+  }
+
+  viewProvisionalModal(rule: any, ruleResponseIndicator: boolean, rrId: string) {
     let ruleId = rule.ruleId;
     let ruleReviewStatus = rule.reviewStatus;
-    let ruleReviewComments = rule.reviewComment;
+    let ruleReviewComments = rule.reviewComments;
     const ref = this.dialogService.open(ProvisionalRuleComponent, {
       data: {
         ruleId: ruleId,
-        header: 'Rule Provisional Details',
+        header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
         reviewStatus: this.getReviewStatus(),
         ruleReviewStatus: ruleReviewStatus,
         ruleReviewComments: ruleReviewComments,
-        stageId: STAGE_SUBMIT
-
+        stageId: Constants.ECL_LIBRARY_STAGE,
+        provSetup: Constants.ECL_PROVISIONAL_STAGE,
+        ruleResponseInd: ruleResponseIndicator,
+        researchRequestId: rrId,
+        hideMyRequestLink: true
       },
-      header: 'Rule Details',
+      showHeader: !ruleResponseIndicator,
+      header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
       width: '80%',
       height: '92%',
       closeOnEscape: false,
@@ -435,6 +467,8 @@ export class MdApprovalComponent implements OnInit {
         status: rowData.reviewStatus,
         stageId: stageId,
         comments: rowData.reviewComments,
+        pdgTemplate:rowData.pdgTemplate
+        
       });
     });
 
@@ -442,6 +476,7 @@ export class MdApprovalComponent implements OnInit {
       "selectedRules": selectedRules,
       "action": actionVal,
       "userId": this.userId
+      
     };
 
     if (actionVal === "save") {
@@ -723,6 +758,8 @@ export class MdApprovalComponent implements OnInit {
     this.dtTableConfig.lazy = true;
     this.dtTableConfig.excelFileName = this.pageTitle;
     this.dtTableConfig.checkBoxSelection = true;
+    this.dtTableConfig.sortBy = 'daysOld';
+    this.dtTableConfig.sortOrder = 0;
     this.isDtEclTableCharged = true;
   }
 
@@ -732,7 +769,7 @@ export class MdApprovalComponent implements OnInit {
   */
   initializeTableColumns(): EclColumn[] {
     let manager = new EclTableColumnManager();
-    manager.addLinkColumn('ruleCode', 'Library Rule ID', null, true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon('ruleCode', 'Library Rule ID', null, true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn('ruleName', 'Rule Name', null, true, EclColumn.TEXT, true);
     manager.addTextColumn('ruleImpactAnalysis', 'Rule Impact Description', null, true, EclColumn.TEXT, true);
     manager.addTextColumn('ruleImpactType', 'Impact Type', null, true, EclColumn.TEXT, true);
@@ -744,7 +781,7 @@ export class MdApprovalComponent implements OnInit {
 
   initializeDtTableColumns(): EclColumn[] {
     let manager = new EclTableColumnManager();
-    manager.addLinkColumn('ruleCode', 'Provisional Rule ID', null, true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon('ruleCode', 'Provisional Rule ID', null, true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn('ruleName', 'Rule Name', null, true, EclColumn.TEXT, true);
     manager.addTextColumn('categoryDesc', 'Category', null, true, EclColumn.TEXT, true);
     manager.addTextColumn('daysOld', 'Days Old', null, true, EclColumn.TEXT, true);
@@ -816,13 +853,11 @@ export class MdApprovalComponent implements OnInit {
   refreshEclTable() {
     if (this.dtEclTable) {
       this.dtEclTable.resetDataTable();
-      this.dtEclTable.refreshTable();
       this.dtEclTable.selectedRecords = [];
       this.dtEclTable.savedSelRecords = [];
     }
     if (this.eclTable) {
       this.eclTable.resetDataTable();
-      this.eclTable.refreshTable();
       this.eclTable.selectedRecords = [];
       this.eclTable.savedSelRecords = [];
     }

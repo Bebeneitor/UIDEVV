@@ -1,0 +1,40 @@
+h3 {
+  font-size: 16px;
+  margin-bottom: 5px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #c8c8c8;
+}
+
+p {
+  margin-bottom: 10px;
+  max-height: 250px;
+  overflow: scroll;
+}
+
+p b {
+  padding-right: 5px;
+}
+
+textarea {
+  width: 100%;
+}
+
+.fa {
+  top: 10px;
+  right: 10px;
+  color: black;
+  background: transparent;
+  position: absolute;
+  cursor: pointer;
+}
+
+.fa:hover {
+  color: black;
+  background: transparent;
+}
+
+.text-l {
+  font-size: 12px;
+  text-align: right;
+  margin-bottom: 5px;
+}

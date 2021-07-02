@@ -1,0 +1,18 @@
+<div class="div-export-cvp">
+  <div *ngIf="subModules.length > 0">
+    <p><b [innerHTML]="getTitle()"></b></p>
+    <div class="div-buttons">
+      <button type="button" (click)="cancel()" class="btn btn-primary f-11" [disabled]="exporting" style="width: 25%;">Cancel</button>
+      <button type="button" (click)="exportPrimary()" class="btn btn-primary f-11" [disabled]="exporting" style="width: 40%;">Primary Requirement Alone</button>
+      <button type="button" (click)="exportPrimaryAndSubModules()" class="btn btn-primary f-11" [disabled]="exporting">Primary & All</button>
+    </div>
+  </div>
+
+  <div *ngIf="subModules.length == 0">
+    <p><b [innerHTML]="getTitle()"></b></p>
+    <div class="div-buttons-0">
+      <button type="button" (click)="cancel()" class="btn btn-primary f-11" [disabled]="exporting">Cancel</button>
+      <button type="button" (click)="exportPrimary()" class="btn btn-primary f-11" [disabled]="exporting">Export to PDF</button>
+    </div>
+  </div>
+</div>

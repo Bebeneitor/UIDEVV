@@ -1,0 +1,51 @@
+<table class="table table-bordered text-center">
+  <thead>
+    <tr>
+      <th *ngFor="let col of cols" class="text-center" [style.width]="col.width">{{col.header}}</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td>
+        <input type="text" class="text-uppercase" [(ngModel)]="icd.codeFrom" [disabled]="readOnlyView || (icd.icdCodeFromVersion == 9 || icd.icdCodeToVersion == 9)" />
+      </td>
+      <td>
+        <input type="text" class="text-uppercase" [(ngModel)]="icd.codeTo" [disabled]="readOnlyView || (icd.icdCodeFromVersion == 9 || icd.icdCodeToVersion == 9)" />
+      </td>
+      <td>
+        <p-calendar type="string" [(ngModel)]="icd.dateFrom" [monthNavigator]="true"
+          [yearNavigator]="true" [yearRange]="yearValidRangeEft" 
+          placeholder="mm/dd/yyyy" [disabled]="readOnlyView"></p-calendar>
+      </td>
+      <td>
+        <p-calendar type="string" [(ngModel)]="icd.dateTo" [monthNavigator]="true"
+          [yearNavigator]="true" [yearRange]="yearValidRangeEft"
+          placeholder="mm/dd/yyyy" [disabled]="readOnlyView">
+        </p-calendar>
+      </td>
+      <td>
+        <p-dropdown [options]="categories" [(ngModel)]="icd.category" placeholder="Select Category"
+          [style]="{'width': '100%'}" [disabled]="readOnlyView"></p-dropdown>
+      </td>
+      <td>
+        <p-dropdown [options]="primarySecondary" [(ngModel)]="icd.primarySecondary"
+          placeholder="Select one option" [style]="{'width': '100%'}" [disabled]="readOnlyView"></p-dropdown>
+      </td>
+      <td class="text-center">
+        <div class="line-height-header">
+          <p-checkbox [(ngModel)]="icd.override" binary="true" [disabled]="readOnlyView"></p-checkbox>
+        </div>
+      </td>
+      <td class="text-center">
+        <div class="line-height-header">
+          <p-checkbox [(ngModel)]="icd.claim" binary="true" [disabled]="readOnlyView"></p-checkbox>
+        </div>
+      </td>
+      <td class="text-center">
+        <button type="button" class="btn btn-primary btn-sm f-11" (click)="addICD()"
+          [disabled]="readOnlyView"><i class="fa fa-plus"></i></button>
+      </td>
+    </tr>
+  </tbody>
+</table>

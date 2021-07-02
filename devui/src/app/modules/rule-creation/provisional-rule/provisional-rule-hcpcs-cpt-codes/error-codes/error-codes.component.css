@@ -1,0 +1,10 @@
+.active-blue{
+    color:#31006F;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.error{
+    color:red;
+    font-size:12px;
+}

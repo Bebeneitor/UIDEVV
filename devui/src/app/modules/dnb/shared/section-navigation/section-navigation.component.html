@@ -1,4 +1,7 @@
-<div class="sections-navigation-wrapp" [ngClass]="{ 'is-fullscreen': isFullScreen }">
+<div
+  class="sections-navigation-wrapp"
+  [ngClass]="{ 'is-fullscreen': isFullScreen }"
+>
   <button
     (click)="toggleNavigation()"
     class="navigation-toggle"
@@ -8,9 +11,31 @@
     <span class="fa fa-bars"></span>
   </button>
   <ul [attr.slm-id]="'navigation_panel'" *ngIf="isNavigationOpen">
-    <li *ngFor="let section of navigationItems">
+    <li
+      *ngFor="let section of navigationItems"
+      [ngClass]="{ 'dnb-navigation-completed': section.completed }"
+    >
       <button (click)="scrollTo(section.id)" [attr.slm-id]="section.id">
         {{ section.name }}
+        <ng-container
+          *ngIf="
+            section.feedbackLeft !== null &&
+            section.feedbackLeft !== undefined
+          "
+        >
+          <span
+            [ngClass]="
+              section.feedbackLeft > 0 ? 'feedback-left' : 'feedback-cleared'
+            "
+          >
+            <ng-container *ngIf="section.feedbackLeft > 0; else check">
+              {{ section.feedbackLeft }}
+            </ng-container>
+            <ng-template #check>
+              <i class="fa fa-check"></i>
+            </ng-template>
+          </span>
+        </ng-container>
       </button>
     </li>
   </ul>

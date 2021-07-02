@@ -26,7 +26,7 @@ export class RecentlyViewedComponent implements OnInit {
   selectedCategory: any = null;
   isClick: boolean = false;
 
-  @ViewChild("dt") dt;
+  @ViewChild("dt",{static: true}) dt;
 
   constructor(private util: AppUtils, private dashboardService: DashboardService,
     private storageService : StorageService, private router : Router) { }

@@ -14,8 +14,8 @@ import { JobSchedulerComponent } from './job-scheduler/job-scheduler.component';
 })
 export class JobManagerComponent implements OnInit {
 
-  @ViewChild('viewGrid') viewGrid: any;
-  @ViewChild(JobCreationComponent) jobCreation: JobCreationComponent;
+  @ViewChild('viewGrid',{static: true}) viewGrid: any;
+  @ViewChild(JobCreationComponent,{static: true}) jobCreation: JobCreationComponent;
 
   pageName: string;
   cols: any[];

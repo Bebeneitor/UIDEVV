@@ -9,7 +9,7 @@ import {
   DialogModule,
   AccordionModule,
   CheckboxModule,
-  BlockUIModule, TreeTableModule
+  BlockUIModule, TreeTableModule, TooltipModule
 } from 'primeng/primeng';
 import { RoleSetupService } from 'src/app/services/role-setup.service';
 import { CcaPoSetupComponent } from './components/cca-po-setup/cca-po-setup.component';
@@ -29,7 +29,8 @@ declarations:[ RoleSetupComponent, CcaPoSetupComponent, UserTeamCategoryViewComp
         CheckboxModule,
         TableModule,
         BlockUIModule,
-        TreeTableModule
+        TreeTableModule,
+        TooltipModule
     ],
   providers:[
     RoleSetupService

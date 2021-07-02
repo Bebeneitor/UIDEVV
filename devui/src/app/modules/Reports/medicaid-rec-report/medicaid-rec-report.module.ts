@@ -12,11 +12,11 @@ import { EclTableModule } from 'src/app/shared/components/ecl-table/ecl-table.mo
 import { TableModule } from 'primeng/table';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ToastModule } from 'primeng/toast';
-
+import { MidRuleBoxModule } from '../components/mid-rule-box/mid-rule-box.module';
 
 
 @NgModule({
-  declarations: [MedicaidRecReportComponent, TextEditableDirective, MidRuleBoxComponent],
+  declarations: [MedicaidRecReportComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -27,20 +27,17 @@ import { ToastModule } from 'primeng/toast';
     PickListModule,
     MultiSelectModule,
     EclTableModule,
-    BlockUIModule,  
-    CommonModule,
-    FormsModule,
+    BlockUIModule,
     TableModule,
-    DropdownModule,
     DialogModule,
     DynamicDialogModule,
     PaginatorModule,
     AutoCompleteModule,
     SharedModule,
-    CalendarModule,
     ProgressBarModule,
     BlockUIModule, 
-    ToastModule
+    ToastModule,
+    MidRuleBoxModule
   ]
 })
 export class MedicaidRecReportModule { }

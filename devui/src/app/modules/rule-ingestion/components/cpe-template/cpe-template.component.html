@@ -1,0 +1,955 @@
+<div>
+  <h5 style="font-size: 17px; margin-bottom: 0px; display: inline-block;">CPE Ingestion Template</h5>
+  <hr>
+</div>
+<p-card>
+  <div class="row">
+    <div class="col-12">
+      <p-steps [model]="items" [readonly]="false" [activeIndex]="activeIndex"></p-steps>
+    </div>
+  </div>
+
+  <!-- Step one -->
+  <div class="row" *ngIf="activeIndex === 0">
+    <div class="col">
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Version Number </label>
+          <input type="text" [pTooltip]="cpe.versionNumber" class="form-control" maxlength="10" onlyNumbers [disabled]="readOnly"
+            placeholder="Version Number"
+            [(ngModel)]="cpe.versionNumber" onkeypress="return event.charCode >= 48 && event.charCode <= 57" />
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.editDescriptionProduct }"><span class="text-danger">*</span>
+            Short
+            Description</label>
+          <input type="text" [pTooltip]="cpe.editDescriptionProduct" class="form-control" [(ngModel)]="cpe.editDescriptionProduct" [disabled]="readOnly"
+            placeholder="Short Description" />
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.editName }"><span class="text-danger">*</span> Edit
+            Name</label>
+          <input type="text" [pTooltip]="cpe.editName" class="form-control" [(ngModel)]="cpe.editName" [disabled]="readOnly"
+            placeholder="Edit Name" />
+        </div>
+
+      </div>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Product </label>
+          <p-dropdown [style]="{'width' : '100%'}" [(ngModel)]="cpe.productCode" [disabled]="readOnly"
+            [options]="cpeService.product" optionLabel="name"></p-dropdown>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.editDescription }"><span
+              class="text-danger">*</span> Edit Description</label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.editDescription" [pTooltip]="cpe.editDescription" [disabled]="readOnly"
+            placeholder="Edit Description" />
+        </div>
+
+        <div class="col-4">
+          <label>Description of Request</label>
+          <br>
+          <p-radioButton name="motherbabyIssue" value="New Edit Request" [(ngModel)]="cpe.desciptionRequest" label="New Edit Request"
+            inputId="descriptionRequest1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="motherbabyIssue" value="Existing Edit Enhancement" [(ngModel)]="cpe.desciptionRequest"
+            label="Existing Edit Enhancement" inputId="descriptionRequest2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Clinical Rationale </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.clinicalRationale" [pTooltip]="cpe.clinicalRationale" [disabled]="readOnly"
+            placeholder="Clinical Rationale" />
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.clientEOBMessage }"><span class="text-danger">*</span>
+            Client EOB Message</label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.clientEOBMessage" [pTooltip]="cpe.clientEOBMessage" [disabled]="readOnly"
+            placeholder="Client EOB Message" />
+        </div>
+
+        <div class="col-4">
+          <label>Story IDs </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.storyIds" [pTooltip]="cpe.storyIds" [disabled]="readOnly"
+            placeholder="Story Ids" />
+        </div>
+
+      </div>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <div class="row">
+            <div class="col">
+              <br>
+              <label>Business Case </label>
+              <p-dropdown [style]="{'width' : '100%'}" [(ngModel)]="cpe.businessCase" [disabled]="readOnly"
+                [options]="cpeService.businessCase" optionLabel="name"></p-dropdown>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-4">
+          <ecl-file-uploader #businessImpAnalysis label="Business Impact Analysis" [showInputText]="true"
+            [simpleUploader]="false" (onSetData)="setTextToCopy($event, 'businessImpAnalysis')"
+            (onDeleteFile)="deleteFile($event, 'businessImpAnalysis')" [disabled]="readOnly"
+            (onFileChange)="onFileChange($event, 'businessImpAnalysis')" [showTextHover]="true"></ecl-file-uploader>
+        </div>
+
+        <div class="col-4">
+          <br>
+          <label>Date of Request </label>
+          <p-calendar [readonlyInput]="true" [disabled]="readOnly" [monthNavigator]="true" [yearNavigator]="true"
+            [yearRange]="yearValidRangeEft" placeholder="mm/dd/yy" dateFormat="mm/dd/yy" [(ngModel)]="cpe.dateRquest">
+          </p-calendar>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Clinical Advisory Group Review Date </label>
+          <p-calendar [readonlyInput]="true" [disabled]="readOnly" [monthNavigator]="true" [yearNavigator]="true"
+            [yearRange]="yearValidRangeEft" placeholder="mm/dd/yy" dateFormat="mm/dd/yy"
+            [(ngModel)]="cpe.clinicalAdvGroupRevDate"></p-calendar>
+        </div>
+
+        <div class="col-4">
+          <label>Form Types </label>
+          <p-multiSelect [style]="{'width' : '100%'}" [(ngModel)]="cpe.formTypes" [disabled]="readOnly"
+            [options]="cpeService.formTypes" optionLabel="name"></p-multiSelect>
+        </div>
+
+        <div class="col-4">
+          <label>Provider Scope </label>
+          <p-dropdown [style]="{'width' : '100%'}" [(ngModel)]="cpe.providerScope" [disabled]="readOnly"
+            [options]="cpeService.providerScope" optionLabel="name"></p-dropdown>
+        </div>
+
+      </div>
+      <br>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Batch Scope </label>
+          <p-dropdown [style]="{'width' : '100%'}" [(ngModel)]="cpe.batchScope" [disabled]="readOnly"
+            [options]="cpeService.batchScope" optionLabel="name"></p-dropdown>
+        </div>
+
+        <div class="col-4">
+          <label>Product Line Filter Criteria </label>
+          <p-dropdown [style]="{'width' : '100%'}" [(ngModel)]="cpe.productLineFilterCriteria" [disabled]="readOnly"
+            [(inputId)]="flag11" [options]="cpeService.lineFilterCriteria" optionLabel="name"></p-dropdown>
+        </div>
+
+        <div class="col-4">
+          <label>Specialty Scope </label>
+          <p-dropdown #DD [style]="{'width' : '100%'}" [(ngModel)]="cpe.specialityScope.selected" [disabled]="readOnly"
+            [options]="cpeService.specialityScope" optionLabel="name" (onChange)="disabledSpecialityScope(DD)">
+          </p-dropdown>
+          &nbsp;
+          <input type="text" class="form-control" [(ngModel)]="cpe.specialityScope.speciality" [pTooltip]="cpe.specialityScope.speciality"
+            [disabled]="cpe.specialityScope.selected?.code != 'S'|| disabled" placeholder="Specific" />
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <ecl-file-uploader #otherLimitation label="Other Limitation" [showInputText]="true" [simpleUploader]="false"
+            (onSetData)="setTextToCopy($event, 'otherLimitation')" (onDeleteFile)="deleteFile($event, 'otherLimitation')"
+            [disabled]="readOnly" (onFileChange)="onFileChange($event, 'otherLimitation')" [showTextHover]="true"></ecl-file-uploader>
+        </div>
+
+        <div class="col-4">
+          <label>Diagnoses</label>
+          <br>
+          <p-radioButton name="diagnosis" value="Yes" [(ngModel)]="cpe.diagnosesCpe" label="Yes"
+            inputId="descriptionRequest1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="diagnosis" value="No" [(ngModel)]="cpe.diagnosesCpe" label="No"
+            inputId="descriptionRequest2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <ecl-file-uploader #clinicalExamplePlainlyState
+            label="Clinical Examples for Expected Flagging Outcomes: Flag will fire when (plainly state the intent of the rule as IF/ THEN statement)"
+            [showInputText]="true" (onSetData)="setTextToCopy($event, 'clinicalExamplePlainlyState')"
+            (onDeleteFile)="deleteFile($event, 'clinicalExamplePlainlyState')" [disabled]="readOnly"
+            [simpleUploader]="false" (onFileChange)="onFileChange($event, 'clinicalExamplePlainlyState')"
+            [showTextHover] ="true">
+          </ecl-file-uploader>
+        </div>
+
+      </div>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <ecl-file-uploader #clinicalExampleExceptionToRule
+            label="Clinical Examples for Expected Flagging Outcomes: Flag will not fire when (exceptions to the rule)"
+            [showInputText]="true" (onSetData)="setTextToCopy($event, 'clinicalExampleExceptionToRule')"
+            (onDeleteFile)="deleteFile($event, 'clinicalExampleExceptionToRule')" [disabled]="readOnly"
+            [simpleUploader]="false" (onFileChange)="onFileChange($event, 'clinicalExampleExceptionToRule')"
+            [showTextHover] ="true">
+          </ecl-file-uploader>
+        </div>
+
+        <div class="col-4">
+          <br>
+          <ecl-file-uploader #procedureDiagOtherCodes label="Procedure/ Diagnosis/ Other Codes Involved"
+            [showInputText]="true" (onSetData)="setTextToCopy($event, 'procedureDiagOtherCodes')"
+            (onDeleteFile)="deleteFile($event, 'procedureDiagOtherCodes')" [disabled]="readOnly"
+            [simpleUploader]="false" (onFileChange)="onFileChange($event, 'procedureDiagOtherCodes')" [showTextHover]="true">
+          </ecl-file-uploader>
+        </div>
+
+        <div class="col-4">
+          <br>
+          <label>Procedure Code Types</label>
+          <div class="ui-g" style="width:100%;margin-bottom:10px;">
+            <div class="ui-g-12" style="padding:0px !important;">
+              <p-checkbox name="recodeunits" [disabled]="readOnly" value="M-Medical" label="Medical"
+                [(ngModel)]="cpe.procedureCodesTypes" inputId="CodeTypes1"></p-checkbox>
+            </div>
+            <div class="ui-g-12" style="padding:0px !important;">
+              <p-checkbox name="recodeunits" [disabled]="readOnly" value="A-Anesthesia" label="Anesthesia"
+                [(ngModel)]="cpe.procedureCodesTypes" inputId="CodeTypes2"></p-checkbox>
+            </div>
+            <div class="ui-g-12" style="padding:0px !important;">
+              <p-checkbox name="recodeunits" [disabled]="readOnly" value="S-Assistant Surgeon" label="Assistant Surgeon"
+                [(ngModel)]="cpe.procedureCodesTypes" inputId="CodeTypes3"></p-checkbox>
+            </div>
+            <div class="ui-g-12" style="padding:0px !important;">
+              <p-checkbox name="recodeunits" [disabled]="readOnly" value="H-HCPCS" label="HCPCS"
+                [(ngModel)]="cpe.procedureCodesTypes" inputId="CodeTypes4"></p-checkbox>
+            </div>
+            <div class="ui-g-12" style="padding:0px !important;">
+              <p-checkbox name="CodeTypes5" [disabled]="readOnly" value="U-Unknown" label="Unknown"
+                [(ngModel)]="cpe.procedureCodesTypes" inputId="CodeTypes5"></p-checkbox>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+    </div>
+  </div>
+
+  <!-- Step two -->
+  <div class="row" *ngIf="activeIndex === 1">
+    <div class="col">
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Test Cases/Notes </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.testCasesNotes" [pTooltip]="cpe.testCasesNotes" [disabled]="readOnly"
+            placeholder="Test Cases" />
+        </div>
+
+        <div class="col-4">
+          <label>Source(s) </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.sources" [pTooltip]="cpe.sources" [disabled]="readOnly"
+            placeholder="Sources" />
+        </div>
+
+        <div class="col-4">
+          <label>Source Value </label>
+          <p-dropdown [style]="{'width' : '100%'}" [(ngModel)]="cpe.sourceValue" [disabled]="readOnly"
+            [options]="cpeService.sourceValue" optionLabel="name"></p-dropdown>
+        </div>
+
+      </div>
+      <!-- End Row -->
+
+      <div class="row">
+        <div class="col-4" style="padding-top: 5px;">
+          <ecl-file-uploader #testCasesNotesFiles [fileUpladerOptions]="fileUpladerOptions"
+            (onRemoveMultipleFile)="onRemoveMultipleFile($event)" [showTextHover]="true">
+          </ecl-file-uploader>
+        </div>
+
+        <div class="col">
+          <div class="row">
+            <div class="col">
+              <div class="row">
+                <div class="col">
+                  <br>
+                  <label>New Source Value?</label>
+                  <br>
+                  <p-radioButton name="newSource" value="Yes" [(ngModel)]="cpe.newSourceValue" label="Yes"
+                    inputId="newSourceValue1" [disabled]="readOnly">
+                  </p-radioButton>
+                  &nbsp;
+                  <p-radioButton name="newSource" value="No" [(ngModel)]="cpe.newSourceValue" label="No"
+                    inputId="newSourceValue2" [disabled]="readOnly">
+                  </p-radioButton>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col" style="padding-top: 5px;">
+                  <input type="text" class="form-control" [(ngModel)]="cpe.newSourceValueDescription"
+                    [pTooltip]="cpe.newSourceValueDescription"
+                    [disabled]="cpe.newSourceValue === '0' || disabled" placeholder="Description" />
+                </div>
+              </div>
+
+            </div>
+            <div class="col">
+              <br>
+              <label>Viewable repository view required </label>
+              <br>
+              <p-radioButton name="repositoryView" value="Yes" [(ngModel)]="cpe.viewableRepository" label="Yes"
+                inputId="repositoryView1" [disabled]="readOnly">
+              </p-radioButton>
+              &nbsp;
+              <p-radioButton name="repositoryView" value="No" [(ngModel)]="cpe.viewableRepository" label="No"
+                inputId="repositoryView2" [disabled]="readOnly">
+              </p-radioButton>
+            </div>            
+          </div>
+        </div>
+
+      </div>
+
+      <hr>
+      <div class="row">
+        <div class="col">
+          <span>Nucleus Edit Settings Manager</span>
+        </div>    
+      </div>
+      <br>
+      <!-- Start Row -->
+      <div class="row">
+        <div class="col-4">
+          <div class="row">
+            <div class="col">
+              <label>Clients </label>
+              <p-dropdown #ddn [style]="{'width' : '100%'}" [(ngModel)]="cpe.nucleousEditSettingManageClients.selected"
+                [disabled]="readOnly" [options]="cpeService.nucleousEditingSetting" optionLabel="name"
+                (onChange)="disabledNucleousEditing(ddn)"></p-dropdown>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col" style="padding-top: 5px;">
+              <input type="text" class="form-control" [(ngModel)]="cpe.nucleousEditSettingManageClients.editingSetting" [pTooltip]="cpe.nucleousEditSettingManageClients.editingSetting"
+                [disabled]="cpe.nucleousEditSettingManageClients.selected.code != 'S'|| disabled" placeholder="Nucleus Editing Setting Specific" />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-4">
+          <label>Flag Auto- Review Status</label>
+          <br>
+
+          <p-multiSelect [style]="{'width' : '100%'}" [(ngModel)]="cpe.nucleousEditSettingManageFlagAuto"
+            [disabled]="readOnly" [options]="cpeService.nucleousEditingSettingFlagAutoReviewStatus" optionLabel="name">
+            <ng-template let-nucleosEdit let-i="index" pTemplate="item">
+              <div style="font-size:14px;display: inline-flex;margin-top:4px">
+                <span [pTooltip]="nucleosEdit.value.desc" tooltipStyleClass="tooltip"
+                  [tooltipZIndex]="'9999999'">{{nucleosEdit.value.name}}</span>
+              </div>
+            </ng-template>
+          </p-multiSelect>
+        </div>
+
+        <div class="col">
+          <label>Settings options- Select Default</label>
+          <br>
+          <p-radioButton name="nucleousEditingManager" value="ON" [(ngModel)]="cpe.nucleousEditSettingManageOptions"
+            label="On" inputId="NucleousEditing1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="nucleousEditingManager" value="OFF"
+            [(ngModel)]="cpe.nucleousEditSettingManageOptions" label="Off" inputId="NucleousEditing2" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="nucleousEditingManager" value="Reporting" [(ngModel)]="cpe.nucleousEditSettingManageOptions"
+            label="Reporting" inputId="NucleousEditing3" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+        <br>
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Ancillary Edit Settings Name </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.ancillarySettingName" [pTooltip]="cpe.ancillarySettingName" [disabled]="readOnly"
+            placeholder="Ancillary Edit Settings Name" />
+        </div>
+
+        <div class="col-4">
+          <label>Ancillary Edit Settings Options (select default) </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.ancillarySettingOptions" [pTooltip]="cpe.ancillarySettingOptions" [disabled]="readOnly"
+            placeholder="Ancillary Edit Settings Options" />
+        </div>
+
+        <div class="col-4">
+          <label>Order and Fallback Order Data-set Name </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.otherAndFallback" [pTooltip]="cpe.otherAndFallback" [disabled]="readOnly"
+            placeholder="Order and Fallback Order Data-set Name" />
+        </div>
+      </div>
+      <br>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-2">
+          <label>Will changes be made to an existing Table?</label>
+          <br>
+          <p-radioButton name="existingTable" value="Yes" [(ngModel)]="cpe.willChangeBeMade" label="Yes"
+            inputId="existingTable1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="existingTable" value="No" [(ngModel)]="cpe.willChangeBeMade" label="No"
+            inputId="existingTable2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-2">
+          <label>Will new table(s) be required?</label>
+          <br>
+          <p-radioButton name="requiredTable" value="Yes" [(ngModel)]="cpe.willNewTableBeRequired" label="Yes"
+            inputId="requiredTable1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="requiredTable" value="No" [(ngModel)]="cpe.willNewTableBeRequired" label="No"
+            inputId="requiredTable2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label>New or existing table name(s) </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.newOrExistingTable" [pTooltip]="cpe.newOrExistingTable" [disabled]="readOnly"
+            placeholder="New or existing table name" />
+        </div>
+
+        <div class="col-4">
+          <ecl-file-uploader #newOrExistingTableContent label="New or existing table content (attach sample)"
+            [showInputText]="true" (onSetData)="setTextToCopy($event, 'newOrExistingTableContent')"
+            (onDeleteFile)="deleteFile($event, 'newOrExistingTableContent')" [disabled]="readOnly"
+            [simpleUploader]="false" (onFileChange)="onFileChange($event, 'newOrExistingTableContent')" [showTextHover]="true">
+          </ecl-file-uploader>
+        </div>
+
+      </div>
+      <br>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Instructions for Analyst Review </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.instrtuctionForAnalysisReview" [pTooltip]="cpe.instrtuctionForAnalysisReview" [disabled]="readOnly"
+            placeholder="Instructions for Analyst Review" />
+        </div>
+
+        <div class="col-4">
+          <label>Instructions for Clinical Services </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.instrtuctionForClinicalServices"
+            [pTooltip]="cpe.instrtuctionForClinicalServices"
+            [disabled]="readOnly" placeholder="Instructions for Clinical Services" />
+        </div>
+
+        <div class="col-4">
+          <label>Effective and Term Dates </label>
+          <br>
+          <p-radioButton name="efectiveTermsRequest" value="Yes" [(ngModel)]="cpe.effectiveAndTermDates.selected"
+            label="Yes - rule table driven" inputId="efectiveTermsRequest1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="efectiveTermsRequest" value="No" [(ngModel)]="cpe.effectiveAndTermDates.selected"
+            label="No - provide effective date if needed" inputId="efectiveTermsRequest2" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <br>
+          <p-calendar [readonlyInput]="true" [(ngModel)]="cpe.effectiveAndTermDates.termDates"
+            [disabled]="cpe.effectiveAndTermDates.selected == 1 || disabled" [monthNavigator]="true"
+            [yearNavigator]="true" [yearRange]="yearValidRangeEft" placeholder="mm/dd/yy" dateFormat="mm/dd/yy">
+          </p-calendar>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Flag lines where ADJ Paid=0</label>
+          <br>
+          <p-radioButton name="flagLine" value="Yes" [(ngModel)]="cpe.flagLines" label="Yes" inputId="flagLine1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="flagLine" value="No" [(ngModel)]="cpe.flagLines" label="No" inputId="flagLine2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label>DOS Scope</label>
+          <br>
+          <p-radioButton name="nucleousEditing" value="Same DOS" [(ngModel)]="cpe.DosScopes" label="Same DOS"
+            inputId="CodeTypes1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="nucleousEditing" value="Different DOS" [(ngModel)]="cpe.DosScopes" label="Different DOS"
+            inputId="CodeTypes2" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="nucleousEditing" value="N/A" [(ngModel)]="cpe.DosScopes" label="NA" inputId="CodeTypes3" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label>Effect Savings?</label>
+          <br>
+          <p-radioButton name="effectSaving" value="1" [(ngModel)]="cpe.effectSaiving" label="True"
+            inputId="effectSavingTable1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="effectSaving" value="0" [(ngModel)]="cpe.effectSaiving" label="False"
+            inputId="effectSavingTable2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <br>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Savings Calculated From</label>
+          <br>
+          <p-radioButton name="savingCalculated" value="Billed" [(ngModel)]="cpe.savingCalculatedFrom" label="Billed"
+            inputId="savingCalculated1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="savingCalculated" value="Paid" [(ngModel)]="cpe.savingCalculatedFrom" label="Paid"
+            inputId="savingCalculated2" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="savingCalculated" value="Adjusted Paid" [(ngModel)]="cpe.savingCalculatedFrom" label="Adj Paid"
+            inputId="savingCalculated3" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label>Rev Reduction Switch Calc Value</label>
+          <br>
+          <p-radioButton name="revReductionSwitch" value="Paid" [(ngModel)]="cpe.revReductionSwitch" label="Paid"
+            inputId="revReduction1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="revReductionSwitch" value="Adjusted Paid" [(ngModel)]="cpe.revReductionSwitch"
+            label="Adjusted Paid" inputId="revReduction2" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="revReductionSwitch" value="N/A" [(ngModel)]="cpe.revReductionSwitch" label="N/A"
+            inputId="revReduction3" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label>Mantis ID </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.mantisId" [disabled]="readOnly"
+            [pTooltip]="cpe.mantisId"
+            placeholder="Mantis ID" />
+        </div>
+
+        <div class="col-4">
+          <label>Trigger lines where ADJ paid</label>
+          <br>
+          <p-radioButton name="flagTrigger" value="Yes" [(ngModel)]="cpe.flagTrigger" label="Yes" inputId="flagTriggerYes" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="flagTrigger" value="No" [(ngModel)]="cpe.flagTrigger" label="No" inputId="flagTriggerNo" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+    </div>
+  </div>
+
+  <!-- Step three -->
+  <div class="row" *ngIf="activeIndex === 2">
+    <div class="col">
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Edit Order</label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.editOrder" [pTooltip]="cpe.editOrder" [disabled]="readOnly"
+            placeholder="Edit Order" />
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.editType }"><span class="text-danger">*</span> Edit
+            Type</label>
+          <br>
+          <p-radioButton name="editTypeSwitch" value="Review" [(ngModel)]="cpe.editType" label="R (Review)"
+            inputId="editType1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="editTypeSwitch" value="Message" [(ngModel)]="cpe.editType" label="M (Message)"
+            inputId="editType2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.product }"><span class="text-danger">*</span>
+            Product</label>
+          <br>
+          <p-radioButton name="revReductionSwitch" value="PCI" [(ngModel)]="cpe.product" label="F- PCI"
+            inputId="revReduction1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="revReductionSwitch" value="DCI" [(ngModel)]="cpe.product" label="D- DCI"
+            inputId="revReduction2" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="revReductionSwitch" value="FFP" [(ngModel)]="cpe.product" label="R- FFP"
+            inputId="revReduction3" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="revReductionSwitch" value="FCI" [(ngModel)]="cpe.product" label="U- FCI"
+            inputId="revReduction3" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <br>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label>Category Id </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.categoryId" [pTooltip]="cpe.categoryId" [disabled]="readOnly"
+            placeholder="Category Id" />
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.status }"><span class="text-danger">*</span>
+            Status</label>
+          <br>
+          <p-radioButton name="Status" value="Active" [(ngModel)]="cpe.status" label="Active" inputId="status1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="Status" value="Inactive" [(ngModel)]="cpe.status" label="Inactive" inputId="status2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.requireSuggestedCode }"><span class="text-danger">*</span>
+            Requires Suggested Code</label>
+          <br>
+          <p-radioButton name="suggestedCode" value="1" [(ngModel)]="cpe.requireSuggestedCode" label="True"
+            inputId="suggestedCode1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="suggestedCode" value="0" [(ngModel)]="cpe.requireSuggestedCode" label="False"
+            inputId="suggestedCode2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.requireSuggestedUnits }"><span
+              class="text-danger">*</span> Requires Suggested Units</label>
+          <br>
+          <p-radioButton name="suggestedUnit" value="1" [(ngModel)]="cpe.requireSuggestedUnits" label="True"
+            inputId="suggestedUnit1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="suggestedUnit" value="0" [(ngModel)]="cpe.requireSuggestedUnits" label="False"
+            inputId="suggestedUnit2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.requireHistoryLine }"><span class="text-danger">*</span>
+            Requires History Line</label>
+          <br>
+          <p-radioButton name="historyLine" value="1" [(ngModel)]="cpe.requireHistoryLine" label="True"
+            inputId="historyLine1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="historyLine" value="0" [(ngModel)]="cpe.requireHistoryLine" label="False"
+            inputId="historyLine2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.requireSuggestedPaid }"><span class="text-danger">*</span>
+            Requires Suggested Paid</label>
+          <br>
+          <p-radioButton name="suggestedPaid" value="1" [(ngModel)]="cpe.requireSuggestedPaid" label="True"
+            inputId="suggestedPaid1">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="suggestedPaid" value="0" [(ngModel)]="cpe.requireSuggestedPaid" label="False"
+            inputId="suggestedPaid2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <br>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.historyInterval }"><span class="text-danger">*</span>
+            History Interval</label>
+          <br>
+          <p-radioButton name="historyIntervalSwitch" value="All" [(ngModel)]="cpe.historyInterval" label="All"
+            inputId="historyInterval1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="historyIntervalSwitch" value="Provider" [(ngModel)]="cpe.historyInterval" label="Provider"
+            inputId="historyInterval2" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="historyIntervalSwitch" value="Same Day" [(ngModel)]="cpe.historyInterval" label="Same Day"
+            inputId="historyInterval3" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.allowSwitch }"><span class="text-danger">*</span> Allow
+            Switch</label>
+          <br>
+          <p-radioButton name="allowSwitch" value="1" [(ngModel)]="cpe.allowSwitch" label="True" 
+            inputId="allowSwitch1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="allowSwitch" value="0" [(ngModel)]="cpe.allowSwitch" label="False"
+            inputId="allowSwitch2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.needsEditExplanation }"><span class="text-danger">*</span>
+            Needs Edit Explanation</label>
+          <br>
+          <p-radioButton name="editExplenation" value="1" [(ngModel)]="cpe.needsEditExplanation" label="True"
+            inputId="editExplenation1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="editExplenation" value="0" [(ngModel)]="cpe.needsEditExplanation" label="False"
+            inputId="editExplenation2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.reverseFlag }"><span class="text-danger">*</span> Reverse
+            Flag</label>
+          <br>
+          <p-radioButton name="reverseFlag" value="1" [(ngModel)]="cpe.reverseFlag" label="True" 
+            inputId="reverseFlag1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="reverseFlag" value="0" [(ngModel)]="cpe.reverseFlag" label="False"
+            inputId="reverseFlag2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.reductionFlag }"><span class="text-danger">*</span>
+            Reduction Flag</label>
+          <br>
+          <p-radioButton name="reductionFlag" value="1" [(ngModel)]="cpe.reductionFlag" label="True"
+            inputId="reductionFlag1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="reductionFlag" value="0" [(ngModel)]="cpe.reductionFlag" label="False"
+            inputId="reductionFlag2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.allowExceed }"><span class="text-danger">*</span> Allow
+            Sugpd Exceed Adjpd</label>
+          <br>
+          <p-radioButton name="allowExceed" value="1" [(ngModel)]="cpe.allowExceed" label="True" 
+            inputId="allowExceed1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="allowExceed" value="0" [(ngModel)]="cpe.allowExceed" label="False"
+            inputId="allowExceed2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <br>
+      <!-- End Row -->
+
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.messageFlag }"><span class="text-danger">*</span> Requires
+            Message Flag</label>
+          <br>
+          <p-radioButton name="messageFlag" value="1" [(ngModel)]="cpe.requireMessageFlag" label="True"
+            inputId="messageFlag1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="messageFlag" value="0" [(ngModel)]="cpe.requireMessageFlag" label="False"
+            inputId="messageFlag2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label>Reverse Edit Switch Flag </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.reverseEditSwitchFlag" [pTooltip]="cpe.reverseEditSwitchFlag" [disabled]="readOnly"
+            placeholder="Reverse Edit Switch Flag" />
+        </div>
+
+        <div class="col-4">
+          <label>Reverse Reduction Switch Percentage </label>
+          <input type="text" class="form-control" [(ngModel)]="cpe.reverseReductionSwitchPerc" [pTooltip]="cpe.reverseReductionSwitchPerc" [disabled]="readOnly"
+            placeholder="Reverse Reduction Switch Percentage" />
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+      <!-- Start Row -->
+      <div class="row">
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.userSpecCond }"><span class="text-danger">*</span> User
+            Specified Condition</label>
+          <br>
+          <p-radioButton name="specifiedCondition" value="1" [(ngModel)]="cpe.userSpecCond" label="True"
+            inputId="specifiedCondition1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="specifiedCondition" value="0" [(ngModel)]="cpe.userSpecCond" label="False"
+            inputId="specifiedCondition2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.reporting }"><span class="text-danger">*</span>
+            Reporting</label>
+          <br>
+          <p-radioButton name="Reporting" value="1" [(ngModel)]="cpe.reporting" label="True" 
+            inputId="Reportin1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="Reporting" value="0" [(ngModel)]="cpe.reporting" label="False" 
+            inputId="Reporting2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+        <div class="col-4">
+          <label [ngClass]="{ 'error-label': validationErrors.useNewEditSetting }"><span class="text-danger">*</span>
+            Use New Edit Settings</label>
+          <br>
+          <p-radioButton name="newEditSetting" value="1" [(ngModel)]="cpe.useNewEditSetting" label="True"
+            inputId="newEditSetting1" [disabled]="readOnly">
+          </p-radioButton>
+          &nbsp;
+          <p-radioButton name="newEditSetting" value="0" [(ngModel)]="cpe.useNewEditSetting" label="False"
+            inputId="newEditSetting2" [disabled]="readOnly">
+          </p-radioButton>
+        </div>
+
+      </div>
+      <!-- End Row -->
+      <hr>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="float-right">
+        <button type="button" [disabled]="readOnly" class="btn btn-sm btn-primary btn-opc" (click)="newTemplate()"><i
+            class="fa fa-magic"></i>
+          New</button>
+        &nbsp;
+        <button type="button" [disabled]="readOnly" class="btn btn-sm btn-primary btn-opc" (click)="saveTemplate()"><i
+            class="fa fa-save"></i>
+          &nbsp;<span *ngIf="cpeIngestionId == 0">Save</span>
+          <span *ngIf="cpeIngestionId > 0">Update</span>
+        </button>
+        &nbsp;
+        <button style="width: 140px !important;" type="button" [disabled]="readOnly"
+          class="btn btn-sm btn-primary btn-opc" (click)="saveTemplate(true)"><i class="fa fa-save"></i>
+          &nbsp;<span *ngIf="cpeIngestionId == 0">Save & Close</span>
+          <span *ngIf="cpeIngestionId > 0">Update & Close</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <br>
+
+</p-card>
+
+<p-blockUI [blocked]="blocked">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif"/>
+    <p style="font-size: 12px;color: #fff;">Saving data, please wait...</p>
+  </div>
+</p-blockUI>

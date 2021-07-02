@@ -1,0 +1,40 @@
+.container {
+    padding: 0;
+}
+
+h3 {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-size: 18px;
+    margin-top: -1.2%;
+}
+
+h3::after {
+    content: '';
+    flex: 1;
+    margin-left: 0.2rem;
+    margin-top: 1%;
+    height: 1.25px;
+    background-color: #ae9bb1;
+}
+
+.active-link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.active-link-blue {
+    font-size: 11px;
+    text-decoration: underline;
+    cursor: pointer;
+    color: blue;
+}
+
+.red-text {
+    color: red;
+}
+
+.blue-text {
+    color: blue;
+}

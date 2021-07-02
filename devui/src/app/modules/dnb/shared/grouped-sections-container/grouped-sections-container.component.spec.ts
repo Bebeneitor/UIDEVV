@@ -1,9 +1,21 @@
-import { Component, Input } from "@angular/core";
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  SimpleChange,
+} from "@angular/core";
 import { async, ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormsModule } from "@angular/forms";
-import { ConfirmationService } from "primeng/api";
+import { ConfirmationService, MessageService } from "primeng/api";
+import { CheckboxModule } from "primeng/checkbox";
 import { InputSwitchModule } from "primeng/inputswitch";
-import { behaviors } from "../../models/constants/behaviors.constants";
+import { StorageService } from "src/app/services/storage.service";
+import {
+  arrowNavigation,
+  behaviors,
+} from "../../models/constants/behaviors.constants";
+import { storageGeneral } from "../../models/constants/storage.constants";
 import {
   Column,
   GroupedSection,
@@ -11,10 +23,17 @@ import {
   Row,
   SearchData,
 } from "../../models/interfaces/uibase";
+import { DnbRoleAuthService } from "../../services/dnb-role-auth.service";
 import { DnbStoreService } from "../../services/dnb-store.service";
+import { DnBDirectivesModule } from "../../utils/directives/dnb-directives.module";
 import { CopyToNew } from "../../utils/utils.index";
 import { GroupedSectionsContainerComponent } from "./grouped-sections-container.component";
-
+import {
+  OKTA_CONFIG,
+  OktaAuthService,
+  OktaAuthModule,
+} from "@okta/okta-angular";
+import { SectionPosition } from "../../models/constants/actions.constants";
 @Component({ selector: "app-dnb-grouped-section", template: "" })
 class SectionSubComponent {
   @Input() section: GroupedSection;
@@ -23,9 +42,16 @@ class SectionSubComponent {
   @Input() undoCopyRowGroupFlag: boolean = false;
   @Input() hasRowHeading: boolean = false;
   @Input() isComparing: boolean = false;
+  @Input() isApproverReviewing: boolean;
+  @Input() sectionIndex: string;
+  @Input() feedbackComplete: boolean;
   @Input() showCurrent: boolean = false;
   @Input() disabled: boolean = false;
   @Input() enableEditing: boolean = true;
+  @Input() focusType: boolean;
+  @Input() sectionEnable: boolean = false;
+  @Output() selectionForPaste = new EventEmitter<any>();
+
   updateCompareColumns() {}
 }
 
@@ -36,8 +62,10 @@ class CellEditorStubComponent {
   @Input() searchInfo: SearchData = null;
   @Input() highLight: number = null;
   @Input() isReadOnly = false;
+  @Input() sectionPosition: SectionPosition = null;
   @Input() negativeDiff: any;
   @Input() sectionId: string;
+  @Input() focus: { hasFocus: boolean; range?: number } = null;
 
   getDifferences() {}
 }
@@ -46,6 +74,12 @@ fdescribe("GroupedSectionsContainerComponent", () => {
   let component: GroupedSectionsContainerComponent;
   let fixture: ComponentFixture<GroupedSectionsContainerComponent>;
   let dnbStore: DnbStoreService;
+  let storageService: StorageService;
+  const oktaConfig = {
+    issuer: "https://not-real.okta.com",
+    clientId: "fake-client-id",
+    redirectUri: "http://localhost:4200",
+  };
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
@@ -53,8 +87,23 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         SectionSubComponent,
         CellEditorStubComponent,
       ],
-      imports: [FormsModule, InputSwitchModule],
-      providers: [ConfirmationService, CopyToNew, DnbStoreService],
+      imports: [
+        FormsModule,
+        InputSwitchModule,
+        DnBDirectivesModule,
+        CheckboxModule,
+        OktaAuthModule,
+      ],
+      providers: [
+        ConfirmationService,
+        CopyToNew,
+        DnbStoreService,
+        DnbRoleAuthService,
+        StorageService,
+        MessageService,
+        OktaAuthService,
+        { provide: OKTA_CONFIG, useValue: oktaConfig },
+      ],
     }).compileComponents();
   }));
 
@@ -64,6 +113,7 @@ fdescribe("GroupedSectionsContainerComponent", () => {
     component.currentVersion = {
       id: "sectionotwo",
       headers: ["header 1", "header 2", "header 3"],
+      headersUIWidth: [100, 100, 100],
       section: { code: "code", name: "Section Name" },
       drugVersionCode: "id",
       groups: [
@@ -72,10 +122,14 @@ fdescribe("GroupedSectionsContainerComponent", () => {
             {
               value: "Group One",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
             {
               value: "Group Tewo",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -84,6 +138,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
                 {
                   value: "Old Column 1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -93,6 +149,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
                 {
                   value: "Row 2 new Column 1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -104,18 +162,24 @@ fdescribe("GroupedSectionsContainerComponent", () => {
     component.newVersion = {
       id: "sectionone",
       headers: ["header 1", "header 2", "header 3"],
+      headersUIWidth: [100, 100, 100],
       section: { code: "code", name: "Section Name" },
       drugVersionCode: "id",
+      enabled: true,
       groups: [
         {
           names: [
             {
               value: "Group One",
-              isReadOnly: true,
+              isReadOnly: false,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
             {
               value: "Group Tewo",
-              isReadOnly: true,
+              isReadOnly: false,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -123,7 +187,9 @@ fdescribe("GroupedSectionsContainerComponent", () => {
               columns: [
                 {
                   value: "Row 1 new Column 11",
-                  isReadOnly: true,
+                  isReadOnly: false,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -132,7 +198,9 @@ fdescribe("GroupedSectionsContainerComponent", () => {
               columns: [
                 {
                   value: "Row 2 Old Column 1",
-                  isReadOnly: true,
+                  isReadOnly: false,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -146,6 +214,51 @@ fdescribe("GroupedSectionsContainerComponent", () => {
     component.isComparing = false;
     component.showCurrent = false;
     component.enableEditing = true;
+    storageService = TestBed.get(StorageService);
+    const dnbPermissions = {
+      userId: 1,
+      authorities: [
+        "ROLE_DNBADMIN",
+        "ROLE_CPEA",
+        "ROLE_CVPE",
+        "ROLE_EBR",
+        "ROLE_DNBA",
+        "ROLE_DNBE",
+        "ROLE_PO",
+        "ROLE_CVPA",
+        "ROLE_MD",
+        "ROLE_TA",
+        "ROLE_CVPAP",
+        "ROLE_OTH",
+        "ROLE_BSC",
+        "ROLE_EA",
+        "ROLE_CCA",
+        "ROLE_CVPU",
+        "DNB_READ_MIDRULE_TEMPLATE",
+        "DNB_REASSIGN_APPROVER",
+        "DNB_EDIT_MIDRULE_TEMPLATE",
+        "DNB_READ_DRDS",
+        "DNB_EDIT_DRDS",
+        "DNB_REVIEW_APPROVE_DRD",
+        "DNB_LIST_DRUGS",
+        "DNB_DOWNLOAD_DRAFT_DRD",
+        "DNB_REASSIGN_EDITOR",
+        "DNB_DOWNLOAD_APPROVED_DRD",
+      ],
+      actions: [
+        "DNB_READ_MIDRULE_TEMPLATE",
+        "DNB_REASSIGN_APPROVER",
+        "DNB_EDIT_MIDRULE_TEMPLATE",
+        "DNB_READ_DRDS",
+        "DNB_EDIT_DRDS",
+        "DNB_REVIEW_APPROVE_DRD",
+        "DNB_LIST_DRUGS",
+        "DNB_DOWNLOAD_DRAFT_DRD",
+        "DNB_REASSIGN_EDITOR",
+        "DNB_DOWNLOAD_APPROVED_DRD",
+      ],
+    };
+    storageService.set(storageGeneral.dnbPermissions, dnbPermissions, true);
     dnbStore = TestBed.get(DnbStoreService);
     fixture.detectChanges();
   });
@@ -160,6 +273,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         {
           value: "Row 1 new Column 11",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
       ],
       hasBorder: false,
@@ -188,10 +303,14 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         {
           value: "Old Column 1",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
         {
           value: "Old Column 1",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
       ],
       rows: [
@@ -200,6 +319,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
             {
               value: "Old Column 2",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           hasBorder: false,
@@ -220,10 +341,14 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         {
           value: "Old Column 1",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
         {
           value: "Old Column 1",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
       ],
       rows: [
@@ -232,6 +357,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
             {
               value: "Old Column 2",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           hasBorder: false,
@@ -254,6 +381,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         {
           value: "New Copied Column 2",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
       ],
       hasBorder: false,
@@ -276,6 +405,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         {
           value: "New Copied Column 2",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
       ],
       hasBorder: false,
@@ -307,6 +438,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         {
           value: "New Copied Column 2",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
       ],
       hasBorder: false,
@@ -317,7 +450,12 @@ fdescribe("GroupedSectionsContainerComponent", () => {
       row: groupRow,
       groupIndex: indexGroup,
     };
-    const column = { isReadOnly: false, value: "test" };
+    const column = {
+      isReadOnly: false,
+      value: "test",
+      feedbackData: [],
+      feedbackLeft: 0,
+    };
     component.newVersion.groups = [
       {
         names: [column],
@@ -337,6 +475,8 @@ fdescribe("GroupedSectionsContainerComponent", () => {
         {
           value: "New Copied Column 2",
           isReadOnly: true,
+          feedbackData: [],
+          feedbackLeft: 0,
         },
       ],
       hasBorder: false,
@@ -414,7 +554,7 @@ fdescribe("GroupedSectionsContainerComponent", () => {
 
   it("should disable a section", () => {
     const spy = spyOn(component.toggleSectionCopy, "emit");
-    component.shouldDisableSection = true;
+    component.shouldEnableSection = false;
     component.disableChange();
 
     expect(spy).toHaveBeenCalledWith({
@@ -425,24 +565,113 @@ fdescribe("GroupedSectionsContainerComponent", () => {
 
   it("should listen to store changes", () => {
     let currentSectionRef = component.currentVersion;
-    dnbStore.notifySectionContainerBulkUpdate("Section Name");
+    dnbStore.notifySectionContainerBulkUpdate(
+      component.currentVersion.section.code
+    );
     expect(currentSectionRef === component.currentVersion).toBe(false);
     const diff = [];
     const compareColumn: Column = {
       isReadOnly: false,
       value: "test",
+      feedbackData: [],
+      feedbackLeft: 0,
     };
     currentSectionRef = component.currentVersion;
     dnbStore.notifySectionContainerColumnUpdate(
-      "Section Name",
+      component.currentVersion.section.code,
       compareColumn,
       diff
     );
     expect(currentSectionRef === component.currentVersion).toBe(false);
   });
 
-  it("remove when method is removed", () => {
-    component.consoleResponseGroup();
-    expect(true).toBe(true);
+  it("should set focus type", () => {
+    component.focusTypeChanged({
+      type: arrowNavigation.up,
+      isTabAction: false,
+    });
+    expect(component.focusType).toEqual({
+      type: arrowNavigation.up,
+      isTabAction: false,
+    });
+  });
+
+  it("should emit navigation event", () => {
+    const spy = spyOn(component.sectionNavigate, "emit");
+    component.sectionNavigateEvt({
+      type: arrowNavigation.up,
+      isTabAction: false,
+    });
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("should focus placeholder", () => {
+    component.isSecondaryMalignancy = true;
+    component.newVersion.codesColumn = {
+      value: "",
+      isReadOnly: false,
+      feedbackData: [],
+      feedbackLeft: 0,
+    };
+    component.sectionNavigateEvt({
+      type: arrowNavigation.up,
+      isTabAction: false,
+    });
+    expect(component.newVersion.codesColumn.focus.hasFocus).toBe(true);
+  });
+
+  it("should emit placeholder navigation", () => {
+    const spy = spyOn(component.sectionNavigate, "emit");
+    component.cellNavigate({ type: arrowNavigation.up, isTabAction: false });
+    expect(spy).toHaveBeenCalled();
+    component.cellNavigate({ type: arrowNavigation.down, isTabAction: false });
+    expect(component.focusType).toEqual({
+      type: arrowNavigation.down,
+      isTabAction: false,
+    });
+  });
+
+  it("should emit feedback", () => {
+    const spy = spyOn(component.feedbackUpdate, "emit");
+    component.feedbackUpdateEvt(1);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("should emit complete", () => {
+    const spy = spyOn(component.toggleCompleted, "emit");
+    component.completeToggle(true);
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("should update compare Section", () => {
+    component.updateCompareSection();
+  });
+
+  it("should confirm undo Section", () => {
+    component.confirmUndoCopySectionGroup();
+  });
+
+  it("should confirm autopopulate for overlaps Section", () => {
+    component.autopopulateOverlapsSection();
+  });
+
+  it("should focus if secondary malignancy", () => {
+    component.focusType = { type: arrowNavigation.down, isTabAction: false };
+    component.isSecondaryMalignancy = true;
+    component.newVersion.codesColumn = {
+      value: "",
+      isReadOnly: false,
+      feedbackData: [],
+      feedbackLeft: 0,
+    };
+    const changes = {
+      focusType: new SimpleChange(
+        null,
+        { type: arrowNavigation.down, isTabAction: false },
+        true
+      ),
+    };
+    component.ngOnChanges(changes);
+    expect(component.focusType).toBe(null);
   });
 });

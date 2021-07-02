@@ -1,0 +1,48 @@
+<div style="width: 400px;">
+  <table class="deletion-grid" style="width: 100%;">
+    <tbody>
+      <tr>
+        <td class="title-table text-left" colspan="2">
+          <div style="margin-bottom: 5px; font-size: 11px; font-weight: bold; color: #3B1E7B" [innerHTML]="getTitle()"></div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div style="max-height: 50vh; overflow: auto;">
+            <table class="table table-hover table-striped table-bordered">
+              <thead *ngIf="options.length > 1">
+                <tr>
+                  <td style="width: 5%;">
+                    <p-checkbox [(ngModel)]="allChecked" binary="true" (onChange)="changeAllChecked($event)" [hidden]="true">
+                    </p-checkbox>
+                  </td>
+                  <td></td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let d of options; let i = index">
+                  <td style="width: 5%;">
+                    <p-checkbox [(ngModel)]="d.checked" binary="true" [disabled]="d.deleted || d.disabled" (onChange)="verifyChecked(i, $event)"></p-checkbox>
+                  </td>
+                  <td>
+                    <span [title]="d.name">
+                      <span *ngIf="i > 0">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                      {{d.name && d.name.length > 35 ? d.name.substring(0, 34) + '... ' : d.name}}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<button type="button" style="width: 48%;" (click)="cancel()" class="btn btn-primary f-11">Cancel</button>
+&nbsp;
+<button type="button" style="width: 48%;" (click)="delete()" [disabled]="checkDisabled()" class="btn btn-primary f-11">Delete</button>
+<br><br>

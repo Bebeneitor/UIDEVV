@@ -27,7 +27,7 @@ export class CcaPoSetupComponent implements OnInit {
   @Input() categoryMappingData: UserTeamCategoryMapDto[]; // list to show the userCategoryMappingData values
   @Input() categoryMappingDataList: UserTeamCategoryMapDto[];// parent list with actual categoryMappingData without any user specific
 
-  @ViewChild('viewGrid') viewGrid: Table;
+  @ViewChild('viewGrid',{static: true}) viewGrid: Table;
 
   cols: any[];
   loading: boolean;

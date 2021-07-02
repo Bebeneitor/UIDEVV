@@ -15,7 +15,7 @@ export class RulesImplementedComponent implements OnInit {
   @Input()
   title: string = "";
 
-  @ViewChild("dt") dt;
+  @ViewChild("dt",{static: true}) dt;
 
   typeView: string = "bubble";
 

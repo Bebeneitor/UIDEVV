@@ -1,0 +1,114 @@
+<p-card class='ecl-table-add-edit'>
+  <div class="text-right" style="right: 15px;">
+    <a nghref="#" style="margin-bottom: 10px;" routerLink="/cure-and-repo/repo/table-admin-list"
+      class="btn btn-sm btn-primary f-11">
+      <i class="fa fa-arrow-left"></i> Back</a>
+  </div>
+
+  <form #tableForm [formGroup]="tableFormGroup" novalidate (ngSubmit)="saveRepoTable()">
+    <div class="row">
+      <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+        <div class="form-group">
+          <label id="tableNameLabel" for="tableName"><span class="required-field-color">*</span>Table Name</label>
+          <input formControlName="tableName" pInputText class="form-control" type="text" />
+          <small class="text-danger"
+            *ngIf="tableFormGroup.get('tableName').errors?.required && tableFormGroup.get('tableName').touched">Required
+            field</small>
+        </div>
+      </div>
+      <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+        <div class="tableDetails">
+          
+          <div class="no-padding-right col-lg-5 col-md-4 col-sm-12 col-xs-12">
+            <div class="form-group">
+              <label id="tableOwnerInDb" for="tableOwnerInDb"><span class="required-field-color">*</span>Table Owner in DB</label>
+              <p-dropdown [options]="tableOwners" placeholder="Select" [style]="{'width':'100%'}"
+                  formControlName="tableOwnerInDb" optionLabel="label" id="tableOwnerInDb" dataKey="value"
+                  (onChange)="ownerChanged();"></p-dropdown>
+              <small class="text-danger"
+                *ngIf="tableFormGroup.get('tableOwnerInDb').errors?.required && tableFormGroup.get('tableOwnerInDb').touched">Required
+                field</small>
+            </div>
+          </div>
+
+          <div class="no-padding-right col-lg-5 col-md-4 col-sm-12 col-xs-12">
+            <div class="form-group">
+              <label id="tableNameInDb" for="tableNameInDb"><span class="required-field-color">*</span>Table Name in
+                DB</label>
+              <p-dropdown [options]="tableNamesDb" placeholder="Select" [style]="{'width':'100%'}"
+                  formControlName="tableNameInDb" optionLabel="label" id="tableNameInDb" dataKey="value">
+              </p-dropdown>
+              <small class="text-danger"
+                *ngIf="tableFormGroup.get('tableNameInDb').errors?.required && tableFormGroup.get('tableNameInDb').touched">Required
+                field</small>
+            </div>
+          </div>
+
+          <div class="button-col col-lg-2 col-md-4 col-sm-12 col-xs-12">
+            <button class="button-validate" (click)="validateRepoTable()" pButton type="button" label="Validate"
+              [disabled]="tableFormGroup.status === 'DISABLED' || validaButtonInactive"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="text-left">
+          <button type="button" class="btn btn-sm btn-primary f-11" style="padding: 5px;" 
+            [disabled]="tableFormGroup.invalid || tableFormGroup.status === 'DISABLED' || formInactive"
+            (click)="showNewAttributeTemplate(null, 0)">
+            <i class="fa fa-plus"></i> Add new attribute
+          </button>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col">
+        <div class="row">
+          <div class="col"><h5>Search criteria added</h5></div>
+         </div>
+        
+        <ecl-table #searchCriteriaTable [tableModel]="searchCriteriaTableModel"
+          (onAcctionIcon)="onClickEditAttribute($event)" (onAcctionButton)="changeStatusAttributeTemplate($event)">
+        </ecl-table>
+      </div>
+
+    </div>
+    <br>
+
+    <div class="row">
+      <div class="col" style="margin-bottom: 10px; margin-top:10px" Id="provisonalRows">
+        <div class="float-right">
+          <button id="submitButton" type="submit" class="btn btn-sm btn-primary f-11"
+            [disabled]="tableFormGroup.invalid || tableFormGroup.status === 'DISABLED' || formInactiveSave">
+            <i class="fa fa-save"></i> Save
+          </button> &nbsp;
+        </div>
+      </div>
+    </div>
+  </form>
+
+</p-card>
+
+<p-dialog [header]="headerText" [(visible)]="saveDisplay" appendTo="body" [draggable]="false" [resizable]="false"
+  [modal]="true">
+  <p>{{message}}</p>
+  <p-footer>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="text-center">
+          <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+            (click)="this.saveDisplay = false " label="OK"></button>
+        </div>
+      </div>
+    </div>
+  </p-footer>
+</p-dialog>
+
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" />
+    <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+  </div>
+</p-blockUI>

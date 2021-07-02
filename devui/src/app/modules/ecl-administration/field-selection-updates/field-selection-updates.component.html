@@ -38,6 +38,10 @@
           </div>
         </div>
         <div class="col-md-10">
+          <div *ngIf="ifPolicyPackage">           
+              <app-policy-package [fieldSaveButton]="fieldSaveButton" (saveButtonChange)="saveButtonEvent($event)">
+              </app-policy-package>
+          </div>
           <div *ngIf="ifReference">
             <app-reference-source [fieldSaveButton]="fieldSaveButton" (saveButtonChange)="saveButtonEvent($event)">
             </app-reference-source>

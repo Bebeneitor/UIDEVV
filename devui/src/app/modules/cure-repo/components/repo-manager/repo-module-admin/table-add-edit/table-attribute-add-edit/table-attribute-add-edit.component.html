@@ -1,0 +1,226 @@
+<form [formGroup]="attributeTemplateForm">
+  <div class="row">
+    <!-- Attributes Label -->
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <div class="form-group nopadding">
+        <label for="attributeLabel"><span class="required-field-color">*</span>Attribute label</label>
+        <input formControlName="attributeLabel" pInputText class="form-control" type="text" id="attributeLabel" />
+        <small class="text-danger"
+          *ngIf="attributeLabelControl.errors?.required && attributeLabelControl.touched">Required field</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <!-- Data base column link -->
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <div class="form-group nopadding">
+        <label for="databaseColumnLinked"><span class="required-field-color">*</span>Database column linked</label>
+        <input formControlName="databaseColumnLinked" pInputText eclTextToUppercase class="form-control" type="text"
+          id="databaseColumnLinked" />
+        <small class="text-danger"
+          *ngIf="databaseColumnLinkedControl.errors?.required && databaseColumnLinkedControl.touched">Required
+          field</small>
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="row form-group nopadding">
+
+    <!-- Search criteria and report check boxes -->
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <p-checkbox (onChange)="onReportCheckBoxChange($event)" formControlName="isReportColumn"
+            label="Report column">
+          </p-checkbox>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group nopadding">
+
+    <!-- Mandatory radio buttons -->
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <div class="row">
+        <div class="col"> <label for="mandatory" class="custom-label"><span
+              class="required-field-color">*</span>Mandatory</label></div>
+      </div>
+
+      <div class="row">
+        <div class="col-3">
+          <p-radioButton name="mandatoryGroup" formControlName="mandatory" [value]="true" label="Yes"
+            inputId="mandatory1"></p-radioButton>
+        </div>
+        <div class="col-3">
+          <p-radioButton name="mandatoryGroup" formControlName="mandatory" [value]="false" label="No"
+            inputId="mandatory2"></p-radioButton>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col"> <small class="text-danger"
+            *ngIf="mandatoryControl.errors?.required && mandatoryControl.touched">Required
+            field</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search criteria selected -->
+  <div class="row">
+    <div class="col-12">
+      <div class="row">
+        <div class="col">
+          <label for="uiDataTypes" class="custom-label"><span class="required-field-color">*</span>Criteria UI
+            type</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <p-dropdown [options]="uiDataTypes" placeholder="Select" [style]="{'width':'100%'}"
+            formControlName="uiDataTypes" optionLabel="label" id="uiDataTypes" dataKey="value"
+            (onChange)="onUiDataTypeChange($event.value.value)"></p-dropdown>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small
+            [ngStyle]="{'color': (uiDataTypesControl.errors?.required && uiDataTypesControl.touched) ? 'red' : 'white'}">Required
+            field</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- When radio button is selected -->
+  <div class="row" *ngIf="uiDataTypesControl.value?.value === 'radio_button'">
+    <div class="col" style="max-height: 150px;
+      overflow: auto;">
+
+      <hr>
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-sm btn-primary f-11" style="height: 30px;" (click)="addRadioButton()">
+            <span><em class="fa fa-plus"></em> Add</span>
+          </button> &nbsp;
+        </div>
+      </div>
+
+      <div class="row" formArrayName="radioButtons" *ngFor="let control of radioButtonsControl.controls; index as i">
+
+        <div class="col-12">
+
+          <div class="row">
+            <div class="col">
+              <label for="attributeLabel"><span class="required-field-color">*</span>Option {{ i + 1}}</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-11" style="padding-right: 0px;">
+              <input [formControl]="radioButtonsControl.controls[i]" pInputText class="form-control" type="text"
+                id="attributeLabel" style="border-top-right-radius: 0; border-bottom-right-radius: 0;" />
+            </div>
+            <div class="col-1" style="padding-left: 0px;">
+              <button style="height: 30px; border-bottom-left-radius: 0; border-top-left-radius: 0;"
+                class="btn btn-sm btn-primary f-11" (click)="removeRadioButton(i)">
+                <span><em class="fa fa-times"></em></span>
+              </button> &nbsp;
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <small class="text-danger" *ngIf="control.errors?.required && control.touched">Required field</small>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- When Dropdown is selected -->
+  <div class="row" *ngIf="uiDataTypesControl.value?.value === 'dropdown'">
+    <div class="col" style="max-height: 150px;
+      overflow: auto;">
+
+      <hr>
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-sm btn-primary f-11" style="height: 30px;" (click)="addDropDownElement()">
+            <span><em class="fa fa-plus"></em> Add</span>
+          </button> &nbsp;
+        </div>
+      </div>
+
+      <div class="row" formArrayName="dropDownOptions"
+        *ngFor="let control of dropDownOptionsControl.controls; index as i">
+
+        <div class="col-12">
+
+          <div class="row">
+            <div class="col">
+              <label for="attributeLabel"><span class="required-field-color">*</span>Option {{ i + 1}}</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-11" style="padding-right: 0px;">
+              <input [formControl]="dropDownOptionsControl.controls[i]" pInputText class="form-control" type="text"
+                id="attributeLabel" style="border-top-right-radius: 0; border-bottom-right-radius: 0;" />
+            </div>
+            <div class="col-1" style="padding-left: 0px;">
+              <button style="height: 30px; border-bottom-left-radius: 0; border-top-left-radius: 0;"
+                class="btn btn-sm btn-primary f-11" (click)="removeDropDownElement(i)">
+                <span><em class="fa fa-times"></em></span>
+              </button> &nbsp;
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <small class="text-danger" *ngIf="control.errors?.required && control.touched">Required field</small>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- When check box is selected -->
+  <!-- <div class="row" *ngIf="isSearchCriteriaControl.value?.length > 0 && uiDataTypesControl.value?.value === 'checkbox'">
+    <div class="col">
+
+      <div class="form-group nopadding">
+        <label for="checkbox"><span class="required-field-color">*</span>Checkbox label</label>
+        <input formControlName="checkbox" pInputText class="form-control" type="text"
+          id="checkbox" />
+        <small class="text-danger"
+          *ngIf="checkboxControl.errors?.required && checkboxControl.touched">Required
+          field</small>
+      </div>
+
+    </div>
+  </div> -->
+
+  <div class="row">
+    <div class="col" style="margin-bottom: 10px; margin-top:10px" Id="provisonalRows">
+      <div class="float-right">
+        <button class="btn btn-primary" 
+          [disabled]="attributeTemplateForm.invalid || formInactiveFlag || columnNameInvalid"
+          (click)="updateAttribute()">
+          <span *ngIf="buttonFlag"><em class="fa fa-plus"></em> Add</span>
+          <span *ngIf="!buttonFlag"><em class="fa fa-save"></em> Update</span>
+        </button> &nbsp;
+      </div>
+    </div>
+  </div>
+</form>

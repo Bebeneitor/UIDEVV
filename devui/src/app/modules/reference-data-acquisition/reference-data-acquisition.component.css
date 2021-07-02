@@ -119,12 +119,6 @@ textarea {
 :host>>>.span-centered{
   text-align:left;
 }
-.block-img-loading {
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  width: 120px
-}
 
 :host::ng-deep.pi-spinner:before {
   content: "";

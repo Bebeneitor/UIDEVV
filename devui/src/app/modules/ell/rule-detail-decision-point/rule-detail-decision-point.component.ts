@@ -20,12 +20,14 @@ export class RuleDetailDecisionPointComponent implements OnInit {
   tableDetailsDtoList: TableDetailDto[];
   midRule: string;
   localConstants = Constants;
+  midRuleVersion: number;
   
   //Mandatory fields.
   private source: string;        //Origen screen, is mandatory only for App Route.
   private type: string;          //SMALL or LONG.
   private releaseLogKey: number; //Release log Key.
   private midRuleKey: number;    //Mid Rule Key.
+  private ruleIdFromPreviousScreen: number;
 
   //Dependents fields.
   private decisionKey: number;   
@@ -46,7 +48,9 @@ export class RuleDetailDecisionPointComponent implements OnInit {
       //When is opened by App Route.
       this.activatedRoute.queryParams.subscribe(params => {
         this.source = params['source'] as string;
+        this.ruleIdFromPreviousScreen = params['RI'] as number;
         this.decisionKey = params['decisionKey'] as number;
+        this.midRuleVersion = params['version'] as number;
       });
       this.activatedRoute.data.subscribe(params => {
         this.type = params['type'] as string;
@@ -78,13 +82,15 @@ export class RuleDetailDecisionPointComponent implements OnInit {
         this.ruleId = resolveData.eclRuleId;
       }
       this.blockedDocument = false;
-    }).catch(rejectData => {
-      this.toastService.messageError(Constants.TOAST_SUMMARY_ERROR, rejectData);
+    },error=>{      
+      if(this.source === Constants.LIBRARY_RULE_SCREEN){                
+        this.toastService.messageSuccess(Constants.TOAST_SEVERITY_INFO, "MidRule "+this.midRuleKey+"."+this.midRuleVersion+ " is not found.");
+        this.returnPreviousScreen();        
+      }                
       this.tableDetailsDtoList = this.ellRuleDetailService.fillTableDetailDtoList(type, new EllRuleDto());
-      this.blockedDocument = false;
+      this.blockedDocument = false;      
     });
   }
-
 
   /**
   * This method is used by return button.
@@ -99,6 +105,10 @@ export class RuleDetailDecisionPointComponent implements OnInit {
         break;
       case Constants.DECISION_POINT_SCREEN:
           this.router.navigate([`/decision-point/${this.releaseLogKey}/${this.decisionKey}`]);
+        break;
+      case Constants.LIBRARY_RULE_SCREEN:
+        this.router.navigate(['/item-detail', this.util.encodeString(this.ruleIdFromPreviousScreen.toString()), 'RULE'],
+        { queryParams: { source: Constants.RULE_CATALOG_SCREEN } });
         break;
       default:
       this.router.navigate([`/home`]);

@@ -1,0 +1,326 @@
+<p-blockUI [blocked]="loading">
+	<div class="img-loading text-center">
+		<img src="assets/img/loading.gif" />
+		<p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+	</div>
+</p-blockUI>
+<div class="preview-pdg col-md-12 mt-3">
+	<div class="row ">
+		<div class="col-md-9"></div>
+		<div class="col-md-3"><button class="btn btn-primary pull-right" 
+				(click)="downloadTemplate()">Download Template</button></div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-12">
+			<label>Title<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.title}}</div>
+		</div>
+	</div>
+	<div class="row mt-2" [hidden]="!isHpp">
+		<div class="col-md-3">
+			<label>HPP MR<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.hppMr}}</div>
+		</div>
+		<div class="col-md-9">
+			<label>HPP Rule Description<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.hppRuleDesc}}</div>
+
+		</div>
+	</div>
+	<div class="row mt-2" [hidden]="!isHpp">
+		<div class="col-md-12">
+			<label>MSSP Revisions<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.revisions}}</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-9">
+			<label>{{headingLabels.RULEDESC_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<div>
+				<div class="readonly-text">{{_previewRuleInfo?.unresolvedSubRuleDesc}}</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div>
+				<label>State<span class="required-field-color">*</span></label>
+				<div class="readonly-text">{{_previewRuleInfo?.states}}</div>
+			</div>
+			<div>
+				<label>{{headingLabels.CLAIM_TYPE_LABEL(heading)}}<span class="required-field-color">*</span></label>
+				<div class="readonly-text">{{_previewRuleInfo?.claimTypes}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-9">
+			<label>Code Description Examples<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.codeDescription}}</div>
+		</div>
+		<div class="col-md-3">
+			<div>
+				<label>Sub Rule DOS From<span class="required-field-color">*</span></label>
+				<div class="readonly-text">{{_previewRuleInfo?.dosFrom}}</div>
+			</div>
+			<div>
+				<label>Sub Rule DOS To<span class="required-field-color">*</span></label>
+				<div class="readonly-text">{{_previewRuleInfo?.dosTo}}</div>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-12">
+			<label>{{headingLabels.REFDETAIL_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.referenceDetails}}</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-6">
+			<label>Primary Reference Title<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.primaryRefTitle}}</div>
+		</div>
+		<div class="col-md-6">
+			<label>Secondary Reference Title</label>
+			<div class="readonly-text">{{_previewRuleInfo?.secondaryRefTitle}}</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-6">
+			<label>CV Code<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.cvCode}}</div>
+		</div>
+		<div class="col-md-3">
+			<label>LOB<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.lob}}</div>
+		</div>
+		<div class="col-md-3">
+			<label>{{headingLabels.REASON_CODE_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<div class="readonly-text">
+				{{_previewRuleInfo?.reasonCode}}</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-6">
+			<label>Industry Update Required<span class="required-field-color">*</span></label>
+			<div class="readonly-text">
+				{{_previewRuleInfo?.iuRequired}}</div>
+		</div>
+		<div class="col-md-6">
+			<label>{{headingLabels.SCRIPT_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.script}}</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-6">
+			<label>{{headingLabels.RATIONALE_LABEL(heading)}}<span class="required-field-color">*</span></label>
+			<div class="readonly-text">{{_previewRuleInfo?.rationale}}</div>
+		</div>
+		<div class="col-md-6">
+			<label>{{headingLabels.NOTE_LABEL(heading)}}</label>
+			<div class="readonly-text">{{_previewRuleInfo?.subRuleNotes}}</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-12 mb-2"><label>Duplicate Check<span class="required-field-color">*</span></label></div>
+		<div class="col-md-12">
+			<div class="col-md-12 preview-border">
+				<div class="row">
+					<div class="col-md-3">
+						<label class="mr-3">CCI</label>
+						<span class="readonly-radio">{{_previewRuleInfo?.isCciDuplicate}}</span>
+					</div>
+					<div class="col-md-3 p-0">
+						<label class="mr-3">RMI</label>
+	
+						<span class="readonly-radio">{{_previewRuleInfo?.isRmiDuplicate}}</span>
+					</div>
+					<div class="col-md-3">
+						<label class="mr-3">BO</label>
+	
+						<span class="readonly-radio">{{_previewRuleInfo?.isBoDuplicate}}</span>
+					</div>
+					<div class="col-md-3">
+						<label class="mr-3">Max Units</label>
+	
+						<span class="readonly-radio">{{_previewRuleInfo?.isMaxUnitsDuplicate}}</span>
+					</div>
+				</div>
+				<div class="row mt-2">
+					<div class="col-md-3">
+						<label class="mr-3">Rules Search</label>
+	
+						<span class="readonly-radio">{{_previewRuleInfo?.isRulesSearchDuplicate}}</span>
+					</div>
+					<div class="col-md-3 p-0">
+						<label class="mr-3">Temp Rule Database</label>
+						<span class="readonly-radio">{{_previewRuleInfo?.isTempRuleDbDuplicate}}</span>
+					</div>
+					<div class="col-md-4">
+						<label class="mr-3">PDG Tracker Report</label>
+						<span class="readonly-radio">{{_previewRuleInfo?.isPdgTrackerReportDuplicate}}</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-3">
+		<div class="col-md-12">
+			<div class="col-md-12 col-border">
+				<div class="mt-1 mb-2">State Reference Information<span class="required-field-color">*</span></div>
+				<div class="top-35" *ngIf="!isRefExist" class="div-no-data">
+					<img src="assets/img/no-data.png" class="img-no-data" alt="No data" />
+					<p class="no-data">No State References</p>
+				</div>
+				<p-tabView *ngIf="isRefExist" id="tabView" class="reference-pr">
+					<div *ngFor="let reference of _previewRuleInfo?.pdgReferences; let i = index">
+						<p-tabPanel [header]="'Reference '+(i+1)" [closable]="false" [selected]="i == 0">
+							<div>
+								<div class="row">
+									<div class="col-12 pl-0">
+										<label>Reference Name<span class="required-field-color">*</span></label>
+										<div class="readonly-text">{{reference?.referenceName }}</div>
+									</div>
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-6 pl-0">
+										<label>Reference Source<span class="required-field-color">*</span></label><br />
+										<div class="readonly-text">{{reference?.referenceSource}}</div>
+									</div>
+									<div class="col-md-6 pl-0">
+										<label>Information from State</label>
+										<div class="readonly-text">{{reference?.infoFromState}}</div>
+									</div>
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-6 pl-0">
+										<label>Section</label>
+										<div class="readonly-text">{{reference?.section}}</div>
+									</div>
+									<div class="col-md-6 pl-0">
+										<label>Page</label>
+										<div class="readonly-text">{{reference?.page}}</div>
+									</div>					
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-6 pl-0">
+										<label>Link</label>
+    									<div class="readonly-text">{{reference?.link}}</div>
+									</div>
+									<div class="col-md-6 pl-0">
+										<label>Path</label>
+										<div class="readonly-text">{{reference?.referencePath}}</div>
+									</div>
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-12 pl-0">
+										<label>Screenshot1</label>
+										<div class="readonly-text">{{reference?.comments1}}</div>
+									</div>	
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-12 pl-0">
+										<app-pdg-preview-file [screenshot]="reference?.screenshot1">
+										</app-pdg-preview-file>
+									</div>	
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-12 pl-0">
+										<label>Screenshot2</label>
+										<div class="readonly-text">{{reference?.comments2}}</div>
+									</div>	
+								</div>
+								<div class="row mt-2">
+									<div class="col-md-12 pl-0">
+										<app-pdg-preview-file [screenshot]="reference?.screenshot2">
+										</app-pdg-preview-file>
+									</div>	
+								</div>								
+								<div class="row mt-2">							
+									<div class="col-md-12 mt-1 pl-0">
+										<label>Attachments</label>
+										<app-pdg-preview-file [fileList]="reference?.attachmentFiles">
+										</app-pdg-preview-file>
+									</div>
+								</div>
+							</div> 
+						</p-tabPanel>
+					</div>
+				</p-tabView>
+			</div>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col-md-12 ">
+		  <label>Key Rule Logic Parameter(s)</label>
+		  <div class="readonly-text no-border">{{_previewRuleInfo?.keyRuleLogic}}</div>
+		</div>
+	  </div>
+	  <div class="row mt-2">
+		<div class="col-md-12">
+			<label>Client Grid<span class="required-field-color">*</span></label>
+			<app-pdg-preview-file [fileList]="_previewRuleInfo?.clientGridFiles" (isLoaded)="cgridFilesLoaded=true;isLoadingDone();">
+			</app-pdg-preview-file>
+		</div>
+	  </div>
+	  <div class="row mt-3 mb-1">
+		<div class="col-md-12">
+			<label style="text-decoration: underline; font-weight: bold; font-size:14px">Additional Information</label>
+			<br/><br/>
+			<label>Rule Relationships or Comments</label>
+			<div id="ruleRelationships" class="readonly-text  no-border"></div>
+		</div>
+	  </div>
+	  <div class="row mt-3  mb-1">
+		<div class="col-md-12">
+			<label>CPT Distribution File(s)<span class="required-field-color">*</span></label>
+			<app-pdg-preview-file [fileList]="_previewRuleInfo?.cptFiles" (isLoaded)="cptFilesLoaded=true;isLoadingDone();">
+			</app-pdg-preview-file>
+		</div>
+	  </div>
+	  <div class="row mt-3 mb-1">
+		<div class="col-md-12">
+			<label>Code Coverage</label>
+			<div id="codeCoverage" class="readonly-text  no-border"></div>
+			<app-pdg-preview-file (isLoaded)="codeFilesLoaded=true;isLoadingDone();" [fileList]="_previewRuleInfo?.codeCoverageFiles">
+			</app-pdg-preview-file>
+		</div>
+	  </div>
+	  <div class="row mt-3 mb-1">
+		<div class="col-md-12">
+			<label>Claim Type</label>
+			<div id="claimTypeInfo" class="readonly-text  no-border"></div>
+			<app-pdg-preview-file (isLoaded)="claimFilesLoaded=true;isLoadingDone();" [fileList]="_previewRuleInfo?.claimTypeFiles">
+			</app-pdg-preview-file>
+		</div>
+	  </div>
+	  <div class="row mt-3 mb-1">
+		<div class="col-md-12">
+			<label>Sub Rule DOS From</label>
+			<div id="dosFromInfo" class="readonly-text  no-border"></div>
+			<app-pdg-preview-file (isLoaded)="dosFilesLoaded=true;isLoadingDone();" [fileList]="_previewRuleInfo?.subRuleDosFiles">
+			</app-pdg-preview-file>
+		</div>
+	  </div>
+	  <div class="row mt-3 mb-1">
+		<div class="col-md-12">
+			<label>Other</label>
+			<div id="otherInfo" class="readonly-text  no-border"></div>
+			<app-pdg-preview-file (isLoaded)="otherFilesLoaded=true;isLoadingDone();" [fileList]="_previewRuleInfo?.otherInfoFiles">
+			</app-pdg-preview-file>
+		</div>
+	  </div>
+	  <div class="row mt-3 mb-1">
+		<div class="col-md-12">
+			<label>ITU Review</label>
+			<div id="ituReview" class="readonly-text  no-border"></div>
+			<app-pdg-preview-file (isLoaded)="ituFilesLoaded=true;isLoadingDone();" [fileList]="_previewRuleInfo?.ituFiles">
+			</app-pdg-preview-file>
+		</div>
+	  </div>
+	  <div class="row mt-3">
+		<div class="col-md-12">
+			<label>ELL Team Note</label>
+			<div id="ellTeamNote" class="readonly-text  no-border"></div>
+		</div>
+	  </div>
+</div>

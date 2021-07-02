@@ -1,0 +1,74 @@
+<p-dialog
+  [header]="midRuleSetUp.headerDialog"
+  [(visible)]="openDialog"
+  (onHide)="dialogHidden()"
+  [modal]="true"
+>
+  <div class="dialog-content">
+    <div class="midRuleRow">
+      <div class="mid-rule-header">
+        <h6>{{ midRuleSetUp.midRuleTitle1 }}</h6>
+        <div class="readonly" *ngIf="midRuleSetUp.showLockedBy">
+          Read Only Mode
+          <label class="locked-by-user">
+            {{ midRule.lockDetail.lockedBy }}
+          </label>
+        </div>
+      </div>
+      <input
+        style="width: 100%"
+        [disabled]="midRuleSetUp.disableTitle1"
+        type="text"
+        pInputText
+        [(ngModel)]="midRule.template"
+        appMaxLength="200"
+      />
+    </div>
+    <div class="dialog-body">
+      <div class="midRuleRow">
+        <label>
+          <h6>{{ midRuleSetUp.midRuleText1 }}</h6>
+        </label>
+        <textarea
+          [disabled]="midRuleSetUp.disableText1"
+          pInputTextarea
+          autoResize="autoResize"
+          [(ngModel)]="midRule.templateInformation"
+          class="midRuleSizeTextArea"
+          appMaxLength="10000"
+        ></textarea>
+      </div>
+      <div>
+        <label>
+          <h6>{{ midRuleSetUp.midRuleText2 }}</h6>
+        </label>
+        <textarea
+          [disabled]="midRuleSetUp.disableText2"
+          pInputTextarea
+          autoResize="autoResize"
+          [(ngModel)]="midRule.reasonCode"
+          class="midRuleSizeTextArea"
+          appMaxLength="4000"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+
+  <p-footer>
+    <div class="dnb-page-btns">
+      <button
+        class="back-button"
+        *ngIf="midRuleSetUp.showButton2"
+        (click)="close()"
+      >
+        {{ midRuleSetUp.textButton2 }}
+      </button>
+      <button
+        (click)="addMidRule()"
+        *ngIf="!midRuleSetUp.showLockedBy && midRuleSetUp.showButton1"
+      >
+        {{ midRuleSetUp.textButton1 }}
+      </button>
+    </div>
+  </p-footer>
+</p-dialog>

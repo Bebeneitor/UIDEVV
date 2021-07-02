@@ -1,0 +1,12 @@
+<div class="col-12 compare-div">
+  <div class="row">
+      <div class="col-6 pr-0 pl-0">
+        <div class="compare-head text-center tagged-result-head"><span>TAGGED RULES</span></div>
+        <compare-table id="taggedRuleTable" class="taggedResult" #taggedRules [tableModel]="tagResultTableConfig" (onServiceCall)="onServiceCallCompare($event)"></compare-table>
+      </div>
+      <div class="col-6 pl-0 pr-0">
+        <div class="compare-head text-center new-result-head"><span>NEW RESULTS</span><span>({{totalNewRules}})</span></div>
+        <compare-table id="newResultTable" class="newResult" #newResults [tableModel]="newResultTableConfig" (onServiceCall)="onServiceCallCompare($event)"></compare-table>
+      </div>
+  </div>
+</div>

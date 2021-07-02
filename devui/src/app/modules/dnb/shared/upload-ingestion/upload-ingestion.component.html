@@ -1,0 +1,86 @@
+<div class="fileUpload">
+  <div *ngIf="isIngesting" class="overlay">
+    <div>
+      <i class="fa fa-spinner fa-spin fa-4x"></i>
+      <p style="font-size: 12px; color: #fff">
+        We are fetching the content from your document. This may take some
+        minutes. Please wait...
+      </p>
+    </div>
+  </div>
+  <div class="sections-box" *ngIf="dataIngested">
+    <h3>Summary</h3>
+    <ul class="notes checkmarks">
+      <li>
+        <span class="ingested-yes"><i class="fa fa-check"></i></span>Found
+      </li>
+      <li>
+        <span class="ingested-no"><i class="fa fa-check"></i></span>Not Found /
+        Error
+      </li>
+    </ul>
+    <div class="sections-content">
+      <ul class="checkmarks">
+        <li *ngFor="let item of ingestedData">
+          <span [ngClass]="item.ingested ? 'ingested-yes' : 'ingested-no'"
+            ><i class="fa fa-check"></i
+          ></span>
+          {{ item.name }}
+        </li>
+      </ul>
+    </div>
+    <p>
+      Are you sure you want to replace all current<br />
+      sections content with the uploaded DRD document?
+    </p>
+    <div class="upload-footer">
+      <button class="dnb-btn" (click)="replaceContent()">Yes</button>
+      <button class="dnb-btn cancel" (click)="cancel()">No</button>
+    </div>
+  </div>
+  <div *ngIf="!dataIngested">
+    <p-fileUpload
+      #upload
+      name="upload_version[]"
+      accept=".docx"
+      maxFileSize="10000000"
+      (uploadHandler)="uploadHandler($event)"
+      (onSelect)="onSelect($event)"
+      [showUploadButton]="false"
+      [showCancelButton]="false"
+      [customUpload]="true"
+    >
+      <ng-template pTemplate="content">
+        <h3>Upload DRD</h3>
+        <div class="upload-header">
+          <h2><sup>*</sup> Drug Name</h2>
+          <input [(ngModel)]="drugName" (ngModelChange)="nameChange($event)" [readonly]="!editable" />
+        </div>
+        <div
+          class="upload-box"
+          (click)="(upload.open)"
+          [ngClass]="{ 'upload-ready': canIngest }"
+        >
+          <i class="fa fa-upload fa-3x"> </i>
+          <p *ngIf="!canIngest">
+            Drop a file here or click to upload<br />
+            Max. upload size: 10MB<br />Allowed extensions: .docx
+          </p>
+          <p *ngIf="canIngest">Upload {{ fileName }}</p>
+        </div>
+        <div class="upload-footer">
+          <button class="simple-link" (click)="downloadTemplate()">
+            Download Template
+          </button>
+          <button
+            class="dnb-btn"
+            (click)="getContent()"
+            [disabled]="!canIngest"
+          >
+            Get Content
+          </button>
+        </div>
+      </ng-template>
+    </p-fileUpload>
+  </div>
+</div>

@@ -1,0 +1,172 @@
+.referenceTabPanel .text-area{
+    width: 100%;
+    height: 60px;
+    border: 1px solid #31006F;
+}
+.width100{
+    width:100%;
+}
+::ng-deep .reference .ui-tabview .ui-tabview-panels{
+    
+    padding-bottom: 20px;
+}
+
+.plus{
+    position: absolute;
+    top: -11px;
+    font-size: 33px;
+    right: 28px;
+}
+
+.file-template{
+    border: 1px solid #31006F;
+    padding: 32px;
+    font-size: 11px !important;
+    text-align: center;
+    height: 84px;
+}
+.readonly-text{
+    width: 100%;
+    min-height: 84px;
+    border:none !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+}
+.readonly-field{
+    width: 100%;
+    min-height: 20px;
+    border:none !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+}
+::ng-deep .reference .ui-tabview{
+    padding:0 !important;
+}
+
+.col-border{
+    border: 2px solid #c8c8c8 !important;
+}
+
+:host ::ng-deep .ui-button.ui-button-text-icon-left .ui-button-text {
+    background-color: transparent;
+    text-align: end;
+    font-size: 12px;
+    text-decoration: underline;
+    width: 80px;
+    padding: 0px 0px 5px 0px;
+  }
+  
+  :host ::ng-deep .ui-dialog-footer.ui-widget-content.ng-star-inserted:host ::ng-deep .ui-fileupload .ui-fileupload-buttonbar .ui-button {
+    background-color: transparent !important;
+    color: black !important;
+    margin-right: 0px;
+  }
+  
+  :host ::ng-deep .ui-button {
+    background-color: transparent !important;
+    color: black !important;
+  }
+  
+  :host ::ng-deep .ui-fileupload-buttonbar {
+    padding: 0;
+  }
+  
+  :host ::ng-deep .ui-button-icon-left.ui-clickable.pi.pi-plus {
+    display: none;
+  }
+  
+  :host ::ng-deep .ui-fileupload.ui-widget.ng-star-inserted {
+    margin-top: -20px;
+    width: 100%;
+  }
+  
+  :host ::ng-deep .ui-fileupload-buttonbar.ui-widget-header.ui-corner-top {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  :host ::ng-deep .ui-fileupload-buttonbar button:nth-child(1) {
+    display: none;
+  }
+  
+  :host ::ng-deep .ui-fileupload-files {
+    font-size: 12px;
+  }
+  
+  :host ::ng-deep.ui-inputtext {
+    background-color: transparent !important;
+    text-overflow: ellipsis;
+  }
+  
+  ::ng-deep p-fileUpload .ui-fileupload-row>div:first-child {
+    display: none !important;
+  }
+  
+  ::ng-deep p-fileUpload .ui-fileupload-row>div:last-child {
+    position: absolute;
+    right: 0 !important;
+  }
+  
+  ::ng-deep p-fileUpload .ui-fileupload-row>div>button.ui-button.ui-widget.ui-button-icon-only,
+  ::ng-deep p-dataView .ui-button.ui-widget.ui-button-icon-only {
+    height: 25px !important;
+    width: 25px !important;
+  }
+  
+  ::ng-deep p-dataView .ui-dataview-header.ui-widget-header.ui-corner-top {
+    display: none !important;
+  }
+  
+  ::ng-deep p-dataView .ui-dataview-content.ui-widget-content {
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+  }
+  
+  ::ng-deep p-fileUpload .ui-fileupload-content.ui-widget-content.ui-corner-bottom {
+    border-radius: unset !important;
+    min-height: 50px !important;
+  }
+  
+  ::ng-deep p-fileUpload .ui-fileupload-content {
+    border-radius: unset !important;
+    min-height: 50px !important;
+  }
+  
+  ::ng-deep .provisional-rule-codes p-dataView.grey-box .ui-dataview-content.ui-widget-content {
+    opacity: 0.5;
+    background: #F5F5F5;
+    border: 1px solid gray;
+  }
+
+  /***File deletion warning dialog***/
+  .message-bold {
+    font-weight: bold;
+  }
+  
+  .message-center {
+    text-align: center;
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+  
+  .icon-float-left {
+    float: left;
+    font-size: 2em;
+    color: red;
+  }
+  
+  .confirmDialog {
+    z-index: 1002;
+    left: 550px;
+    top: 350px;
+    transform: none;
+    opacity: 1;
+  }
+
+  .ref-input{
+    display:block;
+    width: 100%;
+  }

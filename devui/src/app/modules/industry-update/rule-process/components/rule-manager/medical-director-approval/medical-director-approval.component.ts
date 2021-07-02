@@ -33,7 +33,7 @@ const TOAST_RULES_CHANGED_SUCCESS = 'Rules successfully changed:';
 export class MedicalDirectorApprovalComponent implements OnInit {
   constants = Constants;
   
-  @ViewChild('peerReviewTable') peerReviewTable: EclTableComponent;
+  @ViewChild('peerReviewTable',{static: true}) peerReviewTable: EclTableComponent;
 
   public keyUp = new Subject<KeyboardEvent>();
   private keyUpSubscription: Subscription;
@@ -144,7 +144,7 @@ export class MedicalDirectorApprovalComponent implements OnInit {
             if (dialogRef) {
               dialogRef.onClose.subscribe(() => {
        
-                this.peerReviewTable.refreshTable();
+                this.peerReviewTable.resetDataTable();
                 let dataList = this.peerReviewTable.value;
                 let selectedLocalRules: any[] = [];
                 this.selectedRules.forEach((rule: any) => {
@@ -163,7 +163,8 @@ export class MedicalDirectorApprovalComponent implements OnInit {
     case "instanceName":
       this.dialogService.open(ReferenceAnalysisComponent, {
         data: {
-          instanceId: event.row.instanceId
+          instanceId: event.row.instanceId,
+          codesType: event.row.codesType == null ? Constants.HCPCS_CODE_TYPE : event.row.codesType
         },
         header: 'Reference Analysis',
         width: '80%',
@@ -198,7 +199,7 @@ refreshEclTable() {
   this.selectedRules = [];
   this.peerReviewTable.selectedRecords = [];
   this.peerReviewTable.savedSelRecords = [];
-  this.peerReviewTable.refreshTable();
+  this.peerReviewTable.resetDataTable();
 }
 
  /**

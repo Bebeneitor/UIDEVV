@@ -1,0 +1,8 @@
+::ng-deep .user-menu:hover {
+    background-color: #F7F7F7 !important;
+}
+
+::ng-deep .ui-menu.ui-widget.ui-widget-content.ui-corner-all.ui-menu-dynamic {
+    right: 0px !important;
+    left: unset !important;
+}

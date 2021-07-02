@@ -1,0 +1,20 @@
+<div class="fluid-dialog">
+  <div class="row">
+    <div class="col-8 fluid-column fluid-margin">
+      <label class="fluid-font-size">Tag Name</label>
+      <input name="newTagName" pInputText [(ngModel)]="createNewTagRequest.tagName" placeholder="Enter New Tag Name" (keyup)="onTypeNewTagName()"
+        class="fluid-font-size fluid-text-width" />
+      <div *ngIf="showErrorMessage">
+        <span class="fluid-error-text">{{duplicateMessage}}</span>
+      </div>
+    </div>
+
+  </div>
+  <br>
+  <br>
+  <br>
+  <div class="row button-container fluid-button fluid-margin">
+    <button class="btn btn-primary" (click)="cancelNewTagDialog()">Cancel</button>
+    <button class="btn btn-primary" [disabled]="fieldSaveButton" (click)="saveTag()">Save</button>
+  </div>
+</div>

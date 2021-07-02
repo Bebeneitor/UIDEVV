@@ -4,10 +4,12 @@ import { ReferenceSourceComponent } from './reference-source/reference-source.co
 import { EclCategoryComponent } from './ecl-category/ecl-category.component';
 import { EclTeamComponent } from './ecl-team/ecl-team.component';
 import { ToastMessageService } from 'src/app/services/toast-message.service';
+import { PolicyPackageComponent } from './policy-package/policy-package.component';
 
 const CATEGORY = 'Category';
 const REFERENCE_SOURCE = 'Reference Source';
 const TEAM = 'Team';
+const POLICY_PACKAGE = 'Policy Package';
 
 @Component({
   selector: 'app-field-selection-updates',
@@ -17,9 +19,10 @@ const TEAM = 'Team';
 
 export class FieldSelectionUpdatesComponent implements OnInit {
 
-  @ViewChild(ReferenceSourceComponent) newReferenceSource: ReferenceSourceComponent;
-  @ViewChild(EclCategoryComponent) eclCategoryComponent: EclCategoryComponent;
-  @ViewChild(EclTeamComponent) teamComponent: EclTeamComponent;
+  @ViewChild(ReferenceSourceComponent,{static: false}) newReferenceSource: ReferenceSourceComponent;
+  @ViewChild(EclCategoryComponent,{static: false}) eclCategoryComponent: EclCategoryComponent;
+  @ViewChild(EclTeamComponent,{static: false}) teamComponent: EclTeamComponent;
+  @ViewChild(PolicyPackageComponent,{static: false}) policyPackageComponent:  PolicyPackageComponent;
 
   categories: any[] = [];
   availableFields: any[] = [];
@@ -31,6 +34,7 @@ export class FieldSelectionUpdatesComponent implements OnInit {
   ifCategory: boolean = false;
   ifReference: boolean = false;
   ifTeam: boolean = false;
+  ifPolicyPackage = false;
   default: boolean = false;
 
   //boolean values to enable and disable the save and referesh button's
@@ -43,7 +47,8 @@ export class FieldSelectionUpdatesComponent implements OnInit {
       { label: 'Select', value: '' },
       { label: CATEGORY, value: 'category' },
       { label: REFERENCE_SOURCE, value: 'refSource' },
-      { label: TEAM, value: 'team' }
+      { label: TEAM, value: 'team' },
+      { label: POLICY_PACKAGE, value: 'policyPackage'}
     ];
   }
 
@@ -66,24 +71,35 @@ export class FieldSelectionUpdatesComponent implements OnInit {
         this.ifReference = false;
         this.ifTeam = false;
         this.default = false;
+        this.ifPolicyPackage = false;
         break;
       case "refSource":
         this.ifReference = true;
         this.ifCategory = false;
         this.ifTeam = false;
         this.default = false;
+        this.ifPolicyPackage = false;
         break;
       case "team":
         this.ifTeam = true;
         this.ifReference = false;
         this.ifCategory = false;
         this.default = false;
+        this.ifPolicyPackage = false;
         break;
+      case "policyPackage":
+        this.ifPolicyPackage = true;        
+        this.default = false;
+        this.ifTeam = false;
+        this.ifReference = false;
+        this.ifCategory = false;        
+        break;        
       default:
         this.default = true;
         this.ifTeam = false;
         this.ifReference = false;
         this.ifCategory = false;
+        this.ifPolicyPackage = false;
     }
   }
   isNewCategoryDuplicated(e) {
@@ -98,6 +114,8 @@ export class FieldSelectionUpdatesComponent implements OnInit {
   saveFieldSelection(saveObject?: any) {
     if (this.ifReference) {
       this.newReferenceSource.saveRefValidation();
+    } else if(this.ifPolicyPackage){
+      this.policyPackageComponent.savePolicyPackageValidation();
     } else if (this.ifTeam) {
       this.teamComponent.saveNewTeam();
     } else if (this.ifCategory) {
@@ -113,7 +131,9 @@ export class FieldSelectionUpdatesComponent implements OnInit {
   refreshFieldSelection() {
     if (this.ifReference) {
       this.newReferenceSource.refreshAddReferences();
-    } else if (this.ifTeam) {
+    } else if(this.ifPolicyPackage){
+      this.policyPackageComponent.refreshAddPolicyPackage();
+    }else if (this.ifTeam) {
       this.teamComponent.refreshScreen();
     } else if (this.ifCategory) {
       this.eclCategoryComponent.refreshAddCategory();
@@ -123,6 +143,7 @@ export class FieldSelectionUpdatesComponent implements OnInit {
   defaultPage(event: boolean) {
     this.ifCategory = this.ifCategory ? false : this.ifCategory;
     this.ifReference = this.ifReference ? false : this.ifReference;
+    this.ifPolicyPackage = this.ifPolicyPackage ? false : this.ifPolicyPackage;
     this.ifTeam = this.ifTeam ? false : this.ifTeam;
     this.default = event;
     this.selectedField = "";

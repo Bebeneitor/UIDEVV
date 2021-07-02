@@ -1,0 +1,13 @@
+<i class="fa fa-times" (click)="close()"></i>
+<h3 class="dnb-title">Add Feedback</h3>
+<p>
+  <b>Feedback On:</b><i>"{{ selectedFeedback }}"</i>
+</p>
+<textarea #textarea [(ngModel)]="feedback.feedback" rows="5" maxlength="4000"></textarea>
+<p class="text-l">{{ feedback.feedback.length }}/4000</p>
+<div class="feedback-footer dnb-page-btns">
+  <button *ngIf="feedback.itemId === null" (click)="saveFeedback()">Add</button>
+  <button *ngIf="feedback.itemId !== null" (click)="removeFeedback()">
+    Delete
+  </button>
+</div>

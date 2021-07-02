@@ -22,8 +22,8 @@ import { EclAsyncFileDetails } from 'src/app/shared/components/ecl-table/model/e
 })
 export class SameSimListComponent implements OnInit {
 
-  @ViewChild('analysesTable') analysesTable: EclTableComponent;
-  @ViewChild('myAnalysesTable') myAnalysesTable: EclTableComponent;
+  @ViewChild('analysesTable',{static: true}) analysesTable: EclTableComponent;
+  @ViewChild('myAnalysesTable',{static: true}) myAnalysesTable: EclTableComponent;
 
   cols: any[] = [];
   data: any[] = [];
@@ -80,8 +80,9 @@ export class SameSimListComponent implements OnInit {
    redirect(event: any) {
     const row = event.row;
     let urlArray = ['/same-sim-setup', row.sameSimId];
+    let codesType = row.codesType == null ? Constants.HCPCS_CODE_TYPE : row.codesType;
     
-    this.router.navigate(urlArray);
+    this.router.navigate(urlArray, { queryParams: { codesType: codesType } });
 
     if(this.tabIndex == 0){
       this.refreshEclTable(this.analysesTable);
@@ -152,6 +153,13 @@ initializeTableColumns(): EclColumn[] {
   downloadFile() {
     this.fileManagerService.downloadSameSimTemplateFile().subscribe(response => {
       this.fileManagerService.createDownloadFileElement(response, Constants.SAME_SIM_CPT_TEMPLATE);
+      this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, 'File downloaded');
+    });
+  }
+
+  downloadFileIcdTemplate() {
+    this.fileManagerService.downloadSameSimIcdTemplateFile().subscribe(response => {
+      this.fileManagerService.createDownloadFileElement(response, Constants.SAME_SIM_ICD_TEMPLATE);
       this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, 'File downloaded');
     });
   }

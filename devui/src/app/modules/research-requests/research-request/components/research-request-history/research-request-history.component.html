@@ -1,0 +1,28 @@
+<p-table class="history-table" [value]="historyData" [columns]="cols" dataKey="date" [rows]="10" [loading]="loading" [responsive]="true"
+  [rowsPerPageOptions]="[5,10,25,50,100]" [paginator]="true" [first]="first" [expandedRowKeys]="expandedRow">
+  <ng-template pTemplate="header" let-columns>
+    <tr>
+      <th *ngFor="let col of columns" [ngStyle]="{'width': col.width}">{{col.header}}</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex" let-expanded="expanded" let-columns="columns">
+    <tr class="ui-widget-header" *ngIf="dateGroupMetaData[rowData.date].index === rowIndex">
+      <td colspan="6">
+        <a href="#" [pRowToggler]="rowData">
+          <i [ngClass]="expanded ? 'fa fa-chevron-down' : 'fa fa-chevron-right'"></i>
+          <span class="t-header">{{rowData.date | date:'MMMM d, y' }}</span>
+        </a>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="rowexpansion" let-rowData let-rowIndex="rowIndex">
+    <tr>
+      <td>{{rowData.screenName}}</td>
+      <td>{{rowData.fieldName}}</td>
+      <td>{{rowData.oldValue}}</td>
+      <td>{{rowData.newValue}}</td>
+      <td>{{rowData.updatedBy}}</td>
+      <td>{{rowData.updatedOn | date:'medium' }}</td>
+    </tr>
+  </ng-template>
+</p-table>

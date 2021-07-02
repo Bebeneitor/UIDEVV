@@ -1,0 +1,30 @@
+input {
+  width: 100% !important;
+  display: block;
+}
+
+i {
+  color: #0645ad;
+  text-decoration: underline;
+}
+
+.note {
+  padding: 5px 0;
+  display: inline-block;
+}
+
+.topic-mapping .spacing {
+  padding-bottom: 10px;
+}
+
+.topic-mapping .preview {
+  text-align: right;
+}
+
+.topic-mapping .preview button {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  height: auto;
+  background: transparent;
+}

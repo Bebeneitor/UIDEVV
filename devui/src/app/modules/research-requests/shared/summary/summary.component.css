@@ -1,0 +1,53 @@
+.container {
+    padding: 0;
+}
+.uneditable {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    border: none;
+    font-size: 16px !important;
+    cursor: pointer;
+}
+.edit-readonly {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    border: none;
+    font-size: 16px !important;
+    cursor: default
+    
+}
+
+.uneditable::-webkit-scrollbar {
+    display: none;
+}
+
+.uneditable:focus {
+    outline: none;
+}
+
+.uneditable:hover {
+    outline: #31006F;
+}
+
+.editable::webkit-scrollbar {
+    display: block;
+}
+
+.editable {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    border: none;
+    font-size: 16px !important;
+}
+
+.editable:focus {
+    border: 1px solid #31006F;
+    outline: #31006F;
+}
+
+.pad-btm-15 {
+    padding-bottom: 15px;
+}

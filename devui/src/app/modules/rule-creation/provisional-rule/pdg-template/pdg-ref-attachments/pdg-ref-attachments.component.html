@@ -1,0 +1,81 @@
+<div class="row" style="margin-top: -18px;">
+  <div class="col-md-12">
+    <br />
+    <div class="file-template" (drop)="dropFileHandler($event)" (dragover)="$event.preventDefault()">
+      <div *ngIf="displayFileUpload" class="no-files-legend">Drop files to attach or <a nghref="#" (click)="clickFileUpload()">browse</a>
+      </div>
+      <div [ngClass]="_disableView?'pdg-ref-file-100':'pdg-ref-file'">
+        <div class="col-md-12">
+          <div *ngIf="isFileExist == true">
+              <div >
+                <div class="pb-1" >
+                <span (click)="downloadSavedFile()" [ngClass]="fileIcon"
+                  aria-hidden="true"></span>
+                <span class="file-info">{{existingFileName}}</span>
+                <span [hidden]="_disableView" class="fa fa-times delete-file"
+                  (click)="removeFile();"></span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="isFileExist != true && addedFileName != null">
+              <div>
+              <div class="pb-1">
+                <span style="cursor : pointer" (click)="downloadAddedFile()" [ngClass]="fileIcon"
+                  aria-hidden="true"></span>
+                <span class="file-info">{{addedFileName}}</span>
+                <span class="fa fa-times delete-file"
+                  (click)="removeSelectedFile(addedFileName);"></span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="(!isFileExist && addedFileName == null)">
+            <div class="text-center">
+              <span class="file-info no-files-text">No Attachments</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <input type="file" hidden #fileUpload accept="{{acceptFileTypes}}" (change)="addFiles($event)" />
+
+    </div>
+  </div>
+</div>
+
+
+<div *ngIf="refSrcUrl != null">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-1"></div>
+        <div class="col-10">
+            <span *ngIf="addedFileName !== null" class="file-info">{{addedFileName}}</span>            
+            <div class="ss-panel">
+              <img [src]="refSrcUrl" class="ss-image">
+            </div>
+        </div>
+        <div class="col-1"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-dialog header="Are you sure?" [class]="confirmDialog" [(visible)]="removeAttachmentDisplay">
+  <p class="message-bold"> <span class="icon-float-left">
+      <i class="pi pi-exclamation-triangle"></i>
+    </span>
+    <span>Are you sure you want to delete this attachment?</span>
+  </p>
+  <p class="message-center">This action cannot be undone.</p>
+  <p-footer>
+    <div class="row">
+      <div class="col-md-5">
+        <button name="removeAttachmentCancelBtn" class="btn btn-primary" pButton (click)="removeAttachmentCancel()"
+          label="Cancel"></button>
+      </div>
+      <div class="col-md-6">
+        <button name="removeAttachmentDeletebtn" class="btn btn-primary" pButton
+          (click)="removeSavedFile()" label="Delete"></button>
+      </div>
+    </div>
+  </p-footer>
+</p-dialog>

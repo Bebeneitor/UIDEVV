@@ -60,30 +60,28 @@
   
     <div class="team-updates-report">
       <div *ngIf="enabledEclTable === localConstants.ALL_STATUSES" class="col">
-        <ecl-table #eclTableAllStatuses [tableModel]='tableConfig'></ecl-table>
+        <ecl-table #eclTableAllStatuses [tableModel]='tableConfig'  (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
       <div *ngIf="enabledEclTable === localConstants.IDEAS_GENERATED" class="col">
-        <ecl-table #eclTableIdeasGenerated [tableModel]='tableConfig'></ecl-table>
+        <ecl-table #eclTableIdeasGenerated [tableModel]='tableConfig' (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
       <div *ngIf="enabledEclTable === localConstants.PROVISIONAL_RULES_GENERATED" class="col">
-        <ecl-table #eclTableProvisionalRulesGenerated [tableModel]='tableConfig'>
-        </ecl-table>
+        <ecl-table #eclTableProvisionalRulesGenerated [tableModel]='tableConfig' (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
       <div *ngIf="enabledEclTable === localConstants.PROVISIONAL_RULES_ASSIGNED" class="col">
-        <ecl-table #eclTableProvisionalRulesAssigned [tableModel]='tableConfig'>
-        </ecl-table>
+        <ecl-table #eclTableProvisionalRulesAssigned [tableModel]='tableConfig' (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
       <div *ngIf="enabledEclTable === localConstants.RULES_GENERATED" class="col">
-        <ecl-table #eclTableRulesGenerated [tableModel]='tableConfig'></ecl-table>
+        <ecl-table #eclTableRulesGenerated [tableModel]='tableConfig' (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
       <div *ngIf="enabledEclTable === localConstants.SHELVED" class="col">
-        <ecl-table #eclTableShelved [tableModel]='tableConfig'></ecl-table>
+        <ecl-table #eclTableShelved [tableModel]='tableConfig' (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
       <div *ngIf="enabledEclTable === localConstants.INVALID" class="col">
-        <ecl-table #eclTableInvalid [tableModel]='tableConfig'></ecl-table>
+        <ecl-table #eclTableInvalid [tableModel]='tableConfig' (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
       <div *ngIf="enabledEclTable === localConstants.DUPLICATED" class="col">
-        <ecl-table #eclTableDuplicated [tableModel]='tableConfig'></ecl-table>
+        <ecl-table #eclTableDuplicated [tableModel]='tableConfig' (onAcctionLink)="viewModal($event.row)"></ecl-table>
       </div>
   
     </div>
@@ -91,7 +89,7 @@
   </div>
   <p-blockUI [blocked]="blockedDocument">
     <div class="img-loading text-center">
-      <img src="assets/img/loading.gif" style="width: 60%" />
+      <img src="assets/img/loading.gif"/>
       <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
     </div>
   </p-blockUI>

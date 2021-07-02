@@ -1,0 +1,29 @@
+.div-export-cvp {
+    width: 500px;
+}
+
+.div-export-cvp > div {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.div-export-cvp > div > p {
+    margin-bottom: 10px;
+}
+
+.div-export-cvp > div > p > b {
+    color: #31006F;
+    font-size: 11px !important;
+}
+
+.div-export-cvp > div > div.div-buttons > button {
+    width: 30%;
+    margin-right: 3px;
+    margin-left: 3px;
+}
+
+.div-export-cvp > div > div.div-buttons-0 > button {
+    width: 48%;
+    margin-right: 3px;
+    margin-left: 3px;
+}

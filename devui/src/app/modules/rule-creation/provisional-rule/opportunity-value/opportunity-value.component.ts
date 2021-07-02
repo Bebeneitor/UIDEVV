@@ -4,7 +4,11 @@ import { ActivatedRoute } from '@angular/router';
 import { RuleInfo } from 'src/app/shared/models/rule-info';
 import { OpportunityValueDto } from 'src/app/shared/models/opportunity-value';
 import { Constants } from 'src/app/shared/models/constants';
-import { MessageSend } from 'src/app/shared/models/messageSend';
+import { AppUtils } from 'src/app/shared/services/utils';
+
+const CPE_NOTES_ID = 'taCpeNotes';
+const ICMS_NOTES_ID = 'taIcmsNotes';
+const CVP_NOTES_ID = 'taCvpNotes';
 
 @Component({
   selector: 'app-opportunity-value',
@@ -34,8 +38,9 @@ export class OpportunityValueComponent implements OnInit {
   originalCvpFormat: number = 0;
   originalIcmsFormat: number = 0;
   originalRpeFormat: number = 0;
+  maxLength: number = 1000;
 
-  constructor(private ruleService: RuleInfoService, public route: ActivatedRoute) { }
+  constructor(private ruleService: RuleInfoService, public route: ActivatedRoute, private utils: AppUtils) { }
 
   ngOnInit() {
     if (!this.fromMaintenanceProcess) {
@@ -71,20 +76,6 @@ export class OpportunityValueComponent implements OnInit {
     }
   }
 
-  checkLength(e: ClipboardEvent, notes: string) {
-    let pasteData = e.clipboardData.getData('text/plain')
-    if (pasteData.length > 1000) {
-      let dif = pasteData.length - 1000
-      let msg: MessageSend = {
-        'type': 'warn',
-        'summary': Constants.TOAST_SUMMARY_WARN,
-        'detail': `${notes} paste operation contains more than 1000. Truncating excess by ${dif} `,
-        'time': 5000
-      };
-      this.messageSend.emit(msg);
-    }
-  }
-
   /* Method to Redirect to a new address*/
   routeToJira() {
     window.open(Constants.JIRA_URL);
@@ -96,7 +87,7 @@ export class OpportunityValueComponent implements OnInit {
    * @param original - Cloned or original rule
    */
   checkValueIfNullOrUndefined(oppValues: OpportunityValueDto, original?: boolean) {
-    let {cvpOppValue, icmsOppValue, rpeOppValue } = oppValues;
+    let { cvpOppValue, icmsOppValue, rpeOppValue } = oppValues;
     if (original) {
       if (!cvpOppValue) { this.opportunityValue.cvpOppValue = 0; }
       if (!icmsOppValue) { this.opportunityValue.icmsOppValue = 0; }
@@ -107,4 +98,27 @@ export class OpportunityValueComponent implements OnInit {
       if (!rpeOppValue) { this.originalOppValue.rpeOppValue = 0; }
     }
   }
+
+  checkMultiValidation(setup: number, textAreaId, e?: ClipboardEvent, note?: string) {
+    if (setup === Constants.INPUT) {
+      if (textAreaId === CPE_NOTES_ID) {
+        this.opportunityValue.rpeComments = this.utils.checkInputLengthTextArea(this.opportunityValue.rpeComments, this.maxLength);
+      } else if (textAreaId === ICMS_NOTES_ID) {
+        this.opportunityValue.icmsComments = this.utils.checkInputLengthTextArea(this.opportunityValue.icmsComments, this.maxLength);
+      } else {
+        this.opportunityValue.cvpComments = this.utils.checkInputLengthTextArea(this.opportunityValue.cvpComments, this.maxLength);
+      }
+    } else if (setup === Constants.KEYPRESS) {
+      if (textAreaId === CPE_NOTES_ID) {
+        this.utils.checkMultiLineMaxLength(e, this.opportunityValue.rpeComments, document.getElementById(textAreaId), this.maxLength);
+      } else if (textAreaId === ICMS_NOTES_ID) {
+        this.utils.checkMultiLineMaxLength(e, this.opportunityValue.icmsComments, document.getElementById(textAreaId), this.maxLength);
+      } else {
+        this.utils.checkMultiLineMaxLength(e, this.opportunityValue.cvpComments, document.getElementById(textAreaId), this.maxLength);
+      }
+    } else {
+      this.messageSend.emit(this.utils.checkPasteLength(e, 'Estimate', this.maxLength, note));
+    }
+  }
+
 }

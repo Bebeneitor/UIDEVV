@@ -7,8 +7,8 @@ import {
   CombinationTherapyTemplate,
   DailyMaximumDoseHeaders,
   DailyMaximumDoseTemplate,
+  DailyMaxUnitsGroupedTemplate,
   DailyMaxUnitsHeaders,
-  DailyMaxUnitsTemplate,
   DiagnosisCodeOverlapsHeaders,
   DiagnosisCodeOverlapsTemplate,
   DiagnosisCodesHeaders,
@@ -53,7 +53,7 @@ import {
   AgeTemplateResponse,
   CombinationTherapyResponse,
   DailyMaximumDoseTemplateResponse,
-  DailyMaxUnitsTemplateResponse,
+  DailyMaxUnitsGroupedTemplateResponse,
   DiagnosisCodeOverlapsResponse,
   DiagnosisCodesTemplateResponse,
   DiagnosisCodeSummaryTemplateResponse,
@@ -80,50 +80,140 @@ import {
   Section,
   UISection,
 } from "../models/interfaces/uibase";
-import { prepareData } from "./tools.utils";
+import {
+  cleanData,
+  getAPIColumnComments,
+  getColumnFeedback,
+  getSectionFeedback,
+  getSectionFeedbacks,
+  getSectionUnresolvedFeedbacksCount,
+  guidGenerator,
+  isValueReadOnly,
+  prepareData,
+  valuesCorresponding,
+} from "./tools.utils";
 
 const maxLengthDefault: number = 4000;
 const maxLengthFourHundred: number = 400;
+const maxLengthTwoHundred: number = 200;
 const maxLengthOneHundred: number = 100;
 const maxLengthCode: number = 32;
+const maxLengthHCPCSCode: number = 36;
+const maxPlaceholderCodesItems: number = 10;
+const maxSectionCodesItems: number = 1000;
+
+function commonConvertAPItoUI(section, sectionName = null) {
+  const name = sectionName ? sectionName : section.section.name;
+  const sectionFeedback = getSectionFeedback(
+    section.uiDecorator.deletedRowFeedbackItemList,
+    true,
+    section.section.code
+  );
+  return {
+    drugVersionCode: section.drugVersionCode,
+    headersUIWidth: [],
+    section: {
+      code: section.section.code,
+      name: name,
+    },
+    id: convertSectionNameToID(name),
+    focusType: null,
+    feedbackData: sectionFeedback,
+    feedbackLeft: sectionFeedback.reduce(
+      (acc, item) => (acc += !item.resolved ? 1 : 0),
+      0
+    ),
+    completed: section.uiDecorator.sectionComplete,
+    enabled: section.uiDecorator.sectionActive,
+  };
+}
 
 export function generalInformationConvertAPIToUI(
   generalInformation: GeneralInformationTemplateResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: generalInformation.drugVersionCode,
-    section: {
-      code: generalInformation.section.code,
-      name: generalInformation.section.name,
-    },
+    ...commonConvertAPItoUI(generalInformation),
     headers: GeneralInformationHeaders,
-    id: convertSectionNameToID(generalInformation.section.name),
-    rows: !generalInformation.data
+    groups: !generalInformation.data
       ? []
-      : generalInformation.data.map((item) => {
-          const itemColumn = prepareData(item.item.name);
-          const itemDetails = prepareData(item.itemDetails);
-          const comments = prepareData(item.comments.join(", "));
+      : generalInformation.data.map((group) => {
+          const generalInformationFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            generalInformation.section.code,
+            GeneralInformationHeaders[0]
+          );
           return {
-            hasBorder: false,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: itemColumn,
-                maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: itemDetails,
-                maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: comments,
-                maxLength: maxLengthDefault,
+                isReadOnly: true,
+                value: prepareData(group.item.name),
+                maxLength: maxLengthFourHundred,
+                feedbackData: generalInformationFeedback,
+                feedbackLeft: generalInformationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  generalInformation.section.code,
+                  GeneralInformationHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item) => {
+              const detailsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                generalInformation.section.code,
+                GeneralInformationHeaders[1]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                generalInformation.section.code,
+                GeneralInformationHeaders[2]
+              );
+              return {
+                hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.itemDetails),
+                    maxLength: maxLengthDefault,
+                    feedbackData: detailsFeedback,
+                    feedbackLeft: detailsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      generalInformation.section.code,
+                      GeneralInformationHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      generalInformation.section.code,
+                      GeneralInformationHeaders[2]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
@@ -132,40 +222,91 @@ export function generalInformationConvertAPIToUI(
 export function referencesConvertAPIToUI(
   references: ReferencesTemplateResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: references.drugVersionCode,
-    section: {
-      code: references.section.code,
-      name: references.section.name,
-    },
+    ...commonConvertAPItoUI(references),
     headers: ReferenceHeaders,
-    id: convertSectionNameToID(references.section.name),
-    rows: !references.data
+    groups: !references.data
       ? []
-      : references.data.map((item) => {
-          const referenceType = prepareData(item.referenceSourceDto.name);
-          const referenceDetails = prepareData(item.referenceDetails);
-          const comments = prepareData(item.comments.join(", "));
+      : references.data.map((group) => {
+          const referenceTypeFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            references.section.code,
+            ReferenceHeaders[0]
+          );
           return {
-            hasBorder: false,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: referenceType,
-                maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: referenceDetails,
-                maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: comments,
-                maxLength: maxLengthDefault,
+                isReadOnly: true,
+                value: prepareData(
+                  group.referenceSourceDto ? group.referenceSourceDto.name : ""
+                ),
+                maxLength: maxLengthFourHundred,
+                feedbackData: referenceTypeFeedback,
+                feedbackLeft: referenceTypeFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  references.section.code,
+                  ReferenceHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item) => {
+              const referenceDetailsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                references.section.code,
+                ReferenceHeaders[1]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                references.section.code,
+                ReferenceHeaders[2]
+              );
+              return {
+                hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.referenceDetails),
+                    maxLength: maxLengthDefault,
+                    feedbackData: referenceDetailsFeedback,
+                    feedbackLeft: referenceDetailsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      references.section.code,
+                      ReferenceHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      references.section.code,
+                      ReferenceHeaders[2]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
@@ -176,30 +317,59 @@ export function NotesConvertAPIToUI(
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: notes.drugVersionCode,
-    section: {
-      code: notes.section.code,
-      name: notes.section.name,
-    },
+    ...commonConvertAPItoUI(notes),
     headers: NotesHeaders,
-    id: convertSectionNameToID(notes.section.name),
     rows: !notes.data
       ? []
       : notes.data.map((item) => {
           const note = prepareData(item.note);
           const comments = prepareData(item.comments.join(", "));
+          const noteFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            notes.section.code,
+            NotesHeaders[0]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            notes.section.code,
+            NotesHeaders[1]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: note,
                 maxLength: maxLengthDefault,
+                feedbackData: noteFeedback,
+                feedbackLeft: noteFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  notes.section.code,
+                  NotesHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: comments,
                 maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  notes.section.code,
+                  NotesHeaders[1]
+                ),
               },
             ],
           };
@@ -212,36 +382,81 @@ export function LCDConvertAPIToUI(
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: LCD.drugVersionCode,
-    section: {
-      code: LCD.section.code,
-      name: LCD.section.name,
-    },
+    ...commonConvertAPItoUI(LCD),
     headers: LCDHeaders,
-    id: convertSectionNameToID(LCD.section.name),
     rows: !LCD.data
       ? []
       : LCD.data.map((item) => {
           const lcd = prepareData(item.lcd);
           const macName = prepareData(item.macName);
           const comments = prepareData(item.comments.join(", "));
+          const lcdFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            LCD.section.code,
+            LCDHeaders[0]
+          );
+          const macNameFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            LCD.section.code,
+            LCDHeaders[1]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            LCD.section.code,
+            LCDHeaders[2]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: lcd,
                 maxLength: maxLengthDefault,
+                feedbackData: lcdFeedback,
+                feedbackLeft: lcdFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  LCD.section.code,
+                  LCDHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: macName,
                 maxLength: maxLengthDefault,
+                feedbackData: macNameFeedback,
+                feedbackLeft: macNameFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  LCD.section.code,
+                  LCDHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: comments,
                 maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  LCD.section.code,
+                  LCDHeaders[2]
+                ),
               },
             ],
           };
@@ -254,28 +469,57 @@ export function MedicalJournalConvertAPIToUI(
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: medicalJournal.drugVersionCode,
-    section: {
-      code: medicalJournal.section.code,
-      name: medicalJournal.section.name,
-    },
+    ...commonConvertAPItoUI(medicalJournal),
     headers: MedicalJournalHeaders,
-    id: convertSectionNameToID(medicalJournal.section.name),
     rows: !medicalJournal.data
       ? []
       : medicalJournal.data.map((item) => {
+          const citationFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            medicalJournal.section.code,
+            MedicalJournalHeaders[0]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            medicalJournal.section.code,
+            MedicalJournalHeaders[1]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.citation),
                 maxLength: maxLengthDefault,
+                feedbackData: citationFeedback,
+                feedbackLeft: citationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  medicalJournal.section.code,
+                  MedicalJournalHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
-                // maxLength: maxLengthDefault, temp removal since QA needs to test API failure
+                value: prepareData(item.comments.join(", ")),
+                maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  medicalJournal.section.code,
+                  MedicalJournalHeaders[1]
+                ),
               },
             ],
           };
@@ -288,53 +532,162 @@ export function IndicationsConvertAPIToUI(
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: indications.drugVersionCode,
-    section: {
-      code: indications.section.code,
-      name: indications.section.name,
-    },
+    ...commonConvertAPItoUI(indications),
     headers: IndicationsHeaders,
-    id: convertSectionNameToID(indications.section.name),
     rows: !indications.data
       ? []
       : indications.data.map((item) => {
+          const drugLabelFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            indications.section.code,
+            IndicationsHeaders[0]
+          );
+          const clinicalFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            indications.section.code,
+            IndicationsHeaders[1]
+          );
+          const microFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            indications.section.code,
+            IndicationsHeaders[2]
+          );
+          const nccnFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            indications.section.code,
+            IndicationsHeaders[3]
+          );
+          const lexiFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            indications.section.code,
+            IndicationsHeaders[4]
+          );
+          const ahfsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            indications.section.code,
+            IndicationsHeaders[5]
+          );
+          const lcdFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            indications.section.code,
+            IndicationsHeaders[6]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.drugLabel),
                 maxLength: maxLengthFourHundred,
+                feedbackData: drugLabelFeedback,
+                feedbackLeft: drugLabelFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  indications.section.code,
+                  IndicationsHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.clinicalPharmacology),
                 maxLength: maxLengthFourHundred,
+                feedbackData: clinicalFeedback,
+                feedbackLeft: clinicalFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  indications.section.code,
+                  IndicationsHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.micromedexDrugDex),
                 maxLength: maxLengthFourHundred,
+                feedbackData: microFeedback,
+                feedbackLeft: microFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  indications.section.code,
+                  IndicationsHeaders[2]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.nccn),
                 maxLength: maxLengthFourHundred,
+                feedbackData: nccnFeedback,
+                feedbackLeft: nccnFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  indications.section.code,
+                  IndicationsHeaders[3]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.lexiDrugs),
                 maxLength: maxLengthFourHundred,
+                feedbackData: lexiFeedback,
+                feedbackLeft: lexiFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  indications.section.code,
+                  IndicationsHeaders[4]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.ahfsDi),
                 maxLength: maxLengthFourHundred,
+                feedbackData: ahfsFeedback,
+                feedbackLeft: ahfsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  indications.section.code,
+                  IndicationsHeaders[5]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.lcd),
                 maxLength: maxLengthFourHundred,
+                feedbackData: lcdFeedback,
+                feedbackLeft: lcdFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  indications.section.code,
+                  IndicationsHeaders[7]
+                ),
               },
             ],
           };
@@ -343,17 +696,13 @@ export function IndicationsConvertAPIToUI(
 }
 
 export function DailyMaxUnitsConvertAPItoUI(
-  dailyMaxUnits: DailyMaxUnitsTemplateResponse,
+  dailyMaxUnits: DailyMaxUnitsGroupedTemplateResponse,
+  valuesForReadOnly: string[],
   isReadOnly: boolean = false
-): Section {
-  const sectionName = dailyMaxUnits.section.name;
+): GroupedSection {
   const codes = dailyMaxUnits.codes ? dailyMaxUnits.codes : [];
   return {
-    drugVersionCode: SectionCode.DailyMaxUnits,
-    section: {
-      code: dailyMaxUnits.section.code,
-      name: sectionName,
-    },
+    ...commonConvertAPItoUI(dailyMaxUnits),
     headers: DailyMaxUnitsHeaders,
     codes: codes,
     codesColumn: {
@@ -362,36 +711,117 @@ export function DailyMaxUnitsConvertAPItoUI(
       regExValidator: /[^A-Z\d\s,]/,
       regExMessage: "Only commas are acepted for special characters",
       regExTitle: "Daily Maximum Units Values For HCPCS Codes",
-      maxLength: maxLengthCode
+      maxLength: maxLengthCode,
+      maxArrayItems: maxPlaceholderCodesItems,
+      isArrayValue: true,
+      feedbackData: [],
+      feedbackLeft: 0,
     },
-    id: convertSectionNameToID(sectionName),
-    rows: !dailyMaxUnits.data
+    groups: !dailyMaxUnits.data
       ? []
-      : dailyMaxUnits.data.map((item) => {
+      : dailyMaxUnits.data.map((group) => {
+          const dailyMaxUnitsFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            dailyMaxUnits.section.code,
+            DailyMaxUnitsHeaders[0]
+          );
           return {
-            hasBorder: item.hasBorder,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.dmuvItemDto.name),
+                isReadOnly: true,
+                value: prepareData(group.dmuvItemDto.name),
                 maxLength: maxLengthOneHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.currentValues),
-                maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.newValues),
-                maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join("")),
-                maxLength: maxLengthDefault,
+                feedbackData: dailyMaxUnitsFeedback,
+                feedbackLeft: dailyMaxUnitsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  dailyMaxUnits.section.code,
+                  DailyMaxUnitsHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item, itemIndex) => {
+              const currentFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dailyMaxUnits.section.code,
+                DailyMaxUnitsHeaders[1]
+              );
+              const newFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dailyMaxUnits.section.code,
+                DailyMaxUnitsHeaders[2]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dailyMaxUnits.section.code,
+                DailyMaxUnitsHeaders[3]
+              );
+              return {
+                hasBorder:
+                  item.hasBorder ||
+                  (itemIndex + 1 === group.data.length && group.hasBorder),
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.currentValues),
+                    maxLength: maxLengthDefault,
+                    feedbackData: currentFeedback,
+                    feedbackLeft: currentFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dailyMaxUnits.section.code,
+                      DailyMaxUnitsHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isValueReadOnly(
+                      cleanData(group.dmuvItemDto.name),
+                      valuesForReadOnly
+                    ),
+                    value: prepareData(item.newValues),
+                    maxLength: maxLengthDefault,
+                    feedbackData: newFeedback,
+                    feedbackLeft: newFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dailyMaxUnits.section.code,
+                      DailyMaxUnitsHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dailyMaxUnits.section.code,
+                      DailyMaxUnitsHeaders[3]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
@@ -401,42 +831,121 @@ export function DiagnosisCodesConvertAPItoUI(
   diagnosisCodes: DiagnosisCodesTemplateResponse,
   isReadOnly: boolean = false
 ): Section {
-  const sectionName = diagnosisCodes.section.name;
   return {
-    drugVersionCode: diagnosisCodes.drugVersionCode,
-    section: {
-      code: diagnosisCodes.section.code,
-      name: sectionName,
-    },
+    ...commonConvertAPItoUI(diagnosisCodes),
+    sortColumn: "Indication",
+    messages: diagnosisCodes.uiDecorator.warningMessagesList
+      ? diagnosisCodes.uiDecorator.warningMessagesList
+      : [],
     headers: DiagnosisCodesHeaders,
-    id: convertSectionNameToID(sectionName),
     rows: !diagnosisCodes.data
       ? []
       : diagnosisCodes.data.map((item) => {
-          const nccnCodes = item.nccnIcdsCodes.map((code) => code.icd10Code);
-          const lcdCodes = item.lcdIcdsCodes.map((code) => code.icd10Code);
+          const codesInvalid = item.nccnIcdsCodesInvalid
+            .map((code) => code.icd10Code)
+            .concat(item.lcdIcdsCodesInvalid.map((code) => code.icd10Code))
+            .filter((item) => item !== "");
+          const nccnCodes = item.nccnIcdsCodes
+            .map((code) => code.icd10Code)
+            .concat(item.nccnIcdsCodesInvalid.map((code) => code.icd10Code))
+            .filter((item) => item !== "");
+          const lcdCodes = item.lcdIcdsCodes
+            .map((code) => code.icd10Code)
+            .concat(item.lcdIcdsCodesInvalid.map((code) => code.icd10Code))
+            .filter((item) => item !== "");
+          const indicationFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            diagnosisCodes.section.code,
+            DiagnosisCodesHeaders[0]
+          );
+          const nccnFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            diagnosisCodes.section.code,
+            DiagnosisCodesHeaders[1]
+          );
+          const lcdFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            diagnosisCodes.section.code,
+            DiagnosisCodesHeaders[2]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            diagnosisCodes.section.code,
+            DiagnosisCodesHeaders[3]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            invalidCodes: codesInvalid.join(", "),
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.indication),
-                maxLength: maxLengthDefault,
+                maxLength: maxLengthTwoHundred,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  diagnosisCodes.section.code,
+                  DiagnosisCodesHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(nccnCodes.join(", ")),
                 maxLength: maxLengthDefault,
+                isArrayValue: true,
+                maxArrayItems: maxSectionCodesItems,
+                feedbackData: nccnFeedback,
+                feedbackLeft: nccnFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  diagnosisCodes.section.code,
+                  DiagnosisCodesHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(lcdCodes.join(", ")),
                 maxLength: maxLengthDefault,
+                isArrayValue: true,
+                maxArrayItems: maxSectionCodesItems,
+                feedbackData: lcdFeedback,
+                feedbackLeft: lcdFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  diagnosisCodes.section.code,
+                  DiagnosisCodesHeaders[2]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.comments.join(", ")),
                 maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  diagnosisCodes.section.code,
+                  DiagnosisCodesHeaders[3]
+                ),
               },
             ],
           };
@@ -445,38 +954,89 @@ export function DiagnosisCodesConvertAPItoUI(
 }
 
 export function DiagnosisCodeSummaryConvertAPItoUI(
-  DiagnosisCodeSummary: DiagnosisCodeSummaryTemplateResponse,
+  diagnosisCodeSummary: DiagnosisCodeSummaryTemplateResponse,
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: DiagnosisCodeSummary.drugVersionCode,
-    section: {
-      code: DiagnosisCodeSummary.section.code,
-      name: DiagnosisCodeSummary.section.name,
-    },
+    ...commonConvertAPItoUI(diagnosisCodeSummary),
     headers: DiagnosisCodeSummaryHeaders,
-    id: convertSectionNameToID(DiagnosisCodeSummary.section.name),
-    rows: !DiagnosisCodeSummary.data
+    messages: diagnosisCodeSummary.uiDecorator.warningMessagesList
+      ? diagnosisCodeSummary.uiDecorator.warningMessagesList
+      : [],
+    rows: !diagnosisCodeSummary.data
       ? []
-      : DiagnosisCodeSummary.data.map((item) => {
+      : diagnosisCodeSummary.data.map((item) => {
+          const icd10Codes = item.icd10Codes.concat(item.invalidIcd10Codes);
+          const indicationFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            diagnosisCodeSummary.section.code,
+            DiagnosisCodeSummaryHeaders[0]
+          );
+          const icdFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            diagnosisCodeSummary.section.code,
+            DiagnosisCodeSummaryHeaders[1]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            diagnosisCodeSummary.section.code,
+            DiagnosisCodeSummaryHeaders[2]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            invalidCodes: item.invalidIcd10Codes.join(", "),
+            codeUI: guidGenerator(),
             columns: [
               {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.indication),
+                isReadOnly: true,
+                value: prepareData(item.indication.label),
                 maxLength: maxLengthDefault,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  diagnosisCodeSummary.section.code,
+                  DiagnosisCodeSummaryHeaders[0]
+                ),
               },
-
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(item.icd10Codes.join(",")),
+                value: prepareData(icd10Codes.join(", ")),
                 maxLength: maxLengthDefault,
+                isArrayValue: true,
+                maxArrayItems: maxSectionCodesItems,
+                feedbackData: icdFeedback,
+                feedbackLeft: icdFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  diagnosisCodeSummary.section.code,
+                  DiagnosisCodeSummaryHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
+                value: prepareData(item.comments.join(", ")),
                 maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  diagnosisCodeSummary.section.code,
+                  DiagnosisCodeSummaryHeaders[2]
+                ),
               },
             ],
           };
@@ -485,37 +1045,82 @@ export function DiagnosisCodeSummaryConvertAPItoUI(
 }
 
 export function ManifestationCodesConvertAPItoUI(
-  ManifestationCodes: ManifestationCodesTemplateResponse,
+  manifestationCodes: ManifestationCodesTemplateResponse,
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: ManifestationCodes.drugVersionCode,
-    section: {
-      code: ManifestationCodes.section.code,
-      name: ManifestationCodes.section.name,
-    },
+    ...commonConvertAPItoUI(manifestationCodes),
     headers: ManifestationCodesHeaders,
-    id: convertSectionNameToID(ManifestationCodes.section.name),
-    rows: !ManifestationCodes.data
+    rows: !manifestationCodes.data
       ? []
-      : ManifestationCodes.data.map((item) => {
+      : manifestationCodes.data.map((item) => {
+          const icdFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            manifestationCodes.section.code,
+            ManifestationCodesHeaders[0]
+          );
+          const indicationFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            manifestationCodes.section.code,
+            ManifestationCodesHeaders[1]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            manifestationCodes.section.code,
+            ManifestationCodesHeaders[2]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.icd10Code.icd10Code),
-                maxLength: maxLengthDefault,
+                maxLength: maxLengthTwoHundred,
+                feedbackData: icdFeedback,
+                feedbackLeft: icdFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  manifestationCodes.section.code,
+                  ManifestationCodesHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(item.indication),
+                value: prepareData(item.indication.label),
                 maxLength: maxLengthDefault,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  manifestationCodes.section.code,
+                  ManifestationCodesHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
+                value: prepareData(item.comments.join(", ")),
                 maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  manifestationCodes.section.code,
+                  ManifestationCodesHeaders[2]
+                ),
               },
             ],
           };
@@ -524,164 +1129,400 @@ export function ManifestationCodesConvertAPItoUI(
 }
 
 export function MaximumFrecuencyConvertAPItoUI(
-  MaximumFrecuency: MaximumFrequencyTemplateResponse,
+  maximumFrecuency: MaximumFrequencyTemplateResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: SectionCode.MaximumFrequency,
-    section: {
-      code: MaximumFrecuency.section.code,
-      name: MaximumFrecuency.section.name,
-    },
+    ...commonConvertAPItoUI(maximumFrecuency),
     headers: MaximumFrquencyHeaders,
-    id: convertSectionNameToID(MaximumFrecuency.section.name),
-    rows: !MaximumFrecuency.data
+    groups: !maximumFrecuency.data
       ? []
-      : MaximumFrecuency.data.map((item) => {
+      : maximumFrecuency.data.map((group) => {
+          const indicationFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            maximumFrecuency.section.code,
+            MaximumFrquencyHeaders[0]
+          );
           return {
-            hasBorder: false,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.indication),
+                isReadOnly: true,
+                value: prepareData(group.indication),
                 maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.maximumFrequency),
-                maxLength: maxLengthDefault,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
-                maxLength: maxLengthDefault,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  maximumFrecuency.section.code,
+                  MaximumFrquencyHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item) => {
+              const maxFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                maximumFrecuency.section.code,
+                MaximumFrquencyHeaders[1]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                maximumFrecuency.section.code,
+                MaximumFrquencyHeaders[2]
+              );
+              return {
+                hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.maximumFrequency),
+                    maxLength: maxLengthDefault,
+                    feedbackData: maxFeedback,
+                    feedbackLeft: maxFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      maximumFrecuency.section.code,
+                      MaximumFrquencyHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      maximumFrecuency.section.code,
+                      MaximumFrquencyHeaders[2]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
 }
 
 export function AgeConvertAPItoUI(
-  Age: AgeTemplateResponse,
+  age: AgeTemplateResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: SectionCode.Age,
-    section: {
-      code: Age.section.code,
-      name: Age.section.name,
-    },
+    ...commonConvertAPItoUI(age),
     headers: AgeHeaders,
-    id: convertSectionNameToID(Age.section.name),
-    rows: !Age.data
+    groups: !age.data
       ? []
-      : Age.data.map((item) => {
+      : age.data.map((group) => {
+          const labelFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            age.section.code,
+            AgeHeaders[0]
+          );
           return {
-            hasBorder: false,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.indication.label),
+                isReadOnly: true,
+                value: prepareData(group.indication.label),
                 maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.age),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
-                maxLength: maxLengthFourHundred,
+                feedbackData: labelFeedback,
+                feedbackLeft: labelFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  age.section.code,
+                  AgeHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item) => {
+              const ageFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                age.section.code,
+                AgeHeaders[1]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                age.section.code,
+                AgeHeaders[2]
+              );
+              return {
+                hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.age),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: ageFeedback,
+                    feedbackLeft: ageFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      age.section.code,
+                      AgeHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      age.section.code,
+                      AgeHeaders[2]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
 }
 
 export function DailyMaximumDoseConvertAPItoUI(
-  DailyMaxDose: DailyMaximumDoseTemplateResponse,
+  dailyMaxDose: DailyMaximumDoseTemplateResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: "",
-    section: {
-      code: DailyMaxDose.section.code,
-      name: DailyMaxDose.section.name,
-    },
+    ...commonConvertAPItoUI(dailyMaxDose),
     headers: DailyMaximumDoseHeaders,
-    id: convertSectionNameToID(DailyMaxDose.section.name),
-    rows: !DailyMaxDose.data
+    groups: !dailyMaxDose.data
       ? []
-      : DailyMaxDose.data.map((item) => {
+      : dailyMaxDose.data.map((group) => {
+          const indicationFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            dailyMaxDose.section.code,
+            DailyMaximumDoseHeaders[0]
+          );
           return {
-            hasBorder: false,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.indication.label),
+                isReadOnly: true,
+                value: prepareData(
+                  group.indication ? group.indication.label : ""
+                ),
                 maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.maximumDosingPattern),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.maximumDose),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.maximumUnits),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(", ")),
-                maxLength: maxLengthDefault,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  dailyMaxDose.section.code,
+                  ReferenceHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item) => {
+              const maxdosingFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dailyMaxDose.section.code,
+                DailyMaximumDoseHeaders[1]
+              );
+              const maxdoseFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dailyMaxDose.section.code,
+                DailyMaximumDoseHeaders[2]
+              );
+              const maxunitsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dailyMaxDose.section.code,
+                DailyMaximumDoseHeaders[3]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dailyMaxDose.section.code,
+                DailyMaximumDoseHeaders[4]
+              );
+
+              return {
+                hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.maximumDosingPattern),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: maxdosingFeedback,
+                    feedbackLeft: maxdosingFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dailyMaxDose.section.code,
+                      DailyMaximumDoseHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.maximumDose),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: maxdoseFeedback,
+                    feedbackLeft: maxdoseFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dailyMaxDose.section.code,
+                      DailyMaximumDoseHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.maximumUnits),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: maxunitsFeedback,
+                    feedbackLeft: maxunitsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dailyMaxDose.section.code,
+                      DailyMaximumDoseHeaders[3]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dailyMaxDose.section.code,
+                      DailyMaximumDoseHeaders[4]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
 }
 
 export function GenderConvertAPItoUI(
-  Gender: GenderTemplateResponse,
+  gender: GenderTemplateResponse,
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: SectionCode.Gender,
-    section: {
-      code: Gender.section.code,
-      name: Gender.section.name,
-    },
+    ...commonConvertAPItoUI(gender),
     headers: GenderHeaders,
-    id: convertSectionNameToID(Gender.section.name),
-    rows: !Gender.data
+    rows: !gender.data
       ? []
-      : Gender.data.map((item) => {
+      : gender.data.map((item) => {
+          const labelFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            gender.section.code,
+            GenderHeaders[0]
+          );
+          const genderFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            gender.section.code,
+            GenderHeaders[1]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            gender.section.code,
+            GenderHeaders[2]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.indication.label),
                 maxLength: maxLengthFourHundred,
+                feedbackData: labelFeedback,
+                feedbackLeft: labelFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  gender.section.code,
+                  GenderHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.gender),
                 maxLength: maxLengthFourHundred,
+                feedbackData: genderFeedback,
+                feedbackLeft: genderFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  gender.section.code,
+                  GenderHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
+                value: prepareData(item.comments.join(", ")),
                 maxLength: maxLengthFourHundred,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  gender.section.code,
+                  GenderHeaders[2]
+                ),
               },
             ],
           };
@@ -690,135 +1531,338 @@ export function GenderConvertAPItoUI(
 }
 
 export function UnitsOverTimeConvertAPItoUI(
-  template: UnitsOverTimeTemplateResponse,
+  uot: UnitsOverTimeTemplateResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: SectionCode.UnitsOverTime,
-    section: {
-      code: template.section.code,
-      name: template.section.name,
-    },
+    ...commonConvertAPItoUI(uot),
     headers: UnistOverTimeHeaders,
-    id: convertSectionNameToID(template.section.name),
-    rows: !template.data
+    groups: !uot.data
       ? []
-      : template.data.map((item) => {
+      : uot.data.map((group) => {
+          const labelFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            uot.section.code,
+            UnistOverTimeHeaders[0]
+          );
           return {
-            hasBorder: false,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.indication.label),
+                isReadOnly: true,
+                value: prepareData(group.indication.label),
                 maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.units),
-                maxLength: 20,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.interval),
-                maxLength: 40,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(", ")),
-                maxLength: maxLengthDefault,
+                feedbackData: labelFeedback,
+                feedbackLeft: labelFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  uot.section.code,
+                  UnistOverTimeHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item) => {
+              const unitsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                uot.section.code,
+                UnistOverTimeHeaders[1]
+              );
+              const intervalFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                uot.section.code,
+                UnistOverTimeHeaders[2]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                uot.section.code,
+                UnistOverTimeHeaders[3]
+              );
+              return {
+                hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.units),
+                    maxLength: 20,
+                    feedbackData: unitsFeedback,
+                    feedbackLeft: unitsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      uot.section.code,
+                      UnistOverTimeHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.interval),
+                    maxLength: 40,
+                    feedbackData: intervalFeedback,
+                    feedbackLeft: intervalFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      uot.section.code,
+                      UnistOverTimeHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      uot.section.code,
+                      UnistOverTimeHeaders[3]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
 }
 
 export function VisitOverTimeConvertAPItoUI(
-  VisitOverTime: VisitOverTimeTemplateResponse,
+  visitOverTime: VisitOverTimeTemplateResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: SectionCode.VisitOverTime,
-    section: {
-      code: VisitOverTime.section.code,
-      name: VisitOverTime.section.name,
-    },
+    ...commonConvertAPItoUI(visitOverTime),
     headers: VisitOverTimeHeaders,
-    id: convertSectionNameToID(VisitOverTime.section.name),
-    rows: !VisitOverTime.data
+    groups: !visitOverTime.data
       ? []
-      : VisitOverTime.data.map((item) => {
+      : visitOverTime.data.map((group) => {
+          const indicationFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            visitOverTime.section.code,
+            VisitOverTimeHeaders[0]
+          );
           return {
-            hasBorder: false,
-            columns: [
+            names: [
               {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.indication.label),
+                isReadOnly: true,
+                value: prepareData(
+                  group.indication ? group.indication.label : ""
+                ),
                 maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.visits),
-                maxLength: maxLengthOneHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.interval),
-                maxLength: maxLengthOneHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
-                maxLength: maxLengthDefault,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  visitOverTime.section.code,
+                  VisitOverTimeHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item) => {
+              const visitsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                visitOverTime.section.code,
+                VisitOverTimeHeaders[1]
+              );
+              const intervalFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                visitOverTime.section.code,
+                VisitOverTimeHeaders[2]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                visitOverTime.section.code,
+                VisitOverTimeHeaders[3]
+              );
+
+              return {
+                hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.visits),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: visitsFeedback,
+                    feedbackLeft: visitsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      visitOverTime.section.code,
+                      VisitOverTimeHeaders[1]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.interval),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: intervalFeedback,
+                    feedbackLeft: intervalFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      visitOverTime.section.code,
+                      VisitOverTimeHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      visitOverTime.section.code,
+                      VisitOverTimeHeaders[3]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
 }
 
 export function CombinationTherapyAPItoUI(
-  CombinationTherapy: CombinationTherapyResponse,
+  combinationTherapy: CombinationTherapyResponse,
   isReadOnly: boolean = false
 ): GroupedSection {
   return {
-    drugVersionCode: SectionCode.CombinationTherapy,
-    section: {
-      code: CombinationTherapy.section.code,
-      name: CombinationTherapy.section.name,
-    },
+    ...commonConvertAPItoUI(combinationTherapy),
     headers: CombinationTherapyHeaders,
-    id: convertSectionNameToID(CombinationTherapy.section.name),
-    groups: !CombinationTherapy.data
+    groups: !combinationTherapy.data
       ? []
-      : CombinationTherapy.data.map((group) => {
+      : combinationTherapy.data.map((group) => {
+          const indicationFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            combinationTherapy.section.code,
+            CombinationTherapyHeaders[0]
+          );
           return {
             names: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(group.indication.label),
-				maxLength: maxLengthFourHundred,
+                maxLength: maxLengthFourHundred,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  combinationTherapy.section.code,
+                  CombinationTherapyHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
             rows: group.data.map((item) => {
               const codes = item.codes.map((code) => code.code).join(", ");
+              const combinationFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                combinationTherapy.section.code,
+                CombinationTherapyHeaders[1]
+              );
+              const codesFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                combinationTherapy.section.code,
+                CombinationTherapyHeaders[2]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                combinationTherapy.section.code,
+                CombinationTherapyHeaders[3]
+              );
               return {
                 hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
                 columns: [
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.combination),
                     maxLength: maxLengthDefault,
+                    feedbackData: combinationFeedback,
+                    feedbackLeft: combinationFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      combinationTherapy.section.code,
+                      CombinationTherapyHeaders[1]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(codes),
-                    maxLength: maxLengthDefault,
+                    maxLength: maxLengthHCPCSCode,
+                    isArrayValue: true,
+                    maxArrayItems: maxSectionCodesItems,
+                    feedbackData: codesFeedback,
+                    feedbackLeft: codesFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      combinationTherapy.section.code,
+                      CombinationTherapyHeaders[2]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
-                    value: prepareData(item.comments.join(",")),
+                    value: prepareData(item.comments.join(", ")),
                     maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      combinationTherapy.section.code,
+                      CombinationTherapyHeaders[3]
+                    ),
                   },
                 ],
               };
@@ -829,66 +1873,192 @@ export function CombinationTherapyAPItoUI(
 }
 
 export function DosingPatternsAPItoUI(
-  DosingPatterns: DosingPatternsResponse,
+  dosingPatterns: DosingPatternsResponse,
   isReadOnly: boolean = false
 ): GroupedSection {
   return {
-    drugVersionCode: SectionCode.DosingPatterns,
-    section: {
-      code: DosingPatterns.section.code,
-      name: DosingPatterns.section.name,
-    },
+    ...commonConvertAPItoUI(dosingPatterns),
     headers: DosingPatternsHeaders,
-    id: convertSectionNameToID(DosingPatterns.section.name),
-    groups: !DosingPatterns.data
+    groups: !dosingPatterns.data
       ? []
-      : DosingPatterns.data.map((group) => {
+      : dosingPatterns.data.map((group) => {
+          const indicationFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            dosingPatterns.section.code,
+            DosingPatternsHeaders[0]
+          );
           return {
             names: [
               {
-                isReadOnly: isReadOnly,
+                isReadOnly: true,
                 value: prepareData(group.indication.label),
-				maxLength: maxLengthFourHundred,
+                maxLength: maxLengthFourHundred,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  dosingPatterns.section.code,
+                  DosingPatternsHeaders[0]
+                ),
               },
             ],
+            codeGroupUI: guidGenerator(),
             rows: group.data.map((item) => {
+              const labelFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dosingPatterns.section.code,
+                DosingPatternsHeaders[1]
+              );
+              const clinicaleedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dosingPatterns.section.code,
+                DosingPatternsHeaders[2]
+              );
+              const microFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dosingPatterns.section.code,
+                DosingPatternsHeaders[3]
+              );
+              const nccnFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dosingPatterns.section.code,
+                DosingPatternsHeaders[4]
+              );
+              const lexiFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dosingPatterns.section.code,
+                DosingPatternsHeaders[5]
+              );
+              const ahfsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dosingPatterns.section.code,
+                DosingPatternsHeaders[6]
+              );
+              const otherFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                dosingPatterns.section.code,
+                DosingPatternsHeaders[7]
+              );
               return {
                 hasBorder: false,
+                code: item.code,
+                codeUI: guidGenerator(),
                 columns: [
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.drugLabel),
                     maxLength: maxLengthDefault,
+                    feedbackData: labelFeedback,
+                    feedbackLeft: labelFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dosingPatterns.section.code,
+                      DosingPatternsHeaders[1]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.clinicalPharma),
                     maxLength: maxLengthDefault,
+                    feedbackData: clinicaleedback,
+                    feedbackLeft: clinicaleedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dosingPatterns.section.code,
+                      DosingPatternsHeaders[2]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.micromedex),
                     maxLength: maxLengthDefault,
+                    feedbackData: microFeedback,
+                    feedbackLeft: microFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dosingPatterns.section.code,
+                      DosingPatternsHeaders[3]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.nccn),
                     maxLength: maxLengthDefault,
+                    feedbackData: nccnFeedback,
+                    feedbackLeft: nccnFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dosingPatterns.section.code,
+                      DosingPatternsHeaders[4]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.lexiDrugs),
                     maxLength: maxLengthDefault,
+                    feedbackData: lexiFeedback,
+                    feedbackLeft: lexiFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dosingPatterns.section.code,
+                      DosingPatternsHeaders[5]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.ahfsDi),
                     maxLength: maxLengthDefault,
+                    feedbackData: ahfsFeedback,
+                    feedbackLeft: ahfsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dosingPatterns.section.code,
+                      DosingPatternsHeaders[6]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.other),
                     maxLength: maxLengthDefault,
+                    feedbackData: otherFeedback,
+                    feedbackLeft: otherFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      dosingPatterns.section.code,
+                      DosingPatternsHeaders[7]
+                    ),
                   },
                 ],
               };
@@ -901,66 +2071,196 @@ export function DosingPatternsAPItoUI(
 export function DiagnosisCodeOverlapsConvertAPItoUI(
   diagnosisCodeOverlaps: DiagnosisCodeOverlapsResponse,
   isReadOnly: boolean = false
-): Section {
+): GroupedSection {
   return {
-    drugVersionCode: SectionCode.DiagnosisCodeOverlaps,
-    section: {
-      code: diagnosisCodeOverlaps.section.code,
-      name: diagnosisCodeOverlaps.section.name,
-    },
+    ...commonConvertAPItoUI(diagnosisCodeOverlaps),
     headers: DiagnosisCodeOverlapsHeaders,
-    id: convertSectionNameToID(diagnosisCodeOverlaps.section.name),
-    rows: !diagnosisCodeOverlaps.data
+    groups: !diagnosisCodeOverlaps.data
       ? []
-      : diagnosisCodeOverlaps.data.map((item) => {
+      : diagnosisCodeOverlaps.data.map((group) => {
+          const icd10Feedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            diagnosisCodeOverlaps.section.code,
+            DiagnosisCodeOverlapsHeaders[0]
+          );
           return {
-            hasBorder: item.hasBorder,
-            columns: [
+            names: [
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(
-                  item.icd10Code ? item.icd10Code.icd10Code : ""
+                value: prepareData(group.icd10Code.icd10Code),
+                maxLength: maxLengthFourHundred,
+                feedbackData: icd10Feedback,
+                feedbackLeft: icd10Feedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
                 ),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(
-                  item.indication ? item.indication.label : ""
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  diagnosisCodeOverlaps.section.code,
+                  DiagnosisCodeOverlapsHeaders[0]
                 ),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.units),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.frequency),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.unitsOverTime),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.visitsOverTime),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.age),
-                maxLength: maxLengthFourHundred,
-              },
-              {
-                isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(", ")),
-                maxLength: maxLengthFourHundred,
               },
             ],
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item, itemIndex) => {
+              const indicationFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                diagnosisCodeOverlaps.section.code,
+                DiagnosisCodeOverlapsHeaders[1]
+              );
+              const unitsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                diagnosisCodeOverlaps.section.code,
+                DiagnosisCodeOverlapsHeaders[2]
+              );
+              const frequencyFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                diagnosisCodeOverlaps.section.code,
+                DiagnosisCodeOverlapsHeaders[3]
+              );
+              const uotFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                diagnosisCodeOverlaps.section.code,
+                DiagnosisCodeOverlapsHeaders[4]
+              );
+              const votFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                diagnosisCodeOverlaps.section.code,
+                DiagnosisCodeOverlapsHeaders[5]
+              );
+              const ageFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                diagnosisCodeOverlaps.section.code,
+                DiagnosisCodeOverlapsHeaders[6]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                diagnosisCodeOverlaps.section.code,
+                DiagnosisCodeOverlapsHeaders[7]
+              );
+              return {
+                hasBorder:
+                  item.hasBorder ||
+                  (itemIndex + 1 === group.data.length && group.hasBorder),
+                code: item.code,
+                codeUI: guidGenerator(),
+                columns: [
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.indication.label),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: indicationFeedback,
+                    feedbackLeft: indicationFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      diagnosisCodeOverlaps.section.code,
+                      DiagnosisCodeOverlapsHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.units),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: unitsFeedback,
+                    feedbackLeft: unitsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      diagnosisCodeOverlaps.section.code,
+                      DiagnosisCodeOverlapsHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.frequency),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: frequencyFeedback,
+                    feedbackLeft: frequencyFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      diagnosisCodeOverlaps.section.code,
+                      DiagnosisCodeOverlapsHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.unitsOverTime),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: uotFeedback,
+                    feedbackLeft: uotFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      diagnosisCodeOverlaps.section.code,
+                      DiagnosisCodeOverlapsHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.visitsOverTime),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: votFeedback,
+                    feedbackLeft: votFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      diagnosisCodeOverlaps.section.code,
+                      DiagnosisCodeOverlapsHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.age),
+                    maxLength: maxLengthFourHundred,
+                    feedbackData: ageFeedback,
+                    feedbackLeft: ageFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      diagnosisCodeOverlaps.section.code,
+                      DiagnosisCodeOverlapsHeaders[2]
+                    ),
+                  },
+                  {
+                    isReadOnly: isReadOnly,
+                    value: prepareData(item.comments.join(", ")),
+                    maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      diagnosisCodeOverlaps.section.code,
+                      DiagnosisCodeOverlapsHeaders[7]
+                    ),
+                  },
+                ],
+              };
+            }),
           };
         }),
   };
@@ -971,18 +2271,33 @@ export function GlobalReviewIndicationsConvertAPItoUI(
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: SectionCode.GlobalReviewIndications,
-    section: {
-      code: globalReviewIndications.section.code,
-      name: globalReviewIndications.section.name,
-    },
+    ...commonConvertAPItoUI(globalReviewIndications),
     headers: GlobalReviewIndicationsHeaders,
-    id: convertSectionNameToID(globalReviewIndications.section.name),
     rows: !globalReviewIndications.data
       ? []
       : globalReviewIndications.data.map((item) => {
+          const indicationFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            globalReviewIndications.section.code,
+            GlobalReviewIndicationsHeaders[0]
+          );
+          const globalFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            globalReviewIndications.section.code,
+            GlobalReviewIndicationsHeaders[1]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            globalReviewIndications.section.code,
+            GlobalReviewIndicationsHeaders[2]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
@@ -990,16 +2305,46 @@ export function GlobalReviewIndicationsConvertAPItoUI(
                   item.indication ? item.indication.label : ""
                 ),
                 maxLength: maxLengthFourHundred,
+                feedbackData: indicationFeedback,
+                feedbackLeft: indicationFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  globalReviewIndications.section.code,
+                  GlobalReviewIndicationsHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.globalReviewIndication),
                 maxLength: maxLengthFourHundred,
+                feedbackData: globalFeedback,
+                feedbackLeft: globalFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  globalReviewIndications.section.code,
+                  GlobalReviewIndicationsHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.comments.join(", ")),
-                maxLength: maxLengthFourHundred,
+                maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  globalReviewIndications.section.code,
+                  GlobalReviewIndicationsHeaders[2]
+                ),
               },
             ],
           };
@@ -1008,26 +2353,42 @@ export function GlobalReviewIndicationsConvertAPItoUI(
 }
 
 export function SecondaryMalignancyAPItoUI(
-  SecondaryMalignancy: SecondaryMalignancyResponse,
+  secondaryMalignancy: SecondaryMalignancyResponse,
   isReadOnly: boolean = false
 ): GroupedSection {
-  const codes = SecondaryMalignancy.codes ? SecondaryMalignancy.codes : [];
+  const codes = secondaryMalignancy.codes ? secondaryMalignancy.codes : [];
   return {
-    drugVersionCode: SectionCode.SecondaryMalignancy,
-    section: {
-      code: SecondaryMalignancy.section.code,
-      name: SecondaryMalignancy.section.name,
-    },
+    ...commonConvertAPItoUI(secondaryMalignancy),
     headers: SecondaryMalignancyHeaders,
     codes: codes,
     codesColumn: {
       value: codes.join(", "),
       isReadOnly: isReadOnly,
+      regExValidator: /[^A-Z\d\s,.-]/,
+      regExMessage:
+        "Only commas, hyphens and dots are acepted for special characters",
+      regExTitle: "Secondary Malignancy ICD-10 Codes (Standard)",
+      maxLength: maxLengthTwoHundred,
+      maxArrayItems: maxPlaceholderCodesItems,
+      isArrayValue: true,
+      feedbackData: [],
+      feedbackLeft: 0,
     },
-    id: convertSectionNameToID(SecondaryMalignancy.section.name),
-    groups: !SecondaryMalignancy.data
+    groups: !secondaryMalignancy.data
       ? []
-      : SecondaryMalignancy.data.map((group) => {
+      : secondaryMalignancy.data.map((group) => {
+          const icd10Feedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            secondaryMalignancy.section.code,
+            SecondaryMalignancyHeaders[0]
+          );
+          const secondaryFeedback = getColumnFeedback(
+            group.data[0].feedbackItemsList,
+            false,
+            secondaryMalignancy.section.code,
+            SecondaryMalignancyHeaders[1]
+          );
           return {
             names: [
               {
@@ -1037,54 +2398,193 @@ export function SecondaryMalignancyAPItoUI(
                     .map((item) => {
                       return item.icd10Code;
                     })
-                    .join(",")
+                    .join(", ")
                 ),
-                maxLength: maxLengthFourHundred
+                maxLength: maxLengthFourHundred,
+                isArrayValue: true,
+                maxArrayItems: maxSectionCodesItems,
+                feedbackData: icd10Feedback,
+                feedbackLeft: icd10Feedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  secondaryMalignancy.section.code,
+                  SecondaryMalignancyHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(group.secondarySite),
-                maxLength: maxLengthFourHundred
+                maxLength: maxLengthFourHundred,
+                feedbackData: secondaryFeedback,
+                feedbackLeft: secondaryFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  group.data[0].documentNoteList,
+                  secondaryMalignancy.section.code,
+                  SecondaryMalignancyHeaders[1]
+                ),
               },
             ],
-            rows: group.data.map((item) => {
+            codeGroupUI: guidGenerator(),
+            rows: group.data.map((item, itemIndex) => {
+              const primaryFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                secondaryMalignancy.section.code,
+                SecondaryMalignancyHeaders[2]
+              );
+              const unitsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                secondaryMalignancy.section.code,
+                SecondaryMalignancyHeaders[3]
+              );
+              const freqFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                secondaryMalignancy.section.code,
+                SecondaryMalignancyHeaders[4]
+              );
+              const uotFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                secondaryMalignancy.section.code,
+                SecondaryMalignancyHeaders[5]
+              );
+              const votFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                secondaryMalignancy.section.code,
+                SecondaryMalignancyHeaders[6]
+              );
+              const ageFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                secondaryMalignancy.section.code,
+                SecondaryMalignancyHeaders[7]
+              );
+              const commentsFeedback = getColumnFeedback(
+                item.feedbackItemsList,
+                false,
+                secondaryMalignancy.section.code,
+                SecondaryMalignancyHeaders[8]
+              );
               return {
-                hasBorder: item.hasBorder,
+                hasBorder:
+                  item.hasBorder ||
+                  (itemIndex + 1 === group.data.length && group.hasBorder),
+                code: item.code,
+                codeUI: guidGenerator(),
                 columns: [
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.primaryMalignancy),
                     maxLength: maxLengthFourHundred,
+                    feedbackData: primaryFeedback,
+                    feedbackLeft: primaryFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      secondaryMalignancy.section.code,
+                      SecondaryMalignancyHeaders[2]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.units),
                     maxLength: maxLengthFourHundred,
+                    feedbackData: unitsFeedback,
+                    feedbackLeft: unitsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      secondaryMalignancy.section.code,
+                      SecondaryMalignancyHeaders[3]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.frequency),
                     maxLength: maxLengthFourHundred,
+                    feedbackData: freqFeedback,
+                    feedbackLeft: freqFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      secondaryMalignancy.section.code,
+                      SecondaryMalignancyHeaders[4]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.unitsOverTime),
                     maxLength: maxLengthFourHundred,
+                    feedbackData: uotFeedback,
+                    feedbackLeft: uotFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      secondaryMalignancy.section.code,
+                      SecondaryMalignancyHeaders[5]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.visitsOverTime),
                     maxLength: maxLengthFourHundred,
+                    feedbackData: votFeedback,
+                    feedbackLeft: votFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      secondaryMalignancy.section.code,
+                      SecondaryMalignancyHeaders[6]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
                     value: prepareData(item.age),
                     maxLength: maxLengthFourHundred,
+                    feedbackData: ageFeedback,
+                    feedbackLeft: ageFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      secondaryMalignancy.section.code,
+                      SecondaryMalignancyHeaders[7]
+                    ),
                   },
                   {
                     isReadOnly: isReadOnly,
-                    value: prepareData(item.comments.join(",")),
+                    value: prepareData(item.comments.join(", ")),
                     maxLength: maxLengthDefault,
+                    feedbackData: commentsFeedback,
+                    feedbackLeft: commentsFeedback.reduce(
+                      (acc, item) => (acc += !item.resolved ? 1 : 0),
+                      0
+                    ),
+                    comments: getAPIColumnComments(
+                      item.documentNoteList,
+                      secondaryMalignancy.section.code,
+                      SecondaryMalignancyHeaders[8]
+                    ),
                   },
                 ],
               };
@@ -1095,37 +2595,82 @@ export function SecondaryMalignancyAPItoUI(
 }
 
 export function GlobalReviewCodesConvertAPItoUI(
-  GlobalReviewCodes: GlobalReviewCodesResponse,
+  globalReviewCodes: GlobalReviewCodesResponse,
   isReadOnly: boolean = false
 ): Section {
   return {
-    drugVersionCode: SectionCode.GlobalReviewCodes,
-    section: {
-      code: GlobalReviewCodes.section.code,
-      name: GlobalReviewCodes.section.name,
-    },
+    ...commonConvertAPItoUI(globalReviewCodes),
     headers: GlobalReviewCodesHeaders,
-    id: convertSectionNameToID(GlobalReviewCodes.section.name),
-    rows: !GlobalReviewCodes.data
+    rows: !globalReviewCodes.data
       ? []
-      : GlobalReviewCodes.data.map((item) => {
+      : globalReviewCodes.data.map((item) => {
+          const currentFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            globalReviewCodes.section.code,
+            GlobalReviewCodesHeaders[0]
+          );
+          const globalFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            globalReviewCodes.section.code,
+            GlobalReviewCodesHeaders[1]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            globalReviewCodes.section.code,
+            GlobalReviewCodesHeaders[2]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.currentIcd10CodeRange.icd10Code),
-                maxLength: maxLengthFourHundred,
+                maxLength: maxLengthTwoHundred,
+                feedbackData: currentFeedback,
+                feedbackLeft: currentFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  globalReviewCodes.section.code,
+                  GlobalReviewCodesHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.globalReviewIcd10Code.icd10Code),
                 maxLength: maxLengthFourHundred,
+                feedbackData: globalFeedback,
+                feedbackLeft: globalFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  globalReviewCodes.section.code,
+                  GlobalReviewCodesHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
-                value: prepareData(item.comments.join(",")),
-                maxLength: maxLengthFourHundred,
+                value: prepareData(item.comments.join(", ")),
+                maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  globalReviewCodes.section.code,
+                  GlobalReviewCodesHeaders[2]
+                ),
               },
             ],
           };
@@ -1139,33 +2684,78 @@ export function RulesAPItoUI(
   sectionName: string
 ): Section {
   return {
-    drugVersionCode: SectionCode.Rules,
-    section: {
-      code: rules.section.code,
-      name: sectionName,
-    },
+    ...commonConvertAPItoUI(rules, sectionName),
     headers: RulesHeaders,
-    id: convertSectionNameToID(sectionName),
     rows: !rules.data
       ? []
       : rules.data.map((item) => {
+          const ruleFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            rules.section.code,
+            RulesHeaders[0]
+          );
+          const descriptionFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            rules.section.code,
+            RulesHeaders[1]
+          );
+          const commentsFeedback = getColumnFeedback(
+            item.feedbackItemsList,
+            false,
+            rules.section.code,
+            RulesHeaders[2]
+          );
           return {
             hasBorder: false,
+            code: item.code,
+            codeUI: guidGenerator(),
             columns: [
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.rule),
-                maxLength: 20,
+                maxLength: 200,
+                feedbackData: ruleFeedback,
+                feedbackLeft: ruleFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  rules.section.code,
+                  RulesHeaders[0]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.description),
                 maxLength: 10000,
+                feedbackData: descriptionFeedback,
+                feedbackLeft: descriptionFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  rules.section.code,
+                  RulesHeaders[1]
+                ),
               },
               {
                 isReadOnly: isReadOnly,
                 value: prepareData(item.comments.join(", ")),
                 maxLength: maxLengthDefault,
+                feedbackData: commentsFeedback,
+                feedbackLeft: commentsFeedback.reduce(
+                  (acc, item) => (acc += !item.resolved ? 1 : 0),
+                  0
+                ),
+                comments: getAPIColumnComments(
+                  item.documentNoteList,
+                  rules.section.code,
+                  RulesHeaders[2]
+                ),
               },
             ],
           };
@@ -1177,353 +2767,111 @@ export function convertSectionNameToID(name: string): string {
   return name.replace(/\s/g, "_").toLowerCase();
 }
 
-export function aggregatorInformation(item: BaseSectionResponse): UISection {
-  switch (item.section.code) {
-    case SectionCode.GeneralInformation:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: generalInformationConvertAPIToUI(
-          item as GeneralInformationTemplateResponse,
-          true
-        ),
-        new: generalInformationConvertAPIToUI(GeneralInformationTemplate),
-        hasRowHeading: true,
-        grouped: false,
-      };
-    case SectionCode.References:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: referencesConvertAPIToUI(
-          item as ReferencesTemplateResponse,
-          true
-        ),
-        new: referencesConvertAPIToUI(ReferenceTemplate),
-        hasRowHeading: true,
-        grouped: false,
-      };
-    case SectionCode.LCD:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: LCDConvertAPIToUI(item as LCDTemplateResponse, true),
-        new: LCDConvertAPIToUI(LCDTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.Notes:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: NotesConvertAPIToUI(item as NotesTemplateResponse, true),
-        new: NotesConvertAPIToUI(NotesTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-
-    case SectionCode.MedicalJournal:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: MedicalJournalConvertAPIToUI(
-          item as MedicalJournalTemplateResponse,
-          true
-        ),
-        new: MedicalJournalConvertAPIToUI(MedicalJournalTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.Indications:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: IndicationsConvertAPIToUI(
-          item as IndicationsTemplateResponse,
-          true
-        ),
-        new: IndicationsConvertAPIToUI(IndicationsTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.DailyMaxUnits:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: DailyMaxUnitsConvertAPItoUI(
-          item as DailyMaxUnitsTemplateResponse,
-          true
-        ),
-        new: DailyMaxUnitsConvertAPItoUI(DailyMaxUnitsTemplate),
-        hasRowHeading: true,
-        grouped: false,
-      };
-    case SectionCode.DiagnosisCodes:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: DiagnosisCodesConvertAPItoUI(
-          item as DiagnosisCodesTemplateResponse,
-          true
-        ),
-        new: DiagnosisCodesConvertAPItoUI(DiagnosisCodesTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.DiagnosticCodeSummary:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: DiagnosisCodeSummaryConvertAPItoUI(
-          item as DiagnosisCodeSummaryTemplateResponse,
-          true
-        ),
-        new: DiagnosisCodeSummaryConvertAPItoUI(DiagnosisCodeSummaryTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-
-    case SectionCode.MaximumFrequency:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: MaximumFrecuencyConvertAPItoUI(
-          item as MaximumFrequencyTemplateResponse,
-          true
-        ),
-        new: MaximumFrecuencyConvertAPItoUI(MaximumFrequencyTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.ManifestationCodes:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: ManifestationCodesConvertAPItoUI(
-          item as ManifestationCodesTemplateResponse,
-          true
-        ),
-        new: ManifestationCodesConvertAPItoUI(ManifestationCodesTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.Age:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: AgeConvertAPItoUI(item as AgeTemplateResponse, true),
-        new: AgeConvertAPItoUI(AgeTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.DailyMaximumDose:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: DailyMaximumDoseConvertAPItoUI(
-          item as DailyMaximumDoseTemplateResponse,
-          true
-        ),
-        new: DailyMaximumDoseConvertAPItoUI(DailyMaximumDoseTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.Gender:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: GenderConvertAPItoUI(item as GenderTemplateResponse, true),
-        new: GenderConvertAPItoUI(GenderTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.UnitsOverTime:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: UnitsOverTimeConvertAPItoUI(
-          item as UnitsOverTimeTemplateResponse,
-          true
-        ),
-        new: UnitsOverTimeConvertAPItoUI(UnitsOverTimeTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.VisitOverTime:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: VisitOverTimeConvertAPItoUI(
-          item as VisitOverTimeTemplateResponse,
-          true
-        ),
-        new: VisitOverTimeConvertAPItoUI(VisitOverTimeTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.CombinationTherapy:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: CombinationTherapyAPItoUI(
-          item as CombinationTherapyResponse,
-          true
-        ),
-        new: CombinationTherapyAPItoUI(CombinationTherapyTemplate),
-        hasRowHeading: false,
-        grouped: true,
-      };
-    case SectionCode.DosingPatterns:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: DosingPatternsAPItoUI(item as DosingPatternsResponse, true),
-        new: DosingPatternsAPItoUI(DosingPatternsTemplate),
-        hasRowHeading: false,
-        grouped: true,
-      };
-    case SectionCode.DiagnosisCodeOverlaps:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: DiagnosisCodeOverlapsConvertAPItoUI(
-          item as DiagnosisCodeOverlapsResponse,
-          true
-        ),
-        new: DiagnosisCodeOverlapsConvertAPItoUI(DiagnosisCodeOverlapsTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.GlobalReviewIndications:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: GlobalReviewIndicationsConvertAPItoUI(
-          item as GlobalReviewIndicationsResponse,
-          true
-        ),
-        new: GlobalReviewIndicationsConvertAPItoUI(
-          GlobalReviewIndicationsTemplate
-        ),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.SecondaryMalignancy:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: SecondaryMalignancyAPItoUI(
-          item as SecondaryMalignancyResponse,
-          true
-        ),
-        new: SecondaryMalignancyAPItoUI(SecondaryMalignancyTemplate),
-        hasRowHeading: false,
-        grouped: true,
-      };
-    case SectionCode.GlobalReviewCodes:
-      return {
-        id: convertSectionNameToID(item.section.name),
-        current: GlobalReviewCodesConvertAPItoUI(
-          item as GlobalReviewCodesResponse,
-          true
-        ),
-        new: GlobalReviewCodesConvertAPItoUI(GlobalReviewCodesTemplate),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    case SectionCode.Rules:
-      const sectionName = item.section.name;
-      return {
-        id: convertSectionNameToID(sectionName),
-        current: RulesAPItoUI(item as RulesTemplateResponse, true, sectionName),
-        new: RulesAPItoUI(RulesTemplate, false, sectionName),
-        hasRowHeading: false,
-        grouped: false,
-      };
-    default:
-      break;
-  }
-}
-
 export function versionInformation(
-  item: BaseSectionResponse
+  item: BaseSectionResponse,
+  isReadOnly: boolean = false
 ): Section | GroupedSection {
   switch (item.section.code) {
     case SectionCode.GeneralInformation:
       return generalInformationConvertAPIToUI(
         item as GeneralInformationTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.References:
-      return referencesConvertAPIToUI(item as ReferencesTemplateResponse, true);
+      return referencesConvertAPIToUI(
+        item as ReferencesTemplateResponse,
+        isReadOnly
+      );
     case SectionCode.LCD:
-      return LCDConvertAPIToUI(item as LCDTemplateResponse, true);
+      return LCDConvertAPIToUI(item as LCDTemplateResponse, isReadOnly);
     case SectionCode.Notes:
-      return NotesConvertAPIToUI(item as NotesTemplateResponse, true);
+      return NotesConvertAPIToUI(item as NotesTemplateResponse, isReadOnly);
     case SectionCode.MedicalJournal:
       return MedicalJournalConvertAPIToUI(
         item as MedicalJournalTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.Indications:
       return IndicationsConvertAPIToUI(
         item as IndicationsTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.DailyMaxUnits:
       return DailyMaxUnitsConvertAPItoUI(
-        item as DailyMaxUnitsTemplateResponse,
-        true
+        item as DailyMaxUnitsGroupedTemplateResponse,
+        valuesCorresponding,
+        isReadOnly
       );
     case SectionCode.DiagnosisCodes:
       return DiagnosisCodesConvertAPItoUI(
         item as DiagnosisCodesTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.DiagnosticCodeSummary:
       return DiagnosisCodeSummaryConvertAPItoUI(
         item as DiagnosisCodeSummaryTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.MaximumFrequency:
       return MaximumFrecuencyConvertAPItoUI(
         item as MaximumFrequencyTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.ManifestationCodes:
       return ManifestationCodesConvertAPItoUI(
         item as ManifestationCodesTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.Age:
-      return AgeConvertAPItoUI(item as AgeTemplateResponse, true);
+      return AgeConvertAPItoUI(item as AgeTemplateResponse, isReadOnly);
     case SectionCode.DailyMaximumDose:
       return DailyMaximumDoseConvertAPItoUI(
         item as DailyMaximumDoseTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.Gender:
-      return GenderConvertAPItoUI(item as GenderTemplateResponse, true);
+      return GenderConvertAPItoUI(item as GenderTemplateResponse, isReadOnly);
     case SectionCode.UnitsOverTime:
       return UnitsOverTimeConvertAPItoUI(
         item as UnitsOverTimeTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.VisitOverTime:
       return VisitOverTimeConvertAPItoUI(
         item as VisitOverTimeTemplateResponse,
-        true
+        isReadOnly
       );
     case SectionCode.CombinationTherapy:
       return CombinationTherapyAPItoUI(
         item as CombinationTherapyResponse,
-        true
+        isReadOnly
       );
     case SectionCode.DosingPatterns:
-      return DosingPatternsAPItoUI(item as DosingPatternsResponse, true);
+      return DosingPatternsAPItoUI(item as DosingPatternsResponse, isReadOnly);
     case SectionCode.DiagnosisCodeOverlaps:
       return DiagnosisCodeOverlapsConvertAPItoUI(
         item as DiagnosisCodeOverlapsResponse,
-        true
+        isReadOnly
       );
     case SectionCode.GlobalReviewIndications:
       return GlobalReviewIndicationsConvertAPItoUI(
         item as GlobalReviewIndicationsResponse,
-        true
+        isReadOnly
       );
     case SectionCode.SecondaryMalignancy:
       return SecondaryMalignancyAPItoUI(
         item as SecondaryMalignancyResponse,
-        true
+        isReadOnly
       );
     case SectionCode.GlobalReviewCodes:
       return GlobalReviewCodesConvertAPItoUI(
         item as GlobalReviewCodesResponse,
-        true
+        isReadOnly
       );
     case SectionCode.Rules:
       return RulesAPItoUI(
         item as RulesTemplateResponse,
-        true,
+        isReadOnly,
         item.section.name
       );
     default:
@@ -1533,7 +2881,8 @@ export function versionInformation(
 
 export function createNavigation(
   sections: UISection[],
-  versionStatus: string = ""
+  versionStatus: string = "",
+  hideFeedback: boolean = true
 ): NavigationItem[] {
   return sections.map((section) => {
     let id = section.new.section.name;
@@ -1556,10 +2905,17 @@ export function createNavigation(
         )}`;
       }
     }
-
+    const feedbackCount = !hideFeedback
+      ? getSectionFeedbacks(section.new, section.grouped).length
+      : 0;
     return {
       name: name,
       id: convertSectionNameToID(id),
+      completed: section.new.completed,
+      feedbackLeft:
+        feedbackCount > 0
+          ? getSectionUnresolvedFeedbacksCount(section.new, section.grouped)
+          : null,
     };
   });
 }
@@ -1582,7 +2938,10 @@ export function clearNewSection(
     case SectionCode.Indications:
       return IndicationsConvertAPIToUI(IndicationsTemplate);
     case SectionCode.DailyMaxUnits:
-      return DailyMaxUnitsConvertAPItoUI(DailyMaxUnitsTemplate);
+      return DailyMaxUnitsConvertAPItoUI(
+        DailyMaxUnitsGroupedTemplate,
+        valuesCorresponding
+      );
     case SectionCode.DiagnosisCodes:
       return DiagnosisCodesConvertAPItoUI(DiagnosisCodesTemplate);
     case SectionCode.DiagnosticCodeSummary:
@@ -1620,4 +2979,35 @@ export function clearNewSection(
     default:
       break;
   }
+}
+
+export function createCurrentPlaceholder(
+  section: BaseSectionResponse,
+  grouped: boolean
+): Section | GroupedSection {
+  return grouped
+    ? {
+        drugVersionCode: section.drugVersionCode,
+        section: {
+          code: section.section.code,
+          name: section.section.name,
+        },
+        headers: [],
+        headersUIWidth: [],
+        codes: [],
+        id: convertSectionNameToID(section.section.name),
+        groups: [],
+      }
+    : {
+        drugVersionCode: section.drugVersionCode,
+        section: {
+          code: section.section.code,
+          name: section.section.name,
+        },
+        codes: [],
+        headers: [],
+        headersUIWidth: [],
+        id: convertSectionNameToID(section.section.name),
+        rows: [],
+      };
 }

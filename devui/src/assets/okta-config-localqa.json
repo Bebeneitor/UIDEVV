@@ -1,0 +1,9 @@
+{
+    "oidc": {
+      "clientId": "0oap7v9vasypIQBsJ1d6",
+      "issuer": "https://login-int.cotiviti.com/oauth2/default",
+      "postLogoutRedirectUri": "https://cotiviti-ext-int.oktapreview.com",
+      "redirectUri": "/index.html",
+      "scopes": ["openid", "profile", "email"]
+    }
+}

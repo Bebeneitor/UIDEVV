@@ -1,0 +1,33 @@
+.copy-paste-text {
+  width: 100%;
+  min-height: 100px;
+  overflow-y: auto;
+  border: 1px solid #000;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+}
+
+.plus-btn {
+  float: right;
+}
+
+.chk-bx{
+  text-align: center;
+  margin-left: 10px;
+  margin-right: 15px;
+}
+
+.chk-bx label{
+  display: block;
+}
+
+.width-perc-16{
+  width:16%;
+}
+
+#icon{
+  margin-top: 17px;
+}

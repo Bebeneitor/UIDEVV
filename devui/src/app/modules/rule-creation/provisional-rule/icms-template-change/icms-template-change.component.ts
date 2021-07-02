@@ -28,7 +28,7 @@ const EXCEL_EXTENSION = '.xlsx';
 export class IcmsTemplateChangeComponent implements OnInit {
 
   headerText = 'Confirmation';
-  @ViewChild('pridControl') pridControl: ElementRef;
+  @ViewChild('pridControl',{static: true}) pridControl: ElementRef;
   createProjectForm: FormGroup;
 
   requiredFields = [
@@ -61,11 +61,21 @@ export class IcmsTemplateChangeComponent implements OnInit {
   porpuse;
   loggedUser;
   templateStatus: string;
-  buttonsDisabled = false;
+  formSubmitted = false;
   loadingText: string = '';
 
   tableConfig: EclTableModel;
   procedureCodesTableConfig: EclTableModel;
+  hcpcsCptTables: any = {
+    addedConfig: {data:[]},
+    deletedConfig: {data:[]},
+    changedConfig: {data:[]}
+  }
+  icdTables: any = {
+    addedConfig: {data:[]},
+    deletedConfig: {data:[]},
+    changedConfig: {data:[]}
+  }
 
   yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
   
@@ -125,28 +135,29 @@ export class IcmsTemplateChangeComponent implements OnInit {
         Constants.RMR_TEMPLATE_IS_NOT_SUBMITTED, Constants.RMR_CHANGE_TYPE);
     })).subscribe((response: BaseResponse) => {
       this.blockDocument = false;
-      this.templateForm.setValue({
-        prid: response.data ? response.data.icmsTemplateDetails.prid : this.prm,
-        versionNumber: response.data ? response.data.icmsTemplateDetails.versionNumber : this.subRuleKey,
-        description: response.data ? response.data.icmsTemplateDetails.description : this.description,
-        dueDate: response.data ? new Date(response.data.icmsTemplateDetails.dueDate) : null,
-        purpose: response.data ? response.data.icmsTemplateDetails.purpose : this.porpuse,
-        writtenBy: response.data ? response.data.icmsTemplateDetails.writtenBy : this.loggedUser.userId
+      this.templateForm.patchValue({
+          prid: response.data ? response.data.icmsTemplateDetails.prid : this.prm,
+          versionNumber: response.data ? response.data.icmsTemplateDetails.versionNumber : this.subRuleKey,
+          description: response.data ? response.data.icmsTemplateDetails.description : this.description,
+          dueDate: response.data ? new Date(response.data.icmsTemplateDetails.dueDate) : null,
+          purpose: response.data ? response.data.icmsTemplateDetails.purpose : this.porpuse,
+          writtenBy: response.data ? response.data.icmsTemplateDetails.writtenBy : this.loggedUser.userId
       });
-      this.lotusNotesUrl = this.sanitization.bypassSecurityTrustUrl(response.data.icmsTemplateDetails.pridDetails.url);
-      this.templateStatus = (response.data && response.data.icmsTemplateDetails) ? response.data.icmsTemplateDetails.templateStatus : undefined;
-      this.buttonsDisabled = (response.data) ? response.data.submitted : false;
-    });
-    
+      this.templateStatus = (response.data && response.data.icmsTemplateDetails) ? response.data.icmsTemplateDetails.templateStatus : 'New';
+      if(response.data) this.formSubmitted = response.data.submitted;
+      if(this.formSubmitted) this.templateForm.disable();
       
-    
-    this.templateStatus = this.templateStatus === undefined || this.templateStatus === '' ? 'New' : this.templateStatus;
+      if(response.data && response.data.icmsTemplateDetails && response.data.icmsTemplateDetails.pridDetails != undefined)
+        this.lotusNotesUrl = this.sanitization.bypassSecurityTrustUrl(response.data.icmsTemplateDetails.pridDetails.url);
+    });
+
+    this.templateStatus = this.templateStatus || this.templateStatus === '' ? 'New' : this.templateStatus;
     let manager = new EclTableColumnManager();
     this.tableConfig = new EclTableModel();
 
     manager.addTextColumn('columnName', 'Field', null, false, EclColumn.TEXT, false);
     manager.addTextColumn('oldValue', 'Old Value', null, false, EclColumn.TEXT, false);
-    manager.addTextColumn('newValue', 'New Value', null, false, EclColumn.TEXT, false);
+    manager.addTextColumn('delta', 'New Value', null, false, EclColumn.TEXT, false);
 
     this.tableConfig.columns = manager.getColumns();
     this.tableConfig.sort = false;
@@ -154,11 +165,27 @@ export class IcmsTemplateChangeComponent implements OnInit {
     this.tableConfig.filterGlobal = false;
     this.tableConfig.showPaginatorOptions = false;
     this.tableConfig.showPaginator = false;
-    this.tableConfig.scrollable = true;
+    this.tableConfig.scrollable = false;
 
-    const deltasWithoutCodes = this.config.data.deltas.filter(delta => {
-      return delta.columnName !== 'Procedure Codes';
+    const deltasWithoutCodes: any[] = this.config.data.deltas.filter(delta => {
+      return (delta.columnName !== 'Procedure Codes' && delta.columnName !== 'Opportunity Value');
     });
+    
+    if (deltasWithoutCodes.length > 0) {
+      const ruleLogicOriginal = deltasWithoutCodes.find(element => element.columnName === 'Rule Logic Original');
+      if (ruleLogicOriginal) {
+        ruleLogicOriginal.columnName = 'Rule Logic';
+      }
+    }
+
+    if (deltasWithoutCodes.length > 0) {
+      const elementsOnJson = ['Provider Type', 'Included Place of Service','Speciality','Included Speciality','Included Subspeciality'];
+      
+      elementsOnJson.forEach(currentNode => {
+        this.orderElement(deltasWithoutCodes, currentNode );
+      });
+      
+    }
     this.tableConfig.data = deltasWithoutCodes ? deltasWithoutCodes : [];
 
     manager = new EclTableColumnManager();
@@ -174,12 +201,15 @@ export class IcmsTemplateChangeComponent implements OnInit {
     this.procedureCodesTableConfig.filterGlobal = false;
     this.procedureCodesTableConfig.showPaginatorOptions = false;
     this.procedureCodesTableConfig.showPaginator = false;
-    this.procedureCodesTableConfig.scrollable = true;
+    this.procedureCodesTableConfig.scrollable = false;
 
     const codesElement = this.config.data.deltas.find(delta => {
       return delta.columnName === 'Procedure Codes';
     });
     this.procedureCodesTableConfig.data = (codesElement && codesElement.newValue) ? JSON.parse(codesElement.newValue) : [];
+
+    this.createHcpcsCptDeltaTables();
+    this.createIcdDeltaTables();
 
     // Create the prid project form.
     this.createProjectForm = this.fb.group({
@@ -188,6 +218,26 @@ export class IcmsTemplateChangeComponent implements OnInit {
       description: new FormControl(null, [Validators.required])
     });
 
+  }
+
+  orderElement(deltasWithoutCodes: any[], currentNode: string){
+    const node = deltasWithoutCodes.find(element => element.columnName === currentNode);
+    const nodeNew = node;
+    if (node) {
+      const indexToRemove = deltasWithoutCodes.indexOf(node);
+      deltasWithoutCodes.splice(indexToRemove,1);
+      deltasWithoutCodes.push(nodeNew);
+    }
+  }
+
+  orderDeltasToSend(filteredDeltas: any[], currentNode: string){
+    const node = filteredDeltas.find(element => element.columnName === currentNode);
+    const nodeNew = node;
+    if (node) {
+      const indexToRemove = filteredDeltas.indexOf(node);
+      filteredDeltas.splice(indexToRemove,1);
+      filteredDeltas.push(nodeNew);
+    }
   }
 
   /**
@@ -202,7 +252,7 @@ export class IcmsTemplateChangeComponent implements OnInit {
     this.projectCreationModal = true;
     setTimeout(() => {
       this.arrayMessage = [];
-      this.arrayMessage = Object.assign([], [{ severity: 'info', summary: 'Info', detail: 'This will create a Stub Project Request in Lotus Notes, along to a PRID.  Please note that for using this PRID to create RMR, the Project request should be fully processed and Submitted in Lotus Notes.' }]); 
+      this.arrayMessage = Object.assign([], [{ severity: 'info', summary: 'Info', detail: 'This will create a Stub Project Request in Lotus Notes, along to a PRID.  Please note that for using this PRID to create RMR, the Project request should be fully processed and Submitted in Lotus Notes.' }]);
     }, 1000);
 
 
@@ -223,11 +273,11 @@ export class IcmsTemplateChangeComponent implements OnInit {
     };
 
     this.ruleEngineTemplateService.submitProjectCreation(body).subscribe(response => {
-      if (response && response.code === 200) { 
-        
-       this.getControl('prid').setValue(response.data.prid);
+      if (response && response.code === 200) {
+
+        this.getControl('prid').setValue(response.data.prid);
         this.pridDetails = response.data;
-        
+
         this.checkIsValid(response.data.prid, 'PRID');
         this.lotusNotesUrl = this.sanitization.bypassSecurityTrustUrl(response.data.url);
         this.projectCreationModal = false;
@@ -297,6 +347,15 @@ export class IcmsTemplateChangeComponent implements OnInit {
       return element.columnName !== 'Procedure Codes'
     });
 
+    if (filteredDeltas.length > 0) {
+      const elementsOnJson = ['Provider Type', 'Included Place of Service','Speciality','Included Speciality','Included Subspeciality'];
+      
+      elementsOnJson.forEach(currentNode => {
+        this.orderDeltasToSend(filteredDeltas, currentNode );
+      });
+      
+    }
+
     // Find procedure codes in deltas.
     const procedureCodes = this.config.data.deltas.find(delta => {
       return delta.columnName === 'Procedure Codes';
@@ -306,7 +365,7 @@ export class IcmsTemplateChangeComponent implements OnInit {
     let arrayCodes;
     if (procedureCodes && procedureCodes.newValue) {
       arrayCodes = JSON.parse(procedureCodes.newValue);
-    } 
+    }
 
     // Fortmat the procedure codes into a string.
     const procedureCodesFormatted = arrayCodes ? arrayCodes.map(element => {
@@ -383,5 +442,83 @@ export class IcmsTemplateChangeComponent implements OnInit {
   get creationName() { return this.createProjectForm.get('name'); }
   get creationSummary() { return this.createProjectForm.get('summary'); }
   get creationDescription() { return this.createProjectForm.get('description'); }
+
+  createHcpcsCptDeltaTables() {
+    if (!this.config.data.hcpcsCptDelta) {
+      return;
+    }    
+    let manager = new EclTableColumnManager();    
+    let defaultConfig = new EclTableModel();
+    let alignment = 'center';
+
+    manager.addTextColumn('codeFrom'   ,'HCPCS/CPT From'  ,'8%',  false, EclColumn.TEXT, true, 0, alignment, null, null);
+    manager.addTextColumn('codeTo'     ,'HCPCS/CPT To'    ,'8%',  false, EclColumn.TEXT, true, 0, alignment, null, null);
+    manager.addOverlayPanelTextColumn('modifiers'  ,'Modifier'        ,'8%',  false, EclColumn.TEXT, true, 0, alignment, null, true);
+    manager.addTextColumn('daysLo'          ,'Days Lo'         ,'5%',false, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('daysHi'          ,'Days Hi'         ,'5%',false, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('dateFrom','Date From','8%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('dateTo','Date To','8%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('category','Category','15%', false, EclColumn.TEXT, true, 0, alignment, null, null);
+    manager.addOverlayPanelTextColumn('pos','POS','10%', false, EclColumn.TEXT, true, 0, alignment, null, true);
+    manager.addTextColumn('revCodeFrom','Revenue Code From' ,'5%',false, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('revCodeTo','Revenue Code To','5%',false, EclColumn.TEXT, true, 0, alignment);
+
+    manager.addMultiCheckIconIndictorColumn('bwDeny', 'B/W Deny', '5%', false, EclColumn.CHECK_MULTI_ICON_IND, true, 2, true);
+    manager.addMultiCheckIconIndictorColumn('override', 'Override', '5%', false, EclColumn.CHECK_MULTI_ICON_IND, true, 2, true);
+    manager.addMultiCheckIconIndictorColumn('icd', 'ICD', '5%', false, EclColumn.CHECK_MULTI_ICON_IND, true, 2, true);
+
+    defaultConfig.columns = manager.getColumns();
+    defaultConfig.sort = false;
+    defaultConfig.export = false;
+    defaultConfig.filterGlobal = false;
+    defaultConfig.showPaginatorOptions = false;
+    defaultConfig.showPaginator = false;
+    defaultConfig.scrollable = false;
+
+    this.hcpcsCptTables.addedConfig = Object.assign({}, defaultConfig);
+    this.hcpcsCptTables.addedConfig.data = Object.assign([], this.config.data.hcpcsCptDelta.added);
+
+    this.hcpcsCptTables.deletedConfig = Object.assign({}, defaultConfig);
+    this.hcpcsCptTables.deletedConfig.data = Object.assign([], this.config.data.hcpcsCptDelta.deleted);
+
+    this.hcpcsCptTables.changedConfig = Object.assign({}, defaultConfig);
+    this.hcpcsCptTables.changedConfig.data = Object.assign([], this.config.data.hcpcsCptDelta.changed);
+  }
+
+  createIcdDeltaTables() {
+    if (!this.config.data.icdDelta) {
+      return;
+    }    
+    let manager = new EclTableColumnManager();    
+    let defaultConfig = new EclTableModel();
+    let alignment = 'center';
+
+    manager.addTextColumn("codeFrom", 'ICD From', '12%', false, EclColumn.TEXT, true, 0, 'left', null, null);
+    manager.addTextColumn('codeTo', 'ICD To', '12%', false, EclColumn.TEXT, true, 0, 'left', null, null);
+    manager.addTextColumn('dateFrom','Date From','15%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('dateTo','Date To','15%', true, EclColumn.TEXT, true, 0, alignment);
+    manager.addTextColumn('category', 'Category', '15%', false, EclColumn.TEXT, true);
+    manager.addTextColumn('primSecInd', 'Primary / Secondary', '10%', false, EclColumn.TEXT, true);
+    manager.addMultiCheckIconIndictorColumn('override', 'Override', '10%', false, EclColumn.CHECK_MULTI_ICON_IND, true, 2, true);
+    manager.addMultiCheckIconIndictorColumn('claimHeaderLevel', 'Claim Header Level', '10%', false, EclColumn.CHECK_MULTI_ICON_IND, true, 2, true);
+    
+
+    defaultConfig.columns = manager.getColumns();
+    defaultConfig.sort = false;
+    defaultConfig.export = false;
+    defaultConfig.filterGlobal = false;
+    defaultConfig.showPaginatorOptions = false;
+    defaultConfig.showPaginator = false;
+    defaultConfig.scrollable = false;
+
+    this.icdTables.addedConfig = Object.assign({}, defaultConfig);
+    this.icdTables.addedConfig.data = Object.assign([], this.config.data.icdDelta.added);
+
+    this.icdTables.deletedConfig = Object.assign({}, defaultConfig);
+    this.icdTables.deletedConfig.data = Object.assign([], this.config.data.icdDelta.deleted);
+
+    this.icdTables.changedConfig = Object.assign({}, defaultConfig);
+    this.icdTables.changedConfig.data = Object.assign([], this.config.data.icdDelta.changed);
+  }
 
 }

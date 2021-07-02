@@ -4,13 +4,13 @@ import { Elements } from 'src/app/shared/models/elements';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RoleSetupService } from 'src/app/services/role-setup.service';
 import { Users } from 'src/app/shared/models/users';
-import {ConfirmationService} from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { UserAccessDto } from 'src/app/shared/models/dto/user-access-dto';
 import { Constants } from 'src/app/shared/models/constants';
 import { CcaPoSetupComponent } from './components/cca-po-setup/cca-po-setup.component';
 import { UserTeamCategoryMapDto } from 'src/app/shared/models/dto/user-team-category-map-dto';
 import { AppUtils } from 'src/app/shared/services/utils';
-
+import { DnbAuthService } from '../../dnb/services/dnb-auth.service';
 
 const PAGE_TITLE = 'User Authority Setup';
 const WARN_HEADING = 'Warning!';
@@ -39,6 +39,7 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
     displayViewAssignmentsComponent: boolean = false;
     functionType: any;
     pageTitle: string;
+    userStatus: string;
     roles: any[];// list to show the available roles
     roleObjList: any[] // list of all available roles Objects
     selectedRoles: number[];
@@ -63,13 +64,13 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
     userSelected: boolean = false;
     userList: any[] = [];
     loggedInUserId: number; // logged in user Id
-
+    userInitial: string;
     successHeader: string;
     message: string;
     display: boolean = false;
     //true if not ediatble and false if editable flag for the username
     selectedEditable: boolean;
-    loading: boolean;
+    loading: boolean = false;
     saveDisable: boolean;
     //boolean values to handle the child component behavioural changes
     creationOrMaintenance: boolean;//boolean value to fetch the category mapping data based on rule creation or maintenance(true: creation)
@@ -79,14 +80,19 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
     roleCCA: boolean;
     rolePOId: number;
     roleCCAId: number;
+    roleDnbApprover: number;
+    roleDnbEditor: number;
+    roleDnbAdmin: number;
+    roleDnbViewer: number;
     teamValidation: boolean;
     categoryMappingDataRC: UserTeamCategoryMapDto[]; // list to show the userCategoryMappingData values
     categoryMappingDataListRC: UserTeamCategoryMapDto[];// parent list with actual categoryMappingData without any user specific
     categoryMappingDataRM: UserTeamCategoryMapDto[]; // list to show the userCategoryMappingData values
-    categoryMappingDataListRM: UserTeamCategoryMapDto[];// parent list with actual categoryMappingData without any user specific
-
+    categoryMappingDataListRM: UserTeamCategoryMapDto[];// parent list with actual categoryMappingData without any user specific    
+    showDnbDropDown: boolean = false;
+    permissionsDnb: any[] = [];
     constructor(private utilService: UtilsService, private route: ActivatedRoute, private router: Router, private roleSetupService: RoleSetupService,
-        private confirmationService: ConfirmationService, private utils: AppUtils) {
+        private confirmationService: ConfirmationService, private utils: AppUtils, private dnbAuth: DnbAuthService) {
         this.roles = [];
         this.functionalities = [];
         this.teams = [];
@@ -100,6 +106,7 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         this.roleCCA = false;
         this.teamValidation = false;
         this.saveDisable = false;
+
     }
 
     ngOnInit(): void {
@@ -111,8 +118,11 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         this.getAllRuleEngines();
         this.getAllRoleFunctionalities();
         this.getAllTeams();
-        this.fetchAllUserSetUpCategoriesRM();
-        this.fetchAllUserSetUpCategoriesRC();
+
+        Promise.all([this.fetchAllUserSetUpCategoriesRM(), this.fetchAllUserSetUpCategoriesRC()]).then(() => {
+            this.loading = false;
+        });
+
         this.selectedRoles = [];
         this.originalSelectedRoles = [];
         this.selectedEngines = [];
@@ -130,8 +140,6 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
             this.selectedTeams = [];
             this.selectedEditable = false;
         }
-        this.loading = true;
-        this.loading = false;
         this.loggedInUserId = this.utils.getLoggedUserId();
 
     }
@@ -140,7 +148,8 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         this.validateSelectedRole();
         if (sessionStorage.getItem("userAuthSetup")) {
             this.selectedUser = JSON.parse(sessionStorage.getItem("userAuthSetup"));
-            this.selectedUserName = this.selectedUser.firstName;
+            this.selectedUserName = this.selectedUser.userName;
+            this.userInitial =this.selectedUser.initials;
             this.newUser = false;
             this.selectedEditable = true;
             this.getUserAccess(this.selectedUser.userId);
@@ -189,6 +198,7 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
             } else {
                 this.ruleMaintenance = true;
             }
+            this.validateSelectedDnbRole();
         }
     }
 
@@ -196,7 +206,6 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
 
     searchUser() {
         if (this.selectedUserName.length >= 4) {
-            
             this.roleSetupService.searchUserByName(this.trimSearchValue(this.selectedUserName)).subscribe(response => {
                 if (response.data !== undefined && response.data !== null) {
                     if (response.data.length <= 0) {
@@ -208,9 +217,11 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
                             if (this.selectedUserName === user.userName) {
                                 this.selectedUser = new Users();
                                 this.selectedUser.userName = user.userName;
-                                this.selectedUser.firstName = user.userName;
+                                this.selectedUser.firstName = user.firstName;
+                                this.selectedUser.lastName = user.lastName;
                                 this.selectedUser.email = user.email;
                                 this.selectedUserName = user.userName;
+                                this.userInitial = user.initials;
 
                             } else {
                                 this.userList.push(user);
@@ -225,7 +236,7 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
                             this.selectedTeams = [];
                             this.userList = [];
                             if (this.selectedUser.email) {
-                                this.searchSelectedUserByEmail(this.selectedUser.email);
+                                this.searchSelectedUserByUsername(this.selectedUser.userName);
                             }
                         } else {
                             this.newUser = true;
@@ -236,7 +247,7 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
             });
         }
     }
-/* Method to disable the user setup page and save button based on the user search */
+    /* Method to disable the user setup page and save button based on the user search */
     saveButtonDisable() {
         if (this.selectedUserName.length > 4 && this.selectedUser.userName) {
             this.saveDisable = false;
@@ -248,15 +259,19 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    /* Function to search the selected user and add the deleted user */
-    searchSelectedUserByEmail(email: string) {
+    /* Function to search the selected user on ECL DB */
+    searchSelectedUserByUsername(username: string) {
         let userId;
-        this.roleSetupService.searchUserByEmail(email).subscribe(response => {
+        this.roleSetupService.searchECLUserByUsername(username).subscribe(response => {
             if (response.data != null && response.data != undefined && response.data != {}) {
+                //Existent user on ECL DB (already registered), retrieve its info using its User ID
                 this.userAccessDto = response.data;
                 userId = this.userAccessDto.userId;
+                this.userInitial = this.userAccessDto.initials;
                 this.getUserAccess(userId);
             } else {
+                // New User, add default Role
+                this.setUserStatus(null);
                 this.selectDefaultRole();//assigning a default role if the user does not exist
                 this.originalSelectedRoles = this.selectedRoles;
                 this.validateSelectedRole();
@@ -270,33 +285,49 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
+    setUserStatus(user: any) {
+        if (user != null) {
+            if (user.status == Constants.STATUS_ACTIVE) {
+                this.userStatus = Constants.ACTIVE_STRING_VALUE;
+            } else if (user.status == Constants.STATUS_INACTIVE) {
+                this.userStatus = Constants.INACTIVE_STRING_VALUE;
+            }
+        } else {
+            this.userStatus = Constants.ACTIVE_STRING_VALUE;
+        }
+    }
+
     /* Method to fetch rule Maintenance categories */
     fetchAllUserSetUpCategoriesRM() {
-        this.loading = true;
-        this.roleSetupService.fetchAllUserSetUpCategoriesRM().subscribe(response => {
-            if (response.data !== null && response.data !== undefined) {
-                this.categoryMappingDataRM = [];
-                this.categoryMappingDataListRM = [];
-                let categories: any[] = response.data;
-                this.categoryMappingDataRM = categories;
-                this.categoryMappingDataListRM = categories;
-            }
-            this.loading = false;
+        return new Promise(resolve => {
+            this.roleSetupService.fetchAllUserSetUpCategoriesRM().subscribe(response => {
+                if (response.data !== null && response.data !== undefined) {
+                    this.categoryMappingDataRM = [];
+                    this.categoryMappingDataListRM = [];
+                    let categories: any[] = response.data;
+                    this.categoryMappingDataRM = categories;
+                    this.categoryMappingDataListRM = categories;
+                }
+
+                resolve(true);
+            });
         });
     }
 
     /* Method to fetch rule creation categories */
     fetchAllUserSetUpCategoriesRC() {
-        this.loading = true;
-        this.roleSetupService.fetchAllUserSetUpCategoriesRC().subscribe(response => {
-            if (response.data !== null && response.data !== undefined) {
-                this.categoryMappingDataRC = [];
-                this.categoryMappingDataListRC = [];
-                let categories: any[] = response.data;
-                this.categoryMappingDataRC = categories;
-                this.categoryMappingDataListRC = categories;
-            }
-            this.loading = false;
+        return new Promise(resolve => {
+            this.roleSetupService.fetchAllUserSetUpCategoriesRC().subscribe(response => {
+                if (response.data !== null && response.data !== undefined) {
+                    this.categoryMappingDataRC = [];
+                    this.categoryMappingDataListRC = [];
+                    let categories: any[] = response.data;
+                    this.categoryMappingDataRC = categories;
+                    this.categoryMappingDataListRC = categories;
+                }
+                
+                resolve(true);
+            });
         });
     }
 
@@ -310,7 +341,7 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
             accept: () => {
                 if (sessionStorage.getItem("userAuthSetup")) {
                     sessionStorage.removeItem("userAuthSetup");
-                } 
+                }
                 if (sessionStorage.getItem("newUserSetUp")) {
                     sessionStorage.removeItem("newUserSetUp");
                 }
@@ -357,14 +388,19 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         this.loading = true;
         this.roleSetupService.getUserAccess(userId).subscribe(response => {
             if (response.data != null && response.data != undefined && response.data != {}) {
+                this.setUserStatus(response.data)
                 this.userAccessDto = response.data;
-                this.resetCategoriesList();
-                this.showSelectedUser(this.userAccessDto);
-                this.showRoleFunctionalitiesAccess();
-                this.loading = false;
             } else {
                 this.loading = false;
             }
+
+            this.resetCategoriesList();
+            this.showSelectedUser(this.userAccessDto);
+            this.showRoleFunctionalitiesAccess();
+
+            setTimeout(() => {
+                this.loading = false;
+            }, 1000);
         });
     }
 
@@ -377,12 +413,13 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selectedTeams = [];
         this.selectedCreationCategoryMapDtoList = [];
         this.selectedMaintenanceCategoryMapDtoList = [];
-        this.selectedUserName = userAccessDto.firstName;
+        this.selectedUserName = userAccessDto.userName;
         this.selectedRoles = userAccessDto.rolesList;
         this.originalSelectedRoles = this.selectedRoles;
         this.selectedEngines = userAccessDto.ruleEnginesList;
         this.selectedTeams = this.teams.filter(team => userAccessDto.teamsList.includes(team.teamId));
         this.selectedUser.firstName = userAccessDto.firstName;
+        this.selectedUser.lastName = userAccessDto.lastName;
         this.selectedUser.userName = userAccessDto.userName;
         this.selectedUser.email = userAccessDto.email;
         this.selectedUser.userId = userAccessDto.userId;
@@ -523,8 +560,10 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
 
     buildUserAccessDtoObject() {
         this.userAccessDto = new UserAccessDto();
+        this.userAccessDto.initials = this.userInitial;
         this.userAccessDto.email = this.selectedUser.email;
         this.userAccessDto.firstName = this.selectedUser.firstName;
+        this.userAccessDto.lastName = this.selectedUser.lastName;
         this.userAccessDto.userName = this.selectedUser.userName;
         this.userAccessDto.rolesList = this.selectedRoles;
         this.userAccessDto.ruleEnginesList = this.selectedEngines;
@@ -595,6 +634,17 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.roleCCAId = role.roleId;
                     } else if (role.roleName === Constants.PO_ROLE) {
                         this.rolePOId = role.roleId;
+                    }
+                    else if (role.roleName === Constants.DRUGS_BIOLOGICALS_APPROVER) {
+                        this.roleDnbApprover = role.roleId;
+                    } else if (role.roleName === Constants.DRUGS_BIOLOGICALS_EDITOR) {
+                        this.roleDnbEditor = role.roleId;
+                    }
+                    else if (role.roleName === Constants.DRUGS_BIOLOGICALS_ADMIN) {
+                        this.roleDnbAdmin = role.roleId;
+                    }
+                    else if (role.roleName === Constants.DRUGS_BIOLOGICALS_VIEWER) {
+                        this.roleDnbViewer = role.roleId;
                     }
                 });
                 if (this.roles.length > 1) {
@@ -819,14 +869,14 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-  showDialog(functionType: any) {
-    this.displayViewAssignmentsComponent = true;
-    this.functionType = functionType;
-  }
+    showDialog(functionType: any) {
+        this.displayViewAssignmentsComponent = true;
+        this.functionType = functionType;
+    }
 
-  onDialogClose(event) {
-    this.displayViewAssignmentsComponent = event;
-  }
+    onDialogClose(event) {
+        this.displayViewAssignmentsComponent = event;
+    }
 
     /* Method to load the existing userCategoryMapping of rule creation
     based on the team selection of the user by passing the selected teamId*/
@@ -847,7 +897,39 @@ export class RoleSetupComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ccaPoMappingComponent.first.loadSelectedUserTeamCategoryMapping(selectedTeamCategoryMappingList, this.creationOrMaintenance);
     }
 
-    trimSearchValue(selectedUserName: string){        
-             return selectedUserName.replace(/[%;]/g, "");;
+    trimSearchValue(selectedUserName: string) {
+        return selectedUserName.replace(/[%;]/g, "");
+    }
+
+    validateSelectedDnbRole() {
+        this.permissionsDnb = [];
+        let validateDnbRoles: boolean = false;
+        if (this.selectedRoles.includes(this.roleDnbApprover)) {
+            validateDnbRoles = true;
+            this.dnbAuth.getRolePermissions(Constants.DRUGS_BIOLOGICALS_APPROVER).subscribe(response => {
+                this.permissionsDnb.push(response);
+            });
+        }
+        if (this.selectedRoles.includes(this.roleDnbEditor)) {
+            validateDnbRoles = true;
+            this.dnbAuth.getRolePermissions(Constants.DRUGS_BIOLOGICALS_EDITOR).subscribe(response => {
+                this.permissionsDnb.push(response);
+            });
+        }
+
+
+        if (this.selectedRoles.includes(this.roleDnbAdmin)) {
+            validateDnbRoles = true;
+            this.dnbAuth.getRolePermissions(Constants.DRUGS_BIOLOGICALS_ADMIN).subscribe(response => {
+                this.permissionsDnb.push(response);
+            });
+        }
+        if (this.selectedRoles.includes(this.roleDnbViewer)) {
+            validateDnbRoles = true;
+            this.dnbAuth.getRolePermissions(Constants.DRUGS_BIOLOGICALS_VIEWER).subscribe(response => {
+                this.permissionsDnb.push(response);
+            });
+        }
+        this.showDnbDropDown = validateDnbRoles;
     }
 }

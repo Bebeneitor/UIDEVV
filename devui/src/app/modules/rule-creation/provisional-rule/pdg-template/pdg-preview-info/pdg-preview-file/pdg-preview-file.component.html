@@ -1,0 +1,18 @@
+<div class="pdg-preview-file row mt-2">
+  <div class="col-md-12" *ngIf="fileExists">
+    <div class="row" *ngFor="let item of _fileList; let i=index;">
+      <div class="col-1"></div>
+      <div class="col-10">
+        <span (click)="downloadSavedFile(item)" [ngClass]="getFileIcon(item.fileName)"
+        aria-hidden="true" aria-label="Download File" title="Download File"></span>
+        <span class="file-info">{{item.fileName}}</span>
+        <div class="ss-panel" *ngIf="item.refSrcUrl != null">
+          <img [src]="item.refSrcUrl" class="ss-image">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-12" *ngIf="!fileExists">
+    <div class="no-files-text">No Attachments</div> 
+  </div>
+</div>

@@ -13,17 +13,18 @@ import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-tab
 import { GoodIdeasDto } from 'src/app/shared/models/dto/good-ideas-dto';
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
 import { AppUtils } from 'src/app/shared/services/utils';
-import { environment } from '../../../../environments/environment';
 import { ECLConstantsService } from "../../../services/ecl-constants.service";
 import { Constants } from '../../../shared/models/constants';
+import { PageTitleConstants as ptc } from 'src/app/shared/models/page-title-constants';
 import { ConfirmationDialogService } from '../../confirmation-dialog/confirmation-dialog.service';
 import { ProvisionalRuleComponent } from '../provisional-rule/provisional-rule.component';
+import {ResearchRequestSearchedRuleDto} from "../../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../../services/research-request.service";
 
 const LIBRARY_RULE = 'Library Rule';
 const SHELVED = 'Shelved';
 const NEED_MORE_INFO = 'Need More Information';
 const NEED_MD_APPROVAL = 'Need Peer Reviewer Approval';
-const STAGE_SAVESUBMIT = 2;
 const SHELVED_VALUE = Constants.SHELVED_VALUE;
 const NEED_MORE_INFO_VALUE = Constants.NEED_MORE_INFO_VALUE;
 const NEED_MD_APPROVAL_VALUE = Constants.PR_APPROVAL_VALUE;
@@ -38,7 +39,7 @@ const RESPONSE_SUCCESS = "success";
 })
 export class RuleApprovalComponent implements OnInit {
 
-  @ViewChild('poApprovalTable') poApprovalTable: EclTableComponent;
+  @ViewChild('poApprovalTable',{static: true}) poApprovalTable: EclTableComponent;
 
   poApprovalTableConfig: EclTableModel = new EclTableModel();
   cols: any[];
@@ -66,10 +67,15 @@ export class RuleApprovalComponent implements OnInit {
   saveGoodIdeas: boolean = false;
   selectedShelved: GoodIdeasDto[];
 
+  // Research Request
+  rrId: number;
+  rrCode: string;
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
+
   constructor(private util: AppUtils, public route: ActivatedRoute, private http: HttpClient,
     private dialogService: DialogService, private confirmationDialogService: ConfirmationDialogService, private router: Router,
     private confirmationService: ConfirmationService, private provisionalService: ProvisionalRuleService, private messageService: MessageService,
-    private ruleService: RuleInfoService, private eclConstantsService: ECLConstantsService, private toastService: ToastMessageService) {
+    private ruleService: RuleInfoService, private eclConstantsService: ECLConstantsService, private toastService: ToastMessageService, private rrService: ResearchRequestService) {
   }
 
   ngOnInit() {
@@ -80,12 +86,12 @@ export class RuleApprovalComponent implements OnInit {
       this.statusCodes = this.provisionalService.getStatusCodeForApprovalScreen();
     });
     this.initializeTableConfig();
-    
+
   }
 
   initializeTableConfig() {
     let manager = new EclTableColumnManager();
-    manager.addLinkColumn('ruleCode', 'Provisional Rule ID', '12%', true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon('ruleCode', 'Provisional Rule ID', '12%', true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn('ruleName', 'Provisional Rule Name', '20%', true, EclColumn.TEXT, true);
     manager.addTextColumn('categoryDesc', 'Category', '8%', true, EclColumn.TEXT, true);
     manager.addTextColumn('daysOld', 'Days Old', "5%", true, EclColumn.TEXT, true);
@@ -94,11 +100,12 @@ export class RuleApprovalComponent implements OnInit {
     manager.addInputColumn('reviewComments', 'Review Comments','10%', true, EclColumn.TEXT, true);
     this.poApprovalTable.customFilterOptions = this.statusCodes;
     this.poApprovalTableConfig.lazy = true;
-    this.poApprovalTableConfig.sortOrder = 1;
+    this.poApprovalTableConfig.sortBy = 'daysOld';
+    this.poApprovalTableConfig.sortOrder = 0;
     this.poApprovalTableConfig.columns = manager.getColumns();
     this.poApprovalTableConfig.checkBoxSelection = true;
     this.poApprovalTableConfig.excelFileName = this.pageTitle;
-    this.poApprovalTableConfig.url = 
+    this.poApprovalTableConfig.url =
     `${RoutingConstants.RULES_URL}/${RoutingConstants.PROVISIONAL_RULES_FOR_PO_URL}/${Constants.ASSIGNED_TAB}?userId=${this.userId}`;
   }
 
@@ -108,7 +115,7 @@ export class RuleApprovalComponent implements OnInit {
     this.poApprovalTable.savedSelRecords = [];
     this.poApprovalTable.clearFilters();
     this.poApprovalTable.keywordSearch = '';
-    this.poApprovalTable.refreshTable();
+    this.poApprovalTable.resetDataTable();
   }
 
   submitRuleApproval() {
@@ -138,10 +145,10 @@ export class RuleApprovalComponent implements OnInit {
           {
             ruleId: data.ruleId,
             code: data.ruleCode,
-            name: data.name,
-            category: data.category,
-            daysold: data.daysold,
-            creator: data.creator,
+            name: data.ruleName,
+            category: data.categoryDesc,
+            daysold: data.daysOld,
+            creator: data.createdByUser,
             reviewComment: data.reviewComments,
             goodIdeaDt: undefined
           }
@@ -161,6 +168,7 @@ export class RuleApprovalComponent implements OnInit {
         stageId: 2,
         status: rowData.ruleStatusId,
         comments: rowData.reviewComments,
+        pdgTemplate:rowData.pdgTemplate
       });
     });
 
@@ -222,7 +230,7 @@ export class RuleApprovalComponent implements OnInit {
   validateSelectedRows() {
     let res: boolean = true;
     this.selectedData.forEach(data => {
-      if (!data.ruleStatusId || data.ruleStatusId === Constants.PROVISIONAL_RULE_VALUE) { 
+      if (!data.ruleStatusId || data.ruleStatusId === Constants.PROVISIONAL_RULE_VALUE) {
         this.messageService.add({ severity: 'warn', summary: 'No Status', detail: data.ruleCode + " : Please select a review status" + '.', life: 3000, closable: true });
         res = false;
       } else {
@@ -263,31 +271,44 @@ export class RuleApprovalComponent implements OnInit {
     let ruleId = rowData.ruleId;
     let ruleReviewStatus = rowData.ruleStatusId;
     let ruleReviewComments = rowData.reviewComments;
-    const ref = this.dialogService.open(ProvisionalRuleComponent, {
-      data: {
-        ruleId: ruleId,
-        header: 'Rule Provisional Details',
-        reviewStatus: this.getReviewStatus(),
-        ruleReviewStatus: ruleReviewStatus,
-        ruleReviewComments: ruleReviewComments,
-        stageId: STAGE_SAVESUBMIT
-      },
-      header: 'Rule Details',
-      width: '80%',
-      height: '92%',
-      closeOnEscape: false,
-      closable: false,
-      contentStyle: { 
-        'max-height': '92%', 
-        'overflow': 'auto',
-        'padding-top': '0', 
-        'padding-bottom': '0', 
-        'border': 'none' }
-    });
+    let ruleResponseIndicator: boolean = false;
+    let rrId: string = '';
+    this.rrService.isRuleCreatedFromRR(ruleId).subscribe((resp: any) => {
+      if (resp.data !== null && resp.data !== undefined ) {
+        ruleResponseIndicator = true;
+        rrId = resp.data;
+      }
+      const ref = this.dialogService.open(ProvisionalRuleComponent, {
+        data: {
+          ruleId: ruleId,
+          header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
+          reviewStatus: this.getReviewStatus(),
+          ruleReviewStatus: ruleReviewStatus,
+          ruleReviewComments: ruleReviewComments,
+          stageId: Constants.ECL_PROVISIONAL_STAGE,
+          provSetup: Constants.ECL_PROVISIONAL_STAGE,
+          ruleResponseInd: ruleResponseIndicator,
+          researchRequestId: rrId,
+          hideMyRequestLink: true
+        },
+        showHeader: !ruleResponseIndicator,
+        header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
+        width: '80%',
+        height: '92%',
+        closeOnEscape: false,
+        closable: false,
+        contentStyle: {
+          'max-height': '92%',
+          'overflow': 'auto',
+          'padding-top': '0',
+          'padding-bottom': '0',
+          'border': 'none'
+        }
+      });
 
-
-    ref.onClose.subscribe((provRuleId: any) => {
-      this.refreshRuleApproval();
+      ref.onClose.subscribe((provRuleId: any) => {
+        this.refreshRuleApproval();
+      });
     });
   }
   getReviewStatus() {
@@ -347,6 +368,20 @@ export class RuleApprovalComponent implements OnInit {
         this.navigateHome();
         //Actual logic to perform a confirmation
       }
+    });
+  }
+
+
+  // Source Link for Research Request
+  async getRuleResponseIndicatorAndRuleCode(ruleId: number) {
+    this.ruleResponseSearchDto = new ResearchRequestSearchedRuleDto();
+    return new Promise((resolve, reject) => {
+      this.rrService.getRuleResponseIndicator(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined && resp.data !== {}) {
+          this.ruleResponseSearchDto = resp.data;
+        }
+        resolve(this.ruleResponseSearchDto);
+      });
     });
   }
 

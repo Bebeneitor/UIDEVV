@@ -1,23 +1,7 @@
-<div class="row">
+<div class="row" #section>
   <div class="old-version col-6" *ngIf="showCurrent">
     <div class="table-header">
-      <ng-container *ngIf="isDailyMaxUnits; else simpleCurrentTitle">
-        <h3>
-          {{ currentVersion.section.name }}
-          <span class="codes-input input-read-only">
-            <app-cell-editor
-              [attr.slm-id]="'daily_max_codes_text'"
-              [column]="currentVersion.codesColumn"
-              [searchInfo]="currentVersion.codesColumn.searchData"
-              [highLight]="currentVersion.codesColumn.highlight"
-              [isReadOnly]="true"
-            ></app-cell-editor>
-          </span>
-        </h3>
-      </ng-container>
-      <ng-template #simpleCurrentTitle>
-        <h3>{{ currentVersion.section.name }}</h3>
-      </ng-template>
+      <h3>{{ currentVersion.section.name }}</h3>
       <div class="title-buttons" *ngIf="expandSection">
         <button
           class="button is-text undo"
@@ -27,58 +11,152 @@
           data-toggle="tooltip"
           data-placement="top"
           title="Undo Copy to New For This Section Only"
+          tabindex="-1"
         >
-        {{ shouldShowUndo ? "Undo Copy to New" : "Redo Copy to New" }}
+          {{ shouldShowUndo ? "Undo Copy to New" : "Redo Copy to New" }}
         </button>
-        <button
-          class="button is-text"
-          [attr.slm-id]="'section_copy_btn'"
-          (click)="confirmCopySection()"
-          *ngIf="_enableEditing"
-          [disabled]="currentVersion.rows.length == 0"
+        <ng-container
+          *ngIf="
+            enableEditing && !sectionsChildsAutopopulate.includes(newVersion.id)
+          "
         >
-          Copy To New
-        </button>
+          <button
+            class="button is-text"
+            [attr.slm-id]="'section_copy_btn'"
+            (click)="confirmCopySection()"
+            *ngIf="!isRules && newVersion.enabled"
+            [disabled]="currentVersion.rows.length == 0"
+            tabindex="-1"
+          >
+            Copy To New
+          </button>
+        </ng-container>
       </div>
     </div>
   </div>
   <div class="new-version" [ngClass]="showCurrent ? 'col-6' : 'col-12'">
     <div class="table-header">
-      <ng-container *ngIf="isDailyMaxUnits; else simpleTitle">
-        <h3 (click)="consoleResponse()">
-          {{ newVersion.section.name }}
-          <span class="codes-input">
-            <app-cell-editor
-              [attr.slm-id]="'daily_max_codes_text'"
-              [column]="newVersion.codesColumn"
-              [searchInfo]="newVersion.codesColumn.searchData"
-              [highLight]="newVersion.codesColumn.highlight"
-              [isReadOnly]="!_enableEditing"
-            ></app-cell-editor>
+      <h3>
+        <span>{{ newVersion.section.name }}</span>
+        <ng-container *ngIf="newSectionFeedbackCount > 0">
+          <span
+            [ngClass]="
+              newSectionUnsolvedFeedbackCount > 0
+                ? 'feedback-left'
+                : 'feedback-cleared'
+            "
+          >
+            <ng-container
+              *ngIf="newSectionUnsolvedFeedbackCount > 0; else check"
+            >
+              {{ newSectionUnsolvedFeedbackCount }}
+            </ng-container>
+            <ng-template #check>
+              <i class="fa fa-check"></i>
+            </ng-template>
           </span>
-        </h3>
-      </ng-container>
-      <ng-template #simpleTitle>
-        <h3 (click)="consoleResponse()">{{ newVersion.section.name }}</h3>
-      </ng-template>
+        </ng-container>
+        <span class="dnb-progress-checkbox" *ngIf="hideDisableToggle">
+          <p-checkbox
+            [ngModel]="newVersion.completed"
+            (onChange)="completeToggle($event)"
+            [inputId]="'enabled' + newVersion.id"
+            [disabled]="
+              enableEditing === false ? !enableEditing : !newVersion.enabled
+            "
+            [binary]="true"
+            tabindex="-1"
+          ></p-checkbox>
+          <label [for]="'enabled' + newVersion.id">Completed</label>
+        </span>
+        <span class="ell-wrap" *ngIf="showEllOpts && isRules && enableEditing">
+          <button
+            class="dnb-btn ell-btn"
+            (click)="getMidrules()"
+            data-toggle="tooltip"
+            data-placement="top"
+            title="Get ELL Rules"
+          >
+            <i class="fa fa-search"></i>
+          </button>
+          <span class="toggle-section">
+            <p-inputSwitch
+              [attr.slm-id]="'compare_ell_section_btn'"
+              tabindex="-1"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="Compare ELL Rules"
+              (onChange)="rulesCompareChange()"
+              [(ngModel)]="rulesCompare"
+            ></p-inputSwitch>
+          </span>
+        </span>
+      </h3>
+      <ul
+        class="table-options"
+        *ngIf="!enableEditing && isApproverReviewing && feedbackComplete"
+      >
+        <li
+          class="padli"
+          *ngIf="newVersion.feedbackData && newVersion.feedbackData.length > 0"
+        >
+          <button
+            class="button is-text feedback-warning"
+            (click)="openSectionFeedback(editSection)"
+            [attr.slm-id]="'section_feedback_btn'"
+            tabindex="-1"
+          >
+            <i class="fa fa-exclamation-triangle"></i>
+          </button>
+        </li>
+      </ul>
 
-      <ul class="table-options">
-        <ng-container *ngIf="_enableEditing">
+      <ul class="table-options" *ngIf="enableEditing">
+        <li
+          class="padli"
+          *ngIf="newVersion.feedbackData && newVersion.feedbackData.length > 0"
+        >
+          <button
+            class="button is-text feedback-warning"
+            (click)="openSectionFeedback(editSection)"
+            [attr.slm-id]="'section_feedback_btn'"
+            tabindex="-1"
+          >
+            <i class="fa fa-exclamation-triangle"></i>
+          </button>
+        </li>
+        <ng-container *ngIf="newVersion.enabled">
+          <li class="padli" *ngIf="validatePopulate">
+            <button
+              class="button is-text"
+              (click)="autopopulate()"
+              [ngClass]="{ 'arrow-rotate': expandSection }"
+              [attr.slm-id]="'section_autopopulate_btn'"
+              tabindex="-1"
+              data-toggle="tooltip"
+              data-placement="top"
+              title="{{ autopopulateTooltipLabel }}"
+            >
+              <i class="fa fa-link"></i>
+            </button>
+          </li>
           <li class="padli">
             <button
               class="button is-text"
               (click)="collapseSection()"
               [ngClass]="{ 'arrow-rotate': expandSection }"
               [attr.slm-id]="'section_copy_btn'"
+              tabindex="-1"
             >
               <i class="fa fa-chevron-right"></i>
             </button>
           </li>
-          <li class="padli" *ngIf="!isReadOnly">
+          <li class="padli">
             <button
               (click)="stickSection()"
               class="button is-text pin is-pulled-right"
               [attr.slm-id]="'page_section_pin_toggle_btn'"
+              tabindex="-1"
             >
               <i class="fa fa-map-pin"></i>
             </button>
@@ -89,11 +167,15 @@
             ></span>
           </li>
         </ng-container>
-        <li class="disable-section" *ngIf="hideDisableToggle" >
+        <li class="toggle-section" *ngIf="hideDisableToggle">
           <p-inputSwitch
             (onChange)="disableChange($event)"
-            [(ngModel)]="shouldDisableSection"
+            [(ngModel)]="newVersion.enabled"
             [attr.slm-id]="'disable_section_btn'"
+            tabindex="-1"
+            data-toggle="tooltip"
+            data-placement="top"
+            title="Toggle Section"
           ></p-inputSwitch>
         </li>
       </ul>
@@ -111,12 +193,12 @@
     </ng-container>
     <ng-template #section>
       <app-dnb-section
-        *ngIf="expandSection"
+        [ngClass]="{ hideSection: !expandSection }"
         [section]="currentVersion"
         [isComparing]="isComparing"
         (behaviorEvnt)="behavior($event)"
         [isReadOnly]="true"
-        [enableEditing]="_enableEditing"
+        [sectionEnable]="enableEditing"
         [undoCopyRowFlag]="undoCopyRowFlag"
       ></app-dnb-section>
     </ng-template>
@@ -132,14 +214,75 @@
     <ng-template #section>
       <app-dnb-section
         #editSection
-        *ngIf="expandSection"
+        [sectionIndex]="sectionIndex"
+        [ngClass]="{ hideSection: !expandSection }"
         [(section)]="newVersion"
-        [isComparing]="isComparing"
+        [isComparing]="isComparing || (isRules && rulesCompare)"
         (behaviorEvnt)="behavior($event)"
         [isReadOnly]="false"
-        [enableEditing]="_enableEditing"
-        [disabled]="shouldDisableSection"
+        [isApproverReviewing]="isApproverReviewing"
+        [feedbackComplete]="feedbackComplete"
+        [sectionEnable]="newVersion.enabled && enableEditing"
+        [disabled]="!newVersion.enabled"
+        [focusType]="focusType"
+        [isRules]="isRules && showEllOpts"
+        (focusTypeChange)="focusTypeChanged($event)"
+        (sectionNavigate)="sectionNavigateEvt($event)"
+        (feedbackUpdate)="feedbackUpdateEvt($event)"
       ></app-dnb-section>
     </ng-template>
   </div>
 </div>
+
+<ng-container *ngIf="enableEditing">
+  <app-mid-rules-list
+    [(openDialog)]="openMidRuleList"
+    (selectionSet)="openMidRuleEditDialog($event)"
+  ></app-mid-rules-list>
+  <app-mid-rules
+    [(openDialog)]="openMidRuleEdit"
+    (midRuleData)="midRuleDialog($event)"
+    (backMidRuleList)="backMidRule($event)"
+    [(midRule)]="midRuleSelected"
+    [midRuleSetUp]="midRuleSetUp"
+  >
+  </app-mid-rules>
+
+  <app-mid-rules-exist
+    [(openDialog)]="openMidRuleExisting"
+    (selectionSet)="addMidRuleExisting($event)"
+  >
+  </app-mid-rules-exist>
+  <app-mid-rules-ell
+    [(openDialog)]="openELLRules"
+    (selectionSet)="displayELLRules($event)"
+  >
+  </app-mid-rules-ell>
+  <app-mid-rules-ell-summary
+    [openDialog]="openELLSummary"
+    (openDialogChange)="resetRulesCompare($event)"
+    [draftVersion]="newVersion"
+    (updateRules)="updateRulesEll($event)"
+    (showDialog)="showDialog($event)"
+  >
+  </app-mid-rules-ell-summary>
+
+  <app-autopopulate-indications
+    [(openDialog)]="openAutopopulate"
+    [childsIndications]="dataChildAutopopulate"
+    [newIndications]="dataParentAutopopulate"
+    [activeFixedIndication]="activeFixedIndication"
+    [activeGlobalIndication]="activeGlobalIndication"
+    (overrideIndication)="overrideIndication($event)"
+    (addIndications)="addIndications($event)"
+  ></app-autopopulate-indications>
+
+  <app-autopopulate-diagnosis-code-summary
+    [(openDialog)]="openAutopopulateDiagnosisCodeSummary"
+    [childsIcdCodes]="dataChildAutopopulateGlobalIcd10Code"
+    [parentIcdCodes]="dataParentAutopopulateGlobalReviewIcd10Code"
+    [icdCodesNoActions]="icd10CodesForNotActions"
+    (overrideIcdCodes)="overrideIcdCodes($event)"
+    (addIcdCodes)="addIcdCodes($event)"
+  ></app-autopopulate-diagnosis-code-summary>
+</ng-container>

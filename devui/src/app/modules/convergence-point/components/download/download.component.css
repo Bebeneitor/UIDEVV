@@ -1,0 +1,29 @@
+::ng-deep .main-screen p-dialog.dialog-download table.download-grid {
+    width: 400px;
+    font-size: 12px;
+    max-width: 400px;
+    text-align: justify;
+}
+
+::ng-deep .main-screen p-dialog.dialog-download table.download-grid > tbody > tr > td.title-table {
+    color: #31006F; 
+    font-weight: bold;
+}
+
+::ng-deep .main-screen p-dialog.dialog-download table.download-grid > tbody > tr > td.title-table > i.fa.fa-exclamation-triangle {
+    color: #9179B7 !important; 
+    font-size: 21px;
+}
+
+::ng-deep .main-screen p-dialog.dialog-download table.download-grid > tbody > tr > td > button {
+    height: 25px !important;
+}
+
+::ng-deep .main-screen p-dialog.dialog-download table.download-grid > tbody > tr > td.subtitle-table > i.fa.fa-exclamation-triangle {
+    color: #31006F; 
+    font-weight: normal;
+}
+
+::ng-deep .main-screen .ui-dialog-content.ui-widget-content {
+    overflow: hidden !important;
+}

@@ -1,0 +1,13 @@
+<div class="file-template" (drop)="dropFileHandler($event)" (dragover)="$event.preventDefault()">
+  <div class="no-files-legend" *ngIf="fileLoaded == null" [ngStyle]="{'line-height': extraText != null ? '60px': '100px'}">
+    Drop files to attach or <a nghref="#" (click)="fileTemplate.click()">browse</a>
+    <p class="text-danger" *ngIf="extraText != null">{{extraText}}</p>
+  </div>
+  <div class="loaded-files" *ngIf="fileLoaded != null">
+    <a nghref="#" class="remove-button" (click)="removeFile()"><i class="fa fa-times"></i></a>
+    <i class="fa fa-file"></i>
+    <span class="file-info">{{fileLoaded.name}}</span>
+    <span class="file-info">{{humanFileSize(fileLoaded.size)}}</span>
+  </div>
+  <input type="file" hidden #fileTemplate (change)="changeFile($event)" [accept]="allowedExtensions"/>
+</div>

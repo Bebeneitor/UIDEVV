@@ -513,6 +513,10 @@ button[disabled] {
 
 .ui-sidebar-close {
     font-size: 20px !important;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    z-index: 9999999;
 }
 
 #containerWhitePaper ul.ui-autocomplete-multiple-container.ui-widget.ui-inputtext.ui-state-default.ui-corner-all {
@@ -560,4 +564,20 @@ body .ui-autocomplete-panel .ui-autocomplete-items .ui-autocomplete-list-item.ui
 
 .ui-menu.ui-widget.ui-widget-content.ui-corner-all.ui-menu-dynamic.ui-shadow {
     z-index: 9999 !important;
+}
+
+.filter-field {
+    margin-left: 1%;
+    width: 98%;
+    height: 33px;
+    font-size: 20px;
+    border-radius: 5px;
+}
+
+.filter-field:hover {
+    border-color: black;
+}
+
+.filter-field:focus {
+    border-color: #007bff;
 }

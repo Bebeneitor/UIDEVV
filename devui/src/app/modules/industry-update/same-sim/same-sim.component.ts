@@ -19,11 +19,18 @@ let XLSX = require('xlsx');
   styleUrls: ['./same-sim.component.css']
 })
 export class SameSimComponent implements OnInit {
-@ViewChild('fileInput') fileInputElement: ElementRef;
+@ViewChild('fileInput',{static: true}) fileInputElement: ElementRef;
+@ViewChild('icdFileInput',{static: true}) icdFileInputElement: ElementRef;
+
+  tabIndex: number = 0;
+
   id: number = 0;
+  codesType: string = '';
   nameReport: string = '';
+  icdNameReport: string = '';
   dateReport: string = '';
   file: any = null;
+  icdFile: any =  null;
   readingFile: boolean = true;
 
   cols: any = [];
@@ -37,10 +44,14 @@ export class SameSimComponent implements OnInit {
 
   eclFileId: number = 0;
   fileName: string = '';
+  icdFileName: string = '';
 
   disabledGenerate: boolean = false;
+  disabledIcdGenerate: boolean = false;
   preview: boolean = false;
+  icdPreview: boolean = false;
   arrayPreview: any = [];
+  arrayIcdPreview: any = [];
   confirmationIcon: string = 'pi pi-exclamation-triangle';
 
   constructor(private dashboardService: DashboardService, private route: ActivatedRoute,
@@ -51,10 +62,14 @@ export class SameSimComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.id = params['id'];
     });
+    this.route.queryParams.subscribe(qparams => {
+      this.codesType = qparams['codesType'];
+    });
+    this.tabIndex = this.codesType == Constants.HCPCS_CODE_TYPE ? 0 : 1;
   }
 
   ngOnInit() {
-    this.lookupService.search(Constants.SAME_SIM_LOOKUP_TYPE, '', '', 0, 100, true).then((response: BaseResponse) => {
+    this.lookupService.search(Constants.SAME_SIM_UPDATE_TYPE, '', '', 0, 100, true).then((response: BaseResponse) => {
 
       this.lookups = response.data.lookups;
 
@@ -116,7 +131,26 @@ export class SameSimComponent implements OnInit {
       this.readingFile = true;
     }
   }
-  // sameSimInstanceDetailList
+
+  generateICdReport() {
+    if (this.icdNameReport.trim() == '') {
+      this.toastService.messageWarning(`${Constants.TOAST_SUMMARY_WARN}!`, 'Please enter a name report to continue.');
+      return;
+    }
+
+    if (this.icdFile !== null) {
+      this.confirmationService.confirm({
+        message: Constants.SAME_SIM_FILE_PROCESS_CONFIRMATION_MSG,
+        header: Constants.CONFIRMATION_WORD,
+        icon: this.confirmationIcon,
+        accept: this.processIcdFile
+      });
+    } else {
+      this.toastService.messageWarning('Warning!', 'Please enter a valid file to continue.');
+      this.readingFile = true;
+    }
+  }
+
   /**
    * Gets the errorn and changes the flag to true.
    */
@@ -155,6 +189,21 @@ export class SameSimComponent implements OnInit {
     this.arrayPreview = [];
   }
 
+  icdClear() {
+    this.icdNameReport = '';
+    this.icdFile = null;
+    this.readingFile = true;
+    this.eclFileId = 0;
+    this.icdFileName = '';
+    this.icdPreview = false;
+    this.disabledIcdGenerate = false;
+
+    const icdFile: any = document.querySelector('#icdFile');
+    icdFile.value = '';
+
+    this.arrayIcdPreview = [];
+  }
+
   /**
    * Catch file object when changes in input file
    * @param newFile 
@@ -179,6 +228,29 @@ export class SameSimComponent implements OnInit {
       this.toastService.messageError('Error', 'The file format must be .xls or .xlsx');
     } else {
       this.readFile();
+    }
+  }
+
+  icdfileChange(newFile) {
+    this.icdFile = newFile[0];
+    this.icdFileName = this.icdFile.name;
+    this.icdPreview = false;
+
+    let fileExtension = this.icdFileName.split('.').pop();
+    let allowedExtensions = ['xlsx', 'xls'];
+
+    if (!(allowedExtensions.indexOf(fileExtension.toLowerCase()) > -1)) {
+      this.icdFile = null;
+      this.icdFileName = '';
+
+      const file: any = document.querySelector('#icdFile');
+      file.value = '';
+
+      this.arrayIcdPreview = [];
+
+      this.toastService.messageError('Error', 'The file format must be .xls or .xlsx');
+    } else {
+      this.readIcdFile();
     }
   }
 
@@ -259,6 +331,78 @@ export class SameSimComponent implements OnInit {
     })
   }
 
+  readIcdFile() {
+
+    let sheetsListRequired = ['All Changes', 'New (fully specific)', 'DEL', 'REVISED', 'NEW-To SIM Mappings'];
+    this.disabledGenerate = false;
+    this.arrayPreview = [];
+    let sheetexists = 0;
+    let rowSheetValueEmpty = 0;
+    this.toBase64(this.icdFile).then(base64 => {
+
+      let workbook = XLSX.read(base64.toString().split('base64,')[1], { type: 'base64' });
+      let sheet_name_list = workbook.SheetNames;
+
+      sheet_name_list.forEach((sheet, index) => {
+        
+        sheetsListRequired.forEach(sheetReq => {
+          if(sheet == sheetReq){
+            sheetexists++;
+          }
+        });
+      });
+
+      sheet_name_list.forEach((sheet, index) => {
+        let rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+
+        if (rows.length > 0) {
+          let values = rows[1];
+
+          if (index < sheetsListRequired.length){
+            if (sheetexists <= sheetsListRequired.length && (values != null || values != undefined)){
+              rowSheetValueEmpty++;
+            }
+          }
+        }
+
+        rows.shift();
+        
+      });
+
+      if(rowSheetValueEmpty == 0 ){
+        this.toastService.messageWarning(`${Constants.TOAST_SUMMARY_WARN}!`, Constants.EMPTY_FILE_SELECTED);
+        this.disabledGenerate = true;
+        this.icdFileInputElement.nativeElement.value = '';
+      }
+      if (sheetexists < sheetsListRequired.length){
+        this.toastService.messageWarning(`${Constants.TOAST_SUMMARY_WARN}!`, Constants.INVALID_FILE_SELECTED);
+        this.disabledGenerate = true;
+        this.icdFileInputElement.nativeElement.value = '';
+      }
+      sheet_name_list.forEach((sheet, index) => {
+
+        let headers = [];
+        let rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+
+        if (rows.length > 0) {
+          let firstRow = rows[0];
+
+          for (let key in firstRow) {
+            headers.push({ field: firstRow[key], header: key });
+          }
+        }
+
+        this.arrayIcdPreview.push({
+          'tab': sheet,
+          'selected': index == 0,
+          'cols': headers,
+          'rows': rows
+        });
+      });
+
+    })
+  }
+
   /**
    * Show records and tabs from loaded file 
    */
@@ -267,11 +411,21 @@ export class SameSimComponent implements OnInit {
     this.preview = true;
   }
 
+  showIcdPreview() {
+    this.dateReport = this.dashboardService.parseDate(new Date());
+    this.icdPreview = true;
+  }
+
+
   /**
    * Hide records and tabs from loaded file 
    */
   hidePreview() {
     this.preview = false;
+  }
+
+  hideIcdPreview() {
+    this.icdPreview = false;
   }
 
   /**
@@ -341,4 +495,34 @@ export class SameSimComponent implements OnInit {
 
     this.router.navigate(['same-sim']);
   };
+
+  processIcdFile = () => {
+    this.readingFile = false;
+
+    this.dateReport = this.dashboardService.parseDate(new Date());
+    this.icdPreview = false;
+
+    this.sameSimService.uploadXLSX(this.icdFile).subscribe((response: BaseResponse) => {
+      if (response.code == 200) {
+        this.eclFileId = Number(response.data);
+        this.sameSimService.processIcdFile(this.eclFileId, this.icdNameReport).subscribe((processResponse: BaseResponse) => {
+          if (processResponse.code == 200) {
+            this.editMode = true;
+            this.readingFile = true;
+            this.id = Number(processResponse.data.sameSimId);
+            this.loadReport();
+          } else {
+            this.toastService.messageError('Error', 'Error processing XLSX file, please try again.');
+            this.readingFile = true;
+          }
+        }, this.catchError);
+      } else {
+        this.toastService.messageError('Error', 'Error uploading XLSX file, please try again.');
+        this.readingFile = true;
+      }
+    }, this.catchError);
+
+    this.router.navigate(['same-sim']);
+  };
+
 }

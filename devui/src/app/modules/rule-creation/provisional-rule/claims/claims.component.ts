@@ -1,12 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { UtilsService } from 'src/app/services/utils.service';
-import { ProvisionalRuleService } from 'src/app/services/provisional-rule.service';
-import { RuleInfo } from 'src/app/shared/models/rule-info';
-import { RuleRevenueCodeDto } from 'src/app/shared/models/dto/rule-revenue-code-dto';
-import { claimService } from 'src/app/services/claim-service';
-import { Constants } from 'src/app/shared/models/constants';
 import { SelectItem } from 'primeng/api';
-
+import { claimService } from 'src/app/services/claim-service';
+import { ProvisionalRuleService } from 'src/app/services/provisional-rule.service';
+import { UtilsService } from 'src/app/services/utils.service';
+import { Constants } from 'src/app/shared/models/constants';
+import { RuleRevenueCodeDto } from 'src/app/shared/models/dto/rule-revenue-code-dto';
+import { RuleInfo } from 'src/app/shared/models/rule-info';
 
 @Component({
   selector: 'app-claims',
@@ -14,12 +13,18 @@ import { SelectItem } from 'primeng/api';
   styleUrls: ['./claims.component.css']
 })
 export class ClaimsComponent implements OnInit {
-  currRuleInfo: RuleInfo;
+  currRuleInfo;
   parentRuleInfo: RuleInfo;
+  selectedClaimTypesToolTip: string;
+  parentClaimTypesToolTip: string;
   @Input() set ruleInfo(rule: RuleInfo) {
     if (rule && rule.ruleId) {
       this.currRuleInfo = rule;
       this.loadClaimsTabData(rule);
+
+      if (this.currRuleInfo.claimsType) {
+        this.claimTypesSelection = this.currRuleInfo.claimsType.map(claim => claim.claimType.lookupId);
+      }
     }
   };
   @Input() set ruleInfoOriginal(value: RuleInfo) {
@@ -31,6 +36,14 @@ export class ClaimsComponent implements OnInit {
   @Input() ruleRevenueCodesList: RuleRevenueCodeDto[];
   @Input() fromMaintenanceProcess: boolean;
   claimTypes: any[] = [];
+  claimTypesRc: any[] = [];
+
+  @Input() set pdgClaimTypeSelected(pdgClaims:any){
+    if (pdgClaims) {
+      this.claimTypesSelection = pdgClaims;
+      this.setToolTipValueOnChange();
+    }
+  }
 
   includedClaimServices: any[] = [];
   excludedClaimServices: any[] = [];
@@ -58,16 +71,6 @@ export class ClaimsComponent implements OnInit {
   selectedBillIncClaims: any[] = [];
   selectedBillExcClaims: any[] = [];
 
-  /*  Revenue Codes */
-  revenueCodesList: any[] = [];
-  selectedRevenueCodesList: any[];
-  selectedRevenueCodeIncList: any[] = [];
-  selecetdRevenueCodeExcList: any[] = [];
-  revenueIncludeList: any[] = [];
-  revenueExcludeList: any[] = [];
-  originalRevenueIncludeList: any[] = [];
-  originalRevenueExcludeList: any[] = [];
-
   /* boolean values to show and hide the div */
   professional: boolean = false;
   facility: boolean = false;
@@ -80,7 +83,6 @@ export class ClaimsComponent implements OnInit {
   label: string;
   status: string;
   value: string;
-  CLAIM_PLACE_OF_SERVICE: string;
   CLAIM_BILL_TYPES: string;
   CLAIM_TYPE: string;
   originalTypesStyle = { 'width': '100%', 'overflow': 'auto', 'height': '110px', 'border': '1px solid #31006F' };
@@ -90,6 +92,9 @@ export class ClaimsComponent implements OnInit {
   isClaimTypesChanged: boolean = false;
   isExtraClick: boolean = false;
 
+  claimTypesSelection: any;
+  claimTypesSelectionRc: any;
+
   constructor(private utilService: UtilsService, private provisionalRuleService: ProvisionalRuleService, private claimService: claimService) {
     this.selectedClaim = null;
     this.selectedClaimService = null;
@@ -98,23 +103,29 @@ export class ClaimsComponent implements OnInit {
     this.selectedBillClaims = null;
     this.selectedBillIncClaims = null;
     this.selectedBillExcClaims = null;
-    this.CLAIM_PLACE_OF_SERVICE = 'CLAIM_PLACE_OF_SERVICE';
     this.CLAIM_TYPE = 'CLAIM_TYPE';
     this.CLAIM_BILL_TYPES = 'CLAIM_BILL_TYPES';
-    this.selectedClaimType = Constants.CLAIM_PROFESSIONAL_VALUE;
+    this.selectedClaimType = Constants.CLAIM_FACILITY_TYPE;
   }
 
   ngOnInit() {
+
+    this.claimService.getClaimTypes().subscribe(claimTypes => {
+      this.claimTypes = claimTypes;
+      setTimeout(() => {
+        this.setToolTipValueOnChange();
+      }, 2000);
+    });
+    this.claimService.getClaimTypes().subscribe(claimTypesRc => this.claimTypesRc = claimTypesRc);
+
     this.getAllBillTypeClaims(this.CLAIM_BILL_TYPES);
-    this.getAllProfessionalClaims(this.CLAIM_PLACE_OF_SERVICE);
-    this.getAllRevenueCodes();
     if (this.currRuleInfo && !this.currRuleInfo.claimTypId) {
       this.billTypes = false;
       this.professionalClaims = false;
       this.currRuleInfo.claimTypId = 26;
       this.selectedClaim = this.currRuleInfo.claimTypId;
     }
-    this.selectedClaimType = Constants.CLAIM_PROFESSIONAL_VALUE;
+    this.selectedClaimType = Constants.CLAIM_FACILITY_TYPE;
 
     this.message = 'Place of Service and Bill Types selections will be lost if Claim Types is changed.';
     this.onClaimTypeChange(this.selectedClaimType);
@@ -130,23 +141,27 @@ export class ClaimsComponent implements OnInit {
       this.getAllExistingPlacesOfService(rule.ruleId).then(() => {
         this.removeExistingPlacesOfServiceFromParent();
       });
-      // Revenue
-      this.claimService.getAllRuleRevenueCodes(rule.ruleId).subscribe(resp => {
-        if (resp && resp.data) {
-          this.getAllRuleRevenueCodes(resp.data);
-        }
-      });
       // Setting claim Type Changes
       this.onClaimTypeChange(this.selectedClaimType);
     }
     if (this.fromMaintenanceProcess) {
+      this.getParentSelectedClaimTypes(rule.parentRuleId);
       this.getAllExistingPlacesOfService(rule.parentRuleId, true);
-      this.claimService.getAllRuleRevenueCodes(rule.parentRuleId).subscribe(resp => {
-        if (resp && resp.data) {
-          this.getAllRuleRevenueCodes(resp.data, true);
-        }
-      });
     }
+  }
+
+  getParentSelectedClaimTypes(parentRuleId: number) {
+    this.claimService.getParentSelectedClaimTypes(parentRuleId).subscribe(response => {
+      if (response.data !== null && response.data !== undefined) {
+        let selectedOriginalClaimTypes: any[] = response.data;
+        this.claimTypesSelectionRc = selectedOriginalClaimTypes.map(claim => claim.claimType.lookupId);
+        setTimeout(() => {
+          if(this.claimTypesSelectionRc) {
+              this.parentClaimTypesToolTip = this.claimTypes.filter(claim => this.claimTypesSelectionRc.includes(claim.value)).map(claim => claim.label).join(', ');
+          }
+        }, 2000);  
+      }
+    });
   }
 
   /**
@@ -155,176 +170,11 @@ export class ClaimsComponent implements OnInit {
    */
   onClaimTypeChange(claimSelected: string) {
     if (claimSelected) {
-      if (claimSelected === Constants.CLAIM_FACILITY_TYPE) {
-        this.setClaim(false, true, false);
-      } else if (claimSelected === Constants.CLAIM_REVENUE_CODES_TYPE) {
-        this.setClaim(false, false, true);
-      } else {
-        this.setClaim(true, false, false);
-      }
-    }
-  }
-
-  /**
-   * Setting the booleans of each claim type
-   * @param professional Professional Claim Type
-   * @param facility  Facility Claim Type
-   * @param revenueCodes Revenue Codes
-   */
-  setClaim(professional, facility, revenueCodes) {
-    this.professional = professional;
-    this.facility = facility;
-    this.revenueCodes = revenueCodes;
-  }
-
-  /* This method will fetch and generate the list of available Revenue Codes*/
-  getAllRevenueCodes() {
-    return new Promise((resolve, reject) => {
-      this.utilService.getAllRevenueCodes().subscribe(response => {
-        if (response && response.data) {
-          this.revenueCodesList = response.data.map(rCode => {
-            return this.getRevenueCodesListObj(rCode);
-          })
-          resolve();
-        }
-      });
-    });
-  }
-
-  /**
-   * getAllRuleRevenueCodes - populate the existing rule revenue codes include and exclude list
-   * @param ruleRevenueCodesList List of of rule Revenue Codes List
-   */
-  getAllRuleRevenueCodes(ruleRevenueCodesList, loadOriginal?: boolean) {
-    if (loadOriginal) {
-      this.originalRevenueIncludeList = [];
-      this.originalRevenueExcludeList = [];
-      ruleRevenueCodesList.forEach(ruleRevenueCode => {
-        let revenueCode = this.generateRevenueCodeDtoObj(ruleRevenueCode);
-        this.generateRevenueCodesList(revenueCode, ruleRevenueCode.codeInclusionStatus, loadOriginal);
-      });
-    } else {
-      this.revenueIncludeList = [];
-      this.revenueExcludeList = [];
-      this.ruleRevenueCodesList = ruleRevenueCodesList;
-      this.ruleRevenueCodesList.forEach(ruleRevenueCode => {
-        let revenueCode = this.generateRevenueCodeDtoObj(ruleRevenueCode);
-        this.generateRevenueCodesList(revenueCode, ruleRevenueCode.codeInclusionStatus);
-        this.revenueCodesList = this.revenueCodesList.filter(revCode => ruleRevenueCode.revenueCode !== revCode.value.revenueCode);
-      });
+        this.facility = true;
     }
   }
 
 
-  /**
-   * getRevenueCodesListOBj - Mapping SelectItem Object to display Revenue Codes
-   * @param revenueCode Revenue Code Object to be mapped.
-   */
-  getRevenueCodesListObj(revenueCode) {
-    let revenueCodeListObj: SelectItem = {
-      "label": `${revenueCode.revenueCode}-${revenueCode.revenueCodeDesc}`,
-      "value": revenueCode
-    }
-    return revenueCodeListObj;
-  }
-
-  /**
-  * revenueCodesAdd - selected revenue codes will be added to inclusion/exclusion list
-  * @param revCodelistType flag to set if (true/include) or (false/exclude)
-  */
-  revenueCodesAdd(revCodelistType: boolean) {
-    if (this.selectedRevenueCodesList.length > 0) {
-      this.selectedRevenueCodesList.forEach(selectedCode => {
-        this.generateRevenueCodesList(selectedCode, revCodelistType);
-        this.ruleRevenueCodesList.push(this.generateRuleRevenueCodeDtoObj(selectedCode, revCodelistType));
-        this.revenueCodesList = this.revenueCodesList.filter(revenueCode =>
-          revenueCode.value.revenueCode !== selectedCode.revenueCode
-        );
-      });
-      this.selectedRevenueCodesList = [];
-    }
-  }
-
-  /**
-   * revenueCodesRemove - Remove revenue codes from inclusion/exclusion list
-   * @param revCodelistType removed based on boolean (true/include) or (false/exclude)
-   */
-  revenueCodesRemove(revCodelistType: boolean) {
-    if (revCodelistType) {
-      if (this.selectedRevenueCodeIncList.length > 0) {
-        this.selectedRevenueCodeIncList.forEach(selectedRevenueCodeDtoObj => {
-          this.revenueCodesList.push(this.getRevenueCodesListObj(selectedRevenueCodeDtoObj));
-          this.revenueIncludeList = this.revenueIncludeList.filter(revenueCodeDtoObj =>
-            revenueCodeDtoObj.value.revenueCode !== selectedRevenueCodeDtoObj.revenueCode
-          );
-          this.ruleRevenueCodesList = this.ruleRevenueCodesList.filter(ruleRevenueObj =>
-            ruleRevenueObj.revenueCode !== selectedRevenueCodeDtoObj.revenueCode
-          );
-        });
-        this.selectedRevenueCodeIncList = [];
-      }
-    } else {
-      if (this.selecetdRevenueCodeExcList.length > 0) {
-        this.selecetdRevenueCodeExcList.forEach(selectedRevenueCodeDtoObj => {
-          this.revenueCodesList.push(this.getRevenueCodesListObj(selectedRevenueCodeDtoObj));
-          this.revenueExcludeList = this.revenueExcludeList.filter(revenueCodeDtoObj =>
-            revenueCodeDtoObj.value.revenueCode !== selectedRevenueCodeDtoObj.revenueCode
-          );
-          this.ruleRevenueCodesList = this.ruleRevenueCodesList.filter(ruleRevenueObj =>
-            ruleRevenueObj.revenueCode !== selectedRevenueCodeDtoObj.revenueCode
-          );
-        });
-        this.selecetdRevenueCodeExcList = [];
-      }
-    }
-
-  }
-
-  /**
-   * generateRuleRevenueCodeDtoObj - Callback method to return RuleRevenueCodeDto Object
-   * @param selectedCode revenue code that has been selected by user
-   * @param revCodelistType flag to set if (true/include) or (false/exclude)
-   */
-  generateRuleRevenueCodeDtoObj(selectedCode, revCodelistType: boolean) {
-    let ruleRevenueCode = new RuleRevenueCodeDto();
-    ruleRevenueCode.revenueCode = selectedCode.revenueCode;
-    ruleRevenueCode.revenueCodeDesc = selectedCode.revenueCodeDesc;
-    ruleRevenueCode.codeInclusionStatus = revCodelistType;
-    return ruleRevenueCode;
-  }
-
-  /**
-   * generateRevenueCodeDtoObj - mapping to revenueCodeDtoObj Object
-   * @param ruleRevenueCode ruleRevenueCode Object to map
-   */
-  generateRevenueCodeDtoObj(ruleRevenueCode) {
-    let revenueCode = {
-      "revenueCode": ruleRevenueCode.revenueCode,
-      "revenueCodeDesc": ruleRevenueCode.revenueCodeDesc
-    }
-    return revenueCode;
-  }
-
-  /**
-   * generateRevenueCodesList - Setting inclusion/exclusion list for revenue codes
-   * @param selectedCode RevenueCode that has been selected
-   * @param revCodelistType flag to set if (true/include) or (false/exclude)
-   */
-  generateRevenueCodesList(selectedCode, revCodelistType: boolean, loadOriginal?: boolean) {
-    if (loadOriginal) {
-      if (revCodelistType) {
-        this.originalRevenueIncludeList.push(this.getRevenueCodesListObj(selectedCode))
-      } else {
-        this.originalRevenueExcludeList.push(this.getRevenueCodesListObj(selectedCode));
-      }
-    } else {
-      if (revCodelistType) {
-        this.revenueIncludeList.push(this.getRevenueCodesListObj(selectedCode))
-      } else {
-        this.revenueExcludeList.push(this.getRevenueCodesListObj(selectedCode));
-      }
-    }
-  }
 
   /* Function to remove the existing place of service from the parent place of service list */
   removeExistingPlacesOfServiceFromParent() {
@@ -498,21 +348,6 @@ export class ClaimsComponent implements OnInit {
     }
   }
 
-  /* Function to fetch all the professional claim types on load */
-  getAllProfessionalClaims(professionalType) {
-    return new Promise((resolve, reject) => {
-      this.utilService.getAllLookUps(professionalType).subscribe(response => {
-        this.claimServices = response.map(claimservice => {
-          return {
-            "label": claimservice.lookupDesc,
-            "value": claimservice.lookupId
-          }
-        });
-      });
-      resolve();
-    });
-  }
-
   /**
    * getAllBillTypeClaims - Fetch all bill types on load
    * @param billType string to pull correct lookups for billTypes
@@ -584,10 +419,16 @@ export class ClaimsComponent implements OnInit {
       this.originalExcludedBillClaims = [];
       this.originalIncludedBillClaims = [];
     } else {
-      this.excludedClaimServices =[];
-      this.includedClaimServices =[];
-      this.excludedBillClaims =[];
-      this.includedBillClaims =[];
+      this.excludedClaimServices = [];
+      this.includedClaimServices = [];
+      this.excludedBillClaims = [];
+      this.includedBillClaims = [];
+    }
+  }
+
+  setToolTipValueOnChange() {
+    if (this.claimTypesSelection) {
+      this.selectedClaimTypesToolTip = this.claimTypes.filter(claim => this.claimTypesSelection.includes(claim.value)).map(claim => claim.label).join(', ');
     }
   }
 }

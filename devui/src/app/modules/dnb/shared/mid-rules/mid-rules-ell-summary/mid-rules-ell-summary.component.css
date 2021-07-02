@@ -1,0 +1,35 @@
+::ng-deep p-dialog .ui-dialog-content.ui-widget-content {
+  padding: 15px !important;
+}
+
+.dialog-content {
+  overflow-y: auto;
+  max-height: 80vh;
+  max-width: 80vw;
+}
+
+table {
+  margin: 0;
+  font-size: 12px;
+}
+
+.table {
+  background-color: #ffffff;
+}
+
+table tr:hover td,
+table tr.row-selected td {
+  background-color: #f3f0fd;
+}
+
+table tr:nth-child(even) {
+  background-color: #e1eaf2 !important;
+}
+
+.table td,
+.table th {
+  padding: 0.571em 0.857em !important;
+  text-align: left;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

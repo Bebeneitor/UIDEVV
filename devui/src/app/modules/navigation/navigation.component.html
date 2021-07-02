@@ -1,6 +1,6 @@
 <div *ngIf="status != '' && readyToDisplay">
-  <div *ngIf="type == 'RULE'">
-    <provisionalRule-Root [selectorConfig]="configRule"></provisionalRule-Root>
+  <div *ngIf="type == 'RULE' || type == 'CHANGE-TEMP'">
+    <provisionalRule-Root [selectorConfig]="configRule" [displayRMR]="type == 'CHANGE-TEMP'"></provisionalRule-Root>
   </div>
 
   <div *ngIf="type == 'IDEA' && status != 'DRAFT'">

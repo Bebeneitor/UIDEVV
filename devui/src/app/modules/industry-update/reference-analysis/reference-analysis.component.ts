@@ -16,6 +16,7 @@ import { RuleManagerService } from '../rule-process/services/rule-manager.servic
 export class ReferenceAnalysisComponent implements OnInit {
   @Input() editMode;
   @Input() instanceId;
+  @Input() codesType;
   frozenCols = [
     { field: 'ruleCode', header: 'Rule ID' }, { field: 'ruleName', header: 'Rule Name' },
     { field: 'ruleLogic', header: 'Rule Logic' }, { field: 'logicEffectiveDate', header: 'Effective Date' }
@@ -50,7 +51,14 @@ export class ReferenceAnalysisComponent implements OnInit {
     }
 
     // Gets the lookup types then we geth the instance id detail.
-    this.lookupService.searchNoPromise(Constants.SAME_SIM_LOOKUP_TYPE, Constants.EMPTY_STRING, Constants.EMPTY_STRING, 0, 100, true).pipe(flatMap((response: any) => {
+    let lookupType: string = "";
+    if(this.codesType == Constants.HCPCS_CODE_TYPE) {
+      lookupType = Constants.SAME_SIM_UPDATE_TYPE;
+    } else if(this.codesType == Constants.ICD_CODE_TYPE) {
+      lookupType = Constants.SAME_SIM_ICD_UPDATE_TYPE;
+    }
+
+    this.lookupService.searchNoPromise(lookupType, Constants.EMPTY_STRING, Constants.EMPTY_STRING, 0, 100, true).pipe(flatMap((response: any) => {
       const elements = response.map(ele => { return { field: ele.lookupDesc, header: ele.lookupDesc + ' Codes Implemented' } });
       this.cols = [...elements];
       this.selectedColumns = this.cols;

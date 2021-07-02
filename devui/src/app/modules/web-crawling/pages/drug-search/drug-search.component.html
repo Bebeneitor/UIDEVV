@@ -1,0 +1,302 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
+<div class="row justify-content-center">
+  <div class="my-4">
+    <div class="my-2 my-lg-0 form-inline justify-content-center">
+      <div class="w-100 single-input">
+        <div class="ui-fluid">
+          <p-autoComplete [style]="{width:'unset'}" [(ngModel)]="drug" [suggestions]="filteredDrugs"
+            (completeMethod)="filterDrugs($event)" [size]="30" (keyup.enter)="searchdrug(drug)" placeholder="Search"
+            [minLength]="1">
+          </p-autoComplete>
+          <span> <i class="pi pi-search pt-2 pr-1" (click)="searchdrug(drug)"></i>
+            <i *ngIf="!!drug && drug.length>0" class="pi pi-times pr-1" (click)="cleardrug()"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <a [routerLink]=[listDrugsUrl] class="text-center small mt-2 t-style"><u>List all drugs</u></a>
+    </div>
+  </div>
+</div>
+<div class="text-center m-2 t-style"
+  *ngIf="status=='Sorry! No data available.' || 'Please enter a drug to be searched'">
+  <span>{{status}}</span>
+</div>
+<div class="justify-content-center m-1 pb-2" *ngIf="!hideTable && drugs.length>0">
+  <p-toast [baseZIndex]="999999"></p-toast>
+  <p-confirmDialog [style]="{width: '50vw'}" [baseZIndex]="10000"></p-confirmDialog>
+
+  <div class="pt-1 justify-content-center">
+    <span class="t-style">Drug Name:<span class="drugdetail">{{drugDataResponse.drugName}}</span></span>
+    <div class="pt-2">
+      <span class="ps-note"><i>*All comparisons made with just previous version</i></span>
+    </div>
+    <p-table #searchtable [value]="drugs" [autoLayout]="true" sortField="rundrug" sortMode="single">
+      <ng-template pTemplate="header" let-columns>
+        <tr class="text-center" style="width : 100%; padding : 5px;">
+          <th>Run Drug</th>
+          <th>BioSimilar/Brand</th>
+          <th>Website</th>
+          <th>Drug Label</th>
+          <th *ngIf="nccnFlag">NCCN</th>
+          <th>Run BioSimilar</th>
+          <th>Clinical Pharma</th>
+          <th>Micromedex</th>
+          <th *ngIf="!nccnFlag">NCCN</th>
+          <th>LexiDrug</th>
+          <th>AHFS-DI</th>
+          <th>Lexi PN</th>
+          <th>LCD-LCA</th>
+          <th>Last Run</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+        <tr>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            <p-inputSwitch [(ngModel)]="ischecked" (onChange)="handleChange(rowData,ischecked)"></p-inputSwitch>
+          </td>
+          <td style="min-width:150px;">
+            <div class="overlaycontainer">
+              {{rowData.drugName}}
+              <div class="overlay">
+                <span class="bio-del" (click)="deleteBiosimilar(rowData)">
+                  <i class="fa fa-times-circle-o" aria-hidden="true"></i></span>
+                <span class="bio-edit" (click)="showDialogToAdd(rowData)"><i class="fa fa-pencil"
+                    aria-hidden="true"></i></span>
+              </div>
+            </div>
+          </td>
+          <td><a pTooltip="{{rowData.portal}}" tooltipPosition="bottom" href='{{rowData.portal}}'
+              class="url">{{rowData.portal}}</a></td>
+          <td class="text-center">{{rowData.druglabel}}
+            <i pTooltip="{{rowData.errorCode}}" *ngIf="rowData.hasError=='YES'" tooltipPosition="bottom"
+              class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i>
+            <i *ngIf="rowData.hasError=='NO'" class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <div class="pt-2">
+              <button type="button" 
+              [ngClass]="getStylesButton('Druglabel')"
+               (click)="filesToCompareDialog(rowData.drugName,'Druglabel',rowData.druglabel,rowData.oldDownloadDate)">View
+                Compare</button>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="nccnFlag">{{rowData.nccn}}
+            <i *ngIf="rowData.hasError=='YES'" class="fa fa-exclamation-triangle pl-2 errorStyle"
+              aria-hidden="true"></i>
+            <i *ngIf="rowData.hasError=='NO'" class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <div class="pt-2">
+              <button type="button" 
+              [ngClass]="getStylesButton('NCCN')"
+               (click)="filesToCompareDialog(rowData.drugName,'Druglabel',rowData.druglabel,rowData.oldDownloadDate)">View
+                Compare</button>
+            </div>
+          </td>
+          <td class="text-center">
+            <p-inputSwitch [(ngModel)]="rowData.biosimRunStatus"
+              (onChange)="handleBioSimilarChange(rowData,rowData.biosimRunStatus)"></p-inputSwitch>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            {{rowData.clinicalpharma}}<i *ngIf="!rowData.clinicalpharmaError"
+              class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <i pTooltip="{{rowData.clinicalpharmaError}}" *ngIf="!!rowData.clinicalpharmaError" tooltipPosition="bottom"
+              class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i>
+            <div class="pt-4">
+              <button  [ngClass]="getStylesButton('Clinical Pharma')"
+              (click)="filesToCompareDialog(drugDataResponse.drugName,'Clinical Pharma',rowData.clinicalpharma,rowData.clinicalpharmaPDDate)">View
+              Compare</button>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            {{rowData.micromedex}}<i *ngIf="!rowData.micromedexError"
+              class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <i pTooltip="{{rowData.micromedexError}}" *ngIf="!!rowData.micromedexError" tooltipPosition="bottom"
+              class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i>
+            <div class="pt-4">
+              <button [ngClass]="getStylesButton('Micromedex')"
+              (click)="filesToCompareDialog(drugDataResponse.drugName,'Micromedex',rowData.micromedex,rowData.micromedexPDDate)">View
+              Compare</button>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex && !nccnFlag"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            {{rowData.nccn}}<i *ngIf="!rowData.nccnError" class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <i pTooltip="{{rowData.nccnError}}" *ngIf="!!rowData.nccnError" tooltipPosition="bottom"
+              class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i>
+            <div class="pt-4">
+              <button [ngClass]="getStylesButton('NCCN')"
+              (click)="filesToCompareDialog(drugDataResponse.drugName,'NCCN',rowData.nccn, rowData.nccnPDDate)">View
+              Compare</button>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            <div class="">{{rowData.lexidrug}}
+              <i *ngIf="!rowData.lexidrugError" class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+              <i pTooltip="{{rowData.lexidrugError}}" *ngIf="!!rowData.lexidrugError" tooltipPosition="bottom"
+                class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i>
+            </div>
+            <div class="pt-4">
+              <button [ngClass]="getStylesButton('LexiDrug')"
+                (click)="filesToCompareDialog(drugDataResponse.drugName,'LexiDrug',rowData.lexidrug,rowData.lexidrugPDDate)">View
+                Compare</button>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            {{rowData.ahfsdi}}<i *ngIf="!rowData.ahfsdiError" class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <i pTooltip="{{rowData.ahfsdiError}}" *ngIf="!!rowData.ahfsdiError" tooltipPosition="bottom"
+              class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i>
+            <div class="pt-4">
+              <button [ngClass]="getStylesButton('AHFS-DI')"
+                (click)="filesToCompareDialog(drugDataResponse.drugName,'AHFS-DI',rowData.ahfsdi,rowData.ahfsdiPDDate)">View
+                Compare</button>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            {{rowData.lexipn}}<i *ngIf="!rowData.lexipnError" class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <i pTooltip="{{rowData.lexipnError}}" *ngIf="!!rowData.lexipnError" tooltipPosition="bottom"
+              class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i>
+            <div class="pt-4">
+              <button [ngClass]="getStylesButton('Lexi PN')"
+                (click)="filesToCompareDialog(drugDataResponse.drugName,'Lexi PN',rowData.lexipn,rowData.lexipnPDDate)">View
+                Compare</button>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            <span style="font-size:12px;">{{fileCount}} files<i *ngIf="!rowData.lcdlcaError"
+              class="fa fa-file-pdf-o icoactive pl-2 pdfstyle"></i>
+            <i pTooltip="{{rowData.lcdlcaError}}" *ngIf="!!rowData.lcdlcaError" tooltipPosition="bottom"
+              class="fa fa-exclamation-triangle pl-2 errorStyle" aria-hidden="true"></i></span>
+            <div class="mt-4">
+              <select style="height:30px;" [ngStyle]="{'color':fileSelect === 'SUCCESS' ? 'green' : 'red' }"
+                id="lcdlcafiles" (change)="lcdlcafile(lcdlcafileSelected)" [(ngModel)]="lcdlcafileSelected"
+                placeholder="lcdlcafileSelected">
+                <option *ngFor="let item of fileOptions"
+                  [ngStyle]="{'color':item.condition === 'SUCCESS' ? 'green' : 'red' }">{{item.value}}</option>
+              </select>
+            </div>
+          </td>
+          <td class="text-center" *ngIf="rowGroupMetadata[rowData.runDrug].index === rowIndex"
+            [attr.rowspan]="rowGroupMetadata[rowData.runDrug].size">
+            {{rowData.lastRun}}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="summary" let-rowData>
+        <div class="text-left">
+          <button (click)="addBiosimilarDrug()" pButton icon="pi pi-plus" label="Add BioSimilar"></button>
+        </div>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+<div class="row justify-content-center" *ngIf="!hideTable && drugs.length<=0 && !status">
+  <p-progressSpinner></p-progressSpinner>
+</div>
+<p-dialog [(visible)]="displayDialog" [focusOnShow]="false" showEffect="fade" [modal]="true" [style]="{width: '80%'}">
+  <h6 class="m-1 t-style">Biosimilar/Brand Details</h6>
+  <div class="p-grid ui-fluid m-4">
+    <p-table [value]="biosimilars" [autoLayout]="true">
+      <ng-template pTemplate="header">
+        <tr>
+          <th colspan="7" class="bio-header">Edit BioSimilar/Brand</th>
+        </tr>
+        <tr>
+          <th *ngFor="let col of bioSimilarCols">{{col.header}}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body">
+        <tr *ngFor="let container of containers">
+          <td>
+            <div class="p-field p-grid">
+              <div class="p-col">
+                <input id="brandname" class="popup-table" type="text" pInputText [(ngModel)]="container.drugName"
+                  required>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="p-field p-grid">
+              <div class="p-col">
+                <input id="web" class="popup-table" type="text" pInputText [(ngModel)]="container.portal">
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="p-field p-grid">
+              <div class="p-col">
+                <input id="nccnName" class="popup-table" type="text" pInputText [(ngModel)]="container.nccnName">
+              </div>
+            </div>
+          </td>
+          <td class="text-center">
+            <input type="checkbox" [(ngModel)]="container.dailymedAvailability">
+          </td>
+          <td class="text-center">
+            <input type="checkbox" [(ngModel)]="container.drugfdaAvailability">
+          </td>
+          <td>
+            <div class="p-field p-grid">
+              <div class="p-col">
+                <input id="action" class="popup-table" type="text" pInputText [(ngModel)]="container.actionProcess">
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  <p-footer>
+    <div class="ui-dialog-buttonpane ui-helper-clearfix">
+      <button type="button" pButton icon="pi pi-times" (click)="cancel()" label="Cancel"></button>
+      <button type="button" pButton icon="pi pi-check" (click)="addComments()" label="Save"></button>
+    </div>
+  </p-footer>
+</p-dialog>
+
+<p-dialog [(visible)]="commentsDialog" [focusOnShow]="false" showEffect="fade" header="Comments" [modal]="true"
+  [style]="{width: '50%'}">
+  <div class="p-grid ui-fluid">
+    <div class="row mt-2 t-style" style="font-size:12px;">
+      <i>Please explain why editing is required</i></div>
+    <div class="p-field justify-content-center mt-2" style="width:100%;">
+      <textarea id="comment" style="width:100%;" [(ngModel)]="comments" type="text" rows="8" pInputTextarea></textarea>
+    </div>
+  </div>
+  <p-footer>
+    <div class="ui-dialog-buttonpane ui-helper-clearfix mb-2 mt-2">
+      <button type="button" [disabled]="!comments" pButton (click)="save()" label="Update"></button>
+    </div>
+  </p-footer>
+</p-dialog>
+
+<p-dialog [(visible)]="compareDialog" [focusOnShow]="false" showEffect="fade" [modal]="true" [style]="{width: '50%'}">
+  <div style="width:100%;">
+    <div class="mb-4 mt-1 text-center">
+      <span class="t-style">Drug Name:<span class="drugdetail">{{compareDrug}}</span></span>
+      <span class="t-style pl-4">Document Name:<span class="drugdetail">{{subProcess}}</span></span>
+    </div>
+    <div class="p-4 m-2 text-center">
+      <span class="t-style p-2">compare
+        <span class="pl-2"><select disabled>
+            <option value="currentFile">{{revisionDate}}</option>
+          </select></span></span>
+      <span class="t-style p-2">with<span class="pl-2"><select disabled>
+            <option value="previousFile">{{previousRevisionDate}}</option>
+          </select></span></span>
+    </div>
+    <div class= "p-2 text-center">
+      <span class="comment-style">{{showComments}}</span>
+    </div>
+  </div>
+  <p-footer>
+    <div class="ui-dialog-buttonpane ui-helper-clearfix">
+      <button type="button" pButton (click)="showComparedFiles()" [disabled]="showComments" label="View Compared Results"></button>
+      <button type="button" pButton (click)="closeComparison()" label="Close"></button>
+    </div>
+  </p-footer>
+</p-dialog>

@@ -1,165 +1,63 @@
 <fieldset id="fieldset2" class="col-md-12" Id="provisonalRows" *ngIf="fromMaintenanceProcess">
   <div class="row">
     <div class="col-md-12">
-    <label class="labelHeader">Claims Selection</label>
+      <label class="labelHeader">Claims Selection</label>
     </div>
   </div>
+
+  <div class="col-8" style="padding-top: 10px;padding-bottom: 20px;">
+    <label><span class="required-field-color">*</span>Claim Type:</label>
+      <p-multiSelect #multiSelectClaims [pTooltip]="parentClaimTypesToolTip" tooltipPosition="bottom" [appendTo]="multiSelectClaims" 
+      id="claimTypes2" [required]="true" [options]="claimTypesRc" name="selectedClaimTypesRc" id="claimTypeFieldRc"
+      [disabled]="true" [(ngModel)]="claimTypesSelectionRc" [style]="{width:'100%'}">
+    </p-multiSelect>
+  </div>
+
   <div class="row">
 
-    <div class ="col-md-4">
-      <div>
-        <label class="labelSubHeader">Professional Claims-CMS1500</label>
-      </div>
-      <div>
-      <fieldset class="list-fieldset my-panel">
-      <label class="labelForTextbox">Include</label>
-
-      <p-listbox class="list-box list-background list-header list-text" [options]="originalIncludedClaimServices" [disabled]="provDialogDisable"
-                 [readonly]="professionalClaims" [style]="originalTypesStyle" multiple="multiple" filter="filter">
-      </p-listbox>
-
-      <label class="labelForTextbox">Exclude</label>
-
-      <p-listbox class="list-box list-background list-header list-text" [options]="originalExcludedClaimServices" [disabled]="provDialogDisable"
-                 [readonly]="professionalClaims" [style]="originalTypesStyle" multiple="multiple" filter="filter">
-      </p-listbox>
-
-      </fieldset>
-      </div>
-    </div>
-
-
-    <div class ="col-md-4">
+    <div class="col-md-6">
       <div>
         <label class="labelSubHeader">Facility Claims-UB-04</label>
       </div>
       <div>
-      <fieldset class="list-fieldset">
-      <label class="labelForTextbox">Include</label>
+        <fieldset class="list-fieldset">
+          <label class="labelForTextbox">Include</label>
 
-      <p-listbox class="list-box list-background list-header list-text" [disabled]="provDialogDisable" [options]="originalIncludedBillClaims"
-                 [readonly]="billTypes" [style]="originalTypesStyle" multiple="multiple" filter="filter">
-      </p-listbox>
+          <p-listbox class="list-box list-background list-header list-text" [disabled]="provDialogDisable"
+            [options]="originalIncludedBillClaims" [readonly]="billTypes" [style]="originalTypesStyle"
+            multiple="multiple" filter="filter">
+          </p-listbox>
 
-        <label class="labelForTextbox">Exclude</label>
+          <label class="labelForTextbox">Exclude</label>
 
-      <p-listbox class="list-box list-background list-header list-text" [disabled]="provDialogDisable" [options]="originalExcludedBillClaims"
-                  [readonly]="billTypes" [style]="originalTypesStyle" multiple="multiple" filter="filter">
-    </p-listbox>
+          <p-listbox class="list-box list-background list-header list-text" [disabled]="provDialogDisable"
+            [options]="originalExcludedBillClaims" [readonly]="billTypes" [style]="originalTypesStyle"
+            multiple="multiple" filter="filter">
+          </p-listbox>
 
-      </fieldset>
-    </div>
-    </div>
-
-
-    <div class ="col-md-4">
-      <div>
-        <label class="labelSubHeader">Revenue Codes</label>
+        </fieldset>
       </div>
-      <div>
-      <fieldset class="list-fieldset">
-        <label class="labelForTextbox">Include</label>
-
-      <p-listbox class="list-box list-background list-header list-text" [options]="originalRevenueIncludeList" [disabled]="provDialogDisable"
-                 [style]="originalTypesStyle" multiple="multiple" filter="filter">
-      </p-listbox>
-
-        <label class="labelForTextbox">Exclude</label>
-
-      <p-listbox class="list-box list-background list-header list-text" [options]="originalRevenueExcludeList" [disabled]="provDialogDisable"
-                 [style]="originalTypesStyle" multiple="multiple" filter="filter">
-      </p-listbox>
-
-    </fieldset>
-    </div>
     </div>
   </div>
 
 </fieldset>
 
-
-
-<fieldset class="col-md-12" Id="provisonalRows" >
+<fieldset class="col-md-12" Id="provisonalRows">
   <div class="row">
-    <div class="col-2"><label>Claim Type:</label></div>
-    <div class="col-3"><input type="radio" name = "claimType" [(ngModel)]="selectedClaimType" (click)="onClaimTypeChange('professional')"
-        [value]="1"><label>Professional Claims-CMS1500</label></div>
-    <div class="col-2"><input type="radio" name = "claimType" [(ngModel)]="selectedClaimType" (click)="onClaimTypeChange('facility')"
-        [value]="2"><label>Facility Claims-UB-40</label></div>
-    <div class="col-2"><input type="radio" name = "claimType" [(ngModel)]="selectedClaimType" (click)="onClaimTypeChange('revenue')"
-        [value]="0"><label>Revenue Codes</label></div>
+    <div class="col-6">
+      <label><span class="required-field-color">*</span>Claim Type:</label>
+      <p-multiSelect (onChange)="setToolTipValueOnChange()" [pTooltip]="selectedClaimTypesToolTip" tooltipPosition="bottom" id="claimTypes" [required]="true"  
+        [options]="claimTypes" name="selectedClaimTypes" id="claimTypeField" [disabled]="provDialogDisable"
+        [(ngModel)]="claimTypesSelection" [style]="{width:'100%'}" [tooltipZIndex]="999999999">
+      </p-multiSelect>
+    </div>
+  </div>
+  <div class="row"  style="padding-top: 10px;padding-bottom: 20px;">
+      <div class="col-5" ><label>Form Type: Facility Claims-UB-40</label></div>
   </div>
 
   <div class="row">
-
-    <!-- div for the professional claims selection and include exclude lists -->
-
-    <div class="col-md-12" *ngIf="professional">
-      <!-- <div class="row"><label>Place Of Service</label></div> -->
-      <fieldset id="fieldset" [disabled]="professionalClaims">
-        <legend>Place Of Service</legend>
-        <div class="row" id="provisonalRows">
-          <div class="col-md-5">
-            <p-listbox class="list-box" [disabled]="provDialogDisable" [options]="claimServices"
-              [readonly]="professionalClaims" [(ngModel)]="selectedClaimService" [ngModelOptions]="{standalone: true}"
-              multiple="multiple" checkbox="checkbox" filter="filter"
-              [style]="{'width':'100%','height':'280px','overflow':'auto','font-size':'12px','border':'1px solid #31006F'}">
-            </p-listbox>
-          </div>
-          <div class="col-md-7">
-            <div class="row">
-              <div class="col-md-3" Id="provisonalRows">
-                <div class="row" Id="provisonalRows"><button id="professionalIncludeR" class="button btn-primary"
-                    [disabled]="professionalClaims" style="width:90%" (click)="moveToIncludeR($event)" id="P"> >
-                  </button>
-                </div>
-                <div class="row" Id="provisonalRows"><button id="professionalIncludeL" class="button btn-primary"
-                    [disabled]="professionalClaims" style="width:90%" (click)="moveToIncludeL($event)" id="P">&#60;
-                  </button> </div>
-              </div>
-              <div class="col-md-8" id="list-gap">
-                <div class="row">
-                  <label>Include</label>
-                </div>
-                <div class="row">
-                  <p-listbox class="list-box" [options]="includedClaimServices" [disabled]="provDialogDisable"
-                    [readonly]="professionalClaims" [(ngModel)]="selectedIncClaim" [ngModelOptions]="{standalone: true}"
-                    [style]="{'width':'100%','overflow': 'auto','height':'110px','border':'1px solid #31006F'}"
-                    style="width:100%;height:100px;" multiple="multiple" checkbox="checkbox" filter="filter">
-                  </p-listbox>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-3" Id="provisonalRows">
-                <div class="row" Id="provisonalRows"><button id="professionalExcludeR" class="button btn-primary"
-                    [disabled]="provDialogDisable" [disabled]="professionalClaims" style="width:90%"
-                    (click)="moveToExcludeR($event)" id="P"> > </button></div>
-                <div class="row" Id="provisonalRows"><button id="professionalExcludeL" class="button btn-primary"
-                    style="width:90%" [disabled]="professionalClaims" (click)="moveToExcludeL($event)" id="P"> &#60;
-                  </button></div>
-              </div>
-              <div class="col-md-8" id="list-gap">
-                <div class="row">
-                  <label>Exclude</label>
-                </div>
-                <div class="row">
-                  <p-listbox class="list-box" [options]="excludedClaimServices" [disabled]="provDialogDisable"
-                    [readonly]="professionalClaims" [(ngModel)]="selectedExcClaim" [ngModelOptions]="{standalone: true}"
-                    [style]="{'width':'100%','overflow': 'auto','height':'110px','border':'1px solid #31006F'}"
-                    style="width:100%;height:100px;" multiple="multiple" checkbox="checkbox" filter="filter">
-                  </p-listbox>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-
     <!-- div for the facility claims selection and include exclude lists -->
-
     <div class="col-md-12" *ngIf="facility">
       <fieldset id="fieldset" [disabled]="billTypes">
         <legend>Bill Types</legend>
@@ -210,70 +108,6 @@
                 <div class="row">
                   <p-listbox class="list-box" [disabled]="provDialogDisable" [options]="excludedBillClaims"
                     [readonly]="billTypes" [(ngModel)]="selectedBillExcClaims" [ngModelOptions]="{standalone: true}"
-                    [style]="{'width':'100%','overflow': 'auto','height':'110px','border':'1px solid #31006F'}"
-                    style="width:100%;height:100px;" multiple="multiple" checkbox="checkbox" filter="filter">
-                  </p-listbox>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-
-    <!-- div for the Revenue Codes selection and include exclude lists -->
-
-    <div class="col-md-12" *ngIf="revenueCodes">
-      <fieldset id="fieldset" [disabled]="provDialogDisable">
-        <legend>Revenue Codes</legend>
-        <div class="row" id="provisonalRows">
-          <div class="col-md-5">
-            <p-listbox class="list-box" [disabled]="provDialogDisable" [options]="revenueCodesList"
-              [(ngModel)]="selectedRevenueCodesList" [ngModelOptions]="{standalone: true}" multiple="multiple"
-              checkbox="checkbox" filter="filter"
-              [style]="{'width':'100%','height':'280px','overflow':'auto','font-size':'12px','border':'1px solid #31006F'}">
-            </p-listbox>
-          </div>
-          <div class="col-md-7">
-            <div class="row">
-              <div class="col-md-3" Id="provisonalRows">
-                <div class="row" Id="provisonalRows"><button id="revenueCodesAdd" class="button btn-primary"
-                    [disabled]="provDialogDisable" style="width:90%" (click)="revenueCodesAdd(true)" id="P"> >
-                  </button>
-                </div>
-                <div class="row" Id="provisonalRows"><button id="revenueCodesRemove" class="button btn-primary"
-                    [disabled]="provDialogDisable" style="width:90%" (click)="revenueCodesRemove(true)" id="P">&#60;
-                  </button> </div>
-              </div>
-              <div class="col-md-8" id="list-gap">
-                <div class="row">
-                  <label>Include</label>
-                </div>
-                <div class="row">
-                  <p-listbox class="list-box" [options]="revenueIncludeList" [disabled]="provDialogDisable"
-                    [(ngModel)]="selectedRevenueCodeIncList" [ngModelOptions]="{standalone: true}"
-                    [style]="{'width':'100%','overflow': 'auto','height':'110px','border':'1px solid #31006F'}"
-                    style="width:100%;height:100px;" multiple="multiple" checkbox="checkbox" filter="filter">
-                  </p-listbox>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-3" Id="provisonalRows">
-                <div class="row" Id="provisonalRows"><button id="revenueCodesAdd" class="button btn-primary"
-                    [disabled]="provDialogDisable" [disabled]="professionalClaims" style="width:90%"
-                    (click)="revenueCodesAdd(false)"> > </button></div>
-                <div class="row" Id="provisonalRows"><button id="revenueCodesRemove" class="button btn-primary"
-                    style="width:90%" [disabled]="provDialogDisable" (click)="revenueCodesRemove(false)"> &#60;
-                  </button></div>
-              </div>
-              <div class="col-md-8" id="list-gap">
-                <div class="row">
-                  <label>Exclude</label>
-                </div>
-                <div class="row">
-                  <p-listbox class="list-box" [options]="revenueExcludeList" [disabled]="provDialogDisable"
-                    [(ngModel)]="selecetdRevenueCodeExcList" [ngModelOptions]="{standalone: true}"
                     [style]="{'width':'100%','overflow': 'auto','height':'110px','border':'1px solid #31006F'}"
                     style="width:100%;height:100px;" multiple="multiple" checkbox="checkbox" filter="filter">
                   </p-listbox>

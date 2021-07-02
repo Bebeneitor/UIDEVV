@@ -33,7 +33,7 @@ export class WhatsNewComponent implements OnInit {
   minDate : Date = Constants.MIN_VALID_DATE;
   maxDate : Date = new Date();
 
-  @ViewChild("dt") dt;
+  @ViewChild("dt",{static: true}) dt;
 
   yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
   constructor(private util: AppUtils, private dashboardService: DashboardService, 
@@ -57,6 +57,7 @@ export class WhatsNewComponent implements OnInit {
         { field: 'id', header: 'Rule ID' },
         { field: 'name', header: 'Rule Name' },
         { field: 'category', header: 'Category' },
+        { field: 'provRuleCode', header: 'Provisional Rule ID' },
         { field: 'ideaCode', header: 'Idea Code' },
       ];
 
@@ -153,6 +154,8 @@ export class WhatsNewComponent implements OnInit {
 
           this.data.push({
             "id": dataService.data[i].ruleCode,
+            "provRuleId": this.util.encodeString(dataService.data[i].provRuleId),
+            "provRuleCode": dataService.data[i].provRuleCode,
             "ruleId": this.util.encodeString(dataService.data[i].ruleId),
             "name": dataService.data[i].ruleName,
             "category": dataService.data[i].categoryDesc,
@@ -233,8 +236,12 @@ export class WhatsNewComponent implements OnInit {
    * @param id
    */
   redirect(id, type) {
+    if(type === 'IDEA'){
+      this.router.navigate(['newIdea', id]);
+    } else {
+      this.router.navigate(['item-detail', id, type]);
+    }
     this.storageService.set("PARENT_NAVIGATION", "WHATS_NEW", false);
-    this.router.navigate(['item-detail', id, type]);
   }
 
 }

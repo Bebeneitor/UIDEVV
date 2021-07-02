@@ -18,7 +18,7 @@ export class AuditLogComponent implements OnInit, AfterViewInit {
   type: string = 'CCA_PO';
   auditLogs: any[] = [];
   loading: boolean = true;
-
+  switchRoles:boolean =false;
   deltas: any = [];
 
   constructor(private provisionalRuleService: ProvisionalRuleService) { }
@@ -66,6 +66,7 @@ export class AuditLogComponent implements OnInit, AfterViewInit {
         this.auditLogs = [];
       } else {
         this.auditLogs = response.data.auditDetails;
+        this.switchRoles=response.data.switchRoles;
       }
 
       this.loading = false;

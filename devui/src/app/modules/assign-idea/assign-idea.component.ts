@@ -14,6 +14,9 @@ import { Constants } from 'src/app/shared/models/constants';
 import { RuleInfoService } from 'src/app/services/rule-info.service';
 import { BaseResponse } from 'src/app/shared/models/base-response';
 import { UtilsService } from 'src/app/services/utils.service';
+import { PageTitleConstants as ptc} from 'src/app/shared/models/page-title-constants';
+import {ResearchRequestSearchedRuleDto} from "../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../services/research-request.service";
 
 const REASSIGNMENT_FOR_RULE_APPROVAL = 'Reassignment for Policy Owner Approval';
 
@@ -25,8 +28,8 @@ const REASSIGNMENT_FOR_RULE_APPROVAL = 'Reassignment for Policy Owner Approval';
 
 export class AssignIdeaComponent implements OnInit {
 
-  @ViewChild('assignedTable') assignedTable: EclTableComponent;
-  @ViewChild('returnedTable') returnedTable: EclTableComponent;
+  @ViewChild('assignedTable',{static: false}) assignedTable: EclTableComponent;
+  @ViewChild('returnedTable',{static: false}) returnedTable: EclTableComponent;
 
   serviceUrl: string = "";
   assignedTableConfig: EclTableModel = null;
@@ -49,10 +52,16 @@ export class AssignIdeaComponent implements OnInit {
   selectedUserReturned: string = "";
   selectedCommentReturned: string = "";
   tabIndex: number = 0;
+  // Research Request
+  rrId: number;
+  rrCode: string;
+  navPageTitle: string = 'My Requests';
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
+  ruleResponseIndicator: boolean = false;
 
   constructor(public route: ActivatedRoute, public dialogService: DialogService,
     private utilService: UtilsService, private utils: AppUtils, public ruleInfoService: RuleInfoService,
-    private messageService: MessageService) {
+    private messageService: MessageService, private rrService: ResearchRequestService) {
     this.users = [{ label: "Search for User", value: null }];
     this.assignedTableConfig = new EclTableModel();
     this.returnedTableConfig = new EclTableModel();
@@ -73,7 +82,7 @@ export class AssignIdeaComponent implements OnInit {
     this.initializeTableConfig(this.returnedTableConfig, Constants.RETURNED_TAB);
   }
   /**
-    * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT  
+    * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT
     */
   getAllReassignComments() {
     this.comments = [];
@@ -96,7 +105,8 @@ export class AssignIdeaComponent implements OnInit {
     table.url = this.serviceUrl + "/" + tabStatus;
     table.columns = this.initializeTableColumns();
     table.lazy = true;
-    table.sortOrder = 1;
+    table.sortBy = 'daysOld';
+    table.sortOrder = 0;
     table.excelFileName = tabStatus.substring(0, 1).toUpperCase()
       + tabStatus.substring(1, tabStatus.length - 1) + ' Rules Reassignment for Policy Owner Approval';
     table.checkBoxSelection = true;
@@ -107,7 +117,7 @@ export class AssignIdeaComponent implements OnInit {
   */
   initializeTableColumns(): EclColumn[] {
     let manager = new EclTableColumnManager();
-    manager.addLinkColumn("ruleCode", "Provisional Rule ID", '12%', true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon("ruleCode", "Provisional Rule ID", '12%', true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn("ruleName", "Provisional Rule Name", null, true, EclColumn.TEXT, true);
     manager.addTextColumn('categoryDesc', 'Category', '16%', true, EclColumn.TEXT, true);
     manager.addTextColumn('daysOld', 'Days Old', "8%", true, EclColumn.TEXT, true);
@@ -121,6 +131,13 @@ export class AssignIdeaComponent implements OnInit {
     this.tabIndex = index;
     this.selectedUserAssigned = "";
     this.selectedUserReturned = "";
+    if (index === 0) {
+      this.assignedTableConfig.sortBy = 'daysOld';
+      this.assignedTableConfig.sortOrder = 0;
+    } else if (index === 1) {
+      this.returnedTableConfig.sortBy = 'daysOld';
+      this.returnedTableConfig.sortOrder = 0;
+    }
   }
 
   setSelectRules(event: any, tab: string) {
@@ -209,24 +226,37 @@ export class AssignIdeaComponent implements OnInit {
   }
 
   viewProvisionalModal(ruleId: any) {
-    this.dialogService.open(ProvisionalRuleComponent, {
-      data: {
-        ruleId: ruleId,
-        header: 'Provisional Details'
-      },
-      header: 'Provisional Details',
-      width: '80%',
-      height: '92%',
-      closeOnEscape: false,
-      closable: false,
-      contentStyle: {
-        'max-height': '92%',
-        'overflow': 'auto',
-        'padding-top': '0',
-        'padding-bottom': '0',
-        'border': 'none'
+    this.getRuleResponseIndicatorAndRuleCode(ruleId).then((rrCode: any) => {
+      if (rrCode !== null && rrCode != "" ) {
+        this.ruleResponseIndicator = true;
+        this.rrCode = rrCode;
       }
+      this.dialogService.open(ProvisionalRuleComponent, {
+        data: {
+          ruleId: ruleId,
+          header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
+          provDialogDisable: true,
+          stageId: Constants.ECL_PROVISIONAL_STAGE,
+          provSetup: Constants.ECL_PROVISIONAL_STAGE,
+          ruleResponseInd: this.ruleResponseIndicator,
+          researchRequestId: this.rrCode,
+        },
+        showHeader: !this.ruleResponseIndicator,
+        header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
+        width: '80%',
+        height: '92%',
+        closeOnEscape: false,
+        closable: false,
+        contentStyle: {
+          'max-height': '92%',
+          'overflow': 'auto',
+          'padding-top': '0',
+          'padding-bottom': '0',
+          'border': 'none'
+        }
+      });
     });
+
   }
 
   private getAllUsers(): void {
@@ -240,16 +270,29 @@ export class AssignIdeaComponent implements OnInit {
         this.assignedTable.selectedRecords = [];
         this.assignedTable.savedSelRecords = [];
         this.assignedTable.keywordSearch = '';
-        this.assignedTable.refreshTable();
+        this.assignedTable.resetDataTable();
         break;
       case Constants.RETURNED_TAB:
         this.selectedRulesReturned = [];
         this.returnedTable.selectedRecords = [];
         this.returnedTable.savedSelRecords = [];
         this.returnedTable.keywordSearch = '';
-        this.returnedTable.refreshTable();
+        this.returnedTable.resetDataTable();
         break;
     }
   }
+
+  // Source Link for Research Request
+  async getRuleResponseIndicatorAndRuleCode(ruleId: number) {
+    let rrCode = "";
+    return new Promise((resolve, reject) => {
+        this.rrService.isRuleCreatedFromRR(ruleId).subscribe((resp: any) => {
+          if (resp.data !== null && resp.data !== undefined ) {
+            rrCode = resp.data;
+          }
+          resolve(rrCode);
+        });
+      });
+    }
 
 }

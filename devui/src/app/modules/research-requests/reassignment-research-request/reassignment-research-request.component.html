@@ -1,0 +1,96 @@
+<p-blockUI [blocked]="loading">
+    <div class="img-loading text-center">
+      <img src="assets/img/loading.gif"/>
+      <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+    </div>
+  </p-blockUI>
+
+  <h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
+  <div class="reassignmentResearchForm">
+
+    <p-table #viewGrid [columns]="cols" [value]="filteredData" [paginator]="true" [(selection)]="selectedData" [resizableColumns]="true" columnResizeMode="fit"
+             [reorderableColumns]="true" [rows]="10" [rowsPerPageOptions]="eclConstantsService.ROWS_PER_PAGE_OPTIONS" [loading]="loading" [responsive]="true"
+             [style]="{'margin-top': '15px'}" (onRowSelect)='onRowSelect($event)' (onRowUnselect)="onRowUnselect($event)">
+
+      <ng-template pTemplate="caption">
+        <app-grid-tools [primeTableLocalReference]="viewGrid"
+                        [pageTitle]="pageTitle">
+        </app-grid-tools>
+        <div style="text-align: right">
+          <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
+                 (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+                 style="width:150px; border-radius: 5px">
+          <span style="cursor: pointer"><i *ngIf = "keywordSearch !== ''" (click)="viewGrid.reset(); resethDataTable(viewGrid);" style="cursor: pointer" class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
+          <i *ngIf = "keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th class="checkbox-center" style="width:44px; background-color: white;">
+          </th>
+          <th class="small-th" style="text-align: center" *ngFor="let col of columns"
+              [pSortableColumn]="col.field" [ngStyle]="{'width': col.width}" pResizableColumn>
+            {{col.header}}
+            <p-sortIcon [field]="col.field" ariaLabel="Activate to sort"
+                        ariaLabelDesc="Activate to sort in descending order"
+                        ariaLabelAsc="Activate to sort in ascending order"></p-sortIcon>
+          </th>
+        </tr>
+        <tr>
+          <th></th>
+          <th *ngFor="let col of columns; let index = index" class="text-center" [ngStyle]="{'width': col.width}">
+            <input pInputText Type="text" (input)="viewGrid.filter($event.target.value, col.field, 'contains')" [(ngModel)]='filters[index]'
+            [placeholder]="col.header" class="ui-column-filter" style="width : 100%; padding : 5px; border-radius: 5px">
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-rule let-columns="columns">
+
+        <tr [pSelectableRow]="rule">
+          <td class="checkbox-center">
+              <p-tableCheckbox [value]="rule"></p-tableCheckbox>
+          </td>
+          <td class="small-td" *ngFor="let col of columns">
+            <span *ngIf="col.field == 'researchCode'"  class="span-centered active-link" (click)="navigateRequest(rule)">{{rule.researchCode}}</span>
+            <span *ngIf="col.field == 'jiraId'" class="span-centered">{{rule.jiraId}}</span>
+            <span *ngIf="col.field == 'description'" class="span-centered">{{rule.description}}</span>
+            <span *ngIf="col.field == 'daysOld'" class="span-centered">{{rule.daysOld}}</span>
+            <span *ngIf="col.field == 'requestType'" class="span-centered">{{rule.requestType}}</span>
+            <span *ngIf="col.field == 'teamName'" class="span-centered">{{rule.teamName}}</span>
+            <span *ngIf="col.field == 'researchStatus'" class="span-centered">{{rule.researchStatus}}</span>
+            <span *ngIf="col.field == 'firstName'" class="span-centered">{{rule.firstName}}</span>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="paginatorright" let-state>
+              <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
+                Showing <b>{{(state.page * state.rows) + 1}}</b> - <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+                of <b>{{state.totalRecords}}</b>
+          </span>
+        <span style="padding-right: 10px; font-weight: bold" *ngIf="state.totalRecords < 1">No records found.</span>
+      </ng-template>
+    </p-table>
+    <div>
+    <br>
+
+    <p-dropdown #teamDD required [options]="teams"
+        [(ngModel)]="selectedTeam" [filter]="true"  filterBy="label,value" [style]="{'width':'150px'}"  [disabled]="!this.selectedData || this.selectedData.length < 1"
+        class="no-print float-left small-td" (onChange)="onTeamSelection($event)"></p-dropdown>
+
+    <p-dropdown #userDD required [options]="users"
+        [(ngModel)]="selectedUser" [filter]="true"  filterBy="label,value" [style]="{'width':'150px'}"  [disabled]="!this.selectedData || this.selectedData.length < 1"
+        class="no-print float-left small-td"></p-dropdown>
+
+    <p-dropdown #commentDD required [(ngModel)]="selectedComment"
+        [options]="comments" [style]="{'width':'150px'}" class="no-print float-left small-td" [disabled]="!this.selectedData || this.selectedData.length < 1"></p-dropdown>
+
+    <button type="submit" value="Reassign" (click)="reassignRR()" [disabled]="!this.selectedUser || !this.selectedData || !selectedComment || this.selectedData.length < 1"
+        class="btn btn-primary btn-default-height  small-td">Reassign</button>
+
+    <button (click)="refreshData();"
+        class="no-print btn btn-primary btn-default-height float-right small-td " type="button"
+        value="refreshAssignIdea">Refresh</button>
+
+  </div>
+  <p-toast [baseZIndex]="999999"></p-toast>

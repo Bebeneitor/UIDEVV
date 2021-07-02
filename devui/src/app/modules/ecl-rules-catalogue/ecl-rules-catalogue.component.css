@@ -1,8 +1,3 @@
-label {
-    font-size: 10px;
-    color: #949494;
-}
-
 .set-space { padding: 0px 5px 5px 0px; }
 
 .set-space-left { margin-left:2px; }
@@ -103,6 +98,7 @@ label {
 ::ng-deep body .ui-dropdown .ui-dropdown-label {
     text-align: left !important;
     color : gray !important;
+    padding-top: 6px !important;
 }
 
 ::ng-deep .ui-accordion.ui-widget {
@@ -141,7 +137,7 @@ label {
 ::ng-deep .filters-div { 
     position: absolute;
     z-index: 999;
-    right: 0;
+    left: 100px;
     padding: 0px;
     margin-top: 5px;
     margin-right: 7px;
@@ -185,9 +181,10 @@ label {
 .scale-ui-g {width:250px;margin-bottom:10px;}
 .add-btn-font {font-size: 11px;}
 .save-margin-22 {margin : 22px;}
-.filterdpdown{min-width : 10%;}
+.filterdpdown{min-width : 10%; padding-right:0rem; padding-left : 0.1rem;}
 .hide-div {display : none;}
-.filters-div, .filters-div > div, .filters-div > div > div {height : 60px !important;}
+/* .filters-div, .filters-div > div, .filters-div > div > div {height : 60px !important;} */
+.filters-div {height : 100px !important;}
 .btn.btn-primary:disabled {cursor : default;}
 :host>>>.ui-multiselect .ui-multiselect-panel { max-width:100%;}
 :host>>>.ui-multiselect-panel .ui-multiselect-item span{
@@ -212,3 +209,16 @@ label {
 .sel-div {font-size:12px; font-weight: 900; color:gray;}
 .search-item label {margin-top:10px;}
 .wrap-text{ white-space: normal;word-break: break-word;}
+:host>>>.rule-engine .ui-multiselect-panel .ui-multiselect-items-wrapper{overflow: hidden;}
+::ng-deep body .ui-multiselect .ui-multiselect-label { padding : 0.48em;}
+.char-limit{
+    font-size: 0.8rem;
+    color:#4e4c4c
+}
+:host>>>.ecl-table-result .ui-table .ui-paginator-bottom{display: none;}
+:host>>>.ecl-table-result .ui-table-wrapper{display: none;}
+.compare-icon-div{padding-top:31px; padding-right: 0.1rem !important;}
+.compare-icon-div img{width:24px;cursor:pointer;}
+.compare-icon{font-size:21px;}
+::ng-deep .gender .ui-dropdown .ui-dropdown-label{font-family: "Open Sans", "Helvetica Neue", sans-serif; color: #333333 !important;}
+:host>>> .ecl-table .ui-table-wrapper{margin-top:50px;}

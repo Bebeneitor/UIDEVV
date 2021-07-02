@@ -33,7 +33,7 @@ export class SetupNotificationComponent implements OnInit {
   constructor(private util: AppUtils, public route: ActivatedRoute, private http: HttpClient,
     private messageService: MessageService, private refSourceService: ReferenceSourceService) { }
 
-  @ViewChild('setupNotif') setupNotifTable: EclTableComponent;
+  @ViewChild('setupNotif',{static: true}) setupNotifTable: EclTableComponent;
 
   showDuplicateMessage: boolean = false;
   duplicateMessage: any = '';
@@ -113,7 +113,7 @@ export class SetupNotificationComponent implements OnInit {
         }
       });
       this.messageService.add({ severity: 'success', summary: 'Info', detail: 'Selected referenced have been successfully removed!', life: 3000, closable: false });
-      setTimeout(() => this.setupNotifTable.refreshTable(), 1000);
+      setTimeout(() => this.setupNotifTable.resetDataTable(), 1000);
       this.setupNotifTable.selectedRecords = [];
     }
   }
@@ -131,7 +131,7 @@ export class SetupNotificationComponent implements OnInit {
           this.refSourceService.saveReferenceSource(selectedData).subscribe(response => {
             this.messageService.add({ severity: 'success', summary: 'Info', detail: 'Selected referenced have been successfully saved!', life: 3000, closable: false });
             this.loading = false;
-            this.setupNotifTable.refreshTable();
+            this.setupNotifTable.resetDataTable();
             this.setupNotifTable.selectedRecords = [];
           });
         }

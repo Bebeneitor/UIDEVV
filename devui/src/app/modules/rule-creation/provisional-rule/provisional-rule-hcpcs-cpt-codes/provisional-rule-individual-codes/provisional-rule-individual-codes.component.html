@@ -1,0 +1,161 @@
+<div *ngIf="hideRangeField()" class="ind">
+
+  <table class="table table-bordered text-center">
+    <thead>
+      <tr>
+        <th style="width: 12.5%;">HCPCS/CPT From</th>
+        <th style="width: 12.5%;">HCPCS/CPT To</th>
+        <th style="width: 12.5%;">Modifier</th>
+        <th style="width: 12.5%;">Days Lo</th>
+        <th style="width: 12.5%;">Days Hi</th>
+        <th style="width: 12.5%;">Date From</th>
+        <th style="width: 12.5%;">Date To</th>
+        <th style="width: 12.5%;">Category</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="width-perc-9"><input [disabled]="disableRangeCodes" type="text" class="text-uppercase" [(ngModel)]="codeRangeFrom" /></td>
+        <td class="width-perc-9"><input [disabled]="disableRangeCodes" type="text" class="text-uppercase" [(ngModel)]="codeRangeTo" /></td>
+        <td class="width-perc-15">
+          <p-multiSelect [options]="modifierOptions" [(ngModel)]="modifier" defaultLabel="Select"
+            [maxSelectedLabels]="0" (onChange)="onChangeMultiSelectModifiers()" [showToggleAll]="false">
+          </p-multiSelect>
+        </td>
+        <td class="width-perc-4"><input type="number" [(ngModel)]="daysLo" class="border-input" /></td>
+        <td class="width-perc-4"><input type="number" [(ngModel)]="daysHi" class="border-input" /></td>
+        <td>
+          <p-calendar type="string" name="dateFrom" [(ngModel)]="dateFrom" [monthNavigator]="true"
+            [yearNavigator]="true" [yearRange]="yearValidRange" placeholder="{{dateFormat}}">
+          </p-calendar>
+        </td>
+        <td>
+          <p-calendar type="string" name="dateTo" [(ngModel)]="dateTo" [monthNavigator]="true" [yearNavigator]="true"
+            [yearRange]="yearValidRange" placeholder="{{dateFormat}}">
+          </p-calendar>
+        </td>
+        <td>
+          <p-dropdown [options]="_procTypeOptions" [(ngModel)]="category" placeholder="Select Category">
+          </p-dropdown>
+        </td>
+        
+      </tr>
+
+      <tr>
+        <th colspan="2">POS</th>
+        <th>Revenue From</th>
+        <th>Revenue To</th>
+        <th class="word-wrap">B/W Deny</th>
+        <th class="word-wrap">Override</th>
+        <th class="word-wrap">ICD</th>
+        <th></th>
+      </tr>
+
+      <tr>
+        <td class="width-perc-15" colspan="2">
+          <p-multiSelect [options]="posOptions" [(ngModel)]="pos" defaultLabel="Select" [maxSelectedLabels]="0" (onChange)="onChangeMultSelectPos()" [showToggleAll]="false">
+          </p-multiSelect>
+        </td>
+        <td>
+          <p-dropdown [options]="revenueCodeOptions" filter="true" [(ngModel)]="revenueFrom" placeholder="Select" editable="true">
+          </p-dropdown>
+        </td>
+        <td>
+          <p-dropdown [options]="revenueCodeOptions" filter="true" [(ngModel)]="revenueTo" placeholder="Select" editable="true">
+          </p-dropdown>
+        </td>
+        <td class="width-perc-3">
+          <p-checkbox [(ngModel)]="bwDeny" binary="true">
+          </p-checkbox>
+        </td>
+        <td class="width-perc-3">
+          <p-checkbox [(ngModel)]="override" binary="true">
+          </p-checkbox>
+        </td>
+        <td class="width-perc-3">
+          <p-checkbox [(ngModel)]="icd" binary="true">
+          </p-checkbox>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-primary f-11 width28" (click)="validateInfo()">
+            <em class="fa fa-plus"></em>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- for copy paste codes component-->
+<div class="col-12 copy" *ngIf="!hideRangeField()">
+  <div class="row">
+    <div class="width-perc-14">
+      <label>Modifier</label>
+      <p-multiSelect [options]="modifierOptions" [(ngModel)]="modifier" defaultLabel="Select" [maxSelectedLabels]="0" (onChange)="onChangeMultiSelectModifiers()" [showToggleAll]="false">
+      </p-multiSelect>
+    </div>
+    <div class="width-perc-6 pl-2">
+      <label>Days Lo</label>
+      <input type="number" [(ngModel)]="daysLo"  class="border-input" />
+    </div>
+    <div class="width-perc-6 pl-2">
+      <label>Days Hi</label>
+      <input type="number" [(ngModel)]="daysHi"  class="border-input" />
+    </div>
+    <div class="width-perc-9 pl-2">
+      <label>Date From</label>
+      <p-calendar type="string" name="dateFrom" [(ngModel)]="dateFrom" [monthNavigator]="true" [yearNavigator]="true"
+        [yearRange]="yearValidRange" placeholder="{{dateFormat}}">
+      </p-calendar>
+    </div>
+    <div class="width-perc-9 pl-2">
+      <label>Date To</label>
+      <p-calendar type="string" name="dateTo" [(ngModel)]="dateTo" [monthNavigator]="true" [yearNavigator]="true"
+        [yearRange]="yearValidRange" placeholder="{{dateFormat}}">
+      </p-calendar>
+    </div>
+    <div class="pl-2">
+      <label>Category</label>
+      <p-dropdown class="category" [options]="_procTypeOptions" [(ngModel)]="category" placeholder="Select Category">
+      </p-dropdown>
+    </div>
+    <div class="width-perc-14 pl-2">
+      <label>POS</label>
+      <p-multiSelect [options]="posOptions" [(ngModel)]="pos" defaultLabel="Select" [maxSelectedLabels]="0" (onChange)="onChangeMultSelectPos()" [showToggleAll]="false">
+      </p-multiSelect>
+    </div>
+    <div class="pl-2 pt-4">
+      <label class="pr-2">B/W Deny</label>
+      <p-checkbox [(ngModel)]="bwDeny" binary="true">
+      </p-checkbox>
+    </div>
+    <div class="pl-2 pt-4">
+      <label class="pr-2">Override</label>
+      <p-checkbox [(ngModel)]="override" binary="true">
+      </p-checkbox>
+    </div>
+    <div class="pl-2 pt-4">
+      <label class="pr-2">ICD</label>
+      <p-checkbox [(ngModel)]="icd" binary="true">
+      </p-checkbox>
+    </div>
+    <div class="pl-1 pt-4">
+      <button class="btn btn-sm btn-primary f-11" (click)="validateInfo()">
+        <em class="fa fa-plus"></em>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="width-perc-14">
+      <label>Revenue From</label>
+      <p-dropdown [options]="revenueCodeOptions" filter="true" [(ngModel)]="revenueFrom" placeholder="Select" editable="true">
+      </p-dropdown>
+    </div>
+    <div class="width-perc-14 pl-2">
+      <label>Revenue To</label>
+      <p-dropdown [options]="revenueCodeOptions" filter="true" [(ngModel)]="revenueTo" placeholder="Select" editable="true">
+      </p-dropdown>
+    </div>
+  </div>
+</div>

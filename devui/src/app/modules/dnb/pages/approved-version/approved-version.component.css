@@ -44,12 +44,16 @@
   border-bottom: 1px solid #31006f;
 }
 
+.drug-title {
+  position: relative;
+  top: -10px;
+}
+
 .drug-name {
   border: 0;
   display: inline-block;
   font-weight: normal;
-  position: relative;
-  top: 4px;
+  padding: 0;
 }
 
 .drug-name .ql-container {

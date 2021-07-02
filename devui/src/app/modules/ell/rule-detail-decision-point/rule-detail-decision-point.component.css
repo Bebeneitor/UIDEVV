@@ -27,3 +27,9 @@
 .decision-point-rule-detail ul.accordion-list {
     margin: 0px !important
 } 
+
+.btn-ell-return {
+    position: fixed;
+    bottom: 25px;
+    right: 10px;
+}

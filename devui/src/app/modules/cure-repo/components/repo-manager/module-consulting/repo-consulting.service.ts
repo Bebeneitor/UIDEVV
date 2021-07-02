@@ -48,9 +48,10 @@ export class RepoConsultingService {
 
     return this.http.get<BaseResponse>(`${environment.restServiceUrl}${RoutingConstants.REPO_URL}/${RoutingConstants.REPO_TABLES.slice(0, -1)}/${dataSourceId}`)
       .pipe(map(response => {
+
         const attributes = [];
 
-        const elements: any[] = response.data.repoAttributes;
+        const elements: any[] = [...response.data.repoAttributes];
         const dropDownElements: any[] = elements.filter(element => element.uiDataType === 'dropdown');
 
         // Put dropdown elements in the begining of the array. 
@@ -58,7 +59,7 @@ export class RepoConsultingService {
           dropDownElements.forEach(element => {
             const indexToRemove = elements.indexOf(element);
             if (indexToRemove > -1) {
-              elements.splice(indexToRemove);
+              elements.splice(indexToRemove, 1);
               elements.unshift(element);
             }
           });
@@ -71,18 +72,40 @@ export class RepoConsultingService {
             element = { ...element, attributeName: element.attributeName + ' From' };
 
             attributes.push(element, toElement);
+          } else if (element.uiDataType === 'radio_button') {
+            for (const key in element.attributeDetails.radioButtonOptions) {
+              if (Object.prototype.hasOwnProperty.call(element.attributeDetails.radioButtonOptions, key)) {
+                const value = element.attributeDetails.radioButtonOptions[key];
+                element = { ...element, attributeName: value };
+                attributes.push(element);
+              }
+            }
+          } else if (element.uiDataType == 'dropdown') {
+            const dropDownElements = [];
+
+            for (const key in element.attributeDetails.dropDownOptions) {
+              if (Object.prototype.hasOwnProperty.call(element.attributeDetails.dropDownOptions, key)) {
+                const value = element.attributeDetails.dropDownOptions[key];
+                dropDownElements.push({ label: value, value });
+              }
+            }
+            element = { ...element, dropDownElements };
+            attributes.push(element);
           } else {
             attributes.push(element);
           }
         });
 
-        // add the dataset list.
-        const datasets: SelectItem[] = response.data.datasets.map(set => {
-          return {
-            label: set,
-            value: set
-          }
-        });
+        let datasets: SelectItem[] = [];
+        if (response.data.datasets) {
+          // add the dataset list.
+          datasets = response.data.datasets.map(set => {
+            return {
+              label: set,
+              value: set
+            }
+          });
+        }
 
         return { ...response, data: { ...response.data, repoAttributes: attributes, datasets: datasets } };
       }));
@@ -94,8 +117,7 @@ export class RepoConsultingService {
   createRepoConsultancyForm() {
     return this.fb.group({
       tableSource: this.fb.control(null, Validators.required),
-      activeMatch: this.fb.control(null),
-      exactMatch: this.fb.control(null),
+      exactMatch: this.fb.control(false),
       searchCriteria: this.fb.array([])
     });
   }
@@ -104,35 +126,43 @@ export class RepoConsultingService {
    * Creates the table.
    * @param requestObject that contains the search criteria.
    */
-  crateTableConfiguration(requestObject: any, tableColumns: any[]): EclTableModel {
+  crateTableConfiguration(requestObject: any, tableColumns: any[], searchCriteriaElements: any[]): EclTableModel {
     const notRangedAttributes = [];
     const rangedAttributes = [];
-    let criteriaRequestObj: { repoTableId: number, exactMatch: boolean, activeMatch: boolean, queryTemplate: { name: string, value: any }[] } = {
+    let criteriaRequestObj: { repoTableId: number, exactMatch: boolean, queryTemplate: { name: string, value: any }[] } = {
       repoTableId: requestObject.tableSource.repoTableId,
       exactMatch: requestObject.exactMatch ? requestObject.exactMatch : false,
-      activeMatch: requestObject.activeMatch ? requestObject.activeMatch : false,
       queryTemplate: []
     };
-
     requestObject.searchCriteria.forEach((control, index) => {
-      const column = tableColumns[index];
-      if (column.uiDataType === 'range_date' || column.uiDataType === 'range_text') {
-        rangedAttributes.push({ index: index, control })
-      } else {
-        notRangedAttributes.push({ index: index, control });
+      const column = searchCriteriaElements[index];
+      if (column) {
+        if (column.uiDataType === 'range_date' || column.uiDataType === 'range_text') {
+          rangedAttributes.push({ index: index, control })
+        } else {
+          if (control) {
+            notRangedAttributes.push({ index: index, control });
+          }
+        }
       }
     });
 
     criteriaRequestObj.queryTemplate = [
-      ...this.generateRangedAttributes(rangedAttributes, requestObject, tableColumns),
-      ...this.generateNotRangedAttributes(notRangedAttributes, requestObject, tableColumns)
+      ...this.generateRangedAttributes(rangedAttributes, requestObject, searchCriteriaElements),
+      ...this.generateNotRangedAttributes(notRangedAttributes, requestObject, searchCriteriaElements)
     ];
 
     let manager = new EclTableColumnManager();
     const dataTableConfiguration = new EclTableModel();
 
+    const radioButtonsColumn = [...tableColumns.filter((element, index, self) =>
+      index === self.findIndex((innerElement) => (innerElement.attributeId === element.attributeId && innerElement.columnName === element.columnName && innerElement.uiDataType === 'radio_button')))];
+
     // Filter the range columns.
-    tableColumns = tableColumns.filter((element, index, self) => index === self.findIndex((innerElement) => (innerElement.columnName === element.columnName)));
+    tableColumns = tableColumns.filter((element, index, self) => index === self.findIndex((innerElement) => (innerElement.columnName === element.columnName && innerElement.uiDataType === element.uiDataType)));
+
+    tableColumns = tableColumns.filter(element => element.uiDataType !== 'radio_button');
+    tableColumns.push(...radioButtonsColumn);
 
     tableColumns.forEach(column => {
       let attrName: string = this.getAttributeName(column);
@@ -141,6 +171,9 @@ export class RepoConsultingService {
         case 'date':
         case 'range_date':
           manager.addDateColumn(column.columnName, attrName, null, false, true);
+          break;
+        case 'radio_button':
+          manager.addTextColumn(column.columnName, column.columnName, null, false, EclColumn.TEXT, true);
           break;
         default:
           manager.addTextColumn(column.columnName, attrName, null, false, EclColumn.TEXT, true);
@@ -159,6 +192,7 @@ export class RepoConsultingService {
       fileName: `REPO_${requestObject.tableSource.displayTableName}`,
       processCode: 'REPO_QUERY'
     };
+    dataTableConfiguration.excelFileName = `REPO_${requestObject.tableSource.displayTableName}`;
     dataTableConfiguration.criteriaFilters = criteriaRequestObj;
 
     return dataTableConfiguration;
@@ -182,20 +216,27 @@ export class RepoConsultingService {
       name = column.columnName;
       obj['name'] = name;
 
-      if (value) {
+      if (value !== null && value !== undefined) {
         if (typeof value.getMonth === 'function') {
           notRangedValue = this.parseDate(value);
           obj['value'] = `${notRangedValue}`;
         } else if (column.uiDataType === 'dropdown') {
           notRangedValue = value.join(`', '`);
           obj['value'] = `('${notRangedValue}')`;
-        } else {
+        } else if (column.uiDataType === 'radio_button') {
+          if (value) {
+            notRangedValue = column.attributeName;
+            obj['value'] = `${notRangedValue}`;
+          }
+        }
+        else {
           notRangedValue = value;
           obj['value'] = `${notRangedValue}`;
         }
       }
 
-      if (obj['value']) {
+      // do not add attribute if is checkbox
+      if (obj['value'] && column.uiDataType !== 'checkbox') {
         finalRangedAttr.push(obj);
       }
       obj = {};

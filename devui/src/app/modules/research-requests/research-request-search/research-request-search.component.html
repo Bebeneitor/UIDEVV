@@ -1,0 +1,61 @@
+<div class="header-flex">
+  <h5 class="second-header-text">{{title}}</h5>
+  <button class="btn btn-primary" (click)="navigateToNewResearchRequest()">Create New RR</button>
+</div>
+<form class="rr-search-container">
+  <div class="row">
+    <div class="col-4">
+      <label><span class="required-field-color">*</span>Request Type</label>
+      <p-dropdown name="requestType" placeholder="Choose" [options]="requestTypes" [(ngModel)]="selRequestTypes"
+                  (onChange)="selectedIssueType(selRequestTypes)">
+      </p-dropdown>
+    </div>
+
+    <div class="col-4">
+      <label>ID</label>
+      <input type="text" name="rrIdInput" [(ngModel)]="rrId" (keydown)="stopEventSubmit($event)"/>
+    </div>
+
+    <div class="col-4">
+      <label>Jira ID</label>
+      <input type="text" name="jiraIdInput" [(ngModel)]="jiraId"(keydown)="stopEventSubmit($event)" />
+    </div>
+
+    <div class="col-4">
+      <label>Clients</label>
+      <p-multiSelect name="clients" placeholder="Choose" [options]="clients" [(ngModel)]="selClients"></p-multiSelect>
+    </div>
+
+    <div class="col-4">
+      <label>Teams</label>
+      <p-dropdown name="teams" placeholder="Choose" [options]="teams" [(ngModel)]="selTeams"
+        (onChange)="checkTeamSelection()" [disabled]="disabledTeamFieldByPR"></p-dropdown>
+    </div>
+
+    <div class="col-4">
+      <label>Assginees</label>
+      <p-dropdown name="assginees" aria-placeholder="choose"
+        [disabled]="selTeams === undefined || selTeams === null || loadAssignee" [options]="assignees"
+        [(ngModel)]="selAssignee"></p-dropdown>
+    </div>
+
+    <div class="col-4">
+      <label>Status</label>
+      <p-multiSelect name="rrStatus" placeholder="Choose" [options]="rrstatus" [(ngModel)]="selRrStatus">
+      </p-multiSelect>
+    </div>
+
+    <div class="col-8">
+      <label>Keyword Search</label>
+      <input type="text" [(ngModel)]="searchText" name="keysearch" (keyup)="searchText"(keydown)="stopEventSubmit($event)" />
+    </div>
+  </div>
+  <div class="button-container">
+    <button type="button" value="refresh" name="refresh" class="btn btn-primary" (click)="resetCheckInput()">Refresh</button>
+    <button type="submit" value="submit" name="view" class="btn btn-primary" (click)="searchView.next()">View</button>
+  </div>
+
+</form>
+<div class="rr-search-table">
+  <ecl-table #rrSearchTable [tableModel]="rrSearchTableModel" (onAcctionLink)="loadResearchRequest($event)"></ecl-table>
+</div>

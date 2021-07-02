@@ -10,12 +10,14 @@ import { UsersService } from "../../../services/users.service";
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ReturnDialogComponent } from "../../rule-creation/new-idea-research/components/return-dialog/return-dialog.component";
 import { RoutingConstants } from 'src/app/shared/models/routing-constants';
-import { Constants as consts} from 'src/app/shared/models/constants';
+import {Constants as consts} from 'src/app/shared/models/constants';
 import { ImpactRuleApproval } from 'src/app/shared/models/impact-rule-approval';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
 import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column';
 import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
+import {ResearchRequestService} from '../../../services/research-request.service';
+import { ResearchRequestSearchedRuleDto } from 'src/app/shared/models/dto/research-request-searched-rule-dto';
 
 const LIST_OF_RULES_FOR_IMPACT_ANALYSIS = 'List of Rules for Impact Analysis';
 const RULES_FOR_PO_APPROVAL = 'Policy Owner Approval';
@@ -51,11 +53,12 @@ const RETURNED_TAB_ID = 1;
 })
 export class RuleForImpactAnalysisComponent implements OnInit {
 
-  @ViewChild('viewGrid') viewGrid: any;
-  @ViewChild('assignedTableLRIA') assignedTableLRIA: EclTableComponent;
-  @ViewChild('returnedTableLRIA') returnedTableLRIA: EclTableComponent;
-  @ViewChild('approvalMaintenance') approvalMaintenance: EclTableComponent;
+  @ViewChild('viewGrid',{static: false}) viewGrid: any;
+  @ViewChild('assignedTableLRIA',{static: false}) assignedTableLRIA: EclTableComponent;
+  @ViewChild('returnedTableLRIA',{static: false}) returnedTableLRIA: EclTableComponent;
+  @ViewChild('approvalMaintenance',{static: false}) approvalMaintenance: EclTableComponent;
 
+  setFilter: string;
   tabIndex: number;
   assignedTableConfigInLRIA: EclTableModel = null;
   returnedTableConfigInLRIA: EclTableModel = null;
@@ -95,6 +98,7 @@ export class RuleForImpactAnalysisComponent implements OnInit {
   resFromRuleDetails: any[] = [];
 
   selectedRuleIds: any[] = [];
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
 
   validStatusDW = [
     { label: SEARCH_BY_APPROVAL_STATUS, value: null },
@@ -109,7 +113,7 @@ export class RuleForImpactAnalysisComponent implements OnInit {
   constructor(private ruleService: RuleInfoService, private http: HttpClient, private utils: AppUtils,
     public route: ActivatedRoute, private router: Router, private dialogService: DialogService,
     private eclConstants: ECLConstantsService, private usersService: UsersService, private confirmationService: ConfirmationService,
-    private messageService: MessageService) { }
+    private messageService: MessageService, private rrService: ResearchRequestService) { }
 
   ngOnInit() {
     this.cols = [];
@@ -120,7 +124,13 @@ export class RuleForImpactAnalysisComponent implements OnInit {
       this.ruleStatus = params['ruleStatus'];
       this.pageTitle = params['pageTitle'];
       this.userId = this.utils.getLoggedUserId();
-    })
+    });
+
+    this.route.queryParams.subscribe(params => {
+      if(params['filter']) {
+        this.setFilter = params['filter'];
+      }
+    });
 
     this.getAllUsers();
     this.usersService.getUserInfo(this.userId).subscribe((user: any) => {
@@ -149,8 +159,33 @@ export class RuleForImpactAnalysisComponent implements OnInit {
 
 
     }
-
   }
+
+  /**
+  * This method to set the RR rule filter for Assigned Tab
+  */
+  researchRequestRuleIdFilter(){
+    if(this.setFilter) {
+      this.assignedTableLRIA.keywordSearch = this.setFilter;
+      this.assignedTableLRIA.search();
+    }
+  }
+
+    /**
+     * If the service call ends remove the blocked screen.
+     * @param event that ecl table fires when the call starts or ends
+     */
+    onServiceCall(event) {
+      if (event.action === consts.ECL_TABLE_END_SERVICE_CALL) {
+         //RR rule filter logic
+         if(this.tabIndex === ASSIGNED_TAB_ID && this.setFilter) {
+           this.researchRequestRuleIdFilter();
+           this.setFilter = null;
+         }
+
+      }
+    }
+
 
   /**
    * This method is for set the options for dropdown according with the editorial type.
@@ -249,12 +284,12 @@ export class RuleForImpactAnalysisComponent implements OnInit {
   */
   private initializeTableColumnsLRIA(): EclColumn[] {
     let manager = new EclTableColumnManager();
-    manager.addLinkColumn('ruleCode', 'Library Rule ID',                   '10%', true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon('ruleCode', 'Library Rule ID',           '15%', true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', consts.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn('ruleName', 'Rule Name',                         '25%', true, EclColumn.TEXT, true);
     manager.addTextColumn('ruleImpactedInd', 'Rule Impacted?',             '10%', true, EclColumn.TEXT, true);
     manager.addTextColumn('ruleImpactAnalysis', 'Rule Impact Description', '20%', true, EclColumn.TEXT, true);
     manager.addTextColumn('ruleImpactType', 'Impact Type',                 '10%', true, EclColumn.TEXT, true);
-    manager.addTextColumn('workflowStatus', 'Approval Status',             '25%', true, EclColumn.TEXT, true);
+    manager.addTextColumn('workflowStatus', 'Approval Status',             '20%', true, EclColumn.TEXT, true);
     return manager.getColumns();
   }
 
@@ -264,7 +299,7 @@ export class RuleForImpactAnalysisComponent implements OnInit {
   */
   private initializeTableColumnsPolicyOwnerApproval(): EclColumn[] {
     let manager = new EclTableColumnManager();
-    manager.addLinkColumn('ruleCode', 'Library Rule ID',null, true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon('ruleCode', 'Library Rule ID',null, true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', consts.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn('ruleName', 'Rule Name',null, true, EclColumn.TEXT, true);
     manager.addTextColumn('ruleImpactAnalysis', 'Rule Impact Description', null, true, EclColumn.TEXT, true);
     manager.addTextColumn('ruleImpactType', 'Impact Type',null, true, EclColumn.TEXT, true);
@@ -279,6 +314,14 @@ export class RuleForImpactAnalysisComponent implements OnInit {
   */
   showRuleDialog(rowData: any) {
     let draftRuleId = 0;
+    let ruleResponseIndicator: boolean = false;
+    let rrId: string = '';
+    this.getRuleResponseIndicator(rowData.ruleId).then((res: any) => {
+      if (res && res.ruleResponseIndicator && res.ruleResponseIndicator !== undefined) {
+        ruleResponseIndicator = (res.ruleResponseIndicator === 'Y') ? true : false;
+        rrId = res.ruleCode;
+      }
+    });
     this.ruleService.getRulesByParentId(rowData.ruleId).subscribe((response: any) => {
       response.data.forEach(rule => {
         if (rule.ruleStatusId.ruleStatusId === this.eclConstants.RULE_STATUS_IMPACTED)
@@ -295,14 +338,18 @@ export class RuleForImpactAnalysisComponent implements OnInit {
           reviewComments: this.returnReviewComments(rowData),
           readWrite: true,
           pageTitle: this.pageTitle,
-          approvalStatus: rowData.approvalStatus
+          approvalStatus: rowData.approvalStatus,
+          ruleResponseInd: ruleResponseIndicator,
+          researchRequestId: rrId,
+          hideMyRequestLink: true
         },
+        showHeader: !ruleResponseIndicator,
         header: 'Library Rule Details',
         width: '80%',
         height: '92%',
         closeOnEscape: false,
         closable: false,
-          contentStyle: {
+        contentStyle: {
           'max-height': '92%',
           'overflow': 'auto',
           'padding-top': '0',
@@ -313,7 +360,19 @@ export class RuleForImpactAnalysisComponent implements OnInit {
       ref.onClose.subscribe((ri: any) => {
         this.refreshDataTableLRIA();
       });
-    })
+    });
+  }
+
+  async getRuleResponseIndicator(ruleId: number) {
+    this.ruleResponseSearchDto = new ResearchRequestSearchedRuleDto();
+    return new Promise((resolve, reject) => {
+      this.rrService.getRuleResponseIndicator(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined && resp.data !== {}) {
+          this.ruleResponseSearchDto = resp.data;
+        }
+        resolve(this.ruleResponseSearchDto);
+      });
+    });
   }
 
   /**
@@ -378,21 +437,19 @@ export class RuleForImpactAnalysisComponent implements OnInit {
         this.assignedTableLRIA.selectedRecords = [];
         this.assignedTableLRIA.savedSelRecords = [];
         this.assignedTableLRIA.resetDataTable();
-        this.assignedTableLRIA.refreshTable();
       }
     } else if (this.tabIndex === RETURNED_TAB_ID) {
       if(this.returnedTableLRIA){
         this.returnedTableLRIA.selectedRecords = [];
         this.returnedTableLRIA.savedSelRecords = [];
         this.returnedTableLRIA.resetDataTable();
-        this.returnedTableLRIA.refreshTable();
       }
     } else {
       // PO Approval screen
       if (this.approvalMaintenance) {
         this.approvalMaintenance.selectedRecords = [];
         this.approvalMaintenance.savedSelRecords = [];
-        this.approvalMaintenance.refreshTable();
+        this.approvalMaintenance.resetDataTable();
       }
     }
   }
@@ -405,7 +462,7 @@ export class RuleForImpactAnalysisComponent implements OnInit {
  refreshDataTableLPOApproval() {
   this.selectedRules = [];
   this.approvalMaintenance.selectedRecords = [];
-  this.approvalMaintenance.refreshTable();
+  this.approvalMaintenance.resetDataTable();
 }
 
 
@@ -537,7 +594,9 @@ export class RuleForImpactAnalysisComponent implements OnInit {
           'overflow': 'auto',
           'padding-top': '0',
           'padding-bottom': '0',
-          'border': 'none' }
+          'border': 'none',
+          'padding-left': '0',
+          'padding-right': '0'}
       });
 
       ref.onClose.subscribe((ri: any) => {
@@ -702,9 +761,7 @@ export class RuleForImpactAnalysisComponent implements OnInit {
         validRowsSelected = this.validateSelectedRows();
       } else if (this.pageTitle == LIST_OF_RULES_FOR_IMPACT_ANALYSIS) {
         validRowsSelected = true;
-      } else
-        validRowsSelected = false;
-
+      }
       if (validRowsSelected) {
         this.IdeaSaveModal = false;
         this.saveSubmit("submit");
@@ -722,7 +779,7 @@ export class RuleForImpactAnalysisComponent implements OnInit {
 
     let requestBody: ImpactRuleApproval;
     let selectedRules: any[] = [];
-    if (this.pageTitle == RULES_FOR_PO_APPROVAL) {
+    if (this.pageTitle === RULES_FOR_PO_APPROVAL) {
       selectedRules = this.selectedRules.map(rule => {
         return ({
           ruleId: rule.ruleId,
@@ -731,14 +788,10 @@ export class RuleForImpactAnalysisComponent implements OnInit {
           returnedStatus: false
         });
       });
-    } else if ((this.pageTitle == LIST_OF_RULES_FOR_IMPACT_ANALYSIS)) {
+    } else if ((this.pageTitle === LIST_OF_RULES_FOR_IMPACT_ANALYSIS)) {
       if (this.selectedAssignedRules.length > 0) {
         selectedRules = this.selectedAssignedRules.map(rule => {
-          return ({
-            ruleId: rule.ruleId,
-            status: rule.workflowStatus,
-            returnedStatus: false
-          });
+          return this.requestBodyUpdate(rule);
         });
       }
       else {
@@ -838,6 +891,27 @@ export class RuleForImpactAnalysisComponent implements OnInit {
     });
   }
 
+  /**
+   * RequestBodyUpdate for when submiting the rule determine if pending approval for PO
+   * then reviewComment will be wiped. If approved then reviewComments will be shown
+   * @param rule
+   */
+  private requestBodyUpdate(rule) {
+    if (rule.workflowStatus === consts.EXISTING_VERSION_PENDING_SUBMISSION) {
+      return {
+        ruleId: rule.ruleId,
+        status: rule.workflowStatus,
+        returnedStatus: false
+      }
+    } else {
+      return {
+        ruleId: rule.ruleId,
+        status: rule.workflowStatus,
+        comments: rule.reviewComments,
+        returnedStatus: false
+      }
+    }
+  }
 
 /**
  * This function is used to review the status (this is related with navegation service),

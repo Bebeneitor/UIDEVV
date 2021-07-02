@@ -10,7 +10,7 @@ label {
   margin-left: 0px;
   margin-bottom: 0px !important;
 }
-
+ 
 #roleSetupPage {
   border: 1px solid;
   border-radius: 3px;
@@ -48,6 +48,7 @@ label {
   padding-right: 20px;
   border-width: 1.5px;
   border-radius: 2px;
+  margin-top: 3px;
 }
 
 .roleSetup h2 {
@@ -187,4 +188,24 @@ p-table::ng-deep .ui-table tr.ui-state-highlight{
   border: 1px solid #c8c8c8;
   background-color: #f4f4f4;
   transition: background-color 0.2s;
+}
+
+.status-input-field {
+  margin-top: 4px;
+  width: 130%;
+}
+
+.initial-input-field{
+  margin-top: 4px;
+  width: 50%;
+}
+
+.status-input-field:disabled {
+  background-color: white !important;
+  font-weight: bold;
+}
+
+::ng-deep.status-button .p-button-lg {
+  margin-top: 4px;
+  height: 28px;
 }

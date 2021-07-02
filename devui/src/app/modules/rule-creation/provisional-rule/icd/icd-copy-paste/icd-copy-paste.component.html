@@ -1,0 +1,47 @@
+<div class="mb-3">
+  <textarea class="copy-paste-text text-uppercase" [(ngModel)]="codeRanges"
+    *ngIf="_errorMap === undefined || _errorMap === null"></textarea>
+  <div #qlcontainer class="ql-container copy-paste-text text-uppercase" [hidden]="_errorMap === undefined || _errorMap === null">
+    <div #markuped class="editor"></div>
+  </div>
+</div>
+
+<div class="col-md-12 mb-4">
+  <div class="row">
+  <div class="width-perc-16">
+    <label>Date From</label>
+    <p-calendar type="string" placeholder="mm/dd/yyyy" name="dateFrom" [(ngModel)]="icdRuleCodeObj.dateFrom" [monthNavigator]="true" [yearNavigator]="true"
+      [yearRange]="yearValidRange">
+    </p-calendar>
+  </div>
+  <div class="width-perc-16 pl-2">
+    <label>Date To</label>
+    <p-calendar type="string" placeholder="mm/dd/yyyy" name="dateTo" [(ngModel)]="icdRuleCodeObj.dateTo" [monthNavigator]="true" [yearNavigator]="true"
+      [yearRange]="yearValidRange">
+    </p-calendar>
+  </div>
+  <div class=" pl-2">
+    <label>Category</label>
+    <p-dropdown [options]="_categories" [(ngModel)]="icdRuleCodeObj.category" placeholder="Select Category"
+      [style]="{'width': '100%'}" [disabled]="readOnlyView"></p-dropdown>
+  </div>
+  <div class="width-perc-16 pl-2">
+    <label>Primary/Secondary</label>
+    <p-dropdown [options]="_primarySecondary" [(ngModel)]="icdRuleCodeObj.primarySecondaryCode"
+      placeholder="Select one option" [style]="{'width': '100%'}" [disabled]="readOnlyView"></p-dropdown>
+  </div>
+  <div class="chk-bx">
+    <label>Override</label>
+    <p-checkbox [(ngModel)]="icdRuleCodeObj.override" binary="true" [disabled]="readOnlyView"></p-checkbox>
+  </div>
+  <div class="chk-bx">
+    <label>Claim Header Level</label>
+    <p-checkbox [(ngModel)]="icdRuleCodeObj.claimHeaderLevel" binary="true" [disabled]="readOnlyView"></p-checkbox>
+  </div>
+  <div id="icon">
+    <button type="button" class="btn btn-primary btn-sm f-11 plus-btn" (click)="addRowToCodesTable()"
+      [disabled]="readOnlyView"><i
+        class="fa fa-plus"></i></button></div>
+    
+  </div>
+</div>

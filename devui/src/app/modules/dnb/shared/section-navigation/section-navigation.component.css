@@ -54,3 +54,13 @@ button:hover {
 .is-fullscreen.sections-navigation-wrapp button:hover {
   color: #9a4aff !important;
 }
+
+.dnb-navigation-completed button,
+.is-fullscreen.sections-navigation-wrapp .dnb-navigation-completed button {
+  color: #69b117 !important;
+}
+
+.dnb-navigation-completed button:hover,
+.is-fullscreen.sections-navigation-wrapp .dnb-navigation-completed button {
+  color: #80c135 !important;
+}

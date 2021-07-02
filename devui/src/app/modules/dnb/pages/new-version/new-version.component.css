@@ -1,16 +1,3 @@
-.sticky-sections {
-  position: fixed;
-  display: inline-block;
-  right: 15px;
-  left: 0;
-  z-index: 999999;
-  top: 0em;
-  padding: 10px;
-  background: #412585;
-  width: calc(100% - 450px);
-  margin-left: auto;
-}
-
 .has-sticky-header .sticky-sections {
   top: 45px;
 }
@@ -21,10 +8,6 @@
   margin: 0;
   padding: 0;
   font-size: 12px;
-}
-
-.button.is-text.pin {
-  margin-right: 10px;
 }
 
 .is-pulled-right {
@@ -40,7 +23,7 @@
 .page-content {
   margin-left: auto;
   width: calc(100% - 150px);
-  padding: 15px;
+  padding: 15px 50px;
 }
 
 .navigation-closed .page-content {
@@ -52,53 +35,9 @@
   justify-content: space-between;
 }
 
-.sticky-header {
-  background-color: #f2f3f7 !important;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  padding: 10px 0 5px;
-}
-
-.has-sticky-header .sticky-header {
-  border-bottom: 1px solid #31006f;
-}
-
 .dnb-modal {
   width: 50vh;
   max-width: 500px;
-}
-
-.dnb-page.is-fullscreen .sticky-sections {
-  width: calc(100% - 145px);
-}
-
-.dnb-page.navigation-closed .sticky-sections {
-  width: calc(100% - 350px);
-}
-
-.dnb-page.is-fullscreen.show-current .sticky-sections {
-  width: calc(50% - 75px);
-}
-
-.dnb-page.navigation-closed.show-current .sticky-sections {
-  width: calc(50% - 177px);
-}
-
-.dnb-page.is-fullscreen.navigation-closed .sticky-sections {
-  width: calc(100% - 45px);
-}
-
-.dnb-page.is-fullscreen.navigation-closed.show-current .sticky-sections {
-  width: calc(50% - 23px);
-}
-
-.sidebar-collapsed .dnb-page .sticky-sections {
-  width: calc(100% - 23px);
-}
-
-.dnb-page.show-current .sticky-sections {
-  width: calc(50% - 224px);
 }
 
 body .dnb-page .ui-listbox .ui-listbox-header {
@@ -150,13 +89,13 @@ body .dnb-page .ui-listbox {
   overflow-y: scroll;
 }
 
-.sortable_list {
+.section-titles {
   padding-top: 20px !important;
 }
 
-.ui-overlaypanel {
-  top: 34px !important;
-  left: -235px !important;
+.copy-overlay {
+  top: 25px !important;
+  left: -123px !important;
 }
 
 .dnb-toggle {
@@ -168,16 +107,89 @@ body .dnb-page .ui-listbox {
 }
 
 .drug-name {
-  border-bottom: 1px solid #9179b7;
-  padding: 3px;
-  padding: 3px;
+  border: 0;
   display: inline-block;
-  color: black;
   font-weight: normal;
   position: relative;
   top: 6px;
 }
 
 .drug-name .ql-container {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #31006f;
+}
+
+.dnb-drug-title-name {
+  position: relative;
+  top: -9px;
+}
+
+.dnb-progress-checkbox
+  ::ng-deep
+  p-checkbox
+  .ui-chkbox
+  .ui-chkbox-box
+  .ui-chkbox-icon {
   font-size: 14px;
+}
+
+.dnd-label-percentage {
+  font-size: 14px;
+  font-style: normal;
+  font-weight: bold;
+  color: #31006f;
+}
+
+.inges-btn {
+  margin-left: 5px;
+  padding: 0 5px !important;
+  width: 60px !important;
+  display: flex;
+  flex: 0 0 60px;
+  align-items: center;
+  justify-content: center;
+}
+
+.inges-btn .fa {
+  padding-right: 5px;
+}
+
+.ingest-overlay {
+  top: 34px !important;
+  left: auto !important;
+  right: 12px;
+}
+
+.ingest-overlay:before {
+  margin-right: -2px;
+}
+
+.ingest-overlay:before,
+.ingest-overlay:after {
+  left: auto;
+  right: 1.25em;
+}
+
+.sticky-header {
+  background-color: #f2f3f7 !important;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 10px 0 5px;
+}
+
+.has-sticky-header .sticky-header {
+  border-bottom: 1px solid #31006f;
+}
+
+.dnd-label-autosave {
+  font-size: 12px;
+  font-style: normal;
+  color: #31006f;
+  padding: 6px;
+}
+
+.autosave-toggle {
+  margin: auto 0;
 }

@@ -1,0 +1,19 @@
+.div-upload {
+    width: 450px;
+}
+
+.div-upload .div-buttons button {
+    width: 48%;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.div-upload .div-inputs {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.div-upload .div-inputs > input {
+    display: block;
+    width: 100%;
+}

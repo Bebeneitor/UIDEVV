@@ -35,12 +35,22 @@ export class LibrarySearchComponent implements OnInit {
     'icon': 'fa fa-adjust'
   }];
 
+  selectedKeyWord: any = 'keyword';
+  fieldsKeyWords: any[] = [
+    { label: 'Select keyword', value: 'keyword' },
+    { label: 'Rule Name', value: 'ruleName' },
+    { label: 'Rule Logic', value: 'ruleLogic' },
+    { label: 'Rule Description', value: 'ruleDescription' },
+    //{ label: 'CPT Code', value: 'CPT' } -- temporarily commented to remove this option form search.
+  ];
+
   constructor(private util: AppUtils, private libraryViewService: LibraryViewService, private router: Router,
     private storageService: StorageService) {
     this.filterRules = _.debounce(this.filterRules, 1000);
   }
 
   ngOnInit() {
+
     if (this.storageService.exists("parentScreen")) {
       if (this.storageService.get("parentScreen", false).replace(/"/g, "") === "RULE_CATALOGUE") {
         this.index = parseInt(this.storageService.get("activeTab", false));
@@ -57,7 +67,7 @@ export class LibrarySearchComponent implements OnInit {
         this.filterRules();
       }
     } else {
-      this.loadCategories();
+      this.loadCategoriesFromCache();
     }
   }
 
@@ -65,6 +75,23 @@ export class LibrarySearchComponent implements OnInit {
     this.categories.length = 0;
     let listOfCategories = [];
     this.util.getAllCategories(listOfCategories).then((response: any) => {
+      let allCategories = response;
+      allCategories.forEach((category: any) => {
+        this.categories.push({
+          'label': category.label,
+          'data': undefined,
+          'expandedIcon': 'fa fa-folder-open',
+          'collapsedIcon': 'fa fa-folder',
+          'children': this.loadingMessage
+        });
+      });
+    });
+  }
+
+  loadCategoriesFromCache() {
+    this.categories.length = 0;
+    let listOfCategories = [];
+    this.util.getAllCategoriesFromCache(listOfCategories).then((response: any) => {
       let allCategories = response;
       allCategories.forEach((category: any) => {
         this.categories.push({
@@ -155,6 +182,41 @@ export class LibrarySearchComponent implements OnInit {
 
   }
 
+  getCatalogueByCategoryFromCache(event: any, onlyParents: boolean) {
+    let categoryType = "";
+    if (this.index == 0) {
+      categoryType = "active";
+    }
+    this.libraryViewService.getRulesCatalogueByCategoryFromCache(event.node.label, categoryType).subscribe((response: any) => {
+      let rulesCatalogue: any = response.data;
+      let children = [];
+      if (Array.isArray(rulesCatalogue) && rulesCatalogue.length) {
+        if (onlyParents) {
+          rulesCatalogue.forEach((rule: any) => {
+            children.push({
+              'label': rule.ruleLabel,
+              'icon': 'fa fa-file-o',
+              'type': rule.hasOldVersions ? 'redirectIcon' : 'onlyParents',
+              'data': [rule.ruleId, rule.ruleCode, rule.hasOldVersions],
+              'description': rule.ruleDescription
+            });
+          });
+        } else {
+          rulesCatalogue.forEach((rule: any) => {
+            this.generateChildrenNode(children, rule);
+          });
+        }
+        this.sortChildren(children);
+        event.node.children = [];
+        event.node.children = children;
+      } else {
+        event.node.children = this.defaultMessage;
+      }
+      this.selectedNode = event;
+    });
+
+  }
+
   redirect(node: any) {
     if (node.data == undefined) {
       return;
@@ -180,7 +242,12 @@ export class LibrarySearchComponent implements OnInit {
 
   handleChange(event: any) {
     this.index = event.index;
-    this.loadCategories();
+    if (this.index == 0) {
+      this.loadCategoriesFromCache();
+    } else {
+      this.loadCategories();
+    }
+
   }
 
 
@@ -203,7 +270,11 @@ export class LibrarySearchComponent implements OnInit {
         break;
     }
     if (keywordSearch == "") {
-      this.loadCategories();
+      if (this.index == 0) {
+        this.loadCategoriesFromCache();
+      } else {
+        this.loadCategories();
+      }
     } else {
       this.loadFilteredRules(keywordSearch);
     }
@@ -212,8 +283,19 @@ export class LibrarySearchComponent implements OnInit {
 
   loadFilteredRules(keywordSearch: string) {
     this.loadingRules = true;
-    this.libraryViewService.getRulesCatalogueByCategory(this.index, null, keywordSearch).subscribe((response: any) => {
-      let rulesCatalogue: any = response.data;
+
+    let filterRequest = this.createFilterRequest(keywordSearch);
+
+    let serviceRequest = null;
+
+    if(this.index == 0) {      
+      serviceRequest = this.libraryViewService.getLibraryViewRulesCatalogFromCache(filterRequest);
+    } else {
+      serviceRequest = this.libraryViewService.getRulesCatalogueByCategory(this.index, null, keywordSearch);
+    }
+
+    serviceRequest.subscribe((response: any) => {
+      let rulesCatalogue: any = this.index == 0 ? response : response.data;
       let filteredCategories = new Set();
 
       rulesCatalogue.forEach((rule: any) => {
@@ -285,6 +367,28 @@ export class LibrarySearchComponent implements OnInit {
         this.expandRecursive(childNode, isExpand);
       });
     }
+  }
+
+  createFilterRequest(filterKeyWord: string) {
+
+    let request = {
+
+      'cacheRequstList': [
+        {
+          'operator': 'like',
+          'subject': this.selectedKeyWord,
+          'value': filterKeyWord == null || filterKeyWord == undefined ? '' : filterKeyWord
+        },
+        {
+          'operator': '=',
+          'subject': 'status',
+          'value': 'active',
+          'preOperator': 'and'
+        }
+      ]
+    };
+
+    return request;
   }
 
 }

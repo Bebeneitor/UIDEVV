@@ -1,0 +1,18 @@
+.div-associate {
+    width: 400px;
+}
+
+.div-associate label {
+    display: block;
+}
+
+.div-associate .div-buttons {
+    margin-bottom: 10px;
+}
+
+.div-associate .div-buttons > button {
+    width: 48%;
+    margin-right: 2px;
+    margin-left: 2px;
+}
+

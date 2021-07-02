@@ -30,6 +30,7 @@ import { TeamUpdatesComponent } from '../widgets/team-updates/team-updates.compo
 import {CardModule} from 'primeng/card';
 import {PaginatorModule} from 'primeng/paginator';
 import {ScrollPanelModule} from 'primeng/scrollpanel';
+import { NgxPermissionsModule, NgxPermissionsService } from 'ngx-permissions';
 
 @NgModule({
   declarations: [
@@ -64,8 +65,9 @@ import {ScrollPanelModule} from 'primeng/scrollpanel';
     SharedModule,
     CardModule,
     PaginatorModule,
-    ScrollPanelModule
+    ScrollPanelModule,
+    NgxPermissionsModule
   ],
-  providers : [MessageService, DialogService]
+  providers : [MessageService, DialogService, NgxPermissionsService]
 })
 export class HomeModule { }

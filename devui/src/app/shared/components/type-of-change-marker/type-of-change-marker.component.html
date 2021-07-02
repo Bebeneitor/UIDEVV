@@ -1,0 +1,23 @@
+<a nghref="#" *ngIf="ruleId" style="cursor: pointer;" title="Rule Change Notes" (click)="open()">
+  <i class="fa fa-briefcase" style="font-size: 18px; color: #31006F"></i>
+</a>
+
+<p-dialog class="dialog-type-change" header="Rule Change Notes" [(visible)]="display">
+  <p-tabView *ngIf="display && ruleImpactAnalysisRun">
+    <p-tabPanel header="Procedure Codes / HCPS" [selected]="true">
+      <app-type-rule-change typeOfChange="hcps" readOnly="true" [data]="ruleImpactAnalysisRun.typeOfChanges['hcps']"></app-type-rule-change>
+    </p-tabPanel>
+
+    <p-tabPanel header="ICD">
+      <app-type-rule-change typeOfChange="icd" readOnly="true" [data]="ruleImpactAnalysisRun.typeOfChanges['icd']"></app-type-rule-change>
+    </p-tabPanel>
+
+    <p-tabPanel header="Modifiers">
+      <app-type-rule-change typeOfChange="modifiers" readOnly="true" [data]="ruleImpactAnalysisRun.typeOfChanges['modifiers']"></app-type-rule-change>
+    </p-tabPanel>
+
+    <p-tabPanel header="Place of Service">
+      <app-type-rule-change typeOfChange="placeServices" readOnly="true" [data]="ruleImpactAnalysisRun.typeOfChanges['placeServices']"></app-type-rule-change>
+    </p-tabPanel>
+  </p-tabView>
+</p-dialog>

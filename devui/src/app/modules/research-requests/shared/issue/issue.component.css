@@ -1,0 +1,28 @@
+.clone-issue-link {
+    max-height: 30vh;
+    margin-left: 10px;
+    overflow: auto;
+    font-size: 12px;
+  }
+  
+  .clone-issue {
+    display: flex;
+  }
+  
+  .w-30 {
+    width: 30%;
+  }
+  
+  .relation-ind {
+    width: 7%;
+    min-width: 65px;
+  }
+  
+  .clone-issue:hover {
+    background-color: #fafafa;
+    opacity: .9;
+  }
+
+  .pad-right-6 {
+    padding-right: 8em;
+  }

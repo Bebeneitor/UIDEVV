@@ -25,8 +25,8 @@ const ECL_INDUSTRY_UPDATES_REASSIGNMENT_FOR_CCA = 'ECL Industry Updates Reassign
   styleUrls: ['./impact-analysis-cca.component.css']
 })
 export class ImpactAnalysisCcaComponent implements OnInit, OnDestroy {
-  @ViewChild('assignedTable') assignedTable: EclTableComponent;
-  @ViewChild('returnedTable') returnedTable: EclTableComponent;
+  @ViewChild('assignedTable',{static: true}) assignedTable: EclTableComponent;
+  @ViewChild('returnedTable',{static: true}) returnedTable: EclTableComponent;
   pageTitle = '';
   selectedRules = [];
   keywordSearch = '';
@@ -125,7 +125,7 @@ export class ImpactAnalysisCcaComponent implements OnInit, OnDestroy {
       case Constants.ASSIGNED_TAB:
         this.selectedRules = [];
         if (this.assignedTable) {
-          this.assignedTable.refreshTable();
+          this.assignedTable.resetDataTable();
           this.assignedTable.selectedRecords = [];
           this.assignedTable.savedSelRecords = [];
         }
@@ -133,7 +133,7 @@ export class ImpactAnalysisCcaComponent implements OnInit, OnDestroy {
       case Constants.RETURNED_TAB:
         this.selectedRulesReturned = [];
         if (this.returnedTable) {
-          this.returnedTable.refreshTable();
+          this.returnedTable.resetDataTable();
           this.returnedTable.selectedRecords = [];
           this.returnedTable.savedSelRecords = [];
         }
@@ -257,7 +257,8 @@ export class ImpactAnalysisCcaComponent implements OnInit, OnDestroy {
       case 'instanceName':
         this.dialogService.open(ReferenceAnalysisComponent, {
           data: {
-            instanceId: event.row.instanceId
+            instanceId: event.row.instanceId,
+            codesType: event.row.codesType == null ? Constants.HCPCS_CODE_TYPE : event.row.codesType
           },
           header: 'Reference Analysis',
           width: '80%',

@@ -15,6 +15,7 @@ import { AccordionModule, ButtonModule, ConfirmationService, ConfirmDialogModule
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { TriStateCheckboxModule } from 'primeng/tristatecheckbox';
 import { EclTableModule } from 'src/app/shared/components/ecl-table/ecl-table.module';
+import { SharedModule } from '../../shared/shared.module';
 import { CureManagerComponent } from './components/cure-manager/cure-manager.component';
 import { CureModuleAdminService } from './components/cure-manager/cure-module-admin/cure-module-admin.service';
 import { ModuleAddEditComponent } from './components/cure-manager/cure-module-admin/module-add-edit/module-add-edit.component';
@@ -24,17 +25,28 @@ import { ModuleConsultingComponent } from './components/cure-manager/module-cons
 import { RepoConsultingComponent } from './components/repo-manager/module-consulting/repo-consulting.component';
 import { RepoConsultingService } from './components/repo-manager/module-consulting/repo-consulting.service';
 import { RepoManagerComponent } from './components/repo-manager/repo-manager.component';
+import { RepoTableAdminService } from './components/repo-manager/repo-module-admin/repo-table-admin.service';
+import { TableAddEditComponent } from './components/repo-manager/repo-module-admin/table-add-edit/table-add-edit.component';
+import { TableAttributeAddEditComponent } from './components/repo-manager/repo-module-admin/table-add-edit/table-attribute-add-edit/table-attribute-add-edit.component';
+import { TableAdminListComponent } from './components/repo-manager/repo-module-admin/table-admin-list/table-admin-list.component';
 import { CureRoutingModule } from './cure-repo-routing.module';
+
+
 
 @NgModule({
   declarations: [
-    CureManagerComponent, 
-    ModuleConsultingComponent, 
-    ModuleAdminListComponent, 
-    ModuleAddEditComponent, 
+    CureManagerComponent,
+    ModuleConsultingComponent,
+    ModuleAdminListComponent,
+    ModuleAddEditComponent,
     ModuleAttributeAddEditComponent,
-    RepoManagerComponent, 
-    RepoConsultingComponent
+    RepoManagerComponent,
+    RepoConsultingComponent,
+    TableAdminListComponent,
+    TableAddEditComponent,
+    RepoManagerComponent,
+    RepoConsultingComponent,
+    TableAttributeAddEditComponent
   ],
   imports: [
     CommonModule,
@@ -50,16 +62,17 @@ import { CureRoutingModule } from './cure-repo-routing.module';
     CalendarModule,
     FieldsetModule,
     EclTableModule,
-    CheckboxModule, 
+    CheckboxModule,
     TriStateCheckboxModule,
     EclTableModule,
     DialogModule,
     DynamicDialogModule,
     ConfirmDialogModule,
     RadioButtonModule,
-    FormsModule
+    FormsModule,
+    SharedModule
   ],
-  entryComponents: [ ModuleAddEditComponent, ModuleAttributeAddEditComponent ],
-  providers: [ConfirmationService, DialogService, CureModuleAdminService, RepoConsultingService]
+  entryComponents: [ModuleAddEditComponent, ModuleAttributeAddEditComponent, TableAttributeAddEditComponent],
+  providers: [ConfirmationService, DialogService, CureModuleAdminService, RepoConsultingService, RepoTableAdminService]
 })
 export class CureAndRepoModule { }

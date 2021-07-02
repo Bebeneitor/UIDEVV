@@ -1,0 +1,13 @@
+.dnb-page-header {
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+:host ::ng-deep p-tabView .ui-tabview .ui-tabview-panels {
+  padding: 0;
+  border: 0;
+}
+
+:host ::ng-deep p-tabView .ui-tabview .ui-tabview-panels {
+  background-color: transparent !important;
+}

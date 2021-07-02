@@ -14,7 +14,7 @@ import { UserTeamCategoryMapRequestDto } from "../../../../shared/models/dto/use
 
 export class EclCategoryComponent implements OnInit {
 
-  @ViewChild('dt') dataTable: Table;
+  @ViewChild('dt',{static: true}) dataTable: Table;
   @Input() fieldSaveButton: boolean;
   @Output() saveCategory = new EventEmitter();
   @Input() default: boolean;

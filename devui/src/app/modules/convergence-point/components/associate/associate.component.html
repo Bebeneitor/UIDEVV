@@ -1,0 +1,20 @@
+<div class="div-associate">
+  <div [hidden]="isLoading">
+    <label>Section</label>
+    <p-dropdown [ngClass]="dropdown-associate" appendTo="body" [filter]="true" [options]="subModules"
+      placeholder="Select section" [(ngModel)]="selectedSubModule" [style]="{'width': '100%'}"></p-dropdown>
+
+    <label>To Primary Requirement</label>
+    <p-dropdown [ngClass]="dropdown-associate" appendTo="body" [filter]="true" [options]="modules"
+      placeholder="Select primary requirement" [(ngModel)]="selectedModule" [style]="{'width': '100%'}"></p-dropdown>
+  </div>
+
+
+  <hr>
+
+  <div class="div-buttons">
+    <button type="button" (click)="cancel()" class="btn btn-primary f-11">Cancel</button>
+    <button type="button" (click)="associate()" [disabled]="selectedModule == null || selectedSubModule == null"
+      class="btn btn-primary f-11">Add Section</button>
+  </div>
+</div>

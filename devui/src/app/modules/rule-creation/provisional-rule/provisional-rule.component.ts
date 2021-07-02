@@ -1,7 +1,7 @@
-import { Component, Input, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmationService, DialogService, DynamicDialogConfig, DynamicDialogRef, MessageService } from 'primeng/api';
-import { FileUpload } from 'primeng/primeng';
+import { FileUpload, MultiSelect } from 'primeng/primeng';
 import { claimService } from 'src/app/services/claim-service';
 import { ECLConstantsService } from 'src/app/services/ecl-constants.service';
 import { IdeaService } from 'src/app/services/idea.service';
@@ -15,7 +15,6 @@ import { Categories } from 'src/app/shared/models/categories';
 import { Constants } from 'src/app/shared/models/constants';
 import { EclReferenceDto } from 'src/app/shared/models/dto/ecl-reference-dto';
 import { GoodIdeasDto } from 'src/app/shared/models/dto/good-ideas-dto';
-import { ProcedureCodeDto } from 'src/app/shared/models/dto/procedure-code-dto';
 import { ProvisionalRuleDto } from 'src/app/shared/models/dto/provisional-rule-dto';
 import { ReferenceInfoDto } from 'src/app/shared/models/dto/reference-info-dto';
 import { RuleRevenueCodeDto } from 'src/app/shared/models/dto/rule-revenue-code-dto';
@@ -36,20 +35,37 @@ import { IcmsTemplateComponent } from './icms-template/icms-template.component';
 import { OpportunityValueComponent } from './opportunity-value/opportunity-value.component';
 import { ProvisionalReferencesComponent } from './provisional-references/provisional-references.component';
 import { ProvisionalRuleProvidersComponent } from './provisional-rule-providers/provisional-rule-providers.component';
-import { ProcedureCodesService } from 'src/app/services/procedure-codes.service';
 import { forkJoin } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { DatePipe } from '@angular/common';
 import { MessageSend } from 'src/app/shared/models/messageSend';
+import { RuleCodeDto } from 'src/app/shared/models/dto/rule-code-dto';
+import { NotesCommentsComponent } from './notes-comments/notes-comments.component';
+import { ImpactsComponent } from './impacts/impacts.component';
+import { ProcedureCodesService } from 'src/app/services/procedure-codes.service';
+import { PdgTemplateComponent } from './pdg-template/pdg-template.component';
+import { IdeaCommentsService } from 'src/app/services/idea-comments.service';
+import {ResearchRequestService} from "../../../services/research-request.service";
+import { UtilsService } from 'src/app/services/utils.service';
+import { EclPolicyPackage } from 'src/app/shared/models/ecl-policy-package';
+import { RuleApplicationService } from 'src/app/services/rule-application.service';
+import { RuleApplication } from './models/rule-application.model';
+import { EllSearchService } from '../../ell/ell-search/service/ell-search.service';
+import { RuleEngines } from 'src/app/shared/models/rule-engines';
 
 const PROVISIONAL_RULE_CREATION = 'Provisional Rule Creation';
 const LIBRARY_VIEW = 'Library View';
-const PROVISIONAL_DETAILS = 'Provisional Details';
 const NEED_MORE_INFO = 64;
 const LIST_OF_RULES_FOR_IMPACT_ANALYSIS = 'List of Rules for Impact Analysis';
+const PROVISIONAL_SETUP_NEED_MORE = 1;
 
 const RESPONSE_SUCCESS = "success";
+
+const CLAIMS_TAB_INDEX = 2;
+const IMPACTS_TAB_INDEX = 6;
+const REFERENCES_TAB_INDEX = 7;
+const PDG_TAB_INDEX = 10;
 
 @Component({
   selector: 'provisionalRule-Root',
@@ -57,16 +73,19 @@ const RESPONSE_SUCCESS = "success";
   styleUrls: ['./provisional-rule.component.css']
 })
 
-export class ProvisionalRuleComponent implements OnInit {
+export class ProvisionalRuleComponent implements OnInit, OnDestroy {
 
   @Input() selectorConfig: any;
-  @ViewChild(ClaimsComponent) claims;
+  @Input() displayRMR: boolean;
+  @ViewChild(ClaimsComponent,{static: true}) claims;
+  @ViewChild(NotesCommentsComponent,{static: true}) notesData: NotesCommentsComponent;
   @ViewChildren(ProvisionalRuleProvidersComponent) providerChildren: QueryList<ProvisionalRuleProvidersComponent>;
-  @ViewChild(OpportunityValueComponent) oppValue: OpportunityValueComponent;
-  @ViewChild(ProvisionalReferencesComponent) provisionalReferences: ProvisionalReferencesComponent;
+  @ViewChild(OpportunityValueComponent,{static: true}) oppValue: OpportunityValueComponent;
+  @ViewChild(ProvisionalReferencesComponent,{static: true}) provisionalReferences: ProvisionalReferencesComponent;
+  @ViewChild(ImpactsComponent,{static: true}) impactsComponent: ImpactsComponent;
+  @ViewChild(PdgTemplateComponent,{static: false}) pdgComponent: PdgTemplateComponent;
 
-  //to set the stage of idea(like idea, provisional or libray)
-  ruleStage: any;
+  stageId: any;
   opportunityValue: OpportunityValueDto;
   header: any;
   ruleInfo: RuleInfo;
@@ -74,6 +93,7 @@ export class ProvisionalRuleComponent implements OnInit {
   ruleInfoOriginal: RuleInfo;
   lobs: any[] = [];
   categories: any[] = [{ label: "Choose", value: null }];
+  allCategories: any[] = [{ label: "Choose", value: null }]; 
   policyOwners: any[] = [{ label: "Select", value: null }];
   states: any[] = [];
   jurisdictions: any[] = [];
@@ -104,7 +124,6 @@ export class ProvisionalRuleComponent implements OnInit {
   /* Form Variables for two way Binding  */
   ruleStatus: any;
   selectedReviewStatus: any;
-  stageId: any;
   ruleReviewComments: any;
   ruleLogicEffDt: Date;
 
@@ -112,7 +131,7 @@ export class ProvisionalRuleComponent implements OnInit {
   selectedCategory: any;
   selectedStates: any[] = [];
   selectedJurisdictions: any[] = [];
-  selectedReferences: any[] = [];
+  selectedPdgReferences: any[] = [];
 
   ruleClaimImpactInd: boolean = false;
   ruleClaimImpactDetails: any;
@@ -148,7 +167,9 @@ export class ProvisionalRuleComponent implements OnInit {
   provisionalRuleCreation: boolean;
   ruleReview: boolean;
   fromMaintenanceProcess: boolean = false;
-  ruleProvisionalReview: boolean = false;//from  po approval screen to access provisional rule dialog
+  isIngestedRule: boolean = false;
+  //from  po approval screen to access provisional rule dialog
+  ruleProvisionalReview: boolean = false;
   saveDisplay: boolean = false;
   Message: string;
   indexVal: number = 0;
@@ -157,11 +178,16 @@ export class ProvisionalRuleComponent implements OnInit {
   impactTypeNo: boolean = false;
   dialogMode: boolean = true;
 
-  claimsClicked: boolean = false;
-  providersClicked: boolean = false;
-  codesClicked: boolean = false;
-  impactsClicked: boolean = false;
-  referencesClicked: boolean = false;
+  tabClicks = {
+    notesClicked: true,
+    rationaleClicked: false,
+    claimsClicked: false,
+    providersClicked: false,
+    hcpcsClicked: false,
+    icdsClicked: false,
+    impactsClicked: false,
+    referencesClicked: false
+  }
 
   ErrorIDR: boolean;
   ErrorMessageIDR: string = '';
@@ -170,14 +196,16 @@ export class ProvisionalRuleComponent implements OnInit {
 
   ruleId: number;
   templateActivate: boolean = false;
+  icmsButtonVisible: boolean = true;
   cvpTemplate: any;
   rpeTemplate: any;
   cvpDownLoadLink: any = environment.restServiceUrl + RoutingConstants.RULE_ENGINE_URL + '/' + RoutingConstants.CVP_FILE_DOWNLOAD_URL + '/';
   downLoadCvpById: any = environment.restServiceUrl + RoutingConstants.RULE_ENGINE_URL + '/' + RoutingConstants.CVP_FILE_DOWNLOAD_URL + '/';
   rpeDownLoadLink: any = environment.restServiceUrl + RoutingConstants.RULE_ENGINE_URL + '/' + RoutingConstants.RPE_FILE_DOWNLOAD_URL + '/';
   downLoadRpeById: any = environment.restServiceUrl + RoutingConstants.RULE_ENGINE_URL + '/' + RoutingConstants.RPE_FILE_DOWNLOAD_URL + '/';
-  @ViewChild('uploadControl') uploadControl: FileUpload;
-  @ViewChild('rpeUploadControl') rpeUploadControl: FileUpload;
+  @ViewChild('uploadControl',{static: false}) uploadControl: FileUpload;
+  @ViewChild('rpeUploadControl',{static: true}) rpeUploadControl: FileUpload;
+  @ViewChild('policyPackageControl',{static: true}) policyPackageControl: MultiSelect;
   showIcon: boolean = false;
   showRpeIcon: boolean = false;
   readOnlyView: boolean = false;
@@ -220,6 +248,7 @@ export class ProvisionalRuleComponent implements OnInit {
   isIdea: boolean = false;
   ruleReadOnly: boolean = false;
   maintenanceOnly: boolean = false;
+  provSetup: number = PROVISIONAL_SETUP_NEED_MORE;
 
   showChangeRmr: boolean = false;
   showELLLink: boolean = false;
@@ -231,18 +260,47 @@ export class ProvisionalRuleComponent implements OnInit {
   isCandidateGoodIdea: boolean = false;
 
   deltas;
+  hcpcsCptDelta;
+  icdDelta;
 
-  yearValidRange = `${Constants.MIN_VALID_YEAR}:${Constants.MAX_VALID_YEAR}`;
+  yearValidRange = `${Constants.PR_CODE_MIN_VALID_YEAR}:${Constants.PR_CODE_MAX_VALID_YEAR}`;
 
   retireStatusChild: boolean = false;
 
   selectedLobsTooltip: string = '';
   selectedStatesTooltip: string = '';
+  selectedCategoryTooltip: string = '';
   selectedJurisdictionsTooltip: string = '';
   selectedLobsLabels: string[] = [];
   selectedStatesLabels: string[] = [];
 
   loadingELLDetail: boolean = false;
+
+  expandRuleLogic: boolean = false;
+  // Research Request Source Link
+  showSourceLinkForRR: boolean = false;
+  rrNewHeader: string = '';
+  ideaIndicator: boolean = false;
+  hideMyRequestLink: boolean = false;
+  rrId: string = '';
+  showPdgTemplate: boolean = false;
+  uniqueId1: string = 'd';
+  uniqueId2: string = 'i';
+  isPdgMedicaidRule: boolean = false;
+  pdgClaimTypeSelected: any;
+  isReadOnlyPdgRule: boolean = false;
+  isReadOnlyNonPdgRule: boolean = false;
+
+  //Policy Package
+  policyPackageValues: any = [];
+  policyPackageSelected: any[] = []; 
+  comesFromIdeaResearch: boolean = false; 
+
+  //ELL
+  midRule: number = 0;
+  midRuleVersion: number = 0;
+  releaseLogKey: number = 0;
+  isThereMidRule: boolean = false; 
 
   constructor(private utils: AppUtils, private router: Router,
     public config: DynamicDialogConfig, public ref: DynamicDialogRef, private provisionalRuleService: ProvisionalRuleService,
@@ -253,23 +311,35 @@ export class ProvisionalRuleComponent implements OnInit {
     private eclConstants: ECLConstantsService, private userService: UsersService,
     private eclReferenceService: ReferenceService, private toastService: ToastMessageService,
     private claimsService: claimService, private activatedRoute: ActivatedRoute, private confirmationService: ConfirmationService,
-    private procedureCodesService: ProcedureCodesService,
-    private datepipe: DatePipe) {
+    private datepipe: DatePipe, private codesService: ProcedureCodesService,
+    private ideaCommentsService: IdeaCommentsService,
+    private storageService: StorageService,
+    private rrService: ResearchRequestService,
+    private utilServices: UtilsService,
+    private ruleApplicationService: RuleApplicationService,
+    private ellSearchService: EllSearchService) {
 
     this.ruleInfo = new RuleInfo();
     this.originalRuleInfo = new RuleInfo();
     this.opportunityValue = new OpportunityValueDto();
-    this.isGoodIdea = this.storage.get(Constants.PARENT_NAVIGATION, false) == 'GOOD_IDEAS';
-    this.isRuleCatalogue = this.storage.get(Constants.PARENT_NAVIGATION, false) == Constants.PARENT_NAVIGATION_RULE_CATALOGUE;
-
+    this.isGoodIdea = this.storage.get(Constants.PARENT_NAVIGATION, false) === 'GOOD_IDEAS';
+    this.isRuleCatalogue = this.storage.get(Constants.PARENT_NAVIGATION, false) === Constants.PARENT_NAVIGATION_RULE_CATALOGUE;
+    this.isPdgMedicaidRule = false;
+  }
+  ngOnDestroy(): void {
+    if (this.ruleInfo.ruleId !== undefined && !this.isPdgMedicaidRule) {
+      this.codesService.deleteDraftRuleCodes(Constants.ICD_CODE_TYPE, this.ruleInfo.ruleId).subscribe();
+    }
   }
 
   /* Function which executes on the page load to initalize the required values  */
 
-  ngOnInit() {
-    if (this.config.data == undefined) {
+  ngOnInit() {    
+
+    if (this.config.data === undefined) {
       this.config.data = {};
     }
+
     this.markUpEnabled = false;
     let creationStatus = this.config.data.creationStatus;
     //flag to identify a provisional rule needs more info(if 'true' not rule creation and needs more info)
@@ -277,14 +347,26 @@ export class ProvisionalRuleComponent implements OnInit {
     this.isSameSim = this.config.data.isSameSim;
     this.fromSameSimMod = this.config.data.fromSameSimMod;
     this.ruleCreationStatus = creationStatus;
+    this.provSetup = this.config.data.provSetup || PROVISIONAL_SETUP_NEED_MORE;
+    this.isPdgMedicaidRule = this.utils.isPdgEnabled();
+    this.isIngestedRule = this.config.data.isIngestedRule;
+
+    this.utils.getAllCategoriesByPromise(this.allCategories).then((response: any) => {
+      if (this.isPdgMedicaidRule && !this.config.data.isCustomRule) {
+        let medicaidCategories = [];
+        medicaidCategories = this.allCategories.filter(cat => cat.label.toLowerCase().startsWith(Constants.MEDICAID_CAT));
+        this.categories = medicaidCategories;
+      } else {
+        this.categories = this.allCategories;
+      }
+    });
 
     this.utils.getAllLobsValue(this.lobs, this.response);
     this.utils.getAllStatesValue(this.states, this.response);
     this.utils.getAllJurisdictionsValue(this.jurisdictions, this.response);
-    this.utils.getAllCategoriesValue(this.categories, this.response);
+    this.utils.getAllPolicyPackageValue(this.policyPackageValues);
 
     this.userId = this.utils.getLoggedUserId();
-
     this.header = this.config.data.header;
 
     this.minDate = new Date();
@@ -294,52 +376,38 @@ export class ProvisionalRuleComponent implements OnInit {
 
     this.checkSelectorConfigInfo();
     this.readOnlyView = this.config.data.readOnlyView;
+       
+    this.comesFromIdeaResearch = this.config.data.comesFromIdeaResearch;      
+
     this.fromMaintenanceProcess = this.config.data.fromMaintenanceProcess;
     this.reassignmentFlag = this.config.data.reassignmentFlag;
+
     if (this.config.data.ruleReview) {
       this.loadSelectedRule();
     }
+
     if (this.fromMaintenanceProcess) {
       this.disableTopFields = true;
-    }
-    else if (this.header === PROVISIONAL_DETAILS) {
-      this.loading = true;
-      this.provisionalRuleService.findRuleById(this.ruleId).subscribe(response => {
-        let rule = response.data;
-        this.getLibraryPrmNumber(rule.ideaId);
-        this.ruleInfo = rule;
-        this.ruleStatus = 'Provisional Rule';
-        this.provDialogDisable = true;
-        this.disableJurisdiction = true;
-        this.disableState = true;
-
-        if (this.ruleInfo.ruleLogicEffDt !== null && this.ruleInfo.ruleLogicEffDt !== undefined) {
-          this.ruleInfo.ruleLogicEffDt = new Date(this.ruleInfo.ruleLogicEffDtStr);
-        }
-        this.saveBtnDisable = true;
-        this.refreshReferences(this.ruleInfo.ruleId);
-        this.setRuleInfoLobsStatesJurCat(this.ruleInfo);
-        //setting the stage to provisional to fetch and save all the references at the provisional stage
-        this.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
-        this.provisionalReferences.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
-
-        this.loading = false;
-      });
-    }
-    else if (this.header === PROVISIONAL_RULE_CREATION) {
+    } else if (this.header === PROVISIONAL_RULE_CREATION) {
       this.loading = true;
       this.isProvisionalRuleCreation = true;
+      this.isPdgMedicaidRule = this.utils.isPdgEnabled();
+
       if (this.ruleId !== 0 || this.ruleId !== undefined) {
         //condition to validate if a provisional rule needs more info or not('true' value needs more info)
         if (!this.provRuleNeedsMoreInfo) {
           this.getLibraryPrmNumber(this.ruleId);
         }
+
+        //to fetch all the references at the in provisional rule creation
+        this.provisionalReferences.getAllReferences(this.ruleId, Constants.ECL_PROVISIONAL_STAGE);
         if (creationStatus) {
           this.isIdea = true;
           this.provisionalRuleService.findIdeaById(this.ruleId).subscribe(response => {
             let rule = response.data;
             this.provDialogDisable = false;
             this.selectedLobs = [];
+            this.ruleInfo = new RuleInfo();
             this.ruleStatus = 'New Idea';
             this.ruleInfo.ruleName = rule["ideaName"];
             this.ruleInfo.ruleCode = rule["ideaCode"];
@@ -348,10 +416,28 @@ export class ProvisionalRuleComponent implements OnInit {
             this.ruleInfo.ideaId = this.ruleId;
             this.ruleInfo.ruleDescription = rule["ideaDescription"];
 
+            if(this.comesFromIdeaResearch){
+              
+              if(rule.eclPolicyPackages){
+                this.policyPackageControl.value = rule.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageTypeId);
+                this.policyPackageControl.valuesAsString = rule.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageName).join(",");
+                if(this.policyPackageControl.valuesAsString.length == 0){
+                  this.policyPackageControl.valuesAsString = "Select";
+                }
+              }
+
+            }
+            
+            if (this.isPdgMedicaidRule && !this.fromMaintenanceProcess){
+              this.ruleInfo.ruleLogicOriginal = rule["ideaDescription"];
+            }
+
             let references: any[] = rule.eclReferences;
-            if ((references != null) && (references != [])) {
+            if ((references != null) && (references !== [])) {
               //setting the stage to idea to fetch all the references at the in provisional rule creation
               this.provisionalReferences.getAllReferences(this.ruleId, Constants.ECL_IDEA_STAGE);
+              this.selectedPdgReferences = references;
+
             }
             // this flag is set to true a new provisional rule which is not saved and created yet
             this.provisionalRuleDto.newProvRule = true;
@@ -363,80 +449,39 @@ export class ProvisionalRuleComponent implements OnInit {
             this.provisionalReferences.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
 
             this.loading = false;
-          });
-        }
-        //condition to validate and show a provisional rule needs more info('not rule creation and needs more info)
-        else if (!creationStatus && this.provRuleNeedsMoreInfo) {
-          this.provisionalRuleId = this.config.data.ruleId;
-          //disabling the rule creation flag it is not provisional rule creation anymore
-          this.isProvisionalRuleCreation = false;
-          this.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
-          this.provisionalReferences.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
-          this.populateByExistingProvisionalRuleId();
 
+            // load comments by idea
+            this.ideaCommentsService.getIdeaComments(this.ruleInfo.ideaId).subscribe((response: BaseResponse) => {
+              if (this.notesData && this.notesData.ruleNoteTabData && this.notesData.ruleNoteTabData.existingCommentsList){
+                this.notesData.ruleNoteTabData.existingCommentsList = [...response.data, ...this.notesData.ruleNoteTabData.existingCommentsList];
+              } else {
+                this.notesData.ruleNoteTabData.existingCommentsList = [...response.data];
+              }
+            });
+
+          });
+          // Provisional Rule Needs More Info Setup
+        } else if (!creationStatus && this.provRuleNeedsMoreInfo) {
+          this.provisionalRuleId = this.config.data.ruleId;
+          this.isProvisionalRuleCreation = false;
+          this.provisionalReferences.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
+          this.loadProvisionalRuleDetails(this.provisionalRuleId, false, this.provSetup, true);
           this.loading = false;
         } else {
           this.getExistingProvisionalRulesByIdeaId();
-
           this.loading = false;
         }
       }
-    }
-    else if (this.header === LIBRARY_VIEW) {
+    } else if (this.header === ptc.PROVISIONAL_RULE_DETAIL_TITLE) {
       this.loading = true;
-      if (this.ruleId !== 0 || this.ruleId !== undefined) {
-        this.provisionalRuleService.findRuleById(this.ruleId).subscribe(response => {
-          let rule = response.data;
-          this.getLibraryPrmNumber(rule.ideaId);
-          this.ruleInfo = rule;
-          this.ruleStatus = 'Rule';
-          if (this.ruleInfo.ruleLogicEffDt !== null && this.ruleInfo.ruleLogicEffDt !== undefined) {
-            this.ruleInfo.ruleLogicEffDt = new Date(this.ruleInfo.ruleLogicEffDtStr);
-          }
-          this.provDialogDisable = true;
-          this.disableJurisdiction = true;
-          this.disableState = true;
-          this.saveBtnDisable = true;
-          this.refreshReferences(this.ruleInfo.ruleId);
-          this.setRuleInfoLobsStatesJurCat(this.ruleInfo);
-          this.loading = false;
-        });
-      }
-    }
-    else if (this.header == 'Rule Provisional Details') {
-      this.loading = true;
-      this.selectedReviewStatus = this.config.data.ruleReviewStatus;
-      this.ruleReviewComments = this.config.data.ruleReviewComments;
-      this.stageId = this.config.data.stageId;
-
-      this.provisionalRuleService.findRuleById(this.ruleId).subscribe(response => {
-        let rule = response.data;
-        this.getLibraryPrmNumber(rule.ideaId);
-        this.ruleInfo = rule;
-        this.provisionalRuleCreation = false;
-        this.ruleProvisionalReview = true;
-        this.ruleStatus = 'Provisional Rule';
-        if (this.ruleInfo.ruleLogicEffDt !== null && this.ruleInfo.ruleLogicEffDt !== undefined) {
-          this.ruleInfo.ruleLogicEffDt = new Date(this.ruleInfo.ruleLogicEffDtStr);
-        }
-
-        this.provDialogDisable = false;
-        this.disableJurisdiction = false;
-        this.disableState = false;
-        this.submitBtnDisable = false;
-        this.saveBtnDisable = false;
-        this.refreshReferences(this.ruleInfo.ruleId);
-        this.setRuleInfoLobsStatesJurCat(this.ruleInfo);
-        this.checkStateJurisdiction();
-        this.loading = false;
-      });
+      const disable = this.config.data.provDialogDisable;
+      this.loadProvisionalRuleDetails(this.ruleId, disable, this.provSetup, true);
     }
 
     this.provisionalRuleCreation = this.config.data.provisionalRuleCreation;
 
     if (this.provisionalRuleCreation == null) {
       this.provisionalRuleCreation = true;
-
     }
     if (this.ruleProvisionalReview) {
       this.provisionalRuleCreation = false;
@@ -445,10 +490,8 @@ export class ProvisionalRuleComponent implements OnInit {
       this.reviewStatus = this.config.data.reviewStatus;
     }
     this.ruleReview = this.config.data.ruleReview;
-    this.includedSpecialityTypes = [];
-    this.excludedSpecialityTypes = [];
 
-    if (this.selectorConfig != undefined && (this.selectorConfig.templateActivate)) {
+    if (this.selectorConfig !== undefined && (this.selectorConfig.templateActivate)) {
       this.templateActivate = true;
     }
 
@@ -457,10 +500,12 @@ export class ProvisionalRuleComponent implements OnInit {
 
     this.showLatestVersionMsg();
 
-    // Gets the deltas bty rule.
+    // Getting deltas by ruleId.
     this.provisionalRuleService.getRuleDeltas(this.ruleId).subscribe((response: BaseResponse) => {
       if (response.data) {
-        this.deltas = response.data.auditDetails;
+        this.deltas = response.data.auditHeaderDto.auditDetails;
+        this.hcpcsCptDelta = response.data.hcpcsCptDelta;
+        this.icdDelta = response.data.icdDelta;
       }
     });
 
@@ -469,16 +514,98 @@ export class ProvisionalRuleComponent implements OnInit {
     this.showELLLink = (source === Constants.RULE_CATALOG_SCREEN);
 
     //select tab
-    if (this.config.data == undefined || this.config.data.tabSelected == undefined) {
+    if (this.config.data === undefined || this.config.data.tabSelected === undefined) {
       this.indexVal = 0;
     } else {
       this.indexVal = this.config.data.tabSelected;
     }
     if (this.config.data.pageTitle === LIST_OF_RULES_FOR_IMPACT_ANALYSIS ||
       (this.isSameSim && this.indexVal === 0)) {
-      this.indexVal = 5;
+      this.indexVal = REFERENCES_TAB_INDEX;
     }
+  }
 
+  /**
+   * This method is for get all the policy package options.
+   */
+  private getPolicyPackageCatalog() {
+    this.utilServices.getAllPolicyPackage().subscribe(response => {
+      response.data.forEach(policyPackage => {
+        this.policyPackageValues.push({ value: policyPackage.policyPackageTypeId, label: policyPackage.policyPackageName });
+      });
+    });
+  }
+
+  /**
+   * Loads Provisiona Rule Details Screens (Single Not Multi)
+   * @param ruleId id to pull the data
+   * @param disabled Check for reassignment
+   * @param setup Determines setup for Provisional Rule (I.E Need More Prov, Submit Prov)
+   * @param firstRun Check to grab config data for ruleReviewComments or load it from ruleInfo
+   */
+  private loadProvisionalRuleDetails(ruleId: number, disabled?: boolean, setup?: number, firstRun?: boolean) {
+    if (firstRun) {
+      this.selectedReviewStatus = this.config.data.ruleReviewStatus;
+      this.ruleReviewComments = this.config.data.ruleReviewComments
+      this.stageId = Constants.ECL_PROVISIONAL_STAGE;
+    }
+    this.provisionalRuleService.findRuleById(ruleId).subscribe(response => {
+      this.ruleInfo = response.data;      
+      
+      this.updatingPolicyPackage();
+      if(this.ruleInfo.eclPolicyPackages){        
+        this.policyPackageControl.value = this.ruleInfo.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageTypeId);
+        this.policyPackageControl.valuesAsString = this.ruleInfo.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageName).join(",");
+        if(this.policyPackageControl.valuesAsString.length == 0){
+          this.policyPackageControl.valuesAsString = "Select";
+        }
+      }
+
+      this.isPdgMedicaidRule = this.utils.isPdgEnabled(this.ruleInfo.pdgTemplateDto);
+      let effDate = this.ruleInfo.ruleLogicEffDt;
+      if (this.isPdgMedicaidRule) {
+        let medicaidCategories = [];
+        medicaidCategories = this.categories.filter(cat => cat.label.toLowerCase().startsWith(Constants.MEDICAID_CAT));
+        this.categories = medicaidCategories;
+        this.selectedPdgReferences = this.ruleInfo.eclReferences;
+      }
+      if (effDate !== null && effDate !== undefined) {
+        this.ruleInfo.ruleLogicEffDt = new Date(this.ruleInfo.ruleLogicEffDtStr);
+      } else if (this.isPdgMedicaidRule) {
+        this.ruleInfo.ruleLogicEffDt = new Date(Constants.DEFAULT_DATE_FROM);
+      }
+      this.ruleStatus = 'Provisional Rule';
+      this.getLibraryPrmNumber(this.ruleInfo.ideaId);
+      this.setRuleInfoLobsStatesJurCat(this.ruleInfo);
+
+
+      if (disabled) {
+        this.saveBtnDisable = disabled;
+        this.provDialogDisable = disabled;
+        this.refreshReferences(this.ruleInfo.ruleId);
+      } else {
+        if (setup === PROVISIONAL_SETUP_NEED_MORE) {
+          this.ruleInfo.assignedTo = this.selectedPO;
+          this.refreshReferences(this.ruleInfo.ruleId);
+        } else {
+          if (firstRun) {
+            this.provisionalRuleCreation = false;
+            this.ruleProvisionalReview = true;
+            this.submitBtnDisable = true;
+          }
+          this.provisionalReferences.getAllReferences(this.ruleInfo.ruleId, this.stageId);
+          if (this.ruleInfo.activeWorkflow) {
+            this.wasNeedMoreInfo = (this.ruleInfo.activeWorkflow.workflowStatusId === NEED_MORE_INFO);
+            if (!firstRun) { this.ruleReviewComments = this.ruleInfo.activeWorkflow.reviewComments }
+          }
+        }
+        this.provisionalReferences.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
+        this.provisionalRuleDto.newProvRule = false;
+        this.checkStateJurisdiction();
+      }
+      this.checkReadonlyPdgNonPdgRule();
+      this.loading = false;
+    });
   }
 
   onLoadingELLDetail(event: any) {
@@ -502,7 +629,7 @@ export class ProvisionalRuleComponent implements OnInit {
               });
               if (this.originialAssignToCategory !== catId) {
                 this.ruleInfo.assignedTo = null;
-              } else {
+              } else  {
                 this.ruleInfo.assignedTo = this.selectedPO;
               }
             } else {
@@ -515,14 +642,21 @@ export class ProvisionalRuleComponent implements OnInit {
       }
     }
   }
+
+
   /**
    * Check if the screen was called from Navigation Widget, if so
    * replace current ruleInfo by parent Rule
    */
   checkSelectorConfigInfo() {
     this.ruleId = this.config.data.ruleId;
+    this.showSourceLinkForRR = this.config.data.ruleResponseInd;
+    this.rrNewHeader = (this.config.data.rrNewHeader) ? this.config.data.rrNewHeader : '';
+    this.ideaIndicator = (this.config.data.ideaIndicator) ? this.config.data.ideaIndicator : false;
+    this.hideMyRequestLink = (this.config.data.hideMyRequestLink) ? this.config.data.hideMyRequestLink : false;
+    this.rrId = this.config.data.researchRequestId;
     this.readOnlyView = false;
-    if (this.selectorConfig == undefined) {
+    if (this.selectorConfig === undefined) {
       return;
     }
     this.config.data.tabSelected = this.selectorConfig.tabSelected;
@@ -540,7 +674,6 @@ export class ProvisionalRuleComponent implements OnInit {
     this.provDialogDisable = this.readOnlyView;
     this.ruleId = this.selectorConfig.ruleId;
     if (this.selectorConfig.stageId === Constants.ECL_PROVISIONAL_STAGE) {
-      this.header = PROVISIONAL_DETAILS;
       this.config.data.fromMaintenanceProcess = false;
       this.config.data.reviewStatus = this.provisionalRuleService.getStatusCodeForApprovalScreen();
       this.saveBtnDisable = !this.readOnlyView;
@@ -573,11 +706,11 @@ export class ProvisionalRuleComponent implements OnInit {
   getReferences(eclReferences) {
 
     let references = eclReferences;
-    if ((references != null) && (references != [])) {
+    if ((references != null) && (references !== [])) {
       this.ruleReferences = references;
       this.ruleReferencesArray = [];
       this.ruleReferences.forEach(reference => {
-        if (reference.statusId != Constants.STATUS_CODE_INACTIVE) {
+        if (reference.statusId !== Constants.STATUS_INACTIVE.toString()) {
           this.eclReference = new EclReference;
           this.eclReference.refInfo.referenceId = reference.refInfo.referenceId;
           this.eclReference.chapter = reference.chapter;
@@ -607,28 +740,43 @@ export class ProvisionalRuleComponent implements OnInit {
   /* Function to enable Submit button once user clicks all tabs */
 
   onTabChange(e) {
-    var index = e.index;
+    switch (e.index) {
+      case 0:
+        this.tabClicks.notesClicked = true;
+        break;
+      case 1:
+        this.tabClicks.rationaleClicked = true;
+        break;
+      case 2:
+        this.tabClicks.claimsClicked = true;
+        break;
+      case 3:
+        this.tabClicks.providersClicked = true;
+        break;
+      case 4:
+        this.tabClicks.hcpcsClicked = true;
+        break;
+      case 5:
+        this.tabClicks.icdsClicked = true;
+        break;
+      case 6:
+        this.tabClicks.impactsClicked = true;
+        break;
+      case 7:
+        this.tabClicks.referencesClicked = true;
+        break;
+      default:
+      // Do nothing here?
+    }
 
-    if (index == 1) {
-      this.claimsClicked = true;
-    }
-    else if (index == 2) {
-      this.providersClicked = true;
-    }
-    else if (index == 3) {
-      this.codesClicked = true;
-    }
-    else if (index == 4) {
-      this.impactsClicked = true;
-    }
-    else if (index == 5) {
-      this.referencesClicked = true;
-    }
-
-    if (this.claimsClicked && this.providersClicked && this.codesClicked && this.impactsClicked && this.referencesClicked) {
-      if (this.header === PROVISIONAL_DETAILS || this.header === LIBRARY_VIEW) {
+    if (this.checkTabClicks()) {
+      if (this.header === ptc.PROVISIONAL_RULE_DETAIL_TITLE || this.header === LIBRARY_VIEW) {
         this.tabCheck = false;
-        this.submitBtnDisable = true;
+        if (this.provDialogDisable) {
+          this.submitBtnDisable = true;
+        } else {
+          this.submitBtnDisable = false;
+        }
       } else if (this.isProvisionalRuleCreation) {
         if (!this.ruleInfo.assignedTo || this.ruleInfo.assignedTo === 0) {
           this.tabCheck = true;
@@ -644,19 +792,23 @@ export class ProvisionalRuleComponent implements OnInit {
     }
   }
 
+  checkTabClicks() {
+    if (this.isPdgMedicaidRule) {
+      return true;
+    } else {
+      for (const prop in this.tabClicks) {
+        if (this.tabClicks[prop] === false) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
   validateImpactsTab() {
     let res: boolean = true;
     if ((this.ruleInfo.claimImpactInd === 1) && !(this.ruleInfo.claimImpactDetails)) {
       this.Message = "Modifiers Impact on claim process is mandatory when Modifiers Impact on claim process indicator is 'Yes'";
-      this.saveDisplay = true;
-      res = false;
-    } else {
-      this.isValidForSave = true
-    }
-
-    if ((this.ruleInfo.dosageImpactInd === 1) && (!this.ruleInfo.procedureCodeDto ||
-      !this.ruleInfo.procedureCodeDto.diagnosisCodes)) {
-      this.Message = "Diagnosis codes Impact on claim process is mandatory when Diagnosis codes Impact on claim process indicator is 'Yes'";
       this.saveDisplay = true;
       res = false;
     } else {
@@ -690,6 +842,23 @@ export class ProvisionalRuleComponent implements OnInit {
     return res;
   }
 
+  validatePdgTemplateTab() {
+    let res: boolean = true;
+    if (this.isPdgMedicaidRule && this.pdgComponent) {
+      let message = this.pdgComponent.getValidateMessagePdg();
+      if (message) {
+        this.Message = message;
+        this.saveDisplay = true;
+        res = false;
+      } else {
+        this.isValidForSave = true
+      }
+    } else {
+      this.isValidForSave = true
+    }
+
+    return res;
+  }
   /* Function to save the provisional rule details */
   saveProvisional() {
     this.saveBtnDisable = true;
@@ -697,12 +866,8 @@ export class ProvisionalRuleComponent implements OnInit {
     this.approvalCommentsFlag = this.disableTopFields;
     this.validateImpactType();
     if (this.isValidForSave === true) {
-
-      if (!this.validateCategory()) {
-        this.isValidForSave = false;
-      } else if (!this.validateRuleLogic()) {
-        this.isValidForSave = false;
-      } else if (!this.checkRuleEffectiveDateYear(this.ruleInfo.ruleLogicEffDt)) {
+      if (!this.validateCategory() || !this.validateRuleLogic()
+        || !this.checkRuleEffectiveDateYear(this.ruleInfo.ruleLogicEffDt) || !this.validateRuleName() || !this.validatePdgTemplateSave()) {
         this.isValidForSave = false;
       }
       if (this.isValidForSave) {
@@ -714,19 +879,25 @@ export class ProvisionalRuleComponent implements OnInit {
 
         this.ProvisionalRuleDtoSet();
         if (this.isProvisionalRuleCreation) {
-          this.provisionalRuleDtos = [this.provisionalRuleDto];
-          this.provisionalRuleService.saveProvisionalRules(this.provisionalRuleDtos).subscribe(resp => {
+          this.updatingPolicyPackage();
+          this.provisionalRuleDtos = [this.provisionalRuleDto];          
+          this.provisionalRuleService.saveProvisionalRules(this.notesData.filesAttached, this.provisionalRuleDtos).subscribe(resp => {
             let rule = resp.data;
             if (rule) {
               this.saveState = true;
-              this.Message = 'Provisional Rule Details Saved Successfully.';
+              this.Message = `${ptc.PROVISIONAL_RULE_DETAIL_TITLE} Saved Successfully.`;
               this.ruleStatus = 'Provisional Rule';
               this.ruleCreationStatus = false;
               this.saveDisplay = true;
               this.addButtonDisable = false;
+              if (this.isPdgMedicaidRule && this.pdgComponent) {
+                this.pdgComponent.saveRefAttachments(rule[0].ruleInfoObj).then(()=>{
+                  this.refreshReferences(this.ruleInfo.ruleId);
+                });
+              }
               // condition to refresh the provisional rule after saving if the rule needs more info
               if (this.provRuleNeedsMoreInfo) {
-                this.populateByExistingProvisionalRuleId();
+                this.loadProvisionalRuleDetails(this.provisionalRuleId, false, this.provSetup, false);
               } else {
                 this.getExistingProvisionalRulesByIdeaId();
               }
@@ -738,10 +909,15 @@ export class ProvisionalRuleComponent implements OnInit {
           });
         } else {
           if (this.validateReviewStatus()) {
-            this.provisionalRuleService.saveProvRule(this.provisionalRuleDto).subscribe(response => {
+            this.provisionalRuleService.saveProvRule(this.notesData.filesAttached, this.provisionalRuleDto).subscribe(response => {
               let rule = response.data;
               if ((rule !== null) && (rule !== [])) {
                 let ruleId = rule.ruleInfoObj;
+                if (this.isPdgMedicaidRule && this.pdgComponent) {
+                  this.pdgComponent.saveRefAttachments(ruleId).then(()=>{
+                    this.refreshReferences(ruleId);
+                   });
+                }
                 this.refreshProvisionalRule(ruleId);
                 this.saveDisplay = true;
                 if (this.fromMaintenanceProcess) {
@@ -755,7 +931,7 @@ export class ProvisionalRuleComponent implements OnInit {
                   this.resetApprovalValues();
                 } else {
                   this.saveState = true;
-                  this.Message = 'Provisional Rule Details Saved Successfully.';
+                  this.Message = `${ptc.PROVISIONAL_RULE_DETAIL_TITLE} Saved Successfully.`;
                   this.ruleStatus = 'Provisional Rule';
                 }
               } else {
@@ -766,29 +942,30 @@ export class ProvisionalRuleComponent implements OnInit {
             this.fileManagerService.uploadFileSub();
           }
         }
-
       } else {
         this.saveBtnDisable = false;
       }
+    } else {
+      this.saveBtnDisable = false;
     }
   }
 
   private validateImpactType() {
     if (this.fromMaintenanceProcess && !this.retireStatusChild) {
       if (this.ruleImpactAnalysisRun.ruleImpactedInd === null) {
-        this.indexVal = 5;
+        this.indexVal = REFERENCES_TAB_INDEX;
         this.Message = 'Please select Value for Rule Impacted field';
         this.saveDisplay = true;
         this.isValidForSave = false;
       }
       else if (this.ruleImpactAnalysisRun.ruleImpactedInd === 1 && this.ruleImpactAnalysisRun.ruleImpactTypeId === null) {
-        this.indexVal = 5;
+        this.indexVal = REFERENCES_TAB_INDEX;
         this.Message = 'Please select Rule Impact type';
         this.saveDisplay = true;
         this.isValidForSave = false;
       }
       else if (this.ruleImpactAnalysisRun.ruleImpactedInd === 1 && (this.ruleImpactAnalysisRun.ruleImpactAnalysis === null || this.ruleImpactAnalysisRun.ruleImpactAnalysis.trim() === "")) {
-        this.indexVal = 5;
+        this.indexVal = REFERENCES_TAB_INDEX;
         this.Message = 'Please enter Value for Rule Impact Description';
         this.saveDisplay = true;
         this.isValidForSave = false;
@@ -796,7 +973,7 @@ export class ProvisionalRuleComponent implements OnInit {
       else {
         this.provisionalReferences.ruleReferencesArray.forEach(ruleRef => {
           if (ruleRef.changeDetailsDisplayFlag === true && (ruleRef.changedStatus == null || (ruleRef.changedStatus === 1 && (ruleRef.changedDetail === null || ruleRef.changedDetail.trim() === "")))) {
-            this.indexVal = 5;
+            this.indexVal = REFERENCES_TAB_INDEX;
             this.Message = 'Please complete review of all the References';
             this.saveDisplay = true;
             this.isValidForSave = false;
@@ -808,13 +985,7 @@ export class ProvisionalRuleComponent implements OnInit {
 
   /* Function to refresh the provisional rule reference details */
   refreshReferences(ruleId: any) {
-    this.provisionalRuleService.getEclReferences(ruleId).subscribe(response => {
-      let references: any[] = [];
-      references = response["data"];
-      if ((references != null) && (references != [])) {
-        this.getReferences(references);
-      }
-    });
+    this.provisionalReferences.getAllReferences(ruleId, Constants.ECL_PROVISIONAL_STAGE);
   }
 
   /* Function to refresh the provisional rule details */
@@ -824,13 +995,15 @@ export class ProvisionalRuleComponent implements OnInit {
       this.ruleInfo = rule;
       if (this.ruleInfo.ruleLogicEffDt !== null && this.ruleInfo.ruleLogicEffDt !== undefined) {
         this.ruleInfo.ruleLogicEffDt = new Date(this.ruleInfo.ruleLogicEffDtStr);
+      } else if (this.isPdgMedicaidRule){
+        this.ruleInfo.ruleLogicEffDt = new Date(Constants.DEFAULT_DATE_FROM);
       }
       if (this.fromMaintenanceProcess) {
-        this.ruleStage = Constants.ECL_LIBRARY_STAGE
+        this.stageId = Constants.ECL_LIBRARY_STAGE
       } else {
-        this.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
+        this.stageId = Constants.ECL_PROVISIONAL_STAGE;
       }
-      this.provisionalReferences.getAllReferences(this.ruleInfo.ruleId, this.ruleStage);
+      this.provisionalReferences.getAllReferences(this.ruleInfo.ruleId, this.stageId);
       let estOpportunity = String(this.ruleInfo.estOppurtunityVal);
       this.ruleInfo.estOppurtunityVal = estOpportunity;
       this.setRuleInfoLobsStatesJurCat(this.ruleInfo);
@@ -838,7 +1011,11 @@ export class ProvisionalRuleComponent implements OnInit {
   }
 
   submitProvisionalRules() {
+    if (this.saveBtnDisable) {
+      return;
+    }
     this.ProvisionalRuleDtoSet();
+
     if (this.isProvisionalRuleCreation) {
       this.previousAssignedTo = this.ruleInfo.assignedTo;
       this.isValidForSave = true;
@@ -858,10 +1035,15 @@ export class ProvisionalRuleComponent implements OnInit {
         this.provisionalRuleDtos = this.provisionalRuleDtos.filter(provRule => provRule.ruleInfo.ruleId !== this.provisionalRuleDto.ruleInfo.ruleId);
         this.provisionalRuleDtos = [...this.provisionalRuleDtos, this.provisionalRuleDto];
       }
+
+      this.setDiagnosticCodesList();
+
       this.provisionalRuleDtos.forEach(ele => {
         if (this.isValidForSave) {
           this.ruleInfo = ele.ruleInfo;
-          this.ruleInfo.procedureCodeDto = ele.procedureCodeDto;
+          ele.action = "submit";
+          this.ruleInfo.hcpcsCptCodeDtoList = ele.procedureCodeDto;
+          this.ruleInfo.diagnosisCodeDto = ele.diagnosisCodeDto;
           this.validateForm();
         }
         if (isPolicyExist) {
@@ -871,11 +1053,20 @@ export class ProvisionalRuleComponent implements OnInit {
       if (this.isValidForSave && isPolicyExist) {
         this.action = 'submit';
         //call service to submit to backend
-        this.provisionalRuleService.saveProvisionalRules(this.provisionalRuleDtos).subscribe(response => {
+        this.provisionalRuleService.saveProvisionalRules(this.notesData.filesAttached, this.provisionalRuleDtos).subscribe(response => {
           if (response !== null) {
             this.ruleStatus = 'Provisional Rule';
             this.saveDisplay = true;
-            this.Message = 'Provisional Rule Details Submitted Successfully.';
+            this.Message = `${ptc.PROVISIONAL_RULE_DETAIL_TITLE} Submitted Successfully.`;
+            if (this.isPdgMedicaidRule && this.pdgComponent) {
+              let ruleObj = response.data;
+              this.pdgComponent.saveRefAttachments(ruleObj[0].ruleInfoObj, true).then(()=>{
+                this.savePdgTemplateAuditLogs(ruleObj[0].AUDIT_CHANGE_TYPE, this.provisionalRuleDtos);
+              });
+            }
+            this.saveRrMappingForProvisional(this.rrId, this.ruleInfo.ideaId, this.ruleInfo.ruleId, 'SB');
+            this.fileManagerService.uploadFileSub();
+
           } else {
             this.submitBtnDisable = false;
           }
@@ -910,19 +1101,33 @@ export class ProvisionalRuleComponent implements OnInit {
     this.isSubmitValidation = this.validateReviewStatus();
     if (this.validateForm() && this.isSubmitValidation && this.validatePolicyOwner()) {
       this.ProvisionalRuleDtoSet();
-      this.provisionalRuleService.saveProvRule(this.provisionalRuleDto).subscribe(response => {
-        if ((response !== null)) {
-          const msg = this.getDisplayedMessageAfterSubmission(response.data.ruleInfoObj);
-          this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, msg, 3000, true);
-          this.closeRuleApprovalDialog();
-        } else {
-          this.submitBtnDisable = false;
-        }
-      });
+      if (this.isPdgMedicaidRule && this.pdgComponent) {
+        this.pdgComponent.saveRefAttachments(this.ruleInfo.ruleId, true).then(() => {
+          this.saveRule();
+        });
+      } else {
+        this.saveRule();
+      }
       this.fileManagerService.uploadFileSub();
     } else {
       this.submitBtnDisable = false;
     }
+  }
+
+  saveRule() {
+    this.provisionalRuleService.saveProvRule(this.notesData.filesAttached, this.provisionalRuleDto).subscribe(response => {
+      if ((response !== null)) {
+        let pdgObj = response.data;
+        this.provisionalRuleDtos = [...this.provisionalRuleDtos, this.provisionalRuleDto];
+        this.savePdgTemplateAuditLogs(pdgObj.AUDIT_CHANGE_TYPE, this.provisionalRuleDtos);
+        const msg = this.getDisplayedMessageAfterSubmission(response.data.ruleInfoObj);
+        this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, msg, 3000, true);
+        this.closeRuleApprovalDialog();
+        this.saveRrMappingForProvisional(this.rrId, response.data.ruleInfoObj.ideaId, response.data.ruleInfoObj.ruleId, 'SB');
+      } else {
+        this.submitBtnDisable = false;
+      }
+    });
   }
 
   /**
@@ -935,8 +1140,9 @@ export class ProvisionalRuleComponent implements OnInit {
         return `Rule ${data} has been created successfully.`;
       case Constants.PR_APPROVAL_VALUE:
         return 'Rule has been submitted for Peer Review Approval.';
+      default:
+        return 'Rule has been submitted successfully.';
     }
-    return 'Rule has been submitted successfully.';
   }
 
   /* Function to navigate to home page after provisional rule submit */
@@ -968,9 +1174,8 @@ export class ProvisionalRuleComponent implements OnInit {
     if (this.selectedLobs) {
       if (this.selectedLobs.includes(1)) {
         this.disableState = false;
-
       } else {
-        this.selectedStates = undefined;
+        this.selectedStates = null;
         this.disableState = true;
       }
     }
@@ -978,7 +1183,7 @@ export class ProvisionalRuleComponent implements OnInit {
       if (this.selectedLobs.includes(2)) {
         this.disableJurisdiction = false;
       } else {
-        this.selectedJurisdictions = undefined;
+        this.selectedJurisdictions = null;
         this.disableJurisdiction = true;
       }
     }
@@ -1006,7 +1211,8 @@ export class ProvisionalRuleComponent implements OnInit {
     this.provisionalRuleDto.lobs = this.selectedLobs;
     this.provisionalRuleDto.states = this.selectedStates;
     this.provisionalRuleDto.jurisdictions = this.selectedJurisdictions;
-    this.provisionalRuleDto.procedureCodeDto = this.ruleInfo.procedureCodeDto;
+    this.provisionalRuleDto.procedureCodeDto = this.ruleInfo.hcpcsCptCodeDtoList;
+    this.provisionalRuleDto.diagnosisCodeDto = this.ruleInfo.diagnosisCodeDto;
 
     if (!this.fromMaintenanceProcess) {
       this.provisionalRuleDto.includedSpecialityTypes = this.providerChildren.first.includedSpecialityTypes;
@@ -1020,22 +1226,29 @@ export class ProvisionalRuleComponent implements OnInit {
       this.provisionalRuleDto.excludedSubspecialityTypes = this.providerChildren.last.excludedSubspecialityTypes;
     }
 
-    this.provisionalRuleDto.includedClaims = this.claims.includedClaimServices;
-    this.provisionalRuleDto.excludedClaims = this.claims.excludedClaimServices;
     this.provisionalRuleDto.includedBills = this.claims.includedBillClaims;
     this.provisionalRuleDto.excludedBills = this.claims.excludedBillClaims;
     this.provisionalRuleDto.fromMaintenanceProcess = this.fromMaintenanceProcess;
     this.provisionalRuleDto.selectedReviewStatus = this.selectedReviewStatus;
     this.provisionalRuleDto.ruleReviewComments = this.ruleReviewComments;
     this.provisionalRuleDto.oppValueDto = this.oppValue.opportunityValue;
-    this.provisionalRuleDto.ruleRevenueCodesList = this.claims.ruleRevenueCodesList;
+
+    this.provisionalRuleDto.claimTypes = this.claims.claimTypesSelection;
     if (this.ruleInfo.assignedTo) {
+
       if (this.ruleInfo.assignedTo.userId) {
         this.provisionalRuleDto.assignedTo = this.ruleInfo.assignedTo.userId;
       } else {
         this.provisionalRuleDto.assignedTo = this.ruleInfo.assignedTo;
       }
     }
+
+    if (this.notesData.ruleNoteTabData.ruleNotesDto.ruleId !== this.provisionalRuleDto.ruleInfo.ruleId) {
+      this.notesData.ruleNoteTabData.ruleNotesDto.noteId = null;
+    }
+
+    this.provisionalRuleDto.ruleNotesComments = this.notesData.ruleNoteTabData;
+
     if (this.fromMaintenanceProcess) {
       this.provisionalRuleDto.ruleImpactAnalysisDetails = this.provisionalReferences.ruleImpactAnalysisRun;
       this.ruleRefUpdates = [];
@@ -1047,6 +1260,26 @@ export class ProvisionalRuleComponent implements OnInit {
         this.ruleRefUpdates.push(ruleReferenceUpdates);
       });
       this.provisionalRuleDto.ruleRefUpdates = this.ruleRefUpdates;
+    }
+
+    if (this.ruleInfo.cvCode) {
+      this.provisionalRuleDto.ruleInfo.cvCode = +this.provisionalRuleDto.ruleInfo.cvCode;
+    }
+    this.pdgTemplateDtoSet();
+  }
+
+  pdgTemplateDtoSet() {
+    if (!this.isPdgMedicaidRule) {
+      this.provisionalRuleDto.pdgTemplateDto = null;
+    } else {
+      this.pdgComponent ? this.pdgComponent.clearData() : '';
+      this.provisionalRuleDto.pdgTemplateDto = this.ruleInfo.pdgTemplateDto;
+    }
+  }
+
+  savePdgTemplateAuditLogs(auditChangeType, provRuleDtos) {
+    if (this.isPdgMedicaidRule) {
+      this.provisionalRuleService.savePdgTemplateAuditLogs(auditChangeType, provRuleDtos).subscribe();
     }
   }
 
@@ -1079,16 +1312,6 @@ export class ProvisionalRuleComponent implements OnInit {
     let message = 'Are you sure, you want to exit the dialog?';
     let acceptVisible = true;
     let rejectLabel = Constants.NO;
-    if (this.markUpEnabled && (!this.readOnlyView || this.isSameSim) && !this.retireStatusChild) {
-      let codesValidation = this.procedureCodesService.validate('exit');
-      if (!codesValidation.result) {
-        message = codesValidation.message;
-        if (codesValidation.notValidated) {
-          acceptVisible = false;
-          rejectLabel = 'Ok';
-        }
-      }
-    }
     this.confirmationService.confirm({
       key: 'codesTab',
       header: 'Confirmation',
@@ -1096,7 +1319,10 @@ export class ProvisionalRuleComponent implements OnInit {
       acceptVisible: acceptVisible,
       rejectLabel: rejectLabel,
       accept: () => {
-        if(this.showELLLink) {
+        if (this.ruleInfo.ruleId !== undefined && !this.isPdgMedicaidRule && !this.isIngestedRule)  {
+          this.codesService.deleteDraftRuleCodes(Constants.ICD_CODE_TYPE, this.ruleInfo.ruleId).subscribe();
+        }
+        if (this.showELLLink) {
           this.router.navigate(['/library-search']);
         } else {
           this.cancelProvisional();
@@ -1118,7 +1344,7 @@ export class ProvisionalRuleComponent implements OnInit {
       this.navigateIdeasNeedingResearch();
     }
     else {
-      if (this.selectorConfig != undefined) {
+      if (this.selectorConfig !== undefined) {
         if (this.isGoodIdea) {
           this.navigateGoodIdeas();
         } else if (this.isRuleCatalogue) {
@@ -1137,7 +1363,7 @@ export class ProvisionalRuleComponent implements OnInit {
       }
       let selectedStatusDesc = "";
       this.reviewStatus.forEach((opt: any) => {
-        if (opt.value == this.selectedReviewStatus) {
+        if (opt.value === this.selectedReviewStatus) {
           selectedStatusDesc = opt.label;
         }
       })
@@ -1156,18 +1382,36 @@ export class ProvisionalRuleComponent implements OnInit {
   validateForm() {
     let resp = true;
     if (!this.validateImpactsTab()) {
-      this.indexVal = 4;
-      this.isValidForSave = false;
+      this.indexVal = IMPACTS_TAB_INDEX;
       resp = false;
-    } else if (!this.validateCategory() || !this.validateRuleLogic() || !this.validateRuleLogicEffectiveDate(this.ruleInfo.ruleLogicEffDt)) {
-      this.isValidForSave = false;
+    } else if (!this.validateCategory() || !this.validateRuleLogic() || !this.validateRuleLogicEffectiveDate(this.ruleInfo.ruleLogicEffDt) || !this.validateRuleName()) {
       resp = false;
-    } else {
-      this.isValidForSave = true;
-      resp = true;
+    } else if (!this.validateClaimTypes()) {
+      this.indexVal = CLAIMS_TAB_INDEX;
+      resp = false;
+    } else if (!this.validatePdgTemplateTab()) {
+      this.indexVal = PDG_TAB_INDEX;
+      resp = false;
+    }
+    this.isValidForSave = resp
+    return resp;
+  }
+
+  validateClaimTypes() {
+    let resp = true;
+
+    if ((!this.isPdgMedicaidRule) &&
+        ((this.claims && typeof this.claims.claimTypesSelection == 'undefined') ||
+         (this.claims &&
+          this.claims.claimTypesSelection &&
+          this.claims.claimTypesSelection.length === 0))) {
+      this.Message = 'Please select a Claim Type';
+      this.saveDisplay = true;
+      resp = false;
     }
     return resp;
   }
+
   validateCategory() {
     let resp = true;
     let cat = this.ruleInfo.category.categoryId;
@@ -1180,7 +1424,9 @@ export class ProvisionalRuleComponent implements OnInit {
   }
 
   validSelectedPo() {
-    if (this.ruleInfo.assignedTo || this.ruleInfo.assignedTo !== 0) {
+    if (this.ruleInfo.assignedTo !== null &&
+      this.ruleInfo.assignedTo !== 'null' &&
+      this.ruleInfo.assignedTo !== 0) {
       if (this.tabCheck) {
         this.submitBtnDisable = false;
       } else {
@@ -1206,10 +1452,25 @@ export class ProvisionalRuleComponent implements OnInit {
   validateRuleLogic() {
     let resp = true;
     let RLO = this.ruleInfo.ruleLogicOriginal;
-    if (RLO === null || RLO === undefined || RLO === '') {
+    if (RLO === null || RLO === undefined || RLO === '' || this.utils.validateStringContaintOnlyWhiteSpaces(RLO)) {
       this.Message = 'Please enter data in Rule Logic field';
       this.saveDisplay = true;
       resp = false;
+    }
+    this.ruleInfo.ruleLogicOriginal = this.ruleInfo.ruleLogicOriginal? this.ruleInfo.ruleLogicOriginal.trim(): this.ruleInfo.ruleLogicOriginal;
+    return resp;
+  }
+
+  validatePdgTemplateSave() {
+    let resp = true;
+
+    if (this.isPdgMedicaidRule && this.pdgComponent) {
+      let message = this.pdgComponent.getSaveValidateMessagePdg();
+      if (message) {
+        this.Message = message;
+        this.saveDisplay = true;
+        resp = false;
+      }
     }
     return resp;
   }
@@ -1221,8 +1482,8 @@ export class ProvisionalRuleComponent implements OnInit {
     if (this.wasNeedMoreInfo) {
       return (this.ruleReviewComments === undefined || this.ruleReviewComments === '');
     }
-    if (this.selectedReviewStatus == Constants.SHELVED_VALUE || this.selectedReviewStatus == Constants.NEED_MORE_INFO_VALUE) {
-      return (this.ruleReviewComments == "" || this.ruleReviewComments == undefined);
+    if (this.selectedReviewStatus === Constants.SHELVED_VALUE || this.selectedReviewStatus === Constants.NEED_MORE_INFO_VALUE) {
+      return (this.ruleReviewComments === "" || this.ruleReviewComments === undefined);
     }
     return false;
   }
@@ -1298,9 +1559,10 @@ export class ProvisionalRuleComponent implements OnInit {
       date = new Date(rule.ruleLogicEffDt);
     }
     let year: number = Constants.MIN_VALID_YEAR;
-    if ((rule["category"] != null) && (rule["category"] != undefined)) {
+    if ((rule["category"] !== null) && (rule["category"] !== undefined)) {
       this.ruleInfo.category.categoryId = rule["category"].categoryId;
       this.originialAssignToCategory = this.ruleInfo.category.categoryId;
+      this.selectedCategoryTooltip = this.ruleInfo.category.categoryDesc;
       this.reloadAssignTo();
     } else {
       this.ruleInfo.category = new Categories;
@@ -1318,6 +1580,7 @@ export class ProvisionalRuleComponent implements OnInit {
       this.selectedLobsTooltip += this.selectedLobsLabels[i];
       this.selectedLobsTooltip += (i === this.selectedLobsLabels.length - 1) ? '' : ',\n';
     }
+
     let jurisdictions: any[] = rule["jurisdictions"];
     this.selectedJurisdictions = [];
     for (let jurisdiction in jurisdictions) {
@@ -1330,6 +1593,7 @@ export class ProvisionalRuleComponent implements OnInit {
       this.selectedJurisdictionsTooltip += (i === jurisdictions.length - 1) ? '' : ',\n';
     }
     let states: any[] = rule["states"];
+
     this.selectedStates = [];
     for (let state in states) {
       let stateObj = states[state]["state"];
@@ -1345,9 +1609,18 @@ export class ProvisionalRuleComponent implements OnInit {
       year = date.getUTCFullYear();
     }
     if (date === null || date === undefined) {
-      rule.ruleLogicEffDt = undefined;
+
+      if (this.isPdgMedicaidRule) {
+        rule.ruleLogicEffDt = new Date(Constants.DEFAULT_DATE_FROM);
+      } else {
+        rule.ruleLogicEffDt = null;
+      }
     } else if (year < Constants.MIN_VALID_YEAR) {
-      rule.ruleLogicEffDt = undefined;
+      if (this.isPdgMedicaidRule) {
+        rule.ruleLogicEffDt = new Date(Constants.DEFAULT_DATE_FROM);
+      } else {
+        rule.ruleLogicEffDt = null;
+      }
     } else {
       if (rule.ruleLogicEffDt !== null && rule.ruleLogicEffDt !== undefined) {
         rule.ruleLogicEffDt = new Date(rule.ruleLogicEffDt);
@@ -1358,28 +1631,50 @@ export class ProvisionalRuleComponent implements OnInit {
     }
   }
 
-  loadSelectedRule(): void {
+  async loadSelectedRule() {
     this.loading = true;
-    this.provisionalRuleService.findRuleById(this.ruleId).subscribe(response => {
+    this.provisionalRuleService.findRuleById(this.ruleId).subscribe(async response => {
       let rule = response.data;
       this.ruleInfo = rule;
+      this.isPdgMedicaidRule = this.utils.isPdgEnabled(this.ruleInfo.pdgTemplateDto);
+      this.checkReadonlyPdgNonPdgRule();
       this.provisionalRuleCreation = false;
       this.ruleReview = true;
       this.maintenanceOnly = true;
       this.provDialogDisable = false;
       this.submitBtnDisable = true;
       let references: any[] = rule.eclReferences;
+      let ruleEngineFlag: RuleEngines = rule.ruleEngine;
+      if (ruleEngineFlag && ruleEngineFlag.ruleEngineId == Constants.RULE_ENGINEID_ICMS) {
+        this.icmsButtonVisible = false;
+      }
       let statusId = this.ruleInfo.ruleStatusId;
+      if ((this.isPdgMedicaidRule && !this.isReadOnlyNonPdgRule) && !this.config.data.isCustomRule) {
+        let medicaidCategories = [];
+        medicaidCategories = this.allCategories.filter(cat => cat.label.toLowerCase().startsWith(Constants.MEDICAID_CAT));
+        this.categories = medicaidCategories;
+      } else {
+        this.categories = this.allCategories;
+      }
       this.setRuleInfoLobsStatesJurCat(this.ruleInfo);
       this.checkStateJurisdiction();
       this.saveBtnDisable = !this.config.data.readWrite;
       this.getLibraryPrmNumber(this.ruleInfo.ideaId);
-      
+      this.checkMidRule(rule.ruleId);
+
       if (this.ruleInfo.ruleLogicEffDt !== null && this.ruleInfo.ruleLogicEffDt !== undefined) {
         this.ruleInfo.ruleLogicEffDt = new Date(this.ruleInfo.ruleLogicEffDtStr);
+      } else if (this.isPdgMedicaidRule) {
+        this.ruleInfo.ruleLogicEffDt = new Date(Constants.DEFAULT_DATE_FROM);
       }
       if (!this.fromMaintenanceProcess) {
-        this.ruleStatus = 'Provisional Rule';
+        if (this.ruleInfo.ruleStatusId.ruleStatusId === Constants.LIBRARY_RULE_VALUE && this.readOnlyView) {
+          if (this.ruleInfo.activeWorkflow) {
+            this.ruleReviewComments = this.ruleInfo.activeWorkflow.reviewComments;
+          }
+        } else {
+          this.ruleStatus = 'Provisional Rule';
+        }
       } else {
         if (!this.ruleInfo.ruleLogicModified) {
           this.ruleInfo.ruleLogicModified = this.ruleInfo.ruleLogicOriginal;
@@ -1391,9 +1686,13 @@ export class ProvisionalRuleComponent implements OnInit {
       if (this.ruleInfo.ruleStatusId.ruleStatusId === Constants.SHELVED_VALUE) {
         this.selectedReviewStatus = Constants.SHELVED_VALUE;//this.config.data.workFlowStatusId;
       }
-      if (this.fromMaintenanceProcess && rule.parentRuleId != null) {
+      if (this.fromMaintenanceProcess && rule.parentRuleId != null) {    
+        
+        this.populatePolicyPackagesFromLibraryRule();
+        
         let tempRuleInfo = this.tempRuleInfo();
-        this.populateByExistingProvisionalRuleIdFromParent(this.ruleInfo.parentRuleId, tempRuleInfo);
+        await this.populateByExistingProvisionalRuleIdFromParent(this.ruleInfo.parentRuleId, tempRuleInfo) as any;
+        
         this.refreshReferences(rule.ruleId);
         if (this.readOnlyView) {
           this.provisionalReferences.getAllReferences(rule.ruleId, Constants.ECL_LIBRARY_STAGE);
@@ -1408,14 +1707,22 @@ export class ProvisionalRuleComponent implements OnInit {
         } else {
           this.getImpactType(rule.parentRuleId, rule.ruleId);
         }
-      } else if ((references != null) && (references != [])) {
+      } else if ((references !== null) && (references !== [])) {
+        this.populatePolicyPackagesFromProvisionalRule(this.ruleInfo.parentRuleId);
         this.getReferences(references);
+        this.selectedPdgReferences = references;
+        this.loading = false;
+      } else {
+        this.loading = false;
       }
 
-      if (statusId && statusId.ruleStatusId == Constants.RULE_IMPACTED_VALUE) {
+      if(this.isIngestedRule){
+        this.isPdgMedicaidRule = this.isPdgRule(this.selectedLobs);
+      }
+
+      if (statusId && statusId.ruleStatusId === Constants.RULE_IMPACTED_VALUE) {
         this.markUpEnabled = true;
       }
-      this.loading = false;
     });
   }
 
@@ -1437,81 +1744,130 @@ export class ProvisionalRuleComponent implements OnInit {
       mileLimitDetails: this.ruleInfo.mileLimitDetails,
       dosageLimitDetails: this.ruleInfo.dosageLimitDetails,
     }
-    this.ruleInfo.reasonsForDev = " ";
-    this.ruleInfo.scriptRationale = " ";
-    this.ruleInfo.clientRationale = " ";
-    this.ruleInfo.estOppurtunityVal = " ";
+    this.ruleInfo.reasonsForDev = "";
+    this.ruleInfo.scriptRationale = "";
+    this.ruleInfo.clientRationale = "";
+    this.ruleInfo.estOppurtunityVal = "";
     this.ruleInfo.claimImpactInd = 0;
-    this.ruleInfo.claimImpactDetails = " ";
+    this.ruleInfo.claimImpactDetails = "";
     this.ruleInfo.dosageImpactInd = 0;
-    this.ruleInfo.dosageImpactDetails = " ";
+    this.ruleInfo.dosageImpactDetails = "";
     this.ruleInfo.genderInd = 0;
     this.ruleInfo.ageLimitInd = 0;
     this.ruleInfo.mileLimitInd = 0;
     this.ruleInfo.dosageLimitInd = 0;
-    this.ruleInfo.ageLimitDetails = " ";
-    this.ruleInfo.mileLimitDetails = " ";
-    this.ruleInfo.dosageLimitDetails = " ";
+    this.ruleInfo.ageLimitDetails = "";
+    this.ruleInfo.mileLimitDetails = "";
+    this.ruleInfo.dosageLimitDetails = "";
     return tempRuleInfo;
   }
 
   populateByExistingProvisionalRuleIdFromParent(parentRuleId, tempRuleInfo: any) {
     this.loading = true;
-    this.provisionalRuleService.findRuleById(parentRuleId).subscribe(responseOrg => {
-      let ruleOriginal = responseOrg.data;
-      this.ruleInfoOriginal = ruleOriginal;
-      this.ruleInfo.ruleReasonOriginal = this.ruleInfoOriginal.reasonsForDev;
-      this.ruleInfo.scriptRationaleOriginal = this.ruleInfoOriginal.scriptRationale;
-      this.ruleInfo.clientRationaleOriginal = this.ruleInfoOriginal.clientRationale;
-      let originalVal = String(this.ruleInfoOriginal.estOppurtunityVal);
-      if (originalVal !== null && originalVal !== "null") {
-        this.ruleInfo.estOppurtunityValOriginal = originalVal;
-      }
-      this.ruleInfo.claimImpactIndOriginal = this.ruleInfoOriginal.claimImpactInd;
-      this.ruleInfo.claimImpactDetailsOriginal = this.ruleInfoOriginal.claimImpactDetails;
-      this.ruleInfo.dosageImpactIndOriginal = this.ruleInfoOriginal.dosageImpactInd;
-      this.ruleInfo.dosageImpactDetailsOriginal = this.ruleInfoOriginal.dosageImpactDetails;
-      this.ruleInfo.genderIndOriginal = this.ruleInfoOriginal.genderInd;
-      this.ruleInfo.ageLimitIndOriginal = this.ruleInfoOriginal.ageLimitInd;
-      this.ruleInfo.mileLimitIndOriginal = this.ruleInfoOriginal.mileLimitInd;
-      this.ruleInfo.dosageLimitIndOriginal = this.ruleInfoOriginal.dosageLimitInd;
-      this.ruleInfo.ageLimitDetailsOriginal = this.ruleInfoOriginal.ageLimitDetails;
-      this.ruleInfo.mileLimitDetailsOriginal = this.ruleInfoOriginal.mileLimitDetails;
-      this.ruleInfo.dosageLimitDetailsOriginal = this.ruleInfoOriginal.dosageLimitDetails;
-      this.ruleInfo.reasonsForDev = tempRuleInfo.reasonsForDev;
-      this.ruleInfo.scriptRationale = tempRuleInfo.scriptRationale;
-      this.ruleInfo.clientRationale = tempRuleInfo.clientRationale;
-      if (tempRuleInfo.estOpportunity !== null && tempRuleInfo.estOpportunity !== "null") {
-        this.ruleInfo.estOppurtunityVal = tempRuleInfo.estOpportunity;
-      }
-      this.ruleInfo.claimImpactInd = tempRuleInfo.claimImpactInd;
-      this.ruleInfo.claimImpactDetails = tempRuleInfo.claimImpactDetails;
-      this.ruleInfo.dosageImpactInd = tempRuleInfo.dosageImpactInd;
-      this.ruleInfo.dosageImpactDetails = tempRuleInfo.dosageImpactDetails;
-      this.ruleInfo.genderInd = tempRuleInfo.genderInd;
-      this.ruleInfo.ageLimitInd = tempRuleInfo.ageLimitInd;
-      this.ruleInfo.mileLimitInd = tempRuleInfo.mileLimitInd;
-      this.ruleInfo.dosageLimitInd = tempRuleInfo.dosageLimitInd;
-      this.ruleInfo.ageLimitDetails = tempRuleInfo.ageLimitDetails;
-      this.ruleInfo.mileLimitDetails = tempRuleInfo.mileLimitDetails;
-      this.ruleInfo.dosageLimitDetails = tempRuleInfo.dosageLimitDetails;
+    const ruleInfoOriginalPromise = new Promise((resolve, reject) => {
 
-      if (this.fromSameSimMod && this.ruleInfoOriginal.activeWorkflow &&
-        this.ruleInfoOriginal.activeWorkflow.workflowStatus) {
-        this.selectedReviewStatus = this.ruleInfoOriginal.activeWorkflow.workflowStatus.lookupCode;
-        this.ruleReviewComments = this.ruleInfoOriginal.activeWorkflow.reviewComments;
-      }
+      this.provisionalRuleService.findRuleById(parentRuleId).subscribe(responseOrg => {
+        this.ruleInfoOriginal = responseOrg.data;
+        this.ruleInfo.ruleReasonOriginal = this.ruleInfoOriginal.reasonsForDev;
+        this.ruleInfo.scriptRationaleOriginal = this.ruleInfoOriginal.scriptRationale;
+        this.ruleInfo.clientRationaleOriginal = this.ruleInfoOriginal.clientRationale;
+        let originalVal = String(this.ruleInfoOriginal.estOppurtunityVal);
+        if (originalVal !== null && originalVal !== "null") {
+          this.ruleInfo.estOppurtunityValOriginal = originalVal;
+        }
+        this.ruleInfo.claimImpactIndOriginal = this.ruleInfoOriginal.claimImpactInd;
+        this.ruleInfo.claimImpactDetailsOriginal = this.ruleInfoOriginal.claimImpactDetails;
+        this.ruleInfo.dosageImpactIndOriginal = this.ruleInfoOriginal.dosageImpactInd;
+        this.ruleInfo.dosageImpactDetailsOriginal = this.ruleInfoOriginal.dosageImpactDetails;
+        this.ruleInfo.genderIndOriginal = this.ruleInfoOriginal.genderInd;
+        this.ruleInfo.ageLimitIndOriginal = this.ruleInfoOriginal.ageLimitInd;
+        this.ruleInfo.mileLimitIndOriginal = this.ruleInfoOriginal.mileLimitInd;
+        this.ruleInfo.dosageLimitIndOriginal = this.ruleInfoOriginal.dosageLimitInd;
+        this.ruleInfo.ageLimitDetailsOriginal = this.ruleInfoOriginal.ageLimitDetails;
+        this.ruleInfo.mileLimitDetailsOriginal = this.ruleInfoOriginal.mileLimitDetails;
+        this.ruleInfo.dosageLimitDetailsOriginal = this.ruleInfoOriginal.dosageLimitDetails;
+        this.ruleInfo.reduceUnitsOriginal = this.ruleInfoOriginal.reduceUnits;
+        this.ruleInfo.applyPercReductionOriginal = this.ruleInfoOriginal.applyPercReduction;
+        this.ruleInfo.otherExceptionsOriginal = this.ruleInfoOriginal.otherExceptions;
+        this.ruleInfo.reasonsForDev = tempRuleInfo.reasonsForDev;
+        this.ruleInfo.scriptRationale = tempRuleInfo.scriptRationale;
+        this.ruleInfo.clientRationale = tempRuleInfo.clientRationale;
+        if (tempRuleInfo.estOpportunity !== null && tempRuleInfo.estOpportunity !== "null") {
+          this.ruleInfo.estOppurtunityVal = tempRuleInfo.estOpportunity;
+        }
+        this.ruleInfo.claimImpactInd = tempRuleInfo.claimImpactInd;
+        this.ruleInfo.claimImpactDetails = tempRuleInfo.claimImpactDetails;
+        this.ruleInfo.dosageImpactInd = tempRuleInfo.dosageImpactInd;
+        this.ruleInfo.dosageImpactDetails = tempRuleInfo.dosageImpactDetails;
+        this.ruleInfo.genderInd = tempRuleInfo.genderInd;
+        this.ruleInfo.ageLimitInd = tempRuleInfo.ageLimitInd;
+        this.ruleInfo.mileLimitInd = tempRuleInfo.mileLimitInd;
+        this.ruleInfo.dosageLimitInd = tempRuleInfo.dosageLimitInd;
+        this.ruleInfo.ageLimitDetails = tempRuleInfo.ageLimitDetails;
+        this.ruleInfo.mileLimitDetails = tempRuleInfo.mileLimitDetails;
+        this.ruleInfo.dosageLimitDetails = tempRuleInfo.dosageLimitDetails;
 
+        if (this.fromSameSimMod && this.ruleInfoOriginal.activeWorkflow &&
+          this.ruleInfoOriginal.activeWorkflow.workflowStatus) {
+          this.selectedReviewStatus = this.ruleInfoOriginal.activeWorkflow.workflowStatus.lookupCode;
+          this.ruleReviewComments = this.ruleInfoOriginal.activeWorkflow.reviewComments;
+        }
 
+        this.loading = false
+        resolve(responseOrg);
+      }, error => {
+        this.loading = false;
+        reject(true);
+      });
     });
+    return ruleInfoOriginalPromise;
+  }
 
+  populatePolicyPackagesFromLibraryRule() {
+    
+    if(this.ruleInfo.eclPolicyPackages){
+      this.policyPackageControl.value = this.ruleInfo.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageTypeId);
+      this.policyPackageControl.valuesAsString = this.ruleInfo.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageName).join(",");
+      if(this.policyPackageControl.valuesAsString.length == 0){
+        this.policyPackageControl.valuesAsString = "Select";
+      }
+    }
+    
     this.loading = false;
+  }
+
+  populatePolicyPackagesFromProvisionalRule(parentRuleId) {
+    this.loading = true;
+    const ruleInfoOriginalPromise = new Promise((resolve, reject) => {
+
+      this.provisionalRuleService.findRuleById(parentRuleId).subscribe(responseOrg => {
+        
+        let provisionalRule = responseOrg.data;
+
+        if(provisionalRule && provisionalRule.eclPolicyPackages && provisionalRule.eclPolicyPackages.length !== 0){  
+          this.policyPackageControl.value = provisionalRule.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageTypeId);
+          this.policyPackageControl.valuesAsString = provisionalRule.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageName).join(",");
+        } else if(this.ruleInfo.eclPolicyPackages && this.ruleInfo.eclPolicyPackages.length !== 0){
+          this.policyPackageControl.value = this.ruleInfo.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageTypeId);
+          this.policyPackageControl.valuesAsString = this.ruleInfo.eclPolicyPackages.map(eclPolicyPackage=>eclPolicyPackage.policyPackage.policyPackageName).join(",");
+        }else {
+          this.policyPackageControl.valuesAsString = "Please Select";
+        }
+
+        this.loading = false
+        resolve(responseOrg);
+      }, error => {
+        this.loading = false;
+        reject(true);
+      });
+    });
+    return ruleInfoOriginalPromise;
   }
 
   validateChangeInfoFromDb(ruleReferencesArray: any[]) {
     let response = true;
 
-    if (ruleReferencesArray != undefined && ruleReferencesArray != null) {
+    if (ruleReferencesArray !== undefined && ruleReferencesArray !== null) {
       ruleReferencesArray.forEach(ruleRef => {
         if (ruleRef.changeDetailsDisplayFlag === true && ruleRef.changedStatus === null) {
           response = false;
@@ -1530,16 +1886,16 @@ export class ProvisionalRuleComponent implements OnInit {
       this.logicalCodesFlag = true;
       if (this.ruleImpactAnalysisRun.ruleImpactTypeId != null && this.eclConstants.RULE_IMPACT_TYPE_EDITORIAL === this.ruleImpactAnalysisRun.ruleImpactTypeId) {
         this.reviewStatus.forEach(itemLookup => {
-          if (itemLookup.label == Constants.LOGICAL_SUBMIT_APPROVAL || itemLookup.label == Constants.RETIRE_SUBMIT_APPROVAL) {
+          if (itemLookup.label === Constants.LOGICAL_SUBMIT_APPROVAL || itemLookup.label === Constants.RETIRE_SUBMIT_APPROVAL) {
             itemLookup["disabled"] = true;
           } else {
             itemLookup["disabled"] = false;
           }
         });
-      } else if (this.ruleImpactAnalysisRun.ruleImpactTypeId != null && this.eclConstants.RULE_IMPACT_TYPE_LOGICAL === this.ruleImpactAnalysisRun.ruleImpactTypeId) {
+      } else if (this.ruleImpactAnalysisRun.ruleImpactTypeId !== null && this.eclConstants.RULE_IMPACT_TYPE_LOGICAL === this.ruleImpactAnalysisRun.ruleImpactTypeId) {
         this.logicalCodesFlag = false;
         this.reviewStatus.forEach(itemLookup => {
-          if (itemLookup.label == Constants.EDITORIAL_APPROVED || itemLookup.label == Constants.EDITORIAL_SUBMIT_APPROVAL || itemLookup.label == Constants.RETIRE_SUBMIT_APPROVAL) {
+          if (itemLookup.label === Constants.EDITORIAL_APPROVED || itemLookup.label === Constants.EDITORIAL_SUBMIT_APPROVAL || itemLookup.label === Constants.RETIRE_SUBMIT_APPROVAL) {
             itemLookup["disabled"] = true;
           } else {
             itemLookup["disabled"] = false;
@@ -1547,7 +1903,7 @@ export class ProvisionalRuleComponent implements OnInit {
         });
       } else if (this.retireStatusChild) {
         this.reviewStatus.forEach(itemLookup => {
-          if (itemLookup.label == Constants.EDITORIAL_APPROVED || itemLookup.label == Constants.EDITORIAL_SUBMIT_APPROVAL || itemLookup.label == Constants.LOGICAL_SUBMIT_APPROVAL) {
+          if (itemLookup.label === Constants.EDITORIAL_APPROVED || itemLookup.label === Constants.EDITORIAL_SUBMIT_APPROVAL || itemLookup.label === Constants.LOGICAL_SUBMIT_APPROVAL) {
             itemLookup["disabled"] = true;
           } else {
             itemLookup["disabled"] = false;
@@ -1617,6 +1973,7 @@ export class ProvisionalRuleComponent implements OnInit {
     if (this.ruleImpactAnalysisRun &&
       this.ruleImpactAnalysisRun.ruleImpactedInd === 0 && this.retireStatusChild === false) {
       this.impactTypeNo = true;
+      this.logicalCodesFlag = true;
       this.selectedReviewStatus = "";
       this.ruleReviewComments = "";
     }
@@ -1657,15 +2014,29 @@ export class ProvisionalRuleComponent implements OnInit {
   clearData(): void {
     this.loadSelectedRule();
   }
-
   // temp ICMS-link
   showIcmsTemplate(rowInfo) {
     if (this.selectorConfig.templateActivate) {
+
+      // Send codes and notes to the icmsTemplate component
+      let notes = '';
+      let cvCode = this.impactsComponent.cvCodes.find(code => code.id === rowInfo.cvCode);
+      let desc = '';
+      if (cvCode) {
+        let elements = cvCode.description.split(' ');
+        desc = elements[elements.length - 1];
+      }
+
+      if (this.notesData && this.notesData.ruleNoteTabData && this.notesData.ruleNoteTabData.ruleNotesDto && this.notesData.ruleNoteTabData.ruleNotesDto.notes) {
+        notes = this.notesData.ruleNoteTabData.ruleNotesDto.notes;
+      }
       this.dialogService.open(IcmsTemplateComponent, {
         data: {
           prm: this.libraryPrmNumber,
           lobs: this.selectedLobs,
-          rule: rowInfo
+          rule: rowInfo,
+          notes: notes,
+          cvCode: desc
         },
         header: 'ICMS Rule Adoption Template',
         width: '70%',
@@ -1677,8 +2048,16 @@ export class ProvisionalRuleComponent implements OnInit {
   showIcmsTemplateChange(ruleInfo): void {
     if (this.selectorConfig.templateActivate) {
       this.dialogService.open(IcmsTemplateChangeComponent, {
-        data: { ruleInfo, subVersion: this.applications.icms[0].subRule, deltas: this.deltas, prm: this.libraryPrmNumber }, // this.applications.icms[0].subRule
-        header: Constants.ICMS_RMR_CHANGE_TITLE
+        data: {
+          ruleInfo,
+          subVersion: this.applications.icms[0].subRule,
+          deltas: this.deltas,
+          prm: this.libraryPrmNumber,
+          hcpcsCptDelta: this.hcpcsCptDelta,
+          icdDelta: this.icdDelta
+        }, // this.applications.icms[0].subRule
+        header: Constants.ICMS_RMR_CHANGE_TITLE,
+        width: '70%'
       });
     }
   }
@@ -1736,7 +2115,7 @@ export class ProvisionalRuleComponent implements OnInit {
   showLatestVersionMsg() {
     this.latestVersionMeg = "";
     this.ruleService.getRuleLatestVersion(this.ruleId).subscribe(response => {
-      if (response.data != "" && response.data != this.ruleInfo.ruleCode) {
+      if (response.data !== "" && response.data !== this.ruleInfo.ruleCode) {
         this.latestVersionMeg = "The latest version of this rule is " + response.data;
         return true;
       }
@@ -1782,16 +2161,17 @@ export class ProvisionalRuleComponent implements OnInit {
 
 
   addRule() {
+    if (this.ruleInfo.ruleId !== undefined && !this.isPdgMedicaidRule) {
+      this.codesService.deleteDraftRuleCodes(Constants.ICD_CODE_TYPE, this.ruleInfo.ruleId).subscribe();
+    }
     this.getNewProvisionalRuleId();
     this.provisionalReferences.clearScreenReference();
     this.getAllReferences(this.ruleInfo.ideaId, Constants.ECL_IDEA_STAGE);
     this.addButtonDisable = true;
     this.resetTabChange();
+
   }
 
-  ///resetProcedureCodesId() {
-  //   this.ruleCodes.ruleProcedureCodes.forEach(pc => pc.ruleProcedureCodeId = null);
-  // }
 
   getAllReferences(ruleId: number, stage: any) {
     this.eclReferenceService.getAllEclReferences(ruleId, stage).subscribe((response: any) => {
@@ -1839,7 +2219,6 @@ export class ProvisionalRuleComponent implements OnInit {
   }
 
   deleteDialogYes() {
-    this.procedureCodesService.removeRuleInfoData(this.ruleInfo.ruleId);
     if (this.addButtonDisable && this.lastRuleId === this.provisionalRuleId) {
       this.filteredRules.pop();
       this.filteredRules = [...this.filteredRules];
@@ -1847,12 +2226,12 @@ export class ProvisionalRuleComponent implements OnInit {
       this.addButtonDisable = false;
       this.provisionalRuleId = this.filteredRules[this.filteredRules.length - 1].ruleId;
       this.selectedRule = this.filteredRules[this.filteredRules.length - 1];
-      this.populateByExistingProvisionalRuleId();
+      this.loadProvisionalRuleDetails(this.provisionalRuleId, false, this.provSetup, false)
       this.resetTabChange();
     } else {
       this.deleteDisplay = false;
       this.ideaService.deleteProvisionalRule(this.provisionalRuleId).subscribe((resp: any) => {
-
+        this.provisionalRuleId = null;
       }, error => console.log('error = ' + error),
         () => this.getExistingProvisionalRulesByIdeaId()
       );
@@ -1867,46 +2246,23 @@ export class ProvisionalRuleComponent implements OnInit {
   getNewProvisionalRuleId() {
     //Call service to get new ECL-#
     this.ideaService.getNextProvisionalRuleId().subscribe(resp => {
+      let selectedRuleId = this.ruleInfo.ruleId;
       this.ruleInfo.ruleCode = resp.data;
       this.ruleInfo.ruleId = +this.ruleInfo.ruleCode.substring(4);
       this.ruleInfo.ruleCode = 'ECL-' + this.ruleInfo.ruleId;
+      if (this.isPdgMedicaidRule) {
+        this.ruleInfo.ruleLogicEffDt = new Date(Constants.DEFAULT_DATE_FROM);
+      }
       this.filteredRules = [...this.filteredRules, { ruleCode: this.ruleInfo.ruleCode, name: this.ruleInfo.ruleName, ruleId: this.ruleInfo.ruleId }];
-      this.procedureCodesService.setActiveRuleInfo(this.ruleInfo);
+      if (selectedRuleId !== null && selectedRuleId !== undefined && this.ruleInfo.ruleId) {
+        this.codesService.cloneRuleCodes(this.ruleInfo.ruleId, selectedRuleId, Constants.ICD_CODE_TYPE).subscribe();
+      }
     }, error => console.log('error = ' + error),
       () => {
         this.selectedRule = this.filteredRules[this.filteredRules.length - 1];
         this.provisionalRuleDto.newProvRule = true;
       }
     );
-
-  }
-
-  populateByExistingProvisionalRuleId() {
-    this.loading = true;
-    this.provisionalRuleService.findRuleById(this.provisionalRuleId).subscribe(response => {
-      let rule = response.data;
-      this.ruleInfo = rule;
-      this.ruleInfo.assignedTo = this.selectedPO;
-      this.getLibraryPrmNumber(rule.ideaId);
-      this.ruleStatus = 'Provisional Rule';
-      if (this.ruleInfo.ruleLogicEffDt !== null && this.ruleInfo.ruleLogicEffDt !== undefined) {
-        this.ruleInfo.ruleLogicEffDt = new Date(this.ruleInfo.ruleLogicEffDtStr);
-      }
-
-      this.provDialogDisable = false;
-      this.provisionalReferences.getAllReferences(this.ruleInfo.ruleId, this.ruleStage);
-      this.setRuleInfoLobsStatesJurCat(this.ruleInfo);
-      this.checkStateJurisdiction();
-      if (this.ruleInfo.activeWorkflow) {
-        this.wasNeedMoreInfo = (this.ruleInfo.activeWorkflow.workflowStatusId === NEED_MORE_INFO);
-        this.ruleReviewComments = this.ruleInfo.activeWorkflow.reviewComments;
-      }
-      // this flag set to the false parameter since it is
-      // already a provisional rule(if it is a new provisional rule which is not saved this flag willbe true)
-      this.provisionalRuleDto.newProvRule = false;
-
-      this.loading = false;
-    });
   }
 
   getExistingProvisionalRulesByIdeaId() {
@@ -1914,7 +2270,17 @@ export class ProvisionalRuleComponent implements OnInit {
     this.loading = true;
     this.ideaService.getExistProvisionalRulesByIdeaId(this.ruleId).subscribe((resp: BaseResponse) => {
       if (resp.data.length > 0) {
-        this.filteredRules = resp.data.map(rule => {
+        this.filteredRules = resp.data.map(rule => {          
+          this.policyPackageControl.value = rule.policyPackagesId;
+          if(rule.policyPackagesId){
+            let labels = [];
+
+            rule.policyPackagesId.forEach(i => {//ids from DB                          
+              labels.push(this.policyPackageValues.filter(j=>j.value === i)[0].label) ;
+            });
+  
+            this.policyPackageControl.valuesAsString = labels.join(",") ;
+          }
           let setId: number;
           if (!rule.assignedTo) {
             setId = null;
@@ -1923,23 +2289,37 @@ export class ProvisionalRuleComponent implements OnInit {
           }
           return { ruleCode: rule.ruleCode, name: rule.ruleName, ruleId: rule.ruleId, assignedTo: setId };
         });
-        this.procedureCodesService.registerRules(resp.data);
         this.filteredRules.sort((a, b) => (a.ruleCode > b.ruleCode) ? 1 : -1);
-        this.provisionalRuleId = this.filteredRules[this.filteredRules.length - 1].ruleId;
-        this.selectedRule = this.filteredRules[this.filteredRules.length - 1];
-        this.previousSelectedRule = this.filteredRules[this.filteredRules.length - 1];
-        this.selectedPO = this.filteredRules[this.filteredRules.length - 1].assignedTo;
+        if (!this.provisionalRuleId) {
+          this.provisionalRuleId = this.filteredRules[this.filteredRules.length - 1].ruleId;
+          this.selectedRule = this.filteredRules[this.filteredRules.length - 1];
+          this.previousSelectedRule = this.filteredRules[this.filteredRules.length - 1];
+          this.selectedPO = this.filteredRules[this.filteredRules.length - 1].assignedTo;
+        } else {
+          const filteredRule = this.filteredRules.filter(item => item.ruleId == this.ruleInfo.ruleId);
+          if (filteredRule && filteredRule.length > 0) {
+            this.provisionalRuleId = filteredRule[0].ruleId;
+            this.selectedRule = filteredRule[0];
+            this.previousSelectedRule = filteredRule[0];
+            this.selectedPO = filteredRule[0].assignedTo;
+          }
+        }
+
         this.clearScreenData();
         //setting the stage to provisional to fetch and save all the references at the provisional stage
         this.provisionalReferences.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
-        this.ruleStage = Constants.ECL_PROVISIONAL_STAGE;
-        this.populateByExistingProvisionalRuleId();
+        this.stageId = Constants.ECL_PROVISIONAL_STAGE;
+        if (this.selectedRule !== null) {
+          this.loadProvisionalRuleDetails(+this.selectedRule.ruleId, false, this.provSetup, false)
+        } else {
+          this.loadProvisionalRuleDetails(this.provisionalRuleId, false, this.provSetup, false)
+        }
         this.settingNewProvisionalDto(resp).then((prov: any) => {
           if (prov !== null || prov !== undefined) {
             this.provisionalRuleDtos = prov;
           }
-          this.setRuleRevenueCodesList();
           this.setProcedureCodesList();
+          this.setDiagnosticCodesList();
         });
         // call to set the rulerevenue codes list in provisionalruledto
       } else {
@@ -1960,6 +2340,8 @@ export class ProvisionalRuleComponent implements OnInit {
       !ele.assignedTo ? assignedId = null : assignedId = ruleInfo.assignedTo.userId;
       if (ele.ruleLogicEffDt !== null && ele.ruleLogicEffDt !== undefined) {
         ruleInfo.ruleLogicEffDt = new Date(ele.ruleLogicEffDt);
+      } else if (this.isPdgMedicaidRule) {
+        this.ruleInfo.ruleLogicEffDt = new Date(Constants.DEFAULT_DATE_FROM);
       }
       this.sqldateConvert.JSDateToSQLDate(ruleInfo.ruleLogicEffDt);
       let excludedClaimServices: any[] = [];
@@ -1973,7 +2355,7 @@ export class ProvisionalRuleComponent implements OnInit {
       let selectedReviewStatus = '';
       let opportunityValue: OpportunityValueDto = new OpportunityValueDto();
       let ruleRevenueCodesList: any[] = [];
-      let procedureCodeDto: ProcedureCodeDto = new ProcedureCodeDto();
+      let procedureCodeDto: RuleCodeDto = new RuleCodeDto();
 
       return new Promise((resolve, reject) => {
         forkJoin(
@@ -2024,6 +2406,15 @@ export class ProvisionalRuleComponent implements OnInit {
               }
             });
           }
+          if (ruleInfo.cvCode) {
+            if (typeof ruleInfo.cvCode == 'string') {
+              ruleInfo.cvCode = +ruleInfo.cvCode;
+            }
+            else {
+              ruleInfo.cvCode = ruleInfo.cvCode.lookupId;
+            }
+          }
+
           let provDto = {
             action: 'submit',
             assignedTo: assignedId,
@@ -2043,6 +2434,8 @@ export class ProvisionalRuleComponent implements OnInit {
             excludedBills: excludedBillClaims,
             selectedReviewStatus: selectedReviewStatus,
             oppValueDto: opportunityValue,
+
+            claimTypes: this.claims.claimTypesSelection,
             newProvRule: false,
             procedureCodeDto: procedureCodeDto,
             ruleRevenueCodesList: ruleRevenueCodesList
@@ -2056,9 +2449,9 @@ export class ProvisionalRuleComponent implements OnInit {
   setProcedureCodesList() {
     if (this.provisionalRuleDtos.length > 0) {
       this.provisionalRuleDtos.forEach(provRuleDto => {
-        this.ruleService.getAllRuleProcedureCodes(provRuleDto.ruleInfo.ruleId).subscribe(response => {
+        this.ruleService.getAllRuleProcedureCodesForRule(provRuleDto.ruleInfo.ruleId).subscribe(response => {
           if (response !== null && response !== undefined) {
-            provRuleDto.procedureCodeDto = response.data || new ProcedureCodeDto();
+            provRuleDto.procedureCodeDto = response.data || new RuleCodeDto();
           }
         });
       });
@@ -2066,22 +2459,19 @@ export class ProvisionalRuleComponent implements OnInit {
 
   }
 
-
-  /* Method to set the RuleRevenueCodesList in provisionalRuleDtoList */
-  setRuleRevenueCodesList() {
+  setDiagnosticCodesList() {
     if (this.provisionalRuleDtos.length > 0) {
       this.provisionalRuleDtos.forEach(provRuleDto => {
-        let ruleRevenueCodesList: any[] = [];
-        this.claimsService.getAllRuleRevenueCodes(provRuleDto.ruleInfo.ruleId).subscribe((response: any) => {
+        this.ruleService.getAllRuleProcedureDiagnosisCodesForRule(provRuleDto.ruleInfo.ruleId).subscribe(response => {
           if (response !== null && response !== undefined) {
-            if (response.data !== null) {
-              ruleRevenueCodesList = response.data;
-              provRuleDto.ruleRevenueCodesList = ruleRevenueCodesList;
-            }
+
+            provRuleDto.diagnosisCodeDto = response.data || new RuleCodeDto();
+
           }
         });
       });
     }
+
   }
 
   getLibraryPrmNumber(ideaId: number) {
@@ -2097,21 +2487,23 @@ export class ProvisionalRuleComponent implements OnInit {
       this.filteredRules = [...this.filteredRules];
       this.selectDisplay = false;
       this.addButtonDisable = false;
-    } else {
+    } else if (this.selectedRule !== null) {
       this.previousSelectedRule = this.selectedRule;
       this.selectedPO = this.selectedRule.assignedTo;
+
       this.selectDisplay = false;
     }
-
+    if (this.ruleInfo.ruleId !== undefined && !this.isPdgMedicaidRule) {
+      this.codesService.deleteDraftRuleCodes(Constants.ICD_CODE_TYPE, this.ruleInfo.ruleId).subscribe();
+    }
     this.provisionalRuleId = this.selectedRule.ruleId;
     this.clearScreenData();
-    this.populateByExistingProvisionalRuleId();
+    this.loadProvisionalRuleDetails(this.provisionalRuleId, false, this.provSetup, false)
     // to reset the tabchange event and disable the submit button on change of row selection.
     this.resetTabChange();
     //reset References tab inputs to blank and reset buttons
     this.reference = { ...this.reference };
     this.eclRef = { ...this.eclRef };
-    this.selectedReference = { ...this.selectedReference };
     this.isReferenceDisableObject = { ...this.isReferenceDisableObject };
     this.isRemovableObject = { ...this.isRemovableObject };
     this.isSavableObject = { ...this.isSavableObject };
@@ -2132,11 +2524,9 @@ export class ProvisionalRuleComponent implements OnInit {
 
   resetTabChange() {
     this.submitBtnDisable = true;
-    this.claimsClicked = false;
-    this.providersClicked = false;
-    this.codesClicked = false;
-    this.impactsClicked = false;
-    this.referencesClicked = false;
+    for (const prop in this.tabClicks) {
+      this.tabClicks[prop] = false;
+    }
   }
 
   clearScreenData() {
@@ -2144,7 +2534,7 @@ export class ProvisionalRuleComponent implements OnInit {
     this.selectedLobs = [];
     this.selectedStates = [];
     this.selectedJurisdictions = [];
-    this.selectedReferences = [];
+    this.selectedPdgReferences = [];
 
     this.includedClaimServices = [];
     this.excludedClaimServices = [];
@@ -2166,46 +2556,11 @@ export class ProvisionalRuleComponent implements OnInit {
   onRuleApplicationsLoad(applications) {
     this.showChangeRmr = applications.icms.length > 0;
     this.applications = applications;
-  }
-  /**
-   * Continue to execute action.
-   * @param action Action.
-   */
-  continueAction(action: string) {
-    if (action === Constants.SUBMIT_ACTION) {
-      this.submitProvisionalRules();
-    } else if (action === Constants.SAVE_ACTION) {
-      this.saveProvisional();
-    }
-  }
-  /**
-   * Response to check if an action (save or submit) can continue.
-   * This is to allow some child components to do extra validations / actions.
-   * @param contRes Check verification response.
-   */
-  canContinueAction(contRes: any) {
-    if (contRes) {
-      if (contRes.result) {
-        this.continueAction(contRes.action);
-      } else {
-        let acceptVisible = true;
-        let rejectLabel = Constants.NO;
-        if (contRes.notValidated) {
-          acceptVisible = false;
-          rejectLabel = 'Ok';
-        }
 
-        this.confirmationService.confirm({
-          key: 'codesTab',
-          header: 'Confirmation',
-          message: contRes.message,
-          acceptVisible: acceptVisible,
-          rejectLabel: rejectLabel,
-          accept: () => {
-            this.continueAction(contRes.action);
-          }
-        })
-      }
+    if(this.displayRMR) {
+      setTimeout(() => {
+        this.showIcmsTemplateChange(this.ruleInfo);
+      });
     }
   }
 
@@ -2214,11 +2569,10 @@ export class ProvisionalRuleComponent implements OnInit {
    * (this is to give child elements to do extra actions / validations)
    * @param action detail of requestd action.
    */
-  checkToContinueAction(action: string) {
-    this.action = action;
+  checkToContinueAction(action: string) { 
+    this.updatingPolicyPackage();
     if (action === Constants.SUBMIT_ACTION) {
-      let ret = this.procedureCodesService.validate(action);
-      this.canContinueAction(ret);
+      this.submitProvisionalRules();
     } else if (action === Constants.SAVE_ACTION) {
       this.saveProvisional();
     }
@@ -2253,10 +2607,10 @@ export class ProvisionalRuleComponent implements OnInit {
    * Return if audit log tab should be displayed to user
    */
   enableAuditLogTab() {
-    return this.ruleInfo.ruleId != undefined &&
-      this.ruleInfo.ruleStatusId != undefined &&
-      this.ruleInfo.ruleStatusId.ruleStatusId == Constants.LIBRARY_RULE_VALUE &&
-      this.ruleInfo.parentRuleId != this.ruleInfo.ideaId;
+    return this.ruleInfo.ruleId !== undefined &&
+      this.ruleInfo.ruleStatusId !== undefined &&
+      this.ruleInfo.ruleStatusId.ruleStatusId === Constants.LIBRARY_RULE_VALUE &&
+      this.ruleInfo.parentRuleId !== this.ruleInfo.ideaId;
   }
 
   /**
@@ -2264,8 +2618,184 @@ export class ProvisionalRuleComponent implements OnInit {
    * @param e - Object that contains require value to trigger event.
    */
   messageRecieve(e: MessageSend) {
-    if (e.type = 'warn') {
+    if (e && e.type === 'warn') {
       this.toastService.messageWarning(e.summary, e.detail, e.time, false);
     }
   }
+
+  /**
+   * method to navigate back to the research requested page.
+   */
+  navigateBack(page: string) {
+    let rrPathParams;
+    if (page === Constants.RR_MY_REQUEST_PAGE) {
+      this.router.navigate([RoutingConstants.NAV_MY_RESEARCH_REQUEST_PAGE]);
+      this.closeRuleApprovalDialog();
+    } else if (page === Constants.RR_REQUEST_ID_PAGE) {
+      rrPathParams = btoa(JSON.stringify({
+        'rrCode': this.rrId,
+        'navPageTitle': 'My Requests',
+        'navPagePath': Constants.MY_RESEARCH_REQUEST_ROUTE,
+        'rrReadOnly': true,
+        'rrButtonsDisable': true,
+      }));
+      this.router.navigate([Constants.RESEARCH_REQUEST_ROUTE], { queryParams: { rrPathParams: rrPathParams } });
+      this.closeRuleApprovalDialog();
+    }
+  }
+
+  changeICDCodes(event) {
+    this.ruleInfo.diagnosisCodeDto = event;
+    this.provisionalRuleDto.diagnosisCodeDto = event;
+  }
+
+  displayAsterisk() {
+    const { subVersionNumber: sub, ruleStatusId: status } = this.ruleInfo;
+    return (sub > Constants.SUB_VERSION_ONE ||
+      status.ruleStatusId !== Constants.LIBRARY_RULE_VALUE) ? '*' : '';
+  }
+
+  checkExpand(expand: boolean) {
+    if (this.readOnlyView || this.provDialogDisable) {
+      this.expandRuleLogic = expand;
+    }
+
+    let textarea = document.getElementById("ruleLogicOriginal");
+    textarea.style.height = this.calcHeight(this.ruleInfo.ruleLogicOriginal)+"px";
+  }
+
+  // Dealing with Textarea Height
+  calcHeight(value) {
+      let numberOfLineBreaks = value.length/130;
+      let newHeight = 15 + numberOfLineBreaks * 20 + 12 + 2;
+      return newHeight;
+  }
+
+
+  /**
+   * This Methos is for validate the information
+   * contained in rule name field
+   */
+  validateRuleName() {
+    let resp = true;
+    let RDN = this.ruleInfo.ruleName;
+    if (RDN === null || RDN === undefined || RDN === '' || this.utils.validateStringContaintOnlyWhiteSpaces(RDN)) {
+      this.Message = 'Please enter data in Rule Name field';
+      this.saveDisplay = true;
+      resp = false;
+    }
+    this.ruleInfo.ruleName = this.ruleInfo.ruleName.trim();
+    return resp;
+  }
+
+  onCatChange() {
+    if (!this.readOnlyView && this.isPdgMedicaidRule) {
+      let states = this.utils.getStateFromCategory(this.ruleInfo.category.categoryId, this.categories, this.selectedStates, this.states)
+      this.selectedStates = [...states];
+      if (this.pdgComponent) {
+        this.pdgComponent.setIndustryUpdate(this.selectedStates);
+      }
+    }
+  }
+
+  onStateInput(states) {
+    if (!this.readOnlyView && this.isPdgMedicaidRule) {
+      if (null != states) {
+        this.selectedStates = states;
+      }
+      if (this.pdgComponent) {
+        this.pdgComponent.setIndustryUpdate(this.selectedStates);
+      }
+      let cat = this.utils.getCategoryFromState(this.ruleInfo.category.categoryId, this.categories, this.selectedStates, this.states)
+      this.ruleInfo.category.categoryId = cat;
+    }
+
+  }
+
+  shouldShowChangeRmr():boolean {
+    return (this.showChangeRmr && ((this.deltas && this.deltas.length > 0)
+      || this.hcpcsCptDelta || this.icdDelta));
+  }
+
+  saveRrMappingForProvisional(rrCodeId: string, eclIdeaId: number, ruleId: number, action: string) {
+    if (rrCodeId) {
+      this.rrService.saveProvRrMapping({rrCode: rrCodeId, ideaId: eclIdeaId,  eclId: ruleId, actionMapping: action}).subscribe();
+    }
+  }
+
+
+  isPdgRule(selectedLobs: any[]): boolean {
+    return selectedLobs && selectedLobs.length == 1 && selectedLobs[0] == 1;
+  }
+   
+  checkReadonlyPdgNonPdgRule() {
+    this.isReadOnlyNonPdgRule = false;
+    this.isReadOnlyPdgRule = false;
+
+    if (this.readOnlyView || this.provDialogDisable) {
+      if (this.ruleInfo.pdgTemplateDto && this.ruleInfo.pdgTemplateDto.pdgId != null) {
+        this.isReadOnlyPdgRule = true;
+      } else {
+        this.isReadOnlyNonPdgRule = true;
+      }
+    }
+  }
+  
+  /**
+   * This method is for update de policy packages when there is a change.
+   */
+  updatingPolicyPackage(){    
+    this.provisionalRuleDto.policyPackages = this.policyPackageControl.value;
+  }
+
+  /**
+   * This method is for validate if the rule has one midrule associated.
+   * This method is execute when the rule information is loading.
+   * @param ruleId 
+   */
+  checkMidRule(ruleId: number) {  
+    this.ruleApplicationService.getAllRuleApplicationUrl(ruleId).subscribe((response: BaseResponse) => {
+      let icmsApplications = response.data.ICMS;
+      if(icmsApplications[0] && icmsApplications[0].midRule){
+        this.midRule = icmsApplications[0].midRule;
+        this.midRuleVersion = icmsApplications[0].version;
+        this.isThereMidRule = true;      
+      }
+      else{
+        this.isThereMidRule = false;
+      }
+    });    
+  }
+
+  /**
+   * This method is for redirect to ELL screen when the rule from ecl catalog screen 
+   * has one midrule associated.
+   */
+  redirectToELLRuleLongDetail(){
+
+    let releaseLogKey: number = 0;
+
+    if (this.midRule) {
+
+      //Service to get the last release log key from ELL tables
+      this.ellSearchService.loadReleaseLogKey().subscribe((releaseKeyResponse: any) => {
+
+        releaseLogKey = releaseKeyResponse.data;
+
+        if (releaseLogKey) {
+          this.router.navigate([`/rule-long-detail-ell/${releaseLogKey}/${this.midRule}`], 
+          { queryParams: { source: Constants.LIBRARY_RULE_SCREEN, RI: this.ruleInfo.ruleId, version: this.midRuleVersion } });
+        }
+
+      });
+
+    }
+
+  }
+
+  redirectRuleOverview(){
+    this.router.navigate([`rule-ingestion/ingested-rules`], 
+    { queryParams: { source: Constants.LIBRARY_RULE_SCREEN, RI: this.ruleInfo.ruleId, RC: this.ruleInfo.ruleCode, MR: this.midRule } });
+  }
+
 }

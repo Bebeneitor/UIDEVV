@@ -6,6 +6,10 @@
                 <label class="custom-label">Idea Id</label>
                 <input pInputText class="input-control-ideaId" type="text" name="irId" [disabled]="true"
                     [(ngModel)]="displayIdea.ideaCode">
+                <label class="custom-label-cat"><span class="required-field-color">*</span>Policy Packages</label>
+                <p-multiSelect class="policy-packages" [options]="policyPackageValues" [style]="{'width':'140px'}" 
+                    [filter]="false" name="selectedPP" [(ngModel)]="policyPackageSelected">
+                </p-multiSelect>
             </div>
 
             <div class='search-item'>
@@ -23,13 +27,13 @@
             <div class="search-item">
                 <label class="custom-label-cat"><span class="required-field-color">*</span>Category</label>
                 <p-dropdown class="cat-search" [disabled]="readOnlyView" [options]="categories" [style]="{'width':'100%'}" name="selectedCat"
-                    [(ngModel)]="selectedCat" placeholder="Choose">
+                    [(ngModel)]="selectedCat" (onChange)="catInput()"  placeholder="Choose">
                 </p-dropdown>
             </div>
 
             <div id="groupItem" class=group-item-search>
                 <div id="selectLobID" class="search-item-box-lob">
-                    <p-multiSelect class="lob-search" [disabled]="readOnlyView" [options]="business" [style]="{'width':'140px'}" [filter]="false"
+                    <p-multiSelect class="multi-select-search" [disabled]="readOnlyView || isPdgMedicaidRule" [options]="business" [style]="{'width':'140px'}" [filter]="false"
                         (onChange)="lobInput()"  name="selectedLobs"
                         [(ngModel)]="selectedLobs">
                         <p-header class="custom-label-lobHeader"> All Business </p-header>
@@ -37,16 +41,19 @@
                     <label class="custom-all-label"><span class="required-field-color">*</span>Line of Business</label>
                 </div>
                 <div id="selectStateID" class="search-item-box">
-                    <p-multiSelect class="state-search" [options]="states" [style]="{'width':'140px'}" [filter]="false"
-                         [(ngModel)]="selectedStates" name="selectedStates"
+                    <p-multiSelect *ngIf="!isPdgMedicaidRule" class="multi-select-search" [options]="states" [style]="{'width':'140px'}" [filter]="false"
+                         [(ngModel)]="selectedStates" name="selectedStates" (onChange)="stateInput()" 
                         [disabled]="disableState || readOnlyView">
                         <p-header> All States </p-header>
                     </p-multiSelect>
+                    <p-dropdown *ngIf="isPdgMedicaidRule" class="state-search" [disabled]="disableState || readOnlyView" [options]="states"  name="selectedStates"
+                    [(ngModel)]="selectedStates[0]" (onChange)="stateInput()"   placeholder="Choose"></p-dropdown>            
 
-                    <label class="custom-all-label"><span *ngIf="selectedLobs != undefined && selectedLobs.includes(1)" class="required-field-color">*</span>States</label>
+
+                    <label [ngClass]="isPdgMedicaidRule ? 'custom-all-label-pdg' : 'custom-all-label'"><span *ngIf="selectedLobs != undefined && selectedLobs.includes(1)" class="required-field-color">*</span>States</label>
                 </div>
                 <div id="selectJurisdictionID" class="search-item-box-jur">
-                     <p-multiSelect class="jur-search" [options]="jurisdictions" [disabled]="disableJurisdiction || readOnlyView"
+                     <p-multiSelect class="multi-select-search" [options]="jurisdictions" [disabled]="disableJurisdiction || readOnlyView"
                         [style]="{'width':'136px'}" [filter]="false" name="selectedJur"
                         [(ngModel)]="selectedJurs">
                         <p-header> All Jurisdictions </p-header>
@@ -61,12 +68,47 @@
             </div>
         </div>
             <div class="group-item-switch">
-                <label id="toggleAdvLabel" class="less-more-label"> More Details </label>
+                <label id="toggleAdvLabel" [textContent]="detailsText" class="less-more-label"> </label>
                 <a (click)="displayInfo()"><img [src]="checkboxPlus" id="checkboxImg" class="custom-checkbox"></a>
             </div>
 
-            <div id="toggleAdvSH" class="hide-show">
-                <div class='search-item-status'>
+            <div *ngIf="toggleSH">
+
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="row">   
+                                <div class="col">
+                                    <label class="custom-label-status">Status</label>
+                                    <input pInputText class="input-control-status" type="text" name="statusType" [disabled]="true"
+                                        [(ngModel)]="displayIdea.status">
+                                </div>
+                                <div class="col">
+                                    <label id="ruleChangeName" class="custom-label-ideaName">Idea Name</label>
+                                <input pInputText class="input-control-ideaName" type="text" name="irName"
+                                    [(ngModel)]="displayIdea.ideaName" [disabled]="true">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label id="ruleChangeDesc" class="custom-label-ideaDesc">Idea Description</label>
+                                    <textarea pInputTextarea class="input-control-ideaDesc" name="irDesc" [readonly]="true" [disabled]="readOnlyView"
+                                        [(ngModel)]="displayIdea.ideaDescription" style="color: #797979; background-color: #F5F5F5 !important; opacity: .95;"></textarea>
+                                     
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                              <fieldset>
+                                    <label>Comments</label>                              
+                                    <p-accordion expandIcon="pi pi-fw pi-chevron-up" collapseIcon="pi pi-fw pi-chevron-down">
+                                      <p-accordionTab *ngFor="let comment of ideaComments" header={{getCommentHeader(comment)}}>
+                                        {{comment.comments}}
+                                      </p-accordionTab>
+                                    </p-accordion>
+                                  </fieldset>
+                        </div>
+                <!-- <div class='search-item-status'>
+                    
                     <label class="custom-label-status">Status</label>
                     <input pInputText class="input-control-status" type="text" name="statusType" [disabled]="true"
                         [(ngModel)]="displayIdea.status">
@@ -82,7 +124,8 @@
                     <label id="ruleChangeDesc" class="custom-label-ideaDesc">Idea Description</label>
                     <textarea pInputTextarea class="input-control-ideaDesc" name="irDesc" [readonly]="true" [disabled]="readOnlyView"
                         [(ngModel)]="displayIdea.ideaDescription" style="color: #797979; background-color: #F5F5F5 !important; opacity: .95;"></textarea>
-                </div>
+                </div> -->
+            </div>
             </div>
         </div>
     </form>

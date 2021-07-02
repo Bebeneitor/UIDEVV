@@ -6,6 +6,15 @@
         </button>
     </div>
     <div class="ui-fluid">
-        <ecl-table #cureModulesTable [tableModel]='cureModulesTableModel' (onAcctionIcon)="onClickIcon($event)"></ecl-table>
+        <ecl-table #cureModulesTable [tableModel]='cureModulesTableModel' (onAcctionIcon)="onClickIcon($event)"
+        (onAcctionButton)="onAcctionButton($event)"
+        (onSelectRecord)="setSelectRules($event)" (onUnSelectRecord)="setSelectRules($event)"></ecl-table>
+    </div>
+    <br>
+    <div class="ui-fluid">
+        <button class="btn btn-sm btn-primary f-11" style="padding: 5px;"
+          [disabled]="!this.selectedRecords || !this.selectedRecords.length"
+           (click)="processModule()">Activate / Deactivate
+        </button>
     </div>
 </p-card>

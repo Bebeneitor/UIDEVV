@@ -18,7 +18,7 @@ import { TeamDto } from 'src/app/shared/models/dto/team-dto';
 
 export class EclTeamComponent implements OnInit, OnDestroy {
 
-  @ViewChild('dt') dataTable: Table;
+  @ViewChild('dt',{static: true}) dataTable: Table;
   @Input() fieldSaveButton: boolean;
   @Input() default: boolean;
   @Output() saveButtonChange = new EventEmitter<Boolean>();

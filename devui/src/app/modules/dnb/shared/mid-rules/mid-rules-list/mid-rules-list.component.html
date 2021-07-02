@@ -1,0 +1,32 @@
+<p-dialog
+  #dialog
+  [header]="'Add MidRule Template'"
+  [(visible)]="openDialog"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width: 10%">Template</th>
+          <th style="width: 50%">Template Information</th>
+          <th style="width: 40%">Reason Code</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let midR of midRules" (click)="dialogSelected(midR)">
+          <td>
+            <pre>{{ midR.template }}</pre>
+          </td>
+          <td>
+            <pre>{{ midR.templateInformation }}</pre>
+          </td>
+          <td>
+            <pre>{{ midR.reasonCode }}</pre>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</p-dialog>

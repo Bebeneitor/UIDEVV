@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AppUtils } from 'src/app/shared/services/utils';
 import { RuleInfoService } from 'src/app/services/rule-info.service';
@@ -12,6 +12,8 @@ import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column'
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { UtilsService } from 'src/app/services/utils.service';
 import { Constants } from 'src/app/shared/models/constants';
+import {ResearchRequestSearchedRuleDto} from "../../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../../services/research-request.service";
 
 @Component({
   selector: 'app-re-assign-impact-analysis',
@@ -19,9 +21,9 @@ import { Constants } from 'src/app/shared/models/constants';
   styleUrls: ['./re-assign-impact-analysis.component.css']
 })
 
-export class ReAssignImpactAnalysisComponent implements OnInit {
+export class ReAssignImpactAnalysisComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('reassigmentTable') reassigmentTable: EclTableComponent;
+  @ViewChild('reassigmentTable',{static: true}) reassigmentTable: EclTableComponent;
 
   pageTitle: string;
   userId: number;
@@ -31,9 +33,11 @@ export class ReAssignImpactAnalysisComponent implements OnInit {
   selectedRules: any[] = [];
   selectedUser: string = "";
   selectedComment: string = "";
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
+  setFilter: string;
 
   constructor(private route: ActivatedRoute, private utils: AppUtils, private ruleInfoService: RuleInfoService,
-    private dialogService: DialogService, private eclConstants: ECLConstantsService, private messageService: MessageService, private utilService: UtilsService) {
+    private dialogService: DialogService, private eclConstants: ECLConstantsService, private messageService: MessageService, private utilService: UtilsService, private rrService: ResearchRequestService) {
 
     this.tableConfig = new EclTableModel();
     this.users = [{ label: "Search for User", value: null }];
@@ -42,11 +46,19 @@ export class ReAssignImpactAnalysisComponent implements OnInit {
   ngOnInit() {
     this.route.data.subscribe(params => {
       this.pageTitle = params['pageTitle'];
+      this.setFilter = params['filter'];
     });
     this.userId = this.utils.getLoggedUserId();
     this.getAllUsers();
     this.initializeTableConfig(this.tableConfig);
     this.getAllReassignComments();
+  }
+
+  ngAfterViewInit() {
+    if (this.setFilter) {
+      this.reassigmentTable.keywordSearch = this.setFilter;
+      this.reassigmentTable.search();
+    }
   }
 
    /**
@@ -83,7 +95,7 @@ export class ReAssignImpactAnalysisComponent implements OnInit {
   */
   initializeTableColumns(): EclColumn[] {
     let manager = new EclTableColumnManager();
-    manager.addLinkColumn("ruleCode", "Rule ID", '10%', true, EclColumn.TEXT, true);
+    manager.addLinkColumnWithIcon("ruleCode", "Rule ID", '10%', true, EclColumn.TEXT, true, 'left', 'researchRequestRuleIndicator', Constants.RESEARCH_REQUEST_INDICATOR_CLASS);
     manager.addTextColumn('ruleName', 'Rule Name', null, true, EclColumn.TEXT, true);
     manager.addTextColumn('categoryDesc', 'Category', '17%', true, EclColumn.TEXT, true);
     manager.addTextColumn("daysOld", "Days Old", '8%', true, EclColumn.TEXT, true);
@@ -99,6 +111,14 @@ export class ReAssignImpactAnalysisComponent implements OnInit {
   viewRuleModal(event: any) {
     const rowInfo = event.row;
     let draftRuleId = 0;
+    let ruleResponseIndicator: boolean = false;
+    let rrId: string = '';
+    this.getRuleResponseIndicator(rowInfo.ruleId).then((res: any) => {
+      if (res && res.ruleResponseIndicator && res.ruleResponseIndicator !== undefined) {
+        ruleResponseIndicator = (res.ruleResponseIndicator === 'Y') ? true : false;
+        rrId = res.ruleCode;
+      }
+    });
     this.ruleInfoService.getRulesByParentId(rowInfo.ruleId).subscribe((response: any) => {
       response.data.forEach(rule => {
         if (rule.ruleStatusId.ruleStatusId === this.eclConstants.RULE_STATUS_IMPACTED)
@@ -114,8 +134,11 @@ export class ReAssignImpactAnalysisComponent implements OnInit {
           provisionalRuleCreation: false,
           fromMaintenanceProcess: true,
           readWrite: false,
-          readOnlyView: true
+          readOnlyView: true,
+          ruleResponseInd: ruleResponseIndicator,
+          researchRequestId: rrId
         },
+        showHeader: !ruleResponseIndicator,
         header: 'Library Rule Details',
         width: '80%',
         height: '92%',
@@ -129,6 +152,18 @@ export class ReAssignImpactAnalysisComponent implements OnInit {
           'border': 'none' }
       });
     })
+  }
+
+  async getRuleResponseIndicator(ruleId: number) {
+    this.ruleResponseSearchDto = new ResearchRequestSearchedRuleDto();
+    return new Promise((resolve, reject) => {
+      this.rrService.getRuleResponseIndicator(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined && resp.data !== {}) {
+          this.ruleResponseSearchDto = resp.data;
+        }
+        resolve(this.ruleResponseSearchDto);
+      });
+    });
   }
 
   getReviewStatus(rowInfo: any): any {
@@ -184,7 +219,7 @@ export class ReAssignImpactAnalysisComponent implements OnInit {
     this.selectedRules = [];
     this.reassigmentTable.selectedRecords = [];
     this.reassigmentTable.savedSelRecords = [];
-    this.reassigmentTable.refreshTable();
+    this.reassigmentTable.resetDataTable();
   }
 
 }

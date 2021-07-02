@@ -1,0 +1,39 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
+<div class="container-fluid">
+    <div class="row m-2">
+        <h4 style="color:#31006F;">History</h4>
+    </div>
+    <div class="row m-2  justify-content-end">
+        <div class="p-2"> <i pTooltip="Filter" tooltipPosition="top" style="color:#31006F;font-size:2em;"
+                class="pi pi-calendar"></i>
+            <p-calendar #values [(ngModel)]="rangeDates" (click)="filterbyDate(rangeDates,values)" selectionMode="range"
+                placeholder="Choose a date range"></p-calendar>
+            <i class="pi pi-times" *ngIf="values.inputFieldValue?.length>0" (click)="clearDates(values)"></i>
+        </div>
+
+        <div class="p-2" #export (click)="exportPDF()"> <i id="export" pTooltip="Export" tooltipPosition="top"
+                style="color:#31006F;font-size:2em;cursor:pointer;" class="pi pi-download"></i>
+        </div>
+    </div>
+    <div #contentToConvert class="row m-2">
+        <div class="row ml-2 mr-2 mt-2 pl-2 pr-2 justify-content-center" *ngFor="let eachLog of allLogs"
+            style="width:100%;">
+            <div class="col-md-2 p-3 border">
+                <span class="date-style"> {{eachLog.date}}</span>
+            </div>
+            <div class="col-md-10 border">
+                <div class="border-bottom row col-md-12" *ngFor="let eachUser of eachLog.users">
+                    <div class="col-md-3 pt-2"> {{eachUser.user}}</div>
+                    <div class="col-md-9">
+                        <div *ngFor="let log of eachUser.logs" class="pt-2 col-md-12 row">
+                            <div class="col-md-2"><u> {{log.time}}</u></div>
+                            <div class="col-md-10"> {{log.activity}}
+                                <div *ngIf="!!log.comments">Comments: {{log.comments}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

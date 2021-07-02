@@ -26,7 +26,7 @@ export class ChangeLogGroupsComponent implements OnInit {
   tableName: string = '';
   mainResult: boolean;
   searchResult: boolean;
-  @ViewChild('tableResult') tableResult: EclTableComponent;
+  @ViewChild('tableResult',{static: true}) tableResult: EclTableComponent;
 
   constructor(private changeLogGroupsService: ChangeLogGroupsService, private dialogService: DialogService) { }
 

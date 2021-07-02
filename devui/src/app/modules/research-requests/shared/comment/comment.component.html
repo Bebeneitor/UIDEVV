@@ -1,0 +1,13 @@
+<div class="container">
+  <div class="row ">
+    <div class="col-12">
+      <h3><span *ngIf="enableComment" class="required-field-color">*</span>Comments</h3>
+    </div>
+  </div>
+  <div class="row p-2">
+    <div class="col-12"><textarea id="txtComments" name="txtComments" class="input-textarea"
+        rows="8" [disabled]="searchDisable" [(ngModel)]="request.rrComments"
+        (input)="removeRedOutline('txtComments')"></textarea>
+    </div>
+  </div>
+</div>

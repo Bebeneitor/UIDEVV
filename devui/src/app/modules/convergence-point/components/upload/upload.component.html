@@ -1,0 +1,196 @@
+<div class="div-upload">
+  <p-tabView *ngIf="parentPage === 'CRC'" (onChange)="changeTab($event)">
+    <p-tabPanel header="Primary Requirement">
+
+      <!--Primary requirement creation for Client Rule Requirements-->
+      <p-radioButton name="type" (click)="changeRadio()" value="NEW" label="New Primary Requirement" [(ngModel)]="type"
+        inputId="new"></p-radioButton>
+      &nbsp;&nbsp;
+      <p-radioButton name="type" (click)="changeRadio()" value="EXISTS" label="Existing Primary Requirement"
+        [(ngModel)]="type" inputId="exists"></p-radioButton>
+
+      <div class="div-inputs">
+        <input *ngIf="type == 'NEW'" type="text" pInputText placeholder="Module name" [(ngModel)]="newModuleName" />
+
+        <p-dropdown *ngIf="type == 'EXISTS'" [options]="modules" placeholder="Select module"
+          [(ngModel)]="selectedModule" [filter]="true" [style]="{'width': '100%'}"></p-dropdown>
+      </div>
+      <hr>
+
+      <app-file-loader (onFileLoad)="loadFile($event)"></app-file-loader>
+
+      <hr>
+
+      <div *ngIf="fileLoaded != null && checkDifferenceName()" class="f-11 alert alert-danger">
+        The name of the file you have selected does not match with the existing Primary requirement name.
+      </div>
+
+      <div *ngIf="fileLoaded != null && checkExistingName()" style="margin-top: 5px;" class="f-11 alert alert-danger">
+        <span *ngIf="type == 'EXISTS'"><p-checkbox [(ngModel)]="overwrite" binary="true"></p-checkbox> The name of the file you have selected does not match with the existing primary requirement name. Selecting the check box and saving will overwrite the existing primary requirement</span>
+        <span *ngIf="type == 'NEW'">An existing primary requirement has the same name, so please rename.</span>
+      </div>
+
+      <div *ngIf="selectedModule != null && !isUnLockedToLoggerUser(selectedModule)" style="margin-top: 5px;" class="f-11 alert alert-danger">
+        An user is working on it and cannot be uploaded
+      </div>
+
+      <div class="div-buttons">
+        <button type="button" class="btn btn-primary f-11" (click)="cancel(false)">Cancel</button>
+        <button type="button" [disabled]="disableUpload() || checkExistingName()" (click)="upload()" class="btn btn-primary f-11">Upload
+          File</button>
+      </div>
+    </p-tabPanel>
+
+    <!--Submodule creation for Clinical Rule Requirement-->
+    <p-tabPanel header="Sections">
+      <p-radioButton name="typeSubmoduleSection" (click)="changeRadioSubmodule()" value="NEW" label="New Section"
+        [(ngModel)]="typeSubmodule" inputId="new"></p-radioButton>
+      &nbsp;&nbsp;
+      <p-radioButton name="typeSubmoduleSection" (click)="changeRadioSubmodule()" value="EXISTS" label="Existing Section"
+        [(ngModel)]="typeSubmodule" inputId="exists"></p-radioButton>
+
+      <div class="div-inputs">
+        <input *ngIf="typeSubmodule == 'NEW'" type="text" pInputText placeholder="Section name"
+          [(ngModel)]="newSubModuleName" />
+
+        <p-dropdown *ngIf="typeSubmodule == 'EXISTS'" [options]="subModules" placeholder="Select section"
+          [(ngModel)]="selectedSubModule" [filter]="true" [style]="{'width': '100%'}" (onChange)="checkCategoryFromSection()"></p-dropdown>
+      </div>
+
+      <label>Under Primary Requirement</label>
+      <p-dropdown [options]="modules" placeholder="Select primary requirement" [(ngModel)]="selectedModule" [filter]="true"
+        [style]="{'width': '100%'}" (onChange)="changeModuleFromSubmodule()"></p-dropdown>
+
+      <label>Under Category/Sub Category</label>
+      <p-dropdown [options]="categories" placeholder="Select category" [(ngModel)]="selectedCategory" [filter]="true"
+        [style]="{'width': '100%', 'margin-bottom': '10px'}" (onChange)="loadSubCategories()"></p-dropdown>
+      <p-dropdown [options]="subCategories" placeholder="Select sub-category" [(ngModel)]="selectedSection" [filter]="true"
+        [style]="{'width': '100%'}"></p-dropdown>
+
+      <hr>
+
+      <app-file-loader (onFileLoad)="loadFileSubModule($event)"></app-file-loader>
+
+      <hr>
+
+      <div *ngIf="fileLoadedSubModule != null && checkDifferenceNameSubmodule()" class="f-11 alert alert-danger">
+        The name of the file you have selected does not match with the existing module name.
+      </div>
+
+
+      <div *ngIf="fileLoadedSubModule != null && checkExistingNameSubModule()" style="margin-top: 5px;" class="f-11 alert alert-danger">
+        <span *ngIf="typeSubmodule == 'EXISTS'"><p-checkbox [(ngModel)]="overwriteSubmodule" binary="true"></p-checkbox> The name of the file you have selected does not match with the existing section name. Selecting the check box and saving will overwrite the existing section</span>
+        <span *ngIf="typeSubmodule == 'NEW'">An existing section has the same name, so please rename.</span>
+      </div>
+
+      <div *ngIf="selectedSubModule != null && !isUnLockedToLoggerUser(selectedSubModule)" style="margin-top: 5px;" class="f-11 alert alert-danger">
+        An user is working on it and cannot be uploaded
+      </div>
+
+      <div class="div-buttons">
+        <button type="button" class="btn btn-primary f-11" (click)="cancel(false)">Cancel</button>
+        <button type="button" [disabled]="(selectedSection == null || disableUploadSubmodule() || checkExistingNameSubModule())" (click)="uploadSubModule(true)"
+          class="btn btn-primary f-11">Upload
+          File</button>
+      </div>
+    </p-tabPanel>
+
+    <!--Ancillary tab-->
+    <p-tabPanel header="Ancillaries">
+      <p-radioButton name="typeSubmodule" (click)="changeRadioSubmodule()" value="NEW" label="New Attachment"
+        [(ngModel)]="typeSubmodule" inputId="new"></p-radioButton>
+      &nbsp;&nbsp;
+      <p-radioButton name="typeSubmodule" (click)="changeRadioSubmodule()" value="EXISTS" label="Existing Attachment"
+        [(ngModel)]="typeSubmodule" inputId="exists"></p-radioButton>
+
+      <div class="div-inputs">
+        <input *ngIf="typeSubmodule == 'NEW'" type="text" pInputText placeholder="Attachment Name"
+          [(ngModel)]="newSubModuleName" />
+
+        <p-dropdown *ngIf="typeSubmodule == 'EXISTS'" [options]="subModules" placeholder="Select Attachment"
+          [(ngModel)]="selectedSubModule" [filter]="true" [style]="{'width': '100%'}"></p-dropdown>
+      </div>
+
+      <label>Under Primary Requirement</label>
+      <p-dropdown [options]="modules" placeholder="Select primary requirement" [(ngModel)]="selectedModule" [filter]="true"
+        [style]="{'width': '100%'}" (onChange)="changeModuleFromSubmodule()"></p-dropdown>
+      <hr>
+
+      <app-file-loader (onFileLoad)="loadFileSubModule($event)"></app-file-loader>
+
+      <hr>
+
+      <div *ngIf="fileLoadedSubModule != null && checkDifferenceNameSubmodule()" class="f-11 alert alert-danger">
+        The name of the file you have selected does not match with the existing module name.
+      </div>
+
+
+      <div *ngIf="fileLoadedSubModule != null && checkExistingNameSubModule()" style="margin-top: 5px;" class="f-11 alert alert-danger">
+        <span *ngIf="typeSubmodule == 'EXISTS'"><p-checkbox [(ngModel)]="overwriteSubmodule" binary="true"></p-checkbox> The name of the file you have selected does not match with the existing attachment name. Selecting the check box and saving will overwrite the existing attachment</span>
+        <span *ngIf="typeSubmodule == 'NEW'">An existing attachment has the same name, so please rename.</span>
+      </div>
+
+      <div *ngIf="selectedSubModule != null && !isUnLockedToLoggerUser(selectedSubModule)" style="margin-top: 5px;" class="f-11 alert alert-danger">
+        An user is working on it and cannot be uploaded
+      </div>
+
+      <div class="div-buttons">
+        <button type="button" class="btn btn-primary f-11" (click)="cancel(false)">Cancel</button>
+        <button type="button" [disabled]="disableUploadSubmodule() || checkExistingNameSubModule()" (click)="uploadSubModule(false)"
+          class="btn btn-primary f-11">Upload
+          File</button>
+      </div>
+    </p-tabPanel>
+  </p-tabView>
+
+  <!--Submodule creation for ancillary information screen-->
+  <div *ngIf="parentPage == 'AI'">
+    <!--Primary requirement creation for Client Rule Requirements-->
+    <p-radioButton name="type" (click)="changeRadio()" value="NEW" label="New Section" [(ngModel)]="type"
+      inputId="new"></p-radioButton>
+    &nbsp;&nbsp;
+    <p-radioButton name="type" (click)="changeRadio()" value="EXISTS" label="Existing Section" [(ngModel)]="type"
+      inputId="exists"></p-radioButton>
+
+    <div class="div-inputs">
+      <input *ngIf="type == 'NEW'" type="text" pInputText placeholder="New Section name"
+        [(ngModel)]="newModuleName" />
+
+      <p-dropdown *ngIf="type == 'EXISTS'" [options]="modules" placeholder="Select section"
+        [(ngModel)]="selectedModule" [filter]="true" [style]="{'width': '100%'}"></p-dropdown>
+    </div>
+    <hr>
+
+    <label>Under Category/Sub Category</label>
+    <p-dropdown [options]="categories" placeholder="Select category" [(ngModel)]="selectedCategory" [filter]="true"
+      [style]="{'width': '100%', 'margin-bottom': '10px'}" (onChange)="loadSubCategories()"></p-dropdown>
+    <p-dropdown [options]="subCategories" placeholder="Select sub-category" [(ngModel)]="selectedSection" [filter]="true"
+      [style]="{'width': '100%'}" (onChange)="loadModules()"></p-dropdown>
+
+    <hr>
+
+    <app-file-loader (onFileLoad)="loadFile($event)"></app-file-loader>
+
+    <hr>
+
+    <div *ngIf="fileLoaded != null && checkDifferenceName()" class="f-11 alert alert-danger">
+      The name of the file you have selected does not match with the existing module name.
+    </div>
+
+    <div *ngIf="fileLoaded != null && checkExistingName()" style="margin-top: 5px;" class="f-11 alert alert-danger">
+      <span *ngIf="type == 'EXISTS'"><p-checkbox [(ngModel)]="overwrite" binary="true"></p-checkbox> The name of the file you have selected does not match with the existing section name. Selecting the check box and saving will overwrite the existing section</span>
+      <span *ngIf="type == 'NEW'">An existing module has the same name, so please rename.</span>
+    </div>
+
+    <div *ngIf="selectedModule != null && !isUnLockedToLoggerUser(selectedModule)" style="margin-top: 5px;" class="f-11 alert alert-danger">
+      An user is working on it and cannot be uploaded
+    </div>
+
+    <div class="div-buttons" style="margin-bottom: 10px !important;">
+      <button type="button" class="btn btn-primary f-11" (click)="cancel(false)">Cancel</button>
+      <button type="button" [disabled]="(disableUpload() || selectedSection == null) || checkExistingName()" (click)="upload()"
+        class="btn btn-primary f-11">Upload
+        File</button>
+    </div>
+  </div>
+</div>

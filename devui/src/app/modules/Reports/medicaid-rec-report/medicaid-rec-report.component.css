@@ -30,6 +30,7 @@
     flex-direction: column;
     padding: 15px;
     padding-left: 7.5px;
+    width: 100%;
 }
 
 .font-md {
@@ -106,12 +107,20 @@
 :host ::ng-deep .ui-listbox {
     margin-bottom: 0 !important;
 }
-.block-img-loading {
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  width: 120px
+
+.hidden {
+    padding-left: 5px;
+    font-size: 11px !important;
+    visibility: hidden;
 }
+
+.visible {
+    padding-left: 5px;
+    font-size: 11px !important;
+    color: #f22f2f;
+    visibility: visible;
+}
+
 :host::ng-deep.pi-spinner:before {
   content: "";
 }

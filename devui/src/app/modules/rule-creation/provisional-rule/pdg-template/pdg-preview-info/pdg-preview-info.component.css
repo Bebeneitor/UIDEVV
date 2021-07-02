@@ -1,0 +1,46 @@
+.readonly-text{
+    width: 100%;
+    min-height: 25px;
+    border:1px solid #c8c8c8;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    white-space: pre-wrap;
+    padding : 5px;
+    word-wrap: break-word;
+}
+.readonly-field{
+    width: 100%;
+    min-height: 25px;
+    border:none !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+}
+
+.readonly-radio{
+    border:none !important;
+    min-height: 25px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+}
+
+.preview-border {
+    border:1px solid #c8c8c8;
+}
+::ng-deep .reference-pr .ui-tabview .ui-tabview-panels .ui-tabview-panel {
+    padding : 1em !important;
+}
+::ng-deep .reference-pr .ui-tabview .ui-tabview-panels{    
+    padding: 25px !important;
+}
+
+.col-border{
+    border: 2px solid #c8c8c8 !important;
+}
+
+.preview-pdg label {
+    font-size:13px;
+}
+
+.no-border  {border : none !important;}
+
+

@@ -1,6 +1,6 @@
 <p-blockUI [blocked]="blockedDocument">
   <div class="img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" alt="Loading..." />
+    <img src="assets/img/loading.gif" alt="Loading..." />
     <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
   </div>
 </p-blockUI>
@@ -63,37 +63,39 @@
       <div class="col-md-3 col-sm-12">
         <div>
           <span class="set-space">
-            <input type="radio" name="hcpcsCodeInd" [value]="'0'" [(ngModel)]="hcpcsCodeDescInd"
+            <input type="radio" [disabled]="true" name="hcpcsCodeInd" [value]="'0'" [(ngModel)]="hcpcsCodeDescInd"
               (change)="checkHcpcs(event)">
             <label class="set-space-left">HCPCS Code</label>
           </span>
           <span class="set-space">
-            <input type="radio" name="hcpcsCodeInd" [value]="'1'" [(ngModel)]="hcpcsCodeDescInd"
+            <input type="radio" [disabled]="true" name="hcpcsCodeInd" [value]="'1'" [(ngModel)]="hcpcsCodeDescInd"
               (change)="checkHcpcs(event)">
             <label class="set-space-left">HCPCS Description</label>
           </span>
         </div>
-        <textarea type="text" maxlength="30" [hidden]="hcpcsCodeDescInd && hcpcsCodeDescInd == '1'"
+        <textarea type="text" [disabled]="true" maxlength="100" (input)="returnMessage($event.target.value,cacheConstant.hcpcs)" [hidden]="hcpcsCodeDescInd && hcpcsCodeDescInd == '1'"
           class="form-control library-code" [(ngModel)]="hcpcsProcCode" placeholder="HCPCS Procedure Code"></textarea>
-        <textarea type="text" maxlength="30" [hidden]="hcpcsCodeDescInd && hcpcsCodeDescInd == '0'"
+        <textarea type="text" [disabled]="true" maxlength="100" (input)="returnMessage($event.target.value,cacheConstant.hcpcs_desc)" [hidden]="hcpcsCodeDescInd && hcpcsCodeDescInd == '0'"
           class="form-control library-code" [(ngModel)]="hcpcsProcDesc" placeholder="HCPCS Code Description"></textarea>
-      </div>
+          <div class="char-limit">Character Limit: {{ (hcpcsCodeDescInd === '0') ? showCountHcpcsCode : showCountHcpcsDesc }}</div>
+        </div>
       <div class="col-md-3 col-sm-12">
         <div>
           <span class="set-space">
-            <input type="radio" name="cptCodeInd" [value]="'0'" [(ngModel)]="cptCodeDescInd" (change)="checkCpt(event)">
+            <input type="radio" [disabled]="true" name="cptCodeInd" [value]="'0'" [(ngModel)]="cptCodeDescInd" (change)="checkCpt(event)">
             <label class="set-space-left">CPT Code</label>
           </span>
           <span class="set-space">
-            <input type="radio" name="cptCodeInd" [value]="'1'" [(ngModel)]="cptCodeDescInd" (change)="checkCpt(event)">
+            <input type="radio" [disabled]="true" name="cptCodeInd" [value]="'1'" [(ngModel)]="cptCodeDescInd" (change)="checkCpt(event)">
             <label class="set-space-left">CPT Description</label>
           </span>
         </div>
-        <textarea type="text" maxlength="30" [hidden]="cptCodeDescInd && cptCodeDescInd == '1'"
+        <textarea type="text" [disabled]="true" maxlength="100" (input)="returnMessage($event.target.value,cacheConstant.cpt)"  [hidden]="cptCodeDescInd && cptCodeDescInd == '1'"
           class="form-control library-code" [(ngModel)]="cptProcCode" placeholder="CPT Procedure Code"></textarea>
-        <textarea type="text" maxlength="30" [hidden]="cptCodeDescInd && cptCodeDescInd == '0'"
+        <textarea type="text" [disabled]="true" maxlength="100" (input)="returnMessage($event.target.value, cacheConstant.cpt_desc)"  [hidden]="cptCodeDescInd && cptCodeDescInd == '0'"
           class="form-control library-code" [(ngModel)]="cptProcDesc" placeholder="CPT Code Description"></textarea>
-      </div>
+          <div class="char-limit">Character Limit: {{ (cptCodeDescInd === '0') ? showCountCptCode : showCountCptDesc }}</div>
+        </div>
       <div class="col-md-3 col-sm-12">
         <div>
           <span class="set-space">
@@ -114,18 +116,10 @@
       </div>
       <div class="col-md-3 col-sm-12 flex-column">
         <div>
-          <label>Logic Effective Date, From</label>
-          <p-calendar [(ngModel)]="startDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
-            [yearRange]="yearValidRange" [minDate]="minDate" [maxDate]="endDate" placeholder="{{dateFormat}}"
-            dateFormat="mm/dd/yy" [disabled]="true">
-          </p-calendar>
-        </div>
-        <div>
-          <label>Logic Effective Date, To</label>
-          <p-calendar [(ngModel)]="endDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true"
-            [yearRange]="yearValidRange" [minDate]="startDate" placeholder="{{dateFormat}}" dateFormat="mm/dd/yy"
-            [disabled]="true">
-          </p-calendar>
+          <label>Logic Effective Date</label>
+          <p-calendar type="string" name="logicEffectiveDate" [(ngModel)]="logicEffectiveDate"  [monthNavigator]="true" [yearNavigator]="true"
+          [yearRange]="yearValidRange" placeholder="{{dateFormat}}">
+        </p-calendar>
         </div>
       </div>
     </div>
@@ -142,9 +136,14 @@
           [maxSelectedLabels]="0" [disabled]="cptProcCode && cptProcCode.trim().length === 0">
         </p-multiSelect>
       </div>
-      <div class="col-md-3 col-sm-12" style="margin-top: 10px">
+      <div class="col-md-2 col-sm-12" style="margin-top: 10px">
         <label style="display: block;">Rule Status</label>
-        <p-checkbox [(ngModel)]="statusActive" (onChange)="checkToTrigger($event)" binary="true" label="Show Only Active">
+        <p-checkbox [(ngModel)]="statusActive" (onChange)="checkToTrigger($event,cacheConstant.statusActive)" binary="true" label="Include Inactive">
+        </p-checkbox>
+      </div>
+      <div class="col-md-2 col-sm-12" style="margin-top: 10px">
+        <label style="display: block;">Global Ranges</label>
+        <p-checkbox [(ngModel)]="globalRanges" [disabled]="disableGlobalRange"  (onChange)="checkToTrigger($event,cacheConstant.globalRanges)" binary="true" label="Include Global Ranges">
         </p-checkbox>
       </div>
     </div>
@@ -174,15 +173,15 @@
             </div>
             <div class="col-md-3 col-sm-12">
               <label>Bill Types</label>
-              <p-multiSelect [disabled]="true" [options]="billTypes" [(ngModel)]="selectedBillType"
+              <p-multiSelect  [options]="billTypes" [(ngModel)]="selectedBillType"
                 defaultLabel="Select item" [maxSelectedLabels]="0">
               </p-multiSelect>
             </div>
           </div>
           <div class="row">
-            <div class="col-md-3 col-sm-12">
+            <div class="col-md-3 col-sm-12" >
               <label>Revenue Codes</label>
-              <p-multiSelect [options]="revenueCodes" [(ngModel)]="selectedRevCodes" defaultLabel="Select item"
+              <p-multiSelect [disabled]="true" [options]="revenueCodes" [(ngModel)]="selectedRevCodes" defaultLabel="Select item"
                 [maxSelectedLabels]="0">
               </p-multiSelect>
             </div> 
@@ -191,7 +190,7 @@
               <input type="text" [disabled]="true" maxlength="30" class="form-control" [(ngModel)]="procedureCode"
                 placeholder="Enter Modifiers" />
             </div>
-            <div class="custom-flex-item dpdownDiv">
+            <div class="custom-flex-item dpdownDiv gender">
               <label>Gender</label>
               <p-dropdown [options]="genders" [(ngModel)]="selectedGender" defaultLabel="Select item"
                 class="dropdown-full-width"></p-dropdown>
@@ -201,10 +200,18 @@
               <input type="text" [disabled]="true" maxlength="30" class="form-control custom-input-lib"
                 [(ngModel)]="procedureCode" placeholder="Enter Age Here" />
             </div>
-            <div class="custom-flex-item">
+            <div class="custom-flex-item rule-engine">
               <label>Rule Engine</label>
               <p-multiSelect [options]="engines" [(ngModel)]="selectedEngines"
                 defaultLabel="Select item" [maxSelectedLabels]="0">
+              </p-multiSelect>
+            </div>
+            <div class="col-md-2 col-sm-10">
+              <label style="display: block;">Policy Packages</label>
+              <p-multiSelect  
+              [options]="policyPackageValues" 
+              [(ngModel)]="policyPackageSelected"                                         
+              #policyPackageControl>
               </p-multiSelect>
             </div>
             <div class="custom-flex-item hide-div">
@@ -235,7 +242,7 @@
           [toggleable]="true" (onBeforeToggle)="changeSelectionPanelHeader()">
           <label>Selected</label>
           <div class="rules-savings">
-            <div class="top-35" *ngIf="hasSelectedItems(); else showSelection" class="div-no-data">
+            <div class="top-35" *ngIf="hasNoSelectedItems(); else showSelection" class="div-no-data">
               <img src="assets/img/no-data.png" class="img-no-data" alt="No data" />
               <p class="no-data">NO ITEMS SELECTED</p>
             </div>
@@ -436,6 +443,20 @@
                   </div>
                 </div>
               </div>
+              <div class="row search-item" *ngIf="logicEffectiveDate !== '' && logicEffectiveDate !== null">
+                <label class="col-2 default">Logic Effective Date&nbsp;:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.logicEffectiveDate)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{extractDate(logicEffectiveDate)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="row search-item" *ngIf="selectedRevCodes.length > 0">
                 <label class="col-2 default">Revenue Codes :</label>
                 <div class="col-10 select-list">
@@ -507,7 +528,7 @@
                 </div>
               </div>
               <div class="row search-item" *ngIf="statusActive !== false">
-                <label class="col-2 default">Show Active Rules:</label>
+                <label class="col-2 default">Show InActive Rules:</label>
                 <div class="col-10">
                   <div class="selected-listitem sel-div row">
                     <div class="icon-div">
@@ -516,6 +537,48 @@
                     </div>
                     <div class="sel-value-div">
                       <span>{{statusActive}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="globalRanges !== false">
+                <label class="col-2 default">Show Global Ranges:</label>
+                <div class="col-10">
+                  <div class="selected-listitem sel-div row">
+                    <div class="icon-div">
+                      <i (click)="clearTextValues(cacheConstant.globalRanges)" class="fa fa-times-circle icon-remove"
+                        title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      <span>{{globalRanges}}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedPlaceOfService.length > 0">
+                <label class="col-2 default">Place Of Service :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedPlaceOfService; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedPlaceOfService, i, cacheConstant.placeOfServices)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                        {{getValueFromId(placeOfServices, v)}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row search-item" *ngIf="selectedBillType.length > 0">
+                <label class="col-2 default">Bill types :</label>
+                <div class="col-10 select-list">
+                  <div class="selected-listitem sel-div row" *ngFor="let v of selectedBillType; let i = index">
+                    <div class="icon-div">
+                      <i (click)="removeFromList(selectedBillType, i, cacheConstant.billTypes)"
+                        class="fa fa-times-circle icon-remove" title="Remove"></i>
+                    </div>
+                    <div class="sel-value-div">
+                      {{getValueFromId(billTypes, v)}}
                     </div>
                   </div>
                 </div>
@@ -532,10 +595,13 @@
       <p-panel class="panel-filters" header="CATALOG RESULTS">
         <div class="ui-fluid filters-div">
           <div class="p-grid p-justify-start">
-            <div class="p-field p-col dpdownDiv filterdpdown">
+              <div class="p-field pr-2 compare-icon-div">
+                <img title="Compare Results" [src]="compareImg" (click)="compare()">
+              </div>
+              <div class="p-field p-col dpdownDiv filterdpdown">
                 <label>Filter Name</label>
                 <p-dropdown name="selectedFilterName" [options]="filterNames" [(ngModel)]="selectedFilterName"  
-                class="dropdown-full-width" (onChange)="loadFilterCondition($event)" ></p-dropdown>
+                class="dropdown-full-width" (onChange)="loadFilterCondition($event)"></p-dropdown>
               </div>
               <div class="p-field p-col-5">
                 <label>Filter Condition</label>
@@ -545,7 +611,7 @@
               <div class="p-field p-col-2 dpdownDiv">
                 <label>Tag Name</label>
                 <p-dropdown name="selectedTagName" [options]="tagNames" [(ngModel)]="selectedTagName" 
-                class="dropdown-full-width" (onChange)="loadTaggedResults($event)" [disabled]="disableTag"></p-dropdown>
+                class="dropdown-full-width" (onChange)="loadTaggedResults($event)" [disabled]="disableTag" [filter]="true" [resetFilterOnHide]="true"></p-dropdown>
               </div>
               <div class="p-field p-col dpdownDiv" style="max-width: 95px;">
                 <label>Tag Sequence</label>
@@ -557,10 +623,17 @@
                   [disabled]="disableSave">Save</button>
               </div>
           </div>
+          <div class="p-grid p-justify-end pr-4">
+            <p-checkbox [(ngModel)]="hideDeleted" (onChange)="hideOrShowDeletedNewRules()" binary="true" label="Hide Deleted">
+            </p-checkbox>
+            <p-checkbox class="pl-2" [(ngModel)]="showOnlyNewRules" (onChange)="hideOrShowDeletedNewRules()" binary="true" label="New Rules Only">
+            </p-checkbox>
+          </div>
         </div>
-        <ecl-table #tableResults [tableModel]="tableConfig" (onAcctionLink)="redirect($event)"
+        <ecl-table id="eclTable" [ngClass]="isCompare ? 'ecl-table-result' : 'ecl-table'" #tableResults [tableModel]="tableConfig" (onAcctionLink)="redirect($event)"
           (onServiceCall)="onServiceCall($event)" (onSelectRecord)="selectedData=$event"
           (onUnSelectRecord)="selectedData=$event"></ecl-table>
+         <app-filter-tag-compare #compareResult [hidden]="!isCompare"></app-filter-tag-compare>
       </p-panel>
     </div>
   </div>

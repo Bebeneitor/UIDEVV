@@ -1,19 +1,37 @@
-<p-blockUI baseZIndex="10001" [blocked]="loading">
-    <div class="block-img-loading text-center">
-        <img src="assets/img/loading.gif" style="width: 60%" />
+<p-blockUI [blocked]="loading">
+    <div class="img-loading text-center">
+        <img src="assets/img/loading.gif"/>
         <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
     </div>
 </p-blockUI>
 
 
+
 <h5 *ngIf="selectorConfig != undefined" style="margin-left: 20px; margin-right: 20px;">{{header}}</h5>
+<span *ngIf="showSourceLinkForRR">
+    <h5 class="custom-header">
+        <span *ngIf="!hideMyRequestLink">
+            <span class="nav-page-title"> <a (click)="navigateBack('rr-my-req-page')">My Request</a></span>
+            <span class="fa fa-chevron-right" aria-hidden="true"></span>
+        </span>
+        <span class="nav-page-title" style="margin-left:5px"><a (click)="navigateBack('rr-req-id-page')">{{rrId}}</a></span>
+        <span *ngIf="!ideaIndicator">
+            <span class="fa fa-chevron-right" aria-hidden="true"></span>
+            <span style="margin-left:5px">Rule ID: {{ruleInfo.ruleCode}}</span>
+        </span>
+        <span *ngIf="rrNewHeader">
+            <span class="fa fa-chevron-right" aria-hidden="true"></span>
+            <span style="margin-left:5px">{{rrNewHeader}}</span>
+        </span>
+    </h5>
+</span>
 <div #parentDiv [ngClass]="dialogMode ? 'provisionalRule' : 'provisionalRule whitebg'">
     <form ngNativeValidate>
         <fieldset [ngClass]="dialogMode ? 'grid-container top-section-sticky' : 'grid-container'">
             <div style="z-index: 99999; width: 100%; margin-bottom: -10px;"
-                *ngIf="ruleInfo.ruleId != undefined || ruleInfo.ideaId != undefined">
-                <app-marker-favorites [id]="ruleInfo.ruleId == undefined ? ruleInfo.ideaId : ruleInfo.ruleId"
-                    [type]="ruleInfo.ruleId == undefined ? 'IDEA' : 'RULE'" [readOnlyView]="false">
+                *ngIf="ruleInfo?.ruleId != undefined || ruleInfo.ideaId != undefined">
+                <app-marker-favorites [id]="ruleInfo?.ruleId == undefined ? ruleInfo.ideaId : ruleInfo?.ruleId"
+                    [type]="ruleInfo?.ruleId == undefined ? 'IDEA' : 'RULE'" [readOnlyView]="false">
                 </app-marker-favorites>
             </div>
             <div class="row" Id="provisonalRows">
@@ -31,11 +49,10 @@
                 </div>
                 <div class="col-md-2">
                     <label><span class="required-field-color">*</span>Logic Effective Date</label>
-                    <p-calendar type="date" id="ruleLogicEffDt" name="ruleLogicEffDt" [maxDate]="maxDate"
-                        [monthNavigator]="true" [yearNavigator]="true" [yearRange]="yearValidRange"
-                        [(ngModel)]="ruleInfo.ruleLogicEffDt"
-                        [disabled]="(provDialogDisable || readOnlyView || disableTopFields) && !retireStatusChild"
-                        dateFormat="mm/dd/yy" placeholder="mm/dd/yyyy">
+                    <p-calendar type="date" id="ruleLogicEffDt" name="ruleLogicEffDt" [maxDate]="maxDate" [monthNavigator]="true"
+                        [yearNavigator]="true" [yearRange]="yearValidRange" [(ngModel)]="ruleInfo.ruleLogicEffDt"
+                        [disabled]="(provDialogDisable || readOnlyView || disableTopFields) && !retireStatusChild" dateFormat="mm/dd/yy"
+                        placeholder="mm/dd/yyyy" showButtonBar="isPdgMedicaidRule">
                     </p-calendar>
                 </div>
                 <div class="col-md-2" *ngIf="ruleReview">
@@ -52,7 +69,7 @@
                     </p-dropdown>
                 </div>
                 <div class="col-md-2" *ngIf="ruleReview">
-                    <label><span class="required-field-color">*</span>Approval Comments</label>
+                    <label> <span class="required-field-color">{{displayAsterisk()}}</span>Approval Comments</label>
                     <input type="text" name="ruleReviewComments" class="widthSet" pTooltip="{{ruleReviewComments}}"
                         tooltipPosition="bottom" [(ngModel)]="ruleReviewComments" style="width:90%;"
                         [disabled]="(!isSameSim && readOnlyView)  || disableTopFields || impactTypeNo"></div>
@@ -63,15 +80,15 @@
                 </div>
                 <div id="lobID" class="col-md-2">
                     <label>Lines Of Business</label>
-                    <p-multiSelect [options]="lobs" (onChange)="checkStateJurisdiction()" name="selectedLobs"
+                    <p-multiSelect [ngClass]="isPdgMedicaidRule?'lobs':''" [options]="lobs" (onChange)="checkStateJurisdiction()" name="selectedLobs"
                         id="lobfield"
-                        *ngIf="!((provDialogDisable || readOnlyView || disableTopFields) && !retireStatusChild)"
+                        *ngIf="!((provDialogDisable || readOnlyView || disableTopFields || isPdgMedicaidRule) && !retireStatusChild)"
                         [(ngModel)]="selectedLobs" [style]="{width:'100%'}">
                     </p-multiSelect>
                     <div class="adjust-margin"
-                        *ngIf="(provDialogDisable || readOnlyView || disableTopFields) && !retireStatusChild">
+                        *ngIf="(provDialogDisable || readOnlyView || disableTopFields || isPdgMedicaidRule) && !retireStatusChild">
                         <div class="col-md-12">
-                            <p-multiSelect #lobSelect [options]="lobs" (onChange)="checkStateJurisdiction()"
+                            <p-multiSelect [ngClass]="isPdgMedicaidRule?'lobs':''" #lobSelect [options]="lobs" (onChange)="checkStateJurisdiction()"
                                 name="selectedLobs" pTooltip={{selectedLobsTooltip}} tooltipPosition="bottom"
                                 [appendTo]="lobSelect" id="lobfield" [disabled]="true" [(ngModel)]="selectedLobs"
                                 [style]="{width:'100%'}">
@@ -81,14 +98,19 @@
                 </div>
                 <div [ngClass]="ruleProvisionalReview ? 'col-md-3' : 'col-md-2'">
                     <label><span class="required-field-color">*</span>Category</label>
-                    <p-dropdown [options]="categories" (onChange)="reloadAssignTo()"
-                        [disabled]="provDialogDisable || readOnlyView || fromMaintenanceProcess" name="selectedCategory"
-                        [(ngModel)]="ruleInfo.category.categoryId" [required]="true" [style]="{width:'100%'}">
-                    </p-dropdown>
+                    <div class="adjust-margin">
+                        <div class="col-md-12">
+                            <p-dropdown #categorySelect [options]="categories" (onChange)="reloadAssignTo();onCatChange()"
+                            [disabled]="provDialogDisable || readOnlyView || fromMaintenanceProcess" name="selectedCategory"
+                            pTooltip={{selectedCategoryTooltip}} tooltipPosition="bottom"  [appendTo]="categorySelect"
+                            [(ngModel)]="ruleInfo.category.categoryId" [required]="true" [style]="{width:'100%'}">
+                            </p-dropdown>
+                        </div>
+                    </div>  
                 </div>
-                <div [ngClass]="ruleProvisionalReview ? 'col-md-2' : 'col-md-1'">
+                <div *ngIf="!isPdgMedicaidRule || isReadOnlyNonPdgRule" [ngClass]="ruleProvisionalReview ? 'col-md-2' : 'col-md-1'">
                     <label>State</label>
-                    <p-multiSelect [options]="states"
+                    <p-multiSelect [options]="states" (onChange)="onStateInput(null);"
                         *ngIf="!(provDialogDisable || disableState || readOnlyView || disableTopFields)"
                         name="selectedStates" [(ngModel)]="selectedStates" [style]="{width:'100%'}">
                     </p-multiSelect>
@@ -99,6 +121,20 @@
                                 tooltipPosition="bottom" [appendTo]="stateSelect" [disabled]="true"
                                 name="selectedStates" [(ngModel)]="selectedStates" [style]="{width:'100%'}">
                             </p-multiSelect>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="isPdgMedicaidRule && !isReadOnlyNonPdgRule" [ngClass]="ruleProvisionalReview ? 'col-md-2' : 'col-md-1'">
+                    <label>State</label>
+                    <p-dropdown  *ngIf="!(provDialogDisable || disableState || readOnlyView || disableTopFields)"
+                     [options]="states"  name="selectedStates" [(ngModel)]="selectedStates[0]" 
+                    (onChange)="onStateInput(null);"  placeholder="Choose" [style]="{width:'100%'}"> </p-dropdown>
+                    <div class="adjust-margin"
+                        *ngIf="provDialogDisable || disableState || readOnlyView || disableTopFields">
+                        <div class="col-md-12">
+                            <p-dropdown #stateSelect  [options]="states"  name="selectedStates" [(ngModel)]="selectedStates[0]" 
+                            pTooltip={{selectedStatesTooltip}} tooltipPosition="bottom" [appendTo]="stateSelect" 
+                            [disabled]="true"  [style]="{width:'100%'}"> </p-dropdown>
                         </div>
                     </div>
                 </div>
@@ -120,7 +156,7 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row rowHeight">
                 <div class="col-md-4">
                     <label *ngIf="!ruleReview">
                         <span class="required-field-color">*</span>Provisional Rule Name</label>
@@ -131,12 +167,16 @@
                         [(ngModel)]="ruleInfo.ruleName">
 
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label><span class="required-field-color">*</span>Rule Logic</label>
-                    <textarea style="width:100%;height:60px;" name="ruleLogicOriginal"
-                        [(ngModel)]="ruleInfo.ruleLogicOriginal"
-                        [disabled]="provDialogDisable || readOnlyView || fromMaintenanceProcess"
-                        pTooltip="{{ruleInfo.ruleLogicOriginal}}" tooltipPosition="top"></textarea>
+                    <div (mouseenter)="checkExpand(true)" (mouseleave)="checkExpand(false)">
+                        <textarea style="width:100%;height:60px;" name="ruleLogicOriginal" id="ruleLogicOriginal"
+                            [(ngModel)]="ruleInfo.ruleLogicOriginal"
+                            [disabled]="provDialogDisable || readOnlyView || fromMaintenanceProcess"
+                            pTooltip="{{ruleInfo.ruleLogicOriginal}}" tooltipPosition="top"
+                            [ngClass]="expandRuleLogic ? 'expandRuleLogic' : 'ruleLogic'"
+                            (click)="expandRuleLogic = true" (blur)="expandRuleLogic = false"></textarea>
+                    </div>
                 </div>
                 <div class="col-md-2" *ngIf="isProvisionalRuleCreation">
                     <label><span class="required-field-color">*</span>Assign To</label>
@@ -144,67 +184,100 @@
                         (onChange)="validSelectedPo()" [(ngModel)]="ruleInfo.assignedTo" [disabled]="provDialogDisable">
                     </p-dropdown>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="row">
+
+                <div class="col-md-2">
+                        <div class="row">
+                            <label style="margin-top: 2px">Policy Package</label>
+                        </div>
+                        <div class="row">
+                            <p-multiSelect 
+                                [options]="policyPackageValues" 
+                                [(ngModel)]="policyPackageSelected"
+                                defaultLabel="Please Select"
+                                [style]="{width:'100%'}"
+                                (onChange)="updatingPolicyPackage()"
+                                [disabled]="provDialogDisable || readOnlyView"
+                                #policyPackageControl
+                                maxSelectedLabels="0"
+                                name="policyPackageSelected"
+                                [ngModelOptions]="{standalone: true}"
+                            >
+                            </p-multiSelect>
+                        </div>
+                    </div> 
+                    <div class="col-md-12">
                         <hr style="width: 100%">
                     </div>
-                </div>
             </div>
         </fieldset>
+        
+        <!--This div is only for show ell rule detail and View Custom rules (Rule overview)-->
+        <div class="row" *ngIf="showELLLink && isThereMidRule">
+            <div class="col text-right">
+        
+                <a class="ell-link" (click)="redirectToELLRuleLongDetail()">
+                    <u>Go to ELL rule detail</u>
+                </a>
+                <a class="ell-link" (click)="redirectRuleOverview()">
+                    <u>View Custom rules (<span style="font-size: smaller;">Rule overview</span> )</u>
+                </a>
+        
+            </div>
+        </div>
 
         <!--     Tab View Of the Provisional Rule Screen -->
         <p-tabView [style]="{padding: '20px'}" id="tabView" [(activeIndex)]="indexVal" (onChange)="onTabChange($event)">
 
+            <!--     Notes tabpanel view including opportunity value selector -->
+            <p-tabPanel header="Notes">
+                <app-notes-comments [(ruleInfo)]="ruleInfo"
+                    [fromMaintenanceProcess]="fromMaintenanceProcess" (messageSend)="messageRecieve($event)"
+                    [provDialogDisable]="provDialogDisable || readOnlyView || isPdgMedicaidRule">
+                </app-notes-comments>
+            </p-tabPanel>
+
             <!--     Rationale tabpanel view including opportunity value selector -->
-
             <p-tabPanel header="Rationale">
-
                 <app-opportunity-value [(ruleId)]="ruleId" [(ruleInfo)]="ruleInfo"
                     [fromMaintenanceProcess]="fromMaintenanceProcess"
-                    [provDialogDisable]="provDialogDisable || readOnlyView"
-                    (messageSend)="messageRecieve($event)"></app-opportunity-value>
+                    [provDialogDisable]="provDialogDisable || readOnlyView || isPdgMedicaidRule" (messageSend)="messageRecieve($event)">
+                </app-opportunity-value>
 
                 <app-rationale [(ruleInfo)]="ruleInfo" [(fromMaintenanceProcess)]="fromMaintenanceProcess"
-                    [provDialogDisable]="provDialogDisable || readOnlyView">
+                    [provDialogDisable]="provDialogDisable || readOnlyView || isPdgMedicaidRule">
                 </app-rationale>
-                
             </p-tabPanel>
 
             <!--     Claims tabpanel view -->
-
-
             <p-tabPanel header="Claims">
-
-                <app-claims [(ruleInfo)]="ruleInfo" [(ruleInfoOriginal)]="ruleInfoOriginal" 
-                    [(ruleRevenueCodesList)]="ruleRevenueCodesList"
-                    [(fromMaintenanceProcess)]="fromMaintenanceProcess"
-                    [provDialogDisable]='provDialogDisable || readOnlyView'>
+                <app-claims [(ruleInfo)]="ruleInfo" [(ruleInfoOriginal)]="ruleInfoOriginal"
+                    [(ruleRevenueCodesList)]="ruleRevenueCodesList" [(fromMaintenanceProcess)]="fromMaintenanceProcess"
+                    [provDialogDisable]='provDialogDisable || readOnlyView || isPdgMedicaidRule' [pdgClaimTypeSelected] = "pdgClaimTypeSelected">
                 </app-claims>
-
             </p-tabPanel>
 
             <!--     Providers tabpanel view -->
             <p-tabPanel header="Providers">
                 <!-- Rule Creation & Read-Only Rule maintenance -->
-                <app-provisional-rule-providers [(ruleInfoOriginal)]="ruleInfoOriginal || ruleInfo"
+                <app-provisional-rule-providers [(uniqueId)]="uniqueId1"
+                    [(ruleInfoOriginal)]="fromMaintenanceProcess ? ruleInfoOriginal : ruleInfo"
                     [(fromMaintenanceProcess)]="fromMaintenanceProcess" [(ruleReadOnly)]="ruleReadOnly"
                     [(includedSubspecialityTypes)]="includedSubspecialityTypes"
                     [(excludedSubspecialityTypes)]="excludedSubspecialityTypes"
                     [(includedSpecialityTypes)]="includedSpecialityTypes"
                     [(excludedSpecialityTypes)]="excludedSpecialityTypes"
-                    [provDialogDisable]="provDialogDisable || readOnlyView">
+                    [provDialogDisable]="provDialogDisable || readOnlyView || isPdgMedicaidRule">
                 </app-provisional-rule-providers>
                 <!-- Editable Rule maintenance -->
-                <app-provisional-rule-providers *ngIf="fromMaintenanceProcess" [(ruleInfo)]="ruleInfo"
+                <app-provisional-rule-providers *ngIf="fromMaintenanceProcess" [(uniqueId)]="uniqueId2"
+                    [(ruleInfo)]="ruleInfo"
                     [maintenanceOnly]="maintenanceOnly" [(fromMaintenanceProcess)]="!fromMaintenanceProcess"
-                    [provDialogDisable]="provDialogDisable || readOnlyView">
+                    [provDialogDisable]="provDialogDisable || readOnlyView || isPdgMedicaidRule">
                 </app-provisional-rule-providers>
             </p-tabPanel>
             <!--     Codes tabpanel view -->
 
-            <p-tabPanel header="Codes">
+            <!-- <p-tabPanel header="Codes">
 
                 <app-provisional-rule-codes [(ruleInfo)]="ruleInfo" [(userId)]="userId"
                     [(ruleInfoOriginal)]="ruleInfoOriginal" [(fromMaintenanceProcess)]="fromMaintenanceProcess"
@@ -213,28 +286,37 @@
                     (canContinueAction)="canContinueAction($event)">
                 </app-provisional-rule-codes>
 
+            </p-tabPanel> -->
+
+            <p-tabPanel header="HCPCS/CPT">
+                <app-provisional-rule-hcpcs-cpt-codes [(ruleInfo)]="ruleInfo" [(userId)]="userId"
+                    [provDialogDisable]="!isSameSim && (provDialogDisable || readOnlyView || isPdgMedicaidRule)  && logicalCodesFlag"
+                    [readOnlyView]="!isSameSim && readOnlyView" [(fromMaintenanceProcess)]="fromMaintenanceProcess">
+                </app-provisional-rule-hcpcs-cpt-codes>
             </p-tabPanel>
 
             <!--     Impacts tabpanel view -->
+            <p-tabPanel header="ICDs">
+                <app-icd [readOnlyView]="!isSameSim && readOnlyView"
+                    [provDialogDisable]="!isSameSim && (provDialogDisable || readOnlyView || isPdgMedicaidRule)  && logicalCodesFlag"
+                    [(ruleInfo)]="ruleInfo" [(fromMaintenanceProcess)]="fromMaintenanceProcess"
+                    (onChange)="changeICDCodes($event)"></app-icd>
+            </p-tabPanel>
 
-            <p-tabPanel header="ICDs/Impacts">
-
-                <app-impacts [(ruleInfo)]="ruleInfo" 
-                [(ruleInfoOriginal)]="ruleInfoOriginal"
-                [(fromMaintenanceProcess)]="fromMaintenanceProcess"
-                [provDialogDisable]='provDialogDisable || readOnlyView'></app-impacts>
-
+            <p-tabPanel header="Impacts">
+                <app-impacts [(ruleInfo)]="ruleInfo" [(ruleInfoOriginal)]="ruleInfoOriginal"
+                    [(fromMaintenanceProcess)]="fromMaintenanceProcess" (messageSend)="messageRecieve($event)"
+                    [provDialogDisable]='provDialogDisable || readOnlyView || isPdgMedicaidRule' #impactsComponent>
+                </app-impacts>
             </p-tabPanel>
 
             <!--     References tabpanel view -->
-
             <p-tabPanel header="References">
-
                 <app-provisional-references [(ruleInfo)]="ruleInfo" [ruleReferences]="ruleReferences"
-                    [ruleReferencesArray]="ruleReferencesArray" [provDialogDisable]='provDialogDisable'
+                    [ruleReferencesArray]="ruleReferencesArray" [provDialogDisable]='provDialogDisable || isPdgMedicaidRule'
                     [reassignmentFlag]="reassignmentFlag" [readOnlyView]='readOnlyView' [isSameSim]='isSameSim'
                     [provRuleNeedsMoreInfo]="provRuleNeedsMoreInfo" [addButtonDisable]="addButtonDisable"
-                    [ruleCreationStatus]="ruleCreationStatus" [ruleId]="ruleInfo.ruleId" [reference]="reference"
+                    [ruleCreationStatus]="ruleCreationStatus" [ruleId]="ruleInfo?.ruleId" [reference]="reference"
                     [eclRef]="eclRef" [selectedReference]="selectedReference"
                     [fromMaintenanceProcess]="fromMaintenanceProcess"
                     [isReferenceDisableObject]="isReferenceDisableObject" [isRemovableObject]="isRemovableObject"
@@ -247,40 +329,48 @@
                     (setDefaultValueForApprovalDropdown)="setDefaultValueForImpactTypeChange()"
                     (retireRuleTabStatus)="retireRuleTabStatus()">
                 </app-provisional-references>
-
             </p-tabPanel>
 
             <!--    Rule Details tabpanel view -->
-
             <p-tabPanel header="Rule Update" *ngIf="fromMaintenanceProcess">
                 <app-rule-details [(ruleInfo)]="ruleInfo"
-                    [provDialogDisable]='!isSameSim && (provDialogDisable || readOnlyView)'></app-rule-details>
+                    [provDialogDisable]='!isSameSim && (provDialogDisable || readOnlyView || isPdgMedicaidRule)'></app-rule-details>
             </p-tabPanel>
 
 
             <!--    Rule Application tabpanel view -->
-
             <p-tabPanel header="Rule Application">
-                <app-rule-application *ngIf="ruleInfo.ruleId != undefined" [(showELLLink)]="showELLLink" [(ruleInfo)]="ruleInfo" 
-                    [(isIdea)]="isIdea" (loadingELLDetail)="onLoadingELLDetail($event)" (ruleApplicationsEmitter)="onRuleApplicationsLoad($event)">
+                <app-rule-application *ngIf="ruleInfo?.ruleId != undefined" [(showELLLink)]="showELLLink"
+                    [(ruleInfo)]="ruleInfo" [(isIdea)]="isIdea" (loadingELLDetail)="onLoadingELLDetail($event)"
+                    (ruleApplicationsEmitter)="onRuleApplicationsLoad($event)">
                 </app-rule-application>
             </p-tabPanel>
 
             <!--    Rule History tabpanel view -->
-
             <p-tabPanel header="Rule History">
-
-                <app-rule-history [(ruleId)]="ruleId" [ruleCreationStatus]="ruleCreationStatus">
+                <app-rule-history [ruleInfo]="ruleInfo" [ruleCreationStatus]="ruleCreationStatus">
                 </app-rule-history>
+            </p-tabPanel>
+
+            <p-tabPanel header="PDG Template" *ngIf="(((isPdgMedicaidRule && !isReadOnlyNonPdgRule) || isReadOnlyPdgRule) && !fromMaintenanceProcess)">
+
+                <app-pdg-template [ruleId]="ruleId" [provDialogDisable]="provDialogDisable || readOnlyView || !isPdgMedicaidRule" [ruleCreationStatus]="ruleCreationStatus"
+                [(ruleInfo)]="ruleInfo" [(selectedStates)]="selectedStates"
+                [selectedReferences]="selectedPdgReferences" [ruleCreationStatus]="ruleCreationStatus"
+                 [(optionLobs)]="lobs" [(optionStates)]="states" [fromMaintenanceProcess]="fromMaintenanceProcess" 
+                 (stateChanged)="onStateInput($event)" (claimTypeChanged) = "pdgClaimTypeSelected = $event"
+                 (messageSend)="messageRecieve($event)">
+                </app-pdg-template>
 
             </p-tabPanel>
 
-            <p-tabPanel header="Audit Log" [disabled]="!enableAuditLogTab()">
+            <p-tabPanel header="Audit Log"  *ngIf="enableAuditLogTab() || (isPdgMedicaidRule && ruleInfo.ruleId && ruleStatus!=='New Idea')" 
+            [disabled]="(!isPdgMedicaidRule && !enableAuditLogTab()) || isIngestedRule">
+
                 <app-audit-log [(ruleInfo)]="ruleInfo"
-                    *ngIf="(indexVal == 8 || indexVal == 9)&& ruleInfo.ruleId != undefined">
+                    *ngIf="(indexVal == 10 || indexVal == 11)&& ruleInfo?.ruleId != undefined">
                 </app-audit-log>
             </p-tabPanel>
-
 
         </p-tabView>
 
@@ -290,7 +380,7 @@
             <div class="row">
                 <div class="col" style="margin-left: 10px">
                     <button class="btn btn-primary" style="width: 10%; height: 2.5em;" (click)="addRule()"
-                        [disabled]="addButtonDisable">Add</button>
+                      [disabled]="addButtonDisable || isPdgMedicaidRule">Add</button>
                 </div>
             </div>
 
@@ -336,7 +426,7 @@
                     </ng-template>
                     <ng-template pTemplate="paginatorright" let-state>
                         <span *ngIf="state.totalRecords > 0" style="padding-right: 10px;">
-                            Showing <b>{{(state.page  * state.rows) + 1}}</b> -
+                            Showing <b>{{(state.page * state.rows) + 1}}</b> -
                             <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
                             of <b>{{state.totalRecords}}</b>
                         </span>
@@ -372,18 +462,18 @@
         <legend>Rule Engine Adoption</legend>
         <!-- template Buttons -->
         <div class="template" Id="provisonalRows">
-            <div class="full-size">
-                <button class="btn btn-primary btn-size" (click)="showIcmsTemplate(ruleInfo)">ICMS</button>
+            <div *ngIf="icmsButtonVisible" class="full-size">
+                <button class="btn btn-primary btn-size"  (click)="showIcmsTemplate(ruleInfo)">ICMS</button>
             </div>
-            <div *ngIf="showChangeRmr && deltas?.length > 0" class="full-size">
+            <div *ngIf="shouldShowChangeRmr()" class="full-size">
                 <button class="btn btn-primary btn-size" (click)="showIcmsTemplateChange(ruleInfo)">ICMS Change
                     RMR</button>
             </div>
             <div class="full-size">
                 <button class="btn btn-primary btn-size" (click)="showIconsForCVP()">CVP</button>
                 <div *ngIf="showIcon" class="col no-pad">
-                    <a style="font-size: 18px" (click)="downloadCvpFiles()">Open CVP template to fill.</a><br>
-                    <a style="font-size: 18px" (click)="downloadCvpFilesById()">Download CVP template.</a>
+                    <a style="font-size: 18px; text-decoration: underline;" (click)="downloadCvpFiles()">Open CVP template to fill.</a><br>
+                    <a style="font-size: 18px; text-decoration: underline;" (click)="downloadCvpFilesById()">Download CVP template.</a>
                     <p-fileUpload #uploadControl customUpload="true" [showUploadButton]="true" [maxFileSize]="1000000"
                         [fileLimit]="1" [multiple]="false" (uploadHandler)="onFileUpload($event)">
                         <ng-template pTemplate="toolbar">
@@ -395,8 +485,8 @@
             <div class="full-size">
                 <button class="btn btn-primary btn-size" (click)="showIconsForRPE()">CPE</button>
                 <div *ngIf="showRpeIcon" class="col no-pad">
-                    <a style="font-size: 18px" (click)="downloadRpeFiles()">Open CPE template to fill.</a><br>
-                    <a style="font-size: 18px" (click)="downloadRpeFilesById()">Download CPE template.</a>
+                    <a style="font-size: 18px; text-decoration: underline;" (click)="downloadRpeFiles()">Open CPE template to fill.</a><br>
+                    <a style="font-size: 18px; text-decoration: underline;" (click)="downloadRpeFilesById()">Download CPE template.</a>
                     <p-fileUpload #rpeUploadControl customUpload="true" [showUploadButton]="true"
                         [maxFileSize]="1000000" [fileLimit]="1" [multiple]="false"
                         (uploadHandler)="rpeFileUpload($event)">
@@ -413,7 +503,7 @@
 </div>
 
 <!--   Confirmation Dialog -->
-<p-dialog header="Confirmation" [class]="confirmDialog" [(visible)]="saveDisplay">
+<p-dialog header="Confirmation" [class]="confirmDialog" [(visible)]="saveDisplay" [draggable]="false" [closable]="false">
     <p>{{Message}}</p>
     <p-footer>
         <div class="row">
@@ -462,12 +552,12 @@
     <app-good-ideas typeTable="provisional" [goodIdeasBody]="selectedShelved"
         (statusGoodIdeasSaved)="goodIdeasEvent($event)"></app-good-ideas>
 </p-dialog>
-<p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle" key="codesTab">
-</p-confirmDialog>
+
+<p-confirmDialog key="codesTab"></p-confirmDialog>
 
 <p-blockUI [blocked]="loadingELLDetail">
     <div class="img-loading text-center">
-      <img src="assets/img/loading.gif" style="width: 60%" />
-      <p style="font-size: 12px; color: #fff;">loading ELL Detail...</p>
+        <img src="assets/img/loading.gif"/>
+        <p style="font-size: 12px; color: #fff;">loading ELL Detail...</p>
     </div>
 </p-blockUI>

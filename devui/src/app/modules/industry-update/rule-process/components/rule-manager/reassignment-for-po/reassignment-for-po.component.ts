@@ -21,8 +21,8 @@ import { ReferenceAnalysisComponent } from 'src/app/modules/industry-update/refe
 
 export class ReassignmentForPolicyOwnerComponent implements OnInit {
 
-    @ViewChild('assignedTable') assignedTable: EclTableComponent;
-    @ViewChild('returnedTable') returnedTable: EclTableComponent;
+    @ViewChild('assignedTable',{static: true}) assignedTable: EclTableComponent;
+    @ViewChild('returnedTable',{static: true}) returnedTable: EclTableComponent;
 
     assignedTableConfig: EclTableModel = null;
     returnedTableConfig: EclTableModel = null;
@@ -121,7 +121,8 @@ export class ReassignmentForPolicyOwnerComponent implements OnInit {
             case "instanceName":
                 this.dialogService.open(ReferenceAnalysisComponent, {
                     data: {
-                        instanceId: event.row.instanceId
+                        instanceId: event.row.instanceId,
+                        codesType: event.row.codesType == null ? Constants.HCPCS_CODE_TYPE : event.row.codesType
                     },
                     header: 'Reference Analysis',
                     width: '80%',
@@ -194,13 +195,13 @@ export class ReassignmentForPolicyOwnerComponent implements OnInit {
                 this.selectedAssignedRules = [];
                 this.assignedTable.selectedRecords = [];
                 this.assignedTable.savedSelRecords = []
-                this.assignedTable.refreshTable();
+                this.assignedTable.resetDataTable();
                 break;
             case Constants.RETURNED_TAB:
                 this.selectedReturnedRules = [];
                 this.returnedTable.selectedRecords = [];
                 this.returnedTable.savedSelRecords = [];
-                this.returnedTable.refreshTable();
+                this.returnedTable.resetDataTable();
                 break;
         }
     }

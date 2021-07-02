@@ -1,0 +1,24 @@
+<div class="row mt-2" *ngIf="pdgOption">
+  <div class="col-md-12">
+    <label *ngIf="_ruleInfo?.pdgTemplateDto?.pdgType === 'NRO'">Reference Details<span
+        class="required-field-color">*</span></label>
+    <label *ngIf="_ruleInfo?.pdgTemplateDto?.pdgType === 'HPP'">MSSP Reference Details (RMI Header)<span
+        class="required-field-color">*</span></label>
+    <textarea class="text-area" [disabled]="provDialogDisable"
+      *ngIf="_ruleInfo?.pdgTemplateDto" maxlength="500"
+      [(ngModel)]="_ruleInfo.pdgTemplateDto.referenceDetails"></textarea>
+  </div>
+</div>
+<div class="row mt-2" *ngIf="pdgOption">
+  <div class="col-md-6">
+    <label>Primary Reference Title<span class="required-field-color">*</span></label>
+    <p-dropdown [disabled]="provDialogDisable" [options]="_optionsObj.primaryTitleOpts" [style]="{'width':'100%'}"
+      (onChange)="enableSecondary($event)" [(ngModel)]="primSelected"></p-dropdown>
+  </div>
+  <div class="col-md-6">
+    <label>Secondary Reference Title</label>
+    <p-dropdown [disabled]="disabled || provDialogDisable" [options]="_optionsObj.secondaryTitleOpts"
+      [style]="{'width':'100%'}"  [(ngModel)]="secSelected"
+      (onChange)="secondaryChange()"></p-dropdown>
+  </div>
+</div>

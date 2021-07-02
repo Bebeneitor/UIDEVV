@@ -1,0 +1,13 @@
+<p-dialog
+  #dialog
+  header="History"
+  [(visible)]="openDialog"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content" *ngIf="openDialog">
+    <ecl-table
+      [tableModel]="tableConfig"
+      (onServiceCall)="serviceCall($event)"
+    ></ecl-table>
+  </div>
+</p-dialog>

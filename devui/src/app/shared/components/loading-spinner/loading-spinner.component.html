@@ -1,0 +1,6 @@
+<div *ngIf="loaderService.isLoading | async" class="overlay">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif"/>
+    <p style="font-size: 12px; color: #fff;">{{ loaderService.message }}</p>
+  </div>
+</div>

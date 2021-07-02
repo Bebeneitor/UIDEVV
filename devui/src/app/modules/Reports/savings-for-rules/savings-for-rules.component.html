@@ -35,8 +35,7 @@
           <div *ngFor="let report of savingReports; index as i" style="margin-bottom: 1vh">
             <div class="ui-g-12">
               <div class="ui-inputgroup">
-                <input type="text" class="text-center" pInputText
-                  value="{{engineName}}_Savings_{{currentDate}}.xlsx ({{i+1}})" [readonly]="true"
+                <input type="text" class="text-center" pInputText value="{{report.reportName}}" [readonly]="true"
                   style="width: 100%; font-weight: bold; font-size: 50px;">
                 <button pButton type="button" class="ui-button-success" style="background-color: green !important; color: white !important; 
                   border: none !important; height: 30px;" [disabled]="report.notGenerated"

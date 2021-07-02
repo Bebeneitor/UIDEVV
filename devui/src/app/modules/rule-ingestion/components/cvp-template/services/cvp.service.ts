@@ -43,7 +43,7 @@ export class CvpService {
    * Service call to construct CVP Templates Excel File
    * @param cvpIngestionIds 
    */
-  exportCVPRules(cvpIngestionIds: any[]): Observable<any> {
+  exportRules(cvpIngestionIds: any[]): Observable<any> {
     return this.http.post(environment.restServiceUrl + RoutingConstants.CVP_INGESTION_TEMPLATE + "/"
       + RoutingConstants.EXPORT_CVP_RULES_TEMPLATE, cvpIngestionIds, {responseType: 'blob'});
   }

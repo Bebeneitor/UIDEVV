@@ -1,0 +1,984 @@
+<div class="page-container sidebar-collapsed-back">
+
+    <!-- IMPORTANT IF YOU ADD CODE HERE, PLASE VERIFY IF YOU ADD YOUR CODE IN SIDEBAR-MENU AND SIDEBAR-MENU RESPONSIVE -->
+
+    <!-- MENU RESPONSIVE SCREEN -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sidebar-menu-responsive"
+        style="padding-right: 17px; padding-left : 17px; background : #31006F !important;z-index: 99999;">
+        <a class="navbar-brand" nghref="#">&nbsp;</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent" style="margin-top: 10px;">
+            <ul class="navbar-nav mr-auto">
+
+                <!--HOME-->
+                <li data-toggle="collapse" data-target=".navbar-collapse.show" class="nav-item">
+                    <a class="nav-link" nghref="#" routerLink="home"><i class="fa fa-dashboard"></i>&nbsp; Home</a>
+                </li>
+
+                <!--RULE CREATION-->
+                <li class="nav-item dropdown"
+                    *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_OTH', 'ROLE_BSC']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="ruleCreatinDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-pencil"></i>&nbsp;
+                        Rule Creation
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="ruleCreatinDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA','ROLE_OTH', 'ROLE_BSC']"><a
+                                class="dropdown-item" nghref="#" routerLink="newIdea">New Idea</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO', 'ROLE_CCA']"><a class="dropdown-item" nghref="#"
+                                routerLink="assignmentNewIdea">Assignment for New Idea</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CCA']"><a class="dropdown-item" nghref="#"
+                                routerLink="ideas-needing-research">New Idea Research</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO']"><a class="dropdown-item" nghref="#"
+                                routerLink="re-ssign-for-provisional-rules">Reassignment for Provisional Rules</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO']"><a class="dropdown-item" nghref="#"
+                                routerLink="reAssignForRuleApproval">Reassignment for Policy Owner Approval</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO']"><a class="dropdown-item" nghref="#"
+                                routerLink="ruleApproval">Policy Owner Approval</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_MD']"><a class="dropdown-item" nghref="#"
+                                routerLink="assignForMDApprovalNR">Assign for Peer Reviewer Approval</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_MD']"><a class="dropdown-item" nghref="#"
+                                routerLink="mdApprovalPR">Peer Reviewer Approval</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD']"><a class="dropdown-item" nghref="#"
+                                routerLink="good-ideas">Good Ideas</a></li>
+                    </ul>
+                </li>
+
+                <!--RULE MAINTENANCE PROCESS-->
+                <!-- //ECL-13477 -->
+
+                <ng-container *ngIf="showRuleMaintenance">
+
+
+                    <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']">
+                        <a class="nav-link dropdown-toggle" nghref="#" id="ruleMaintenanceDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-wrench"></i>&nbsp;
+                            Rule Maintenance Process
+                        </a>
+                        <ul class="dropdown-menu animated fadeIn" aria-labelledby="ruleMaintenanceDropdown">
+
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD']"><a class="dropdown-item" nghref="#"
+                                    routerLink="setupNotification">Set Notification for Reference Check</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO','ROLE_CCA']"><a class="dropdown-item" nghref="#"
+                                    routerLink="initiateImpact">Initiate Impact Analysis Process</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO']"><a class="dropdown-item" nghref="#"
+                                    routerLink="reAssignImpactAnalysis">Reassignment for Impact Analysis</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_CCA']"><a class="dropdown-item" nghref="#"
+                                    routerLink="ruleForImpactAnalysis">List of Rules for Impact Analysis</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO']"><a class="dropdown-item" nghref="#"
+                                    routerLink="reAssignForRuleUpdateApproval">Reassignment for Policy Owner</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO']"><a class="dropdown-item" nghref="#"
+                                    routerLink="ruleForPOApproval">Policy Owner Approval</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_MD']"><a class="dropdown-item" nghref="#"
+                                    routerLink="assignForMDApprovalRM">Assign for Peer Reviewer Approval</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_MD']"><a class="dropdown-item" nghref="#"
+                                    routerLink="mdApprovalRM">Peer Reviewer Approval</a></li>
+                        </ul>
+                    </li>
+
+
+                </ng-container>
+
+
+
+                <!--LIBRARY VIEW-->
+                <li class="nav-item dropdown"
+                    *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="ruleLibraryViewDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-book"></i>&nbsp;
+                        Library View
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="ruleLibraryViewDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']"><a
+                                class="dropdown-item" nghref="#" routerLink="library-search">Rules Catalog</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']"><a
+                                class="dropdown-item" nghref="#" routerLink="eclRuleCatalogue">Library View Search</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!--WHITE PAPER-->
+                <li class="nav-item dropdown"
+                    *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="ruleWhitePaperDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-file-text-o"></i>&nbsp;
+                        White Paper
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="ruleWhitePaperDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']"><a
+                                class="dropdown-item" nghref="#" routerLink="white-paper/internal">Internal White
+                                Paper</a></li>
+                        <!-- HIDE FOR THIS RELEASE
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#"
+                                routerLink="white-paper/external">Client White Paper</a></li>-->
+                    </ul>
+                </li>
+
+                <!-- RULE PROCESS SYSTEM UPDATES
+                <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="systemUpdatesDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-refresh"></i>&nbsp;
+                        Rule Processing System Updates
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="systemUpdatesDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item" nghref="#">Update Rule Processing System Version changes</a></li>
+                    </ul>
+                </li> -->
+
+                <!--REPORTS / ANALYTICS-->
+                <!-- <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="reportsDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-pie-chart"></i>&nbsp;
+                        Reports / Analytics
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="reportsDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item" nghref="#">Opportunity Value Analysis</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">New Rules in Time-Frame</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">Rules not yet implemented by Rules Engines</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">Rules Catalogue based on user search criteria</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item" nghref="#" routerLink="savingClientAdoptedRule">Savings for Client Adopted Rules</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">Rules Catalogue based on user search criteria</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">Rules related to Reference Source Name</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">Potential Savings not yet realized</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">Savings generated by Rules in specified time period</a></li>
+                    </ul>
+                </li> -->
+
+                <!--ECL ADMIN-->
+                <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_EA','ROLE_TA','ROLE_CVPA','ROLE_CPEA']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="eclDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-cog"></i>&nbsp;
+                        ECL Administration
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="eclDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#"
+                                routerLink="ecl-user-directory">ECL User Directory</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#"
+                                routerLink="ecl-user-authority-setup">User Authority Setup</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#"
+                                routerLink="field-selection-updates">Field Selection Update</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_TA']"><a class="dropdown-item" nghref="#"
+                                routerLink="jobManager">Job Manager</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_TA']"><a class="dropdown-item" nghref="#"
+                                routerLink="email-notification">Email Notification</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_TA']"><a class="dropdown-item" nghref="#"
+                                routerLink="ecl-lookups">ECL Lookups</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_TA','ROLE_CVPA']"><a class="dropdown-item" nghref="#"
+                                routerLinkActive="active" routerLink="/cure-and-repo/cure/module-admin-list">CURE
+                                Configuration</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_TA','ROLE_CPEA']"><a class="dropdown-item" nghref="#"
+                                routerLink="/cure-and-repo/repo/table-admin-list">REPO Configuration</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_TA']"><a class="dropdown-item" nghref="#"
+                                routerLink="mviews-log">ECL DB MV Refresh Log</a>
+                        </li>
+                        <!-- <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#">Rule Life-cycle Setup</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#">Distribution List Setup</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#">Approval Matrix by Medical Policy</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#">Reference Source Setup</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_EA']"><a class="dropdown-item" nghref="#">Line of Business Setup</a></li> -->
+                    </ul>
+                </li>
+
+                <!--D&B -->
+                <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN', 'ROLE_BSC','ROLE_DNBVIEWER']">
+                    <li *ngIf="menuActivate('menu-dnb')" class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" nghref="#" id="dnbDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="dnb-icon">
+                                <img src="assets/img/pills.svg">
+                            </span>&nbsp;
+                            Drugs & Biologicals
+                        </a>
+                        <ul class="dropdown-menu animated fadeIn" aria-labelledby="dnbDropdown">
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN', 'ROLE_BSC' ,'ROLE_DNBVIEWER']">
+                                <li *ngIf="menuActivate('dnb-submenu-drug-lib')" data-toggle="collapse"
+                                    data-target=".navbar-collapse.show">
+                                    <a class="dropdown-item" nghref="#" routerLink="dnb/select-drug"
+                                        (click)="refreshDrugLibraryFilters()">Drug Library</a></li>
+                            </ng-container>
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN']">
+                                <li *ngIf="menuActivate('dnb-submenu-drugs-in-progress')" data-toggle="collapse"
+                                    data-target=".navbar-collapse.show">
+                                    <a class="dropdown-item" nghref="#" routerLink="dnb/drugs-in-approval-process"
+                                        (click)="refreshApprovalFilters()">Drugs In Approval Process</a></li>
+                            </ng-container>
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBADMIN']">
+                                <li *ngIf="menuActivate('dnb-submenu-mid-rule-admin')" data-toggle="collapse"
+                                    data-target=".navbar-collapse.show">
+                                    <a class="dropdown-item" nghref="#" routerLink="dnb/mid-rule-admin">MidRules
+                                        Template Configuration</a></li>
+                            </ng-container>
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN']">
+                                <li *ngIf="menuActivate('dnb-submenu-webcrawling')" data-toggle="collapse"
+                                    data-target=".navbar-collapse.show">
+                                    <a class="dropdown-item" nghref="#" routerLink="dnb/web-crawling">Web Crawling</a>
+                                </li>
+                            </ng-container>
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN']">
+                                <li *ngIf="menuActivate('dnb-cpe-edit-creations')" data-toggle="collapse"  data-target=".navbar-collapse.show">
+                                    <a class="dropdown-item" nghref="#" routerLink="dnb/template-flags">CPE Table Creation</a>
+                                </li>
+                            </ng-container>
+                        </ul>
+                    </li>
+                </ng-container>
+
+                <!--MERGE CAPABILITY-->
+                <!-- <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="mergeDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-clone"></i>&nbsp;
+                        Merge Capability
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="mergeDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']"><a class="dropdown-item" nghref="#">Identify Merge Candidates</a></li>
+                    </ul>
+                </li> -->
+
+                <!--RULE INGESTION-->
+                <li class="nav-item dropdown"
+                    *ngxPermissionsOnly="['ROLE_MD','ROLE_CCA','ROLE_EA','ROLE_PO','ROLE_CVPA','ROLE_CVPU','ROLE_CPEA','ROLE_CPEU']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="ingestionDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-file-text-o"></i>&nbsp;
+                        Rule Ingestion
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="ingestionDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_MD','ROLE_CCA','ROLE_EA','ROLE_PO']"><a class="dropdown-item"
+                                nghref="#" routerLink="rule-ingestion/ingestion-process">Template Upload</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_MD','ROLE_CCA','ROLE_EA','ROLE_PO','ROLE_CVPA','ROLE_CVPU','ROLE_CPEU']"><a
+                                class="dropdown-item" nghref="#" routerLink="rule-ingestion/ingested-rules">Rule
+                                Overview</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CVPA']"><a class="dropdown-item" nghref="#"
+                                routerLink="rule-ingestion/cvp-template">CVP Ingestion
+                                Template</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CPEA']"><a class="dropdown-item" nghref="#"
+                                routerLink="rule-ingestion/cpe-template">CPE Ingestion
+                                Template</a></li>
+                    </ul>
+                </li>
+
+                <!--INDUSTRY UPDATE-->
+                <ng-container *ngIf="showIndustryUpdate">
+                <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="industryUpdate" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-file-text-o"></i>&nbsp;
+                        Industry Update
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="IndustryDropDown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            routerLink="industryUpdateHistory" *ngxPermissionsOnly="['ROLE_EA','ROLE_MD','ROLE_PO']"><a
+                                class="dropdown-item" nghref="#">ICMS Industry Update Integration</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show" routerLink="crosswalk"
+                            *ngxPermissionsOnly="['ROLE_EA','ROLE_CCA','ROLE_MD','ROLE_PO']"><a class="dropdown-item"
+                                nghref="#">ICMS/ECL Rule
+                                Crosswalk</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_EA','ROLE_CCA']"><a class="dropdown-item" routerLink="same-sim"
+                                nghref="#">{{sameSimTitle}}</a>
+                        </li>
+
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_EA', 'ROLE_PO']"><a class="dropdown-item"
+                                routerLink="industry-updates/rule-process/reassignment-cca" nghref="#">ECL Industry
+                                Updates Reassignment for
+                                CCA Analysis</a>
+                        </li>
+
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item"
+                                routerLink="industry-updates/rule-process/initiate-analysis" nghref="#">ECL Industry
+                                Updates CCA Analysis</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO','ROLE_MD','ROLE_EA','ROLE_TA']"><a
+                                class="dropdown-item" routerLink="industry-updates/rule-process/reassignment-po"
+                                nghref="#">ECL Industry
+                                Updates Reassignment for Policy Owner</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_PO','ROLE_EA']"><a class="dropdown-item"
+                                routerLink="industry-updates/rule-process/policy-owner-approval" nghref="#">ECL Industry
+                                Updates Policy Owner Approval</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_MD']"><a class="dropdown-item"
+                                routerLink="industry-updates/rule-process/for-medical-director-approval" nghref="#">ECL
+                                Industry Updates Assigned for Peer Reviewer Approval</a>
+                        </li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_MD','ROLE_EA']"><a class="dropdown-item"
+                                routerLink="industry-updates/rule-process/medical-director-approval" nghref="#">ECL
+                                Industry Updates Peer Reviewer Approval</a>
+                        </li>
+
+                        <!-- HAS NO ROUTER LINK -->
+                    </ul>
+                </li>
+            </ng-container>
+
+                <li class="nav-item" data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsExcept="['ROLE_OTH']">
+                    <a class="nav-link" routerLink="/ell-search"><i class="fa fa-table"></i>&nbsp; ELL Library View</a>
+                </li>
+
+                <li class="nav-item" data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsExcept="['ROLE_OTH']">
+                    <a class="nav-link" routerLink="/sub-rule-search"><i class="fa fa-th"></i>&nbsp; Sub Rule Search</a>
+                </li>
+
+                <!--CURE & REPO-->
+                <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_CVPA','ROLE_CVPU','ROLE_CPEA','ROLE_CPEU']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="cureDropDown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-files-o"></i>&nbsp;
+                        CURE & REPO
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="cureDropDown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CVPA','ROLE_CPEA','ROLE_CVPU']"><a class="dropdown-item" nghref="#"
+                                routerLink="cure-and-repo/cure/module-consulting">CURE</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CVPA','ROLE_CPEA','ROLE_CPEU']"><a class="dropdown-item" nghref="#"
+                                routerLink="cure-and-repo/repo/module-consulting">REPO</a></li>
+
+                    </ul>
+                </li>
+                <!--Reference Data Acquisition RDA -->
+                <li data-toggle="collapse" data-target=".navbar-collapse.show" routerLink="rda"
+                    *ngxPermissionsOnly="['ROLE_EA']">
+                    <a class="dropdown-item" nghref="#">
+                        <img [src]="rdaImage" id="rdaImage" class="custom-rdaImg">
+                        Reference Data Acquisition
+                    </a>
+                </li>
+                <!--CONVERGENCE POINT-->
+                <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPU', 'ROLE_CVPAP', 'ROLE_CVPE']">
+                    <a class="nav-link dropdown-toggle" nghref="#" id="convergenceDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-th"></i>&nbsp;
+                        ConVergence Point Documentation
+                    </a>
+                    <ul class="dropdown-menu animated fadeIn" aria-labelledby="convergenceDropdown">
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPU', 'ROLE_CVPAP', 'ROLE_CVPE']">
+                            <a class="dropdown-item" nghref="#" routerLink="clinical-rules-requirements">Clinical Rules
+                                Requirements</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPU', 'ROLE_CVPAP', 'ROLE_CVPE']">
+                            <a class="dropdown-item" nghref="#" routerLink="ancillary-information">ConVergence Point
+                                Ancillary Information</a></li>
+                        <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                            *ngxPermissionsOnly="['ROLE_CVPA']">
+                            <a class="dropdown-item" nghref="#" routerLink="audit-log">Audit Log and Reports</a></li>
+                    </ul>
+                </li>
+
+
+                <!--Research Requests (RR) -->
+                <div id="rrFlowEnabled">
+                    <li class="nav-item dropdown" *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                        <a class="nav-link dropdown-toggle" nghref="#" id="researchRequestsDropdown" role="button"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-search"></i>&nbsp;
+                            Research Requests
+                        </a>
+                      <div *ngIf="showJiraLoginFlag">
+                        <ul class="dropdown-menu animated fadeIn" aria-labelledby="researchRequestsDropdown">
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA','ROLE_EA']"><a class="dropdown-item"
+                                    nghref="#" (click)="getResearchRequestLogin('NR')">New Request</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA','ROLE_EA']"><a class="dropdown-item"
+                                    nghref="#" (click)="getResearchRequestLogin('MR')">My Requests</a></li>
+                            <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA','ROLE_EA']"><a class="dropdown-item"
+                                    nghref="#" (click)="getResearchRequestLogin('UR')">Unassigned Requests</a></li>
+                           <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA','ROLE_EA']"><a class="dropdown-item"
+                                   nghref="#" (click)="getResearchRequestLogin('RR')">Reassignment for Research Request</a></li>
+                          <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                                *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA','ROLE_EA']"><a class="dropdown-item"
+                                    nghref="#" (click)="getResearchRequestLogin('RS')">Requests Search</a></li>
+                        </ul>
+                      </div>
+                      <div *ngIf="!showJiraLoginFlag">
+                        <ul class="dropdown-menu animated fadeIn" aria-labelledby="researchRequestsDropdown">
+                          <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                              *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item"
+                               nghref="#" routerLink="new-research-request">New Request</a></li>
+                          <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                              *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item"
+                               nghref="#" routerLink="my-research-request">My Requests</a></li>
+                          <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                              *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item"
+                              nghref="#" routerLink="unassigned-research-request">Unassigned Requests</a></li>
+                          <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                              *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item"
+                              nghref="#" routerLink="reassignment-research-request">Reassignment for Research Request</a></li>
+                          <li data-toggle="collapse" data-target=".navbar-collapse.show"
+                              *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"><a class="dropdown-item"
+                               nghref="#" routerLink="search-research-request">Requests Search</a></li>
+                          </ul>
+                      </div>
+                    </li>
+                </div>
+
+                <li class="nav-item" data-toggle="collapse" data-target=".navbar-collapse.show" *ngxPermissionsExcept="['ROLE_OTH', 'ROLE_BSC']">
+                    <a class="nav-link" nghref="#" routerLink=""><em class="fa fa-cloud-download"></em>&nbsp;
+                        Downloads</a>
+                </li>
+                <!--LOGOUT-->
+                <li class="nav-item" data-toggle="collapse" data-target=".navbar-collapse.show">
+                    <a class="nav-link" nghref="#" (click)="logout()"><i class="fa fa-lock"></i>&nbsp; Log Out</a>
+                </li>
+
+                <!--HELP-->
+                <li class="nav-item" data-toggle="collapse" data-target=".navbar-collapse.show">
+                    <a class="nav-link" nghref="#" (click)="getHelp()"><i class="fa fa-question-circle"></i>&nbsp;
+                        Help</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- MENU NORMAL SCREEN -->
+    <div class="sidebar-menu">
+        <header class="logo">
+            <a nghref="#" class="sidebar-icon">
+                <span class="fa fa-bars" style="color : #fff; font-size:23px;"></span>
+            </a>
+
+            <a *ngIf="toggle" routerLink='/home'>
+                <img src="./assets/img/logo2.png" class="d-inline-block align-top logo-header" alt="logo"
+                    style="max-width: 164px; min-width: 164px; padding-left: 10px;">
+
+            </a>
+        </header>
+        <div *ngIf="toggle">
+            <p class="user-logged"
+                style="font-size: 14px !important; font-weight: 400; color : #fff !important; margin : 0px !important; margin-left: 25px !important;">
+                Enterprise
+                Content Library</p>
+        </div>
+        <div id="menu" class="menu">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a nghref="#" routerLink="home" (click)="closeMenu()">
+                        <i class="fa fa-dashboard"></i><span>Home</span>
+                    </a>
+                </li>
+                <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA','ROLE_OTH', 'ROLE_BSC']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu1">
+                        <i class="fa fa-pencil"></i>
+                        <span>Rule Creation</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+                    <div id="submenu1" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA','ROLE_OTH', 'ROLE_BSC']"
+                            class="nav-item1" nghref="#" routerLink="newIdea" routerLinkActive="active"
+                            (click)="closeMenu()">New Idea</span>
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_CCA']" class="nav-item1" nghref="#"
+                            routerLink="assignmentNewIdea" routerLinkActive="active">Assignment for New Idea</span>
+                        <span *ngxPermissionsOnly="['ROLE_CCA']" class="nav-item1" nghref="#"
+                            routerLink="ideas-needing-research" routerLinkActive="active">New Idea Research</span>
+                        <!-- <span class="nav-item1" nghref="#" routerLink="newIdeaResearch" routerLinkActive="active">New Idea Research</span>  May need for later functionality testing-->
+                        <span *ngxPermissionsOnly="['ROLE_PO']" class="nav-item1" nghref="#"
+                            routerLink="re-ssign-for-provisional-rules" routerLinkActive="active" (click)="closeMenu()">
+                            Reassignment for Provisional Rules</span>
+                        <span *ngxPermissionsOnly="['ROLE_PO']" class="nav-item1" nghref="#"
+                            routerLink="reAssignForRuleApproval" routerLinkActive="active" (click)="closeMenu()">
+                            Reassignment for Policy Owner Approval</span>
+                        <span *ngxPermissionsOnly="['ROLE_PO']" class="nav-item1" nghref="#" routerLink="ruleApproval"
+                            routerLinkActive="active" (click)="closeMenu()">Policy Owner Approval</span>
+                        <span *ngxPermissionsOnly="['ROLE_MD']" class="nav-item1" nghref="#"
+                            routerLink="assignForMDApprovalNR" routerLinkActive="active">Assign for Peer Reviewer
+                            Approval</span>
+                        <span *ngxPermissionsOnly="['ROLE_MD']" class="nav-item1" nghref="#" routerLink="mdApprovalPR"
+                            routerLinkActive="active">Peer Reviewer Approval</span>
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD']" class="nav-item1" nghref="#"
+                            routerLink="good-ideas" routerLinkActive="active">Good Ideas</span>
+                    </div>
+                </li>
+
+                <!-- //ECL-13477 -->
+                <ng-container *ngIf="showRuleMaintenance">
+
+                    <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']">
+                        <a nghref="#" data-toggle="collapse" data-target="#submenu2">
+                            <i class="fa fa-wrench"></i>
+                            <span style="width: 100px; margin-right:20px; white-space: wrap;">Rule Maintenance
+                                Process</span>
+                            <span class="fa fa-angle-down" style="float: right"></span>
+                        </a>
+                        <div id="submenu2" class="collapse">
+
+                            <span *ngxPermissionsOnly="['ROLE_PO','ROLE_MD']" class="nav-item1" nghref="#"
+                                routerLink="setupNotification" routerLinkActive="active" (click)="closeMenu()">Set
+                                Notification for Reference Check</span>
+                            <span *ngxPermissionsOnly="['ROLE_PO','ROLE_CCA']" class="nav-item1" nghref="#"
+                                routerLink="initiateImpact" routerLinkActive="active">Initiate Impact Analysis
+                                Process</span>
+                            <span *ngxPermissionsOnly="['ROLE_PO']" class="nav-item1" nghref="#"
+                                routerLink="reAssignImpactAnalysis" routerLinkActive="active">Reassignment for Impact
+                                Analysis</span>
+                            <span *ngxPermissionsOnly="['ROLE_CCA']" class="nav-item1" nghref="#"
+                                routerLink="ruleForImpactAnalysis" routerLinkActive="active">List of Rules for Impact
+                                Analysis</span>
+                            <span *ngxPermissionsOnly="['ROLE_PO']" class="nav-item1" nghref="#"
+                                routerLink="reAssignForRuleUpdateApproval" routerLinkActive="active">Reassignment for
+                                Policy
+                                Owner</span>
+                            <span *ngxPermissionsOnly="['ROLE_PO']" class="nav-item1" nghref="#"
+                                routerLink="ruleForPOApproval" routerLinkActive="active">Policy Owner Approval</span>
+                            <span *ngxPermissionsOnly="['ROLE_MD']" class="nav-item1" nghref="#"
+                                routerLink="assignForMDApprovalRM" routerLinkActive="active">Assign for Peer Reviewer
+                                Approval</span>
+                            <span *ngxPermissionsOnly="['ROLE_MD']" class="nav-item1" nghref="#"
+                                routerLink="mdApprovalRM" routerLinkActive="active">Peer Reviewer Approval</span>
+                        </div>
+                    </li>
+
+
+                </ng-container>
+
+
+                <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu3" aria-expanded="false">
+                        <i class="fa fa-book"></i>
+                        <span>Library View</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+                    <div id="submenu3" class="collapse">
+                        <!--<span class="nav-item1" nghref="#" routerLink="libraryView" (click)="closeMenu()">Summary View</span>
+                        <span class="nav-item1" nghref="#" routerLinkActive="!active">Recently Viewed List</span> -->
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']"
+                            class="nav-item1" nghref="#" routerLink="library-search" routerLinkActive="active"
+                            (click)="closeMenu()">Rules
+                            Catalog</span>
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']"
+                            class="nav-item1" nghref="#" routerLink="eclRuleCatalogue" routerLinkActive="active"
+                            (click)="closeMenu()">Library View Search</span>
+                    </div>
+                </li>
+
+
+                <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu4" aria-expanded="false">
+                        <i class="fa fa-file-text-o"></i>
+                        <span>White Paper</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+
+                    <div id="submenu4" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']"
+                            class="nav-item1" nghref="#" routerLink="white-paper/internal"
+                            routerLinkActive="active">Internal White Paper</span>
+                        <!-- HIDE FOR THIS RELEASE
+                            <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']" class="nav-item1" nghref="#"
+                            routerLink="white-paper/external" routerLinkActive="active" (click)="closeMenu()">Client
+                            White Paper</span>-->
+                    </div>
+                </li>
+
+                <!-- <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu5">
+                        <i class="fa fa-refresh"></i>
+                        <span>Rule Processing System Updates</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+
+                    <div id="submenu5" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1"
+                            nghref="#">Update Rule Processing System Version changes</span>
+                    </div>
+                </li> -->
+
+                <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu5" aria-expanded="false">
+                        <i class="fa fa-pie-chart"></i>
+                        <span>Reports</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+
+                    <div id="submenu5" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1"
+                            nghref="#" routerLinkActive="active" routerLink="savings-for-rule">Savings
+                        </span>
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"
+                            class="nav-item1" nghref="#" routerLinkActive="active" routerLink="team-updates-report">Team
+                            Reporting
+                        </span>
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"
+                            class="nav-item1" nghref="#" routerLinkActive="active"
+                            routerLink="medicaid-recomend-report">Medicaid Workflow
+                        </span>
+                        <ng-container *ngIf="menuActivate('menu-rva-pdg-report')">
+                            <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']"
+                                class="nav-item1" nghref="#" routerLinkActive="active"
+                                routerLink="rva-pdg-report">RVA PDG
+                            </span>
+                        </ng-container>
+                        
+                    </div>
+                </li>
+
+                <li *ngxPermissionsOnly="['ROLE_EA','ROLE_TA','ROLE_CVPA','ROLE_CPEA']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu7">
+                        <i class="fa fa-cog"></i>
+                        <span>ECL Administration</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+                    <div id="submenu7" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#"
+                            routerLink="ecl-user-directory" routerLinkActive="active">ECL User Directory</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#"
+                            routerLink="ecl-user-authority-setup" routerLinkActive="active">User Authority Setup</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#"
+                            routerLink="field-selection-updates" (click)="closeMenu()">Field Selection Update</span>
+                        <span *ngxPermissionsOnly="['ROLE_TA']" class="nav-item1" nghref="#" routerLink="jobManager"
+                            (click)="closeMenu()">Job Manager</span>
+                        <span *ngxPermissionsOnly="['ROLE_TA']" class="nav-item1" nghref="#"
+                            routerLink="email-notification" (click)="closeMenu()">Email Notification</span>
+                        <span *ngxPermissionsOnly="['ROLE_TA']" class="nav-item1" nghref="#" routerLink="ecl-lookups"
+                            (click)="closeMenu()">ECL Lookups</span>
+                        <span *ngxPermissionsOnly="['ROLE_TA','ROLE_CVPA']" class="nav-item1" nghref="#"
+                            routerLink="cure-and-repo/cure/module-admin-list" (click)="closeMenu()">CURE
+                            Configuration</span>
+                        <span *ngxPermissionsOnly="['ROLE_TA','ROLE_CPEA']" class="nav-item1" nghref="#"
+                            routerLink="cure-and-repo/repo/table-admin-list" (click)="closeMenu()">REPO
+                            Configuration</span>
+                        <span *ngxPermissionsOnly="['ROLE_TA']" class="nav-item1" nghref="#" routerLink="mviews-log"
+                            (click)="closeMenu()">ECL DB MV Refresh Log</span>
+                        <!-- <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#"
+                            routerLinkActive="!active">Rule Life-cycle Setup</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#"
+                            routerLinkActive="!active">Distribution List Setup</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#"
+                            routerLinkActive="!active">Approval Matrix by Medical Policy</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#" routerLinkActive="!active"
+                            routerLink>Reference Source Setup</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA']" class="nav-item1" nghref="#"
+                            routerLinkActive="!active">Line of Business Setup</span> -->
+                    </div>
+                </li>
+
+
+                <!--D&B ADMIN-->
+                <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN', 'ROLE_BSC' ,'ROLE_DNBVIEWER']">
+                    <li *ngIf="menuActivate('menu-dnb')">
+                        <a nghref="#" data-toggle="collapse" data-target="#dnbmenu">
+                            <span class="dnb-icon">
+                                <img src="assets/img/pills.svg">
+                            </span>
+                            <span>Drugs & Biologicals</span>
+                            <span class="fa fa-angle-down" style="float: right"></span>
+                        </a>
+                        <div id="dnbmenu" class="collapse">
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN', 'ROLE_BSC' ,'ROLE_DNBVIEWER']">
+                                <span *ngIf="menuActivate('dnb-submenu-drug-lib')" class="nav-item1" nghref="#"
+                                    routerLink="dnb/select-drug" (click)="refreshDrugLibraryFilters()"
+                                    routerLinkActive="active">Drug Library</span>
+                            </ng-container>
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN']">
+                                <span *ngIf="menuActivate('dnb-submenu-drugs-in-progress')" class="nav-item1" nghref="#"
+                                    routerLink="dnb/drugs-in-approval-process" (click)="refreshApprovalFilters()"
+                                    routerLinkActive="active">Drugs In Approval Process</span>
+                            </ng-container>
+
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBADMIN']">
+                                <span *ngIf="menuActivate('dnb-submenu-mid-rule-admin')" class="nav-item1" nghref="#"
+                                    routerLink="dnb/mid-rule-admin" routerLinkActive="active">MidRules Template
+                                    Configuration</span>
+                            </ng-container>
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN']">
+                                <span *ngIf="menuActivate('dnb-submenu-webcrawling')" class="nav-item1" nghref="#"
+                                    routerLink="dnb/web-crawling" routerLinkActive="active">
+                                    Web Crawling</span>
+                            </ng-container>
+                            <ng-container *ngxPermissionsOnly="['ROLE_DNBE', 'ROLE_DNBA', 'ROLE_DNBADMIN']">
+                                <span *ngIf="menuActivate('dnb-cpe-edit-creations')" class="nav-item1" nghref="#"
+                                    routerLink="dnb/template-flags" routerLinkActive="active">
+                                    CPE Table Creation</span>
+                            </ng-container>
+                        </div>
+                    </li>
+                </ng-container>
+
+                <ng-container *ngIf="showIndustryUpdate">
+
+                <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu8">
+                        <i class="fa fa-area-chart"></i>
+                        <span>Industry Update</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+                    <div id="submenu8" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_EA','ROLE_MD','ROLE_PO']" class="nav-item1" nghref="#"
+                            routerLinkActive="active" routerLink="industryUpdateHistory">ICMS Industry Update
+                            Integration</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA','ROLE_CCA','ROLE_MD', 'ROLE_PO']"
+                            routerLinkActive="active" class="nav-item1" nghref="#" routerLink="crosswalk"
+                            (click)="closeMenu()">ICMS/ECL Rule Crosswalk</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA','ROLE_CCA']" class="nav-item1" nghref="#"
+                            routerLinkActive="active" (click)="closeMenu()"
+                            routerLink="same-sim">{{sameSimTitle}}</span>
+                        <span *ngxPermissionsOnly="['ROLE_EA', 'ROLE_PO']" class="nav-item1" nghref="#"
+                            (click)="closeMenu()" routerLinkActive="active"
+                            routerLink="industry-updates/rule-process/reassignment-cca">ECL Industry
+                            Updates Reassignment for CCA
+                            Analysis</span>
+                        <span *ngxPermissionsOnly="['ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                            (click)="closeMenu()" routerLinkActive="active"
+                            routerLink="industry-updates/rule-process/initiate-analysis">ECL Industry
+                            Updates CCA Analysis</span>
+                        <span *ngxPermissionsOnly="['ROLE_PO','ROLE_MD','ROLE_EA','ROLE_TA']"
+                            class="nav-item1" nghref="#" (click)="closeMenu()" routerLinkActive="active"
+                            routerLink="industry-updates/rule-process/reassignment-po">ECL Industry
+                            Updates Reassignment for Policy Owner</span>
+                        <span *ngxPermissionsOnly="['ROLE_PO','ROLE_EA']" class="nav-item1" nghref="#"
+                            (click)="closeMenu()" routerLinkActive="active"
+                            routerLink="industry-updates/rule-process/policy-owner-approval">ECL Industry
+                            Updates Policy Owner Approval</span>
+                        <span *ngxPermissionsOnly="['ROLE_MD','ROLE_EA']" class="nav-item1" nghref="#"
+                            (click)="closeMenu()" routerLinkActive="active"
+                            routerLink="industry-updates/rule-process/for-medical-director-approval">ECL Industry
+                            Updates Assign for Peer Reviewer Approval</span>
+                        <span *ngxPermissionsOnly="['ROLE_MD','ROLE_EA']" class="nav-item1" nghref="#"
+                            (click)="closeMenu()" routerLinkActive="active"
+                            routerLink="industry-updates/rule-process/medical-director-approval">ECL Industry
+                            Updates Peer Reviewer Approval</span>
+                    </div>
+                </li>
+            </ng-container>
+
+                <li *ngxPermissionsExcept="['ROLE_OTH']">
+                    <a routerLink="/ell-search">
+                        <i class="fa fa-table"></i><span routerLinkActive="!active">ELL Library View</span>
+                    </a>
+                </li>
+
+                <li *ngxPermissionsExcept="['ROLE_OTH']">
+                    <a routerLink="/sub-rule-search">
+                        <i class="fa fa-th"></i><span routerLinkActive="!active">Sub Rule Search</span>
+                    </a>
+                </li>
+
+                <!-- <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu8">
+                        <i class="fa fa-clone"></i>
+                        <span>Merge Capability</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+                    <div id="submenu8" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA']" class="nav-item1" nghref="#"
+                            routerLinkActive="!active">Identify Merge Candidates</span>
+                    </div>
+
+                </li> -->
+
+                <li
+                    *ngxPermissionsOnly="['ROLE_MD','ROLE_CCA','ROLE_EA','ROLE_PO','ROLE_CVPA','ROLE_CVPU','ROLE_CPEA','ROLE_CPEU']">
+                    <a nghref="#" data-toggle="collapse" data-target="#submenu10" aria-expanded="false">
+                        <i class="fa fa-file-text-o"></i>
+                        <span>Rule Ingestion</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+
+                    <div id="submenu10" class="collapse">
+                        <span *ngxPermissionsOnly="['ROLE_MD','ROLE_CCA','ROLE_EA','ROLE_PO']" class="nav-item1"
+                            nghref="#" routerLink="rule-ingestion/ingestion-process" routerLinkActive="active">Template
+                            Upload</span>
+                        <span *ngxPermissionsOnly="['ROLE_MD','ROLE_CCA','ROLE_EA','ROLE_PO','ROLE_CVPA','ROLE_CVPU','ROLE_CPEU']"
+                            class="nav-item1" nghref="#" routerLink="rule-ingestion/ingested-rules"
+                            routerLinkActive="active" (click)="closeMenu()">Rule
+                            Overview</span>
+                        <span *ngxPermissionsOnly="['ROLE_CVPA']" class="nav-item1" nghref="#"
+                            routerLink="rule-ingestion/cvp-template" routerLinkActive="active" (click)="closeMenu()">CVP
+                            Ingestion Template</span>
+                        <span *ngxPermissionsOnly="['ROLE_CPEA']" class="nav-item1" nghref="#"
+                            routerLink="rule-ingestion/cpe-template" routerLinkActive="active" (click)="closeMenu()">CPE
+                            Ingestion Template</span>
+                    </div>
+                </li>
+
+                <li *ngxPermissionsOnly="['ROLE_CVPA','ROLE_CVPU','ROLE_CPEA','ROLE_CPEU']">
+                    <a nghref="#" data-toggle="collapse" data-target="#cureSubMenu">
+                        <i class="fa fa-cubes"></i>
+                        <span>CURE & REPO</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+                    <div id="cureSubMenu" class="collapse">
+                        <span class="nav-item1" *ngxPermissionsOnly="['ROLE_CVPA','ROLE_CPEA','ROLE_CVPU']"
+                            routerLink="cure-and-repo/cure/module-consulting" (click)="closeMenu()"
+                            routerLinkActive="active">CURE</span>
+
+                        <span class="nav-item1" *ngxPermissionsOnly="['ROLE_CVPA','ROLE_CPEA','ROLE_CPEU']"
+                            routerLink="cure-and-repo/repo/module-consulting" (click)="closeMenu()"
+                            routerLinkActive="active">REPO</span>
+                    </div>
+
+                </li>
+
+
+                <li *ngxPermissionsOnly="['ROLE_EA']">
+                    <a nghref="#" class="nav-item1" routerLink="rda" routerLinkActive="active">
+                        <img [src]="rdaImage" id="rdaImage" class="custom-rdaImg">
+                        <span>Reference Data Acquisition</span>
+                    </a>
+                </li>
+                <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA','ROLE_TA', 'ROLE_BSC']">
+                    <a nghref="#" class="nav-item1" routerLink="tagfilter-management" routerLinkActive="active">
+                        <i class="fa fa-tags"></i>
+                        <span>Filter & Tag Management</span>
+                    </a>
+                </li>
+                <li *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPU', 'ROLE_CVPAP', 'ROLE_CVPE']">
+                    <a nghref="#" data-toggle="collapse" data-target="#convergenceSubMenu">
+                        <i class="fa fa-list-ul"></i>
+                        <span>ConVergence Point Documentation</span>
+                        <span class="fa fa-angle-down" style="float: right"></span>
+                    </a>
+                    <div id="convergenceSubMenu" class="collapse">
+                        <span class="nav-item1"
+                            *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPU', 'ROLE_CVPAP', 'ROLE_CVPE']"
+                            routerLink="clinical-rules-requirements" (click)="closeMenu()"
+                            routerLinkActive="active">Clinical Rules Requirements</span>
+
+                        <span class="nav-item1"
+                            *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPU', 'ROLE_CVPAP', 'ROLE_CVPE']"
+                            routerLink="ancillary-information" (click)="closeMenu()"
+                            routerLinkActive="active">ConVergence Point Ancillary Information</span>
+
+                        <span class="nav-item1" *ngxPermissionsOnly="['ROLE_CVPA']" routerLink="audit-log"
+                            (click)="closeMenu()" routerLinkActive="active">Audit Log and Reports</span>
+                    </div>
+
+                </li>
+
+                <li *ngxPermissionsExcept="['ROLE_OTH', 'ROLE_BSC']">
+                    <a nghref="#" class="nav-item1" routerLink="file-inbox" routerLinkActive="active">
+                        <i class="fa fa-cloud-download"></i><span>Downloads</span>
+                    </a>
+                </li>
+
+                <!--Research Requests (RR) -->
+                <div *ngIf="rrFlowEnabled">
+                    <li *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']">
+                        <a nghref="#" data-toggle="collapse" data-target="#mainResearchRequestsDropdown"
+                            aria-expanded="false">
+                            <i class="fa fa-search"></i>
+                            <span> Research Requests</span>
+                            <span class="fa fa-angle-down" style="float: right"></span>
+                        </a>
+                      <div id="mainResearchRequestsDropdown" class="collapse">
+                        <div *ngIf="showJiraLoginFlag">
+                            <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                  (click)="getResearchRequestLogin('NR')">New
+                                Request</span>
+                          <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                (click)="getResearchRequestLogin('MR')">My
+                                Requests</span>
+                          <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                (click)="getResearchRequestLogin('UR')">Unassigned Requests</span>
+
+                          <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD','ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                (click)="getResearchRequestLogin('RR')">Reassignment for Research Request</span>
+
+                          <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                (click)="getResearchRequestLogin('RS')">Requests Search</span>
+                        </div>
+                        <div *ngIf="!showJiraLoginFlag">
+                           <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1"
+                                 nghref="#" routerLink="new-research-request" routerLinkActive="active"
+                                 (click)="closeMenu()">New Request</span>
+                          <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                routerLink="my-research-request" routerLinkActive="active" (click)="closeMenu()">My
+                                Requests</span>
+                          <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                routerLink="unassigned-research-request" routerLinkActive="active"
+                                (click)="closeMenu()">Unassigned Requests</span>
+
+                          <span *ngxPermissionsOnly="['ROLE_PO','ROLE_MD','ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                routerLink="reassignment-research-request" routerLinkActive="active"
+                                (click)="closeMenu()">Reassignment for Research Request</span>
+
+                          <span *ngxPermissionsOnly="['ROLE_PO', 'ROLE_MD', 'ROLE_CCA', 'ROLE_EA']" class="nav-item1" nghref="#"
+                                routerLink="search-research-request" routerLinkActive="active"
+                                (click)="closeMenu()">Requests Search</span>
+                        </div>
+                      </div>
+                    </li>
+                </div>
+                <li>
+                    <a nghref="#" (click)="logout()">
+                        <i class="fa fa-lock"></i><span routerLinkActive="!active">Log Out</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a nghref="#" (click)="openDialogHelp()">
+                        <i class="fa fa-question-circle"></i><span routerLinkActive="!active">Help</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <dnb-app-dialog [(openDialog)]="openDialog" [setUpDialog]="setUpDialog"
+            (selectionSet)="openTabSelected($event)">
+        </dnb-app-dialog>
+      <app-research-request-login [(rrLoginDialog)]="rrLoginDialog"
+                                  [(rrNavReqType)]="rrNavReqType"
+                                  [setUpRrDialog]="setUpRrDialog"
+        (hideDialogChange)="hideRRLoginDialog()">
+      </app-research-request-login>
+
+    </div>
+</div>

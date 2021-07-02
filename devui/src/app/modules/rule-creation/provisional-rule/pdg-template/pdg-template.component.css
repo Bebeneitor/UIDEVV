@@ -1,0 +1,11 @@
+.pdg-template{
+    border-bottom: 1px solid #31006F;
+}
+.pdg-option{
+    display: block;
+}
+.active-blue{
+    color:#31006F;
+    font-weight: bold;
+    font-size: 14px;
+}

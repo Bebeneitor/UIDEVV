@@ -23,3 +23,27 @@ export enum SectionCode {
   GlobalReviewCodes = "UI-S-GLICD10",
   Rules = "UI-S-RULES",
 }
+
+export const blockGroupedCheckBox = [
+  SectionCode.DosingPatterns,
+  SectionCode.DailyMaximumDose,
+  SectionCode.Age,
+  SectionCode.VisitOverTime,
+  SectionCode.MaximumFrequency,
+  SectionCode.UnitsOverTime,
+];
+
+export const groupedSections = [
+  SectionCode.SecondaryMalignancy,
+  SectionCode.DosingPatterns,
+  SectionCode.CombinationTherapy,
+  SectionCode.References,
+  SectionCode.DailyMaximumDose,
+  SectionCode.DailyMaxUnits,
+  SectionCode.GeneralInformation,
+  SectionCode.MaximumFrequency,
+  SectionCode.Age,
+  SectionCode.VisitOverTime,
+  SectionCode.UnitsOverTime,
+  SectionCode.DiagnosisCodeOverlaps,
+];

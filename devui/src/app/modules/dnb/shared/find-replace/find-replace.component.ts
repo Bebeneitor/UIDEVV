@@ -7,6 +7,7 @@ import {
   Output,
 } from "@angular/core";
 import { ConfirmationService } from "primeng/api";
+import { DnBActions } from "../../models/constants/actions.constants";
 import {
   HeaderDialog,
   IconDialog,
@@ -19,7 +20,8 @@ import {
   Section,
   UISection,
 } from "../../models/interfaces/uibase";
-import { escapeRegExp } from "../../utils/tools.utils";
+import { DnbUndoRedoService } from "../../services/undo-redo.service";
+import { cloneSection, escapeRegExp } from "../../utils/tools.utils";
 
 @Component({
   selector: "app-find",
@@ -33,13 +35,11 @@ export class FindReplaceComponent {
   @Input() showButtonReplace: boolean = false;
   @Input() drugNameColumn: Column = null;
   @Input() shouldShowCurrent: boolean = true;
-  @Output() showFindAndReplaceChange: EventEmitter<
-    boolean
-  > = new EventEmitter();
+  @Output() showFindAndReplaceChange: EventEmitter<boolean> =
+    new EventEmitter();
   shouldSeeReplaceBox: boolean = false;
   coincidences: Coincidence[] = [];
   allCoincidencesBackUp: Coincidence[] = [];
-  replacedCoincidencesBackUp: Coincidence[] = null;
   replacedCoincidencesRef: Coincidence[] = null;
   findWord: string = "";
   replaceWord: string = "";
@@ -51,7 +51,8 @@ export class FindReplaceComponent {
 
   constructor(
     private confirmationService: ConfirmationService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private undoRedo: DnbUndoRedoService
   ) {}
 
   toggleSearch(): void {
@@ -60,6 +61,8 @@ export class FindReplaceComponent {
     this.shouldSeeReplaceBox = false;
     if (!this.showFindAndReplace) {
       this.clearSearchData();
+      this.findWord = "";
+      this.replaceWord = "";
     }
     this.coincidences = [];
   }
@@ -73,7 +76,19 @@ export class FindReplaceComponent {
     if (this.findWord.length === 0) {
       return;
     }
-    this.findCoincidenceInColumn(this.drugNameColumn, columnId, -1, "");
+    this.findCoincidenceInColumn(
+      this.drugNameColumn,
+      columnId,
+      -1,
+      "",
+      false,
+      true,
+      false,
+      false,
+      0,
+      0,
+      0
+    );
     if (this.shouldShowCurrent) {
       this.sections.forEach((section, sectionIndex) => {
         this.findSearchInSection(
@@ -95,8 +110,10 @@ export class FindReplaceComponent {
       );
     });
     this.disableReplaceAll =
-      this.coincidences.filter((coincidence) => !coincidence.column.isReadOnly)
-        .length === 0;
+      this.coincidences.filter(
+        (coincidence) =>
+          coincidence.sectionType === "new" && !coincidence.column.isReadOnly
+      ).length === 0;
     if (this.coincidences.length > 0) {
       this.highlightIndex = 0;
       const position = this.coincidences[this.highlightIndex].position;
@@ -104,9 +121,9 @@ export class FindReplaceComponent {
       this.disableArrowUp = this.highlightIndex <= 0;
       this.disableArrowDown =
         this.highlightIndex >= this.coincidences.length - 1;
-      this.disableReplace = this.coincidences[
-        this.highlightIndex
-      ].column.isReadOnly;
+      this.disableReplace =
+        this.coincidences[this.highlightIndex].sectionType !== "new" ||
+        this.coincidences[this.highlightIndex].column.isReadOnly;
     }
   }
 
@@ -124,49 +141,84 @@ export class FindReplaceComponent {
           (section as Section).codesColumn,
           columnId,
           sectionIndex,
-          type
+          type,
+          grouped,
+          false,
+          false,
+          true,
+          0,
+          0,
+          0
         );
         found = found || foundCode;
       }
-      (section as GroupedSection).groups.forEach((group) => {
-        group.names.forEach((column) => {
+      if (section.section.code === SectionCode.DailyMaxUnits) {
+        const foundCode = this.findCoincidenceInColumn(
+          (section as Section).codesColumn,
+          columnId,
+          sectionIndex,
+          type,
+          grouped,
+          false,
+          false,
+          true,
+          0,
+          0,
+          0
+        );
+        found = found || foundCode;
+      }
+      (section as GroupedSection).groups.forEach((group, groupIndex) => {
+        group.names.forEach((column, columnIndex) => {
           const foundCode = this.findCoincidenceInColumn(
             column,
             columnId,
             sectionIndex,
-            type
+            type,
+            grouped,
+            false,
+            true,
+            false,
+            groupIndex,
+            0,
+            columnIndex
           );
           found = found || foundCode;
         });
-        group.rows.forEach((row) => {
-          row.columns.forEach((column) => {
+        group.rows.forEach((row, rowIndex) => {
+          row.columns.forEach((column, columnIndex) => {
             const foundCode = this.findCoincidenceInColumn(
               column,
               columnId,
               sectionIndex,
-              type
+              type,
+              grouped,
+              false,
+              false,
+              false,
+              groupIndex,
+              rowIndex,
+              columnIndex
             );
             found = found || foundCode;
           });
         });
       });
     } else {
-      if (section.section.code === SectionCode.DailyMaxUnits) {
-        const foundCode = this.findCoincidenceInColumn(
-          (section as Section).codesColumn,
-          columnId,
-          sectionIndex,
-          type
-        );
-        found = found || foundCode;
-      }
-      (section as Section).rows.forEach((row) => {
-        row.columns.forEach((column) => {
+      (section as Section).rows.forEach((row, rowIndex) => {
+        row.columns.forEach((column, columnIndex) => {
           const foundColumn = this.findCoincidenceInColumn(
             column,
             columnId,
             sectionIndex,
-            type
+            type,
+            grouped,
+            false,
+            false,
+            false,
+            0,
+            rowIndex,
+            columnIndex
           );
           found = found || foundColumn;
         });
@@ -200,7 +252,14 @@ export class FindReplaceComponent {
     column: Column,
     columnId: { id: number },
     sectionIndex: number,
-    sectionType: string
+    sectionType: string,
+    isGrouped: boolean,
+    isDrugName: boolean,
+    isName: boolean,
+    isSectionCodes: boolean,
+    groupIndex: number,
+    rowIndex: number,
+    columnIndex: number
   ): boolean {
     let found = false;
     const regexp = RegExp(escapeRegExp(this.findWord), "gi");
@@ -225,6 +284,13 @@ export class FindReplaceComponent {
             columnId: columnId.id,
             sectionIndex,
             sectionType,
+            isGrouped,
+            isDrugName,
+            isName,
+            isSectionCodes,
+            groupIndex,
+            rowIndex,
+            columnIndex,
           };
         }
       );
@@ -282,18 +348,32 @@ export class FindReplaceComponent {
   }
 
   updateHighlight(oldIndex: number): void {
-    this.disableReplace = this.coincidences[
-      this.highlightIndex
-    ].column.isReadOnly;
+    this.disableReplace =
+      this.coincidences[this.highlightIndex].sectionType !== "new" ||
+      this.coincidences[this.highlightIndex].column.isReadOnly;
     const position = this.coincidences[this.highlightIndex].position;
     this.coincidences[oldIndex].column.highlight = null;
     let sectionIndex = this.coincidences[oldIndex].sectionIndex;
     let sectionType = this.coincidences[oldIndex].sectionType;
     this.updateSection(sectionIndex, sectionType);
+    if (this.coincidences[oldIndex].isSectionCodes) {
+      this.sections[sectionIndex][sectionType].codesColumn.highlight =
+        this.coincidences[oldIndex].column.highlight;
+      this.coincidences[oldIndex].column = {
+        ...this.coincidences[oldIndex].column,
+      };
+    }
     this.coincidences[this.highlightIndex].column.highlight = position;
     sectionIndex = this.coincidences[this.highlightIndex].sectionIndex;
     sectionType = this.coincidences[this.highlightIndex].sectionType;
     this.updateSection(sectionIndex, sectionType);
+    if (this.coincidences[this.highlightIndex].isSectionCodes) {
+      this.sections[sectionIndex][sectionType].codesColumn.highlight =
+        this.coincidences[this.highlightIndex].column.highlight;
+      this.coincidences[this.highlightIndex].column = {
+        ...this.coincidences[this.highlightIndex].column,
+      };
+    }
   }
 
   highlightSearchUp(): void {
@@ -319,9 +399,18 @@ export class FindReplaceComponent {
   }
 
   replaceSelected(): void {
-    const selected = this.coincidences[this.highlightIndex].column;
-    const sectionIndex = this.coincidences[this.highlightIndex].sectionIndex;
-    const sectionType = this.coincidences[this.highlightIndex].sectionType;
+    let selected = this.coincidences[this.highlightIndex].column;
+    let {
+      sectionIndex,
+      sectionType,
+      isGrouped,
+      isName,
+      columnIndex,
+      rowIndex,
+      groupIndex,
+      isSectionCodes,
+      isDrugName,
+    } = this.coincidences[this.highlightIndex];
     const text = selected.value;
     const index = this.coincidences[this.highlightIndex].position;
     const columnId = this.coincidences[this.highlightIndex].columnId;
@@ -336,8 +425,12 @@ export class FindReplaceComponent {
       text.substring(0, index) +
       this.replaceWord +
       text.substring(index + selected.searchData.length);
+    const oldSearchData = selected.searchData;
+    const oldHighlight = selected.highlight;
     selected.value = newText;
     const str = selected.value;
+    const val = newText;
+    const oldVal = text;
     let match;
     const foundPositions = [];
     while ((match = regexp.exec(str)) !== null) {
@@ -356,6 +449,13 @@ export class FindReplaceComponent {
           columnId,
           sectionIndex,
           sectionType,
+          isGrouped,
+          isName,
+          isDrugName,
+          isSectionCodes,
+          groupIndex,
+          rowIndex,
+          columnIndex,
         };
       });
     } else {
@@ -366,32 +466,94 @@ export class FindReplaceComponent {
     const arr1 = this.coincidences.slice(0, firstColumnIndex);
     const arr2 = this.coincidences.slice(firstColumnIndex);
     this.coincidences = arr1.concat(highglights, arr2);
+    const oldHighlightIndex = this.highlightIndex;
     if (this.highlightIndex >= this.coincidences.length) {
       this.highlightIndex = 0;
     }
-
     if (this.coincidences.length === 0) {
       this.shouldSeeReplaceBox = false;
       this.disableReplace = this.disableReplaceAll = true;
     } else {
       const position = this.coincidences[this.highlightIndex].position;
       this.coincidences[this.highlightIndex].column.highlight = position;
-      this.disableReplace = this.coincidences[
-        this.highlightIndex
-      ].column.isReadOnly;
+      this.disableReplace =
+        this.coincidences[this.highlightIndex].sectionType !== "new" ||
+        this.coincidences[this.highlightIndex].column.isReadOnly;
       this.disableReplaceAll =
         this.coincidences.filter(
-          (coincidence) => !coincidence.column.isReadOnly
+          (coincidence) =>
+            coincidence.sectionType === "new" &&
+            !this.coincidences[this.highlightIndex].column.isReadOnly
         ).length === 0;
     }
+    const data = {
+      value: val,
+      searchData: selected.searchData,
+      highlight: selected.highlight,
+    };
+    const oldData = {
+      value: oldVal,
+      searchData: oldSearchData,
+      highlight: oldHighlight,
+    };
+    if (isDrugName) {
+      this.undoRedo.doCommand(
+        DnBActions.DRUG_NAME,
+        {
+          isDrugName,
+          oldHighlightIndex,
+          oldVal: oldVal,
+          val: val,
+        },
+        val,
+        oldVal
+      );
+    } else if (isSectionCodes) {
+      this.undoRedo.doCommand(
+        DnBActions.SECTION_HEADER_CODES_SEARCH_DATA,
+        {
+          sectionIndex,
+          isSectionCodes,
+          oldHighlightIndex,
+          oldVal: oldData,
+          val: data,
+        },
+        data,
+        oldData
+      );
+    } else {
+      this.undoRedo.doCommand(
+        isGrouped
+          ? DnBActions.GROUPED_COLUMN_SEARCH_CHANGE
+          : DnBActions.COLUMN_SEARCH_CHANGE,
+        {
+          sectionIndex,
+          groupIndex,
+          rowIndex,
+          columnIndex,
+          oldHighlightIndex,
+          oldVal: oldData,
+          val: data,
+          isName,
+        },
+        data,
+        oldData
+      );
+    }
+
     this.disableArrowUp = this.highlightIndex <= 0;
     this.disableArrowDown = this.highlightIndex >= this.coincidences.length - 1;
-    this.updateSection(sectionIndex, sectionType);
+    if (this.coincidences.length > 0) {
+      sectionIndex = this.coincidences[this.highlightIndex].sectionIndex;
+      sectionType = this.coincidences[this.highlightIndex].sectionType;
+      this.updateSection(sectionIndex, sectionType);
+    }
   }
 
   confirmReplaceAll(): void {
     const replaceCount = this.coincidences.filter(
-      (coincidence) => !coincidence.column.isReadOnly
+      (coincidence) =>
+        coincidence.sectionType === "new" && !coincidence.column.isReadOnly
     ).length;
     this.confirmationService.confirm({
       message: `Are you sure you want to replace ${replaceCount} matches?`,
@@ -400,32 +562,74 @@ export class FindReplaceComponent {
       accept: () => {
         this.replaceAll();
       },
-      reject: () => {},
     });
   }
 
   replaceAll(): void {
     this.allCoincidencesBackUp = this.coincidences;
     const allConcidencesToReplace = this.coincidences.filter(
-      (coincidence) => !coincidence.column.isReadOnly
+      (coincidence) =>
+        coincidence.sectionType === "new" && !coincidence.column.isReadOnly
     );
     const allConcidencesToRemain = this.coincidences.filter(
-      (coincidence) => coincidence.column.isReadOnly
+      (coincidence) =>
+        coincidence.sectionType !== "new" || coincidence.column.isReadOnly
     );
     this.replacedCoincidencesRef = allConcidencesToReplace;
-    this.replacedCoincidencesBackUp = allConcidencesToReplace.map(
-      (coincidence) => {
-        return {
-          ...coincidence,
-          column: {
-            ...coincidence.column,
-            searchData: { ...coincidence.column.searchData },
-          },
-        };
+
+    const concidencesBySection = allConcidencesToReplace
+      .filter(
+        (v, i, a) => a.findIndex((t) => t.sectionIndex === v.sectionIndex) === i
+      )
+      .map((s) => s.sectionIndex);
+    const sectionsCode = [];
+
+    const newData = this.sections.map((section, sIndex) => {
+      if (concidencesBySection.indexOf(sIndex) < 0) {
+        return null;
       }
-    );
+      const code = section.new.section.code;
+      sectionsCode.push(code);
+      let newSection: Section | GroupedSection = cloneSection(
+        section.new,
+        section.grouped
+      );
+      return section.grouped
+        ? (newSection as GroupedSection)
+        : (newSection as Section);
+    });
+
     allConcidencesToReplace.reverse().forEach((coincidence) => {
-      const selected = coincidence.column;
+      const {
+        isGrouped,
+        isSectionCodes,
+        isDrugName,
+        isName,
+        sectionIndex,
+        groupIndex,
+        rowIndex,
+        columnIndex,
+      } = coincidence;
+
+      let col;
+
+      if (isDrugName) {
+        col = this.drugNameColumn;
+      } else if (isSectionCodes) {
+        col = newData[sectionIndex].codesColumn;
+      } else {
+        col = isGrouped
+          ? isName
+            ? (newData[sectionIndex] as GroupedSection).groups[groupIndex]
+                .names[columnIndex]
+            : (newData[sectionIndex] as GroupedSection).groups[groupIndex].rows[
+                rowIndex
+              ].columns[columnIndex]
+          : (newData[sectionIndex] as Section).rows[rowIndex].columns[
+              columnIndex
+            ];
+      }
+      const selected = col;
       const text = selected.value;
       const searchData = selected.searchData;
       if (searchData) {
@@ -434,78 +638,71 @@ export class FindReplaceComponent {
           this.replaceWord +
           text.substring(coincidence.position + selected.searchData.length);
         selected.value = newText;
-        const sectionIndex = coincidence.sectionIndex;
-        const sectionType = coincidence.sectionType;
-        this.updateSection(sectionIndex, sectionType);
       }
     });
+    let drugUpdated = null;
     allConcidencesToReplace.forEach((coincidence) => {
-      coincidence.column.searchData = null;
-      coincidence.column.highlight = null;
+      const {
+        isGrouped,
+        isSectionCodes,
+        isName,
+        isDrugName,
+        sectionIndex,
+        groupIndex,
+        rowIndex,
+        columnIndex,
+      } = coincidence;
+      let col;
+      if (isDrugName) {
+        col = this.drugNameColumn;
+        drugUpdated = col.value;
+      } else if (isSectionCodes) {
+        col = newData[sectionIndex].codesColumn;
+      } else {
+        col = isGrouped
+          ? isName
+            ? (newData[sectionIndex] as GroupedSection).groups[groupIndex]
+                .names[columnIndex]
+            : (newData[sectionIndex] as GroupedSection).groups[groupIndex].rows[
+                rowIndex
+              ].columns[columnIndex]
+          : (newData[sectionIndex] as Section).rows[rowIndex].columns[
+              columnIndex
+            ];
+      }
+
+      col.searchData = null;
+      col.highlight = null;
     });
+    if (drugUpdated) {
+      sectionsCode.push("DRUG_NAME");
+    }
+
+    const newSections = newData.filter((x) => x !== null);
+    this.undoRedo.doCommand(
+      DnBActions.BATCH_SECTIONS,
+      {
+        sectionsCode,
+      },
+      { drugUpdated: drugUpdated, sections: newSections },
+      null
+    );
+
     this.coincidences = allConcidencesToRemain;
     const oldIndex = this.highlightIndex;
     this.highlightIndex = 0;
-    this.updateHighlight(oldIndex);
     this.disableReplace = true;
     if (this.coincidences.length > 0) {
+      this.updateHighlight(oldIndex);
       const position = this.coincidences[this.highlightIndex].position;
       this.coincidences[this.highlightIndex].column.highlight = position;
-      this.disableReplace = this.coincidences[
-        this.highlightIndex
-      ].column.isReadOnly;
+      this.disableReplace =
+        this.coincidences[this.highlightIndex].sectionType !== "new" ||
+        this.coincidences[this.highlightIndex].column.isReadOnly;
     }
     this.disableArrowUp = this.highlightIndex <= 0;
     this.disableArrowDown = this.highlightIndex >= this.coincidences.length - 1;
     this.disableReplaceAll = true;
-    this.cd.detectChanges();
-  }
-
-  confirmUndoReplaceAll(): void {
-    this.confirmationService.confirm({
-      message: `Are you sure you want to undo the last replace all`,
-      header: HeaderDialog.confirm,
-      icon: IconDialog.warning,
-      accept: () => {
-        this.undoReplaceAll();
-      },
-      reject: () => {},
-    });
-  }
-
-  undoReplaceAll(): void {
-    this.replacedCoincidencesRef = this.replacedCoincidencesRef.reverse();
-    this.replacedCoincidencesBackUp.forEach((coincidence, index) => {
-      this.replacedCoincidencesRef[index].column.value =
-        coincidence.column.value;
-      this.replacedCoincidencesRef[index].column.searchData =
-        coincidence.column.searchData;
-      this.replacedCoincidencesRef[index].column.highlight =
-        coincidence.column.highlight;
-      const sectionIndex = coincidence.sectionIndex;
-      const sectionType = coincidence.sectionType;
-      this.updateSection(sectionIndex, sectionType);
-    });
-
-    this.coincidences = this.allCoincidencesBackUp;
-    this.replacedCoincidencesBackUp = null;
-    this.disableReplaceAll =
-      this.coincidences.filter((coincidence) => !coincidence.column.isReadOnly)
-        .length === 0;
-    const oldIndex = this.highlightIndex;
-
-    if (this.coincidences.length > 0) {
-      this.highlightIndex = 0;
-      const position = this.coincidences[this.highlightIndex].position;
-      this.coincidences[this.highlightIndex].column.highlight = position;
-      this.disableArrowUp = this.highlightIndex <= 0;
-      this.disableArrowDown =
-        this.highlightIndex >= this.coincidences.length - 1;
-      this.disableReplace = this.coincidences[
-        this.highlightIndex
-      ].column.isReadOnly;
-    }
-    this.updateHighlight(oldIndex);
     this.cd.detectChanges();
   }
 }

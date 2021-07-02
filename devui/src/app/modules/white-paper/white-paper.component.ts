@@ -16,7 +16,8 @@ import { DashboardService } from 'src/app/services/dashboard.service';
 import { PageTitleConstants } from 'src/app/shared/models/page-title-constants';
 import { ConfirmationService } from 'primeng/api';
 import { UtilsService } from 'src/app/services/utils.service';
-
+import * as _ from 'underscore';
+import { OverlayPanel } from 'primeng/primeng';
 
 declare var $: any;
 let whitePaper;
@@ -281,10 +282,9 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
 
   originalWhitePaper: WhitePaperDto = new WhitePaperDto();
   currentWhitePaper: WhitePaperDto = new WhitePaperDto();
-  whitePapers: WhitePaperDto[] = [
-  ];
-  whitePapersShared: WhitePaperDto[] = [
-  ];
+  whitePapers: WhitePaperDto[] = [];
+  whitePapersShared: WhitePaperDto[] = [];
+  whitePapersFound: WhitePaperDto[] = [];
 
   editable: boolean = true;
 
@@ -297,6 +297,12 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
   userSuggestions: any = [];
   userSuggestionsFiltered: any = [];
   whitePapersTab: string = "MY";
+  keywordSearch: string = "";
+
+  isPublicSearch: boolean = true;
+  loadingSearchTab: boolean = false;
+  whitePaperlabel: string = "";
+  whitePaperCategories: string = "";
 
   constructor(private route: ActivatedRoute, private utils: AppUtils,
     private libraryViewService: LibraryViewService,
@@ -321,6 +327,8 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    this.utils.getAllCategoriesValue(this.categories, false);
+    this.searchWhitePapers = _.debounce(this.searchWhitePapers, 1000);
   }
 
   init() {
@@ -1646,6 +1654,11 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
    * Save white paper in data base
    */
   save(saveSection) {
+
+    if(!this.changeRadioSave()) {
+      return;
+    }
+
     this.blockedDocument = true;
 
     let data = this.getDashboardForMemory();
@@ -1663,7 +1676,7 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
           this.blockedDocument = false;
         });
       } else {
-        this.whitePaperService.save(this.currentWhitePaper.whitePaperName, fileId, this.currentWhitePaper.draft).subscribe((response: BaseResponse) => {
+        this.whitePaperService.save(this.currentWhitePaper).subscribe((response: BaseResponse) => {
           this.saveEvent(response, saveSection);
         }, () => {
           this.blockedDocument = false;
@@ -1741,7 +1754,7 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.whitePaperService.share(this.whitePaperToShare, users).subscribe((response: BaseResponse) => {
-      this.toastService.messageSuccess('White Papers', 'White paper shared sucessfully.');
+      this.toastService.messageSuccess('White Papers', 'White paper shared successfully.');
       this.blockedDocument = false;
     });
   }
@@ -1770,7 +1783,55 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         });
         break;
+      case 'SEARCH':
+        this.showSavedWhitePapers = true;
     }
+  }
+
+  searchWhitePapers(searchClicked: boolean) {
+    this.loadingSearchTab = true;
+    this.whitePapersFound = [];
+
+    let loadAll: boolean = this.keywordSearch == "" && searchClicked;
+    this.whitePaperService.searchWhitePaper(this.keywordSearch, this.isPublicSearch, loadAll).subscribe((response: BaseResponse) => {
+      if (response) {
+        this.whitePapersFound = response.data;
+        this.showSavedWhitePapers = true;
+      }
+
+      this.loadingSearchTab = false;
+    });
+  }
+
+  /**
+   * Function to open an overplay panel with label and category detail
+   * @param event 
+   * @param overlayPanel 
+   * @param index 
+   */
+  openWhitePaperDetail(event: any, overlayPanel: OverlayPanel, index: number) {
+    let hoveredWhitePaper: WhitePaperDto = null;
+    switch (this.whitePapersTab) {
+      case "MY":
+        hoveredWhitePaper = this.whitePapers[index];
+        break;
+      case "SHARED":
+        hoveredWhitePaper = this.whitePapersShared[index];
+        break;
+      case "SEARCH":
+        hoveredWhitePaper = this.whitePapersFound[index];
+    }
+    this.whitePaperlabel = hoveredWhitePaper.whitePaperLabel;
+    let categoriesDesc: string[] = [];
+    hoveredWhitePaper.categories.forEach((categoryId: number) => {
+      this.categories.forEach((category: any) => {
+        if (category.value == categoryId) {
+          categoriesDesc.push(category.label);
+        }
+      });
+    });
+    this.whitePaperCategories = categoriesDesc.join(", ");
+    overlayPanel.toggle(event);
   }
 
   /**
@@ -1844,5 +1905,24 @@ export class WhitePaperComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showSlider = false;
     this.rangeValues = [Number(auxRange[0]), Number(auxRange[1])];
     this.showSlider = true;
+  }
+
+  changePublicStatus(event, whitePaper) {
+    this.whitePaperService.update(whitePaper).subscribe(() => {
+      this.toastService.messageSuccess(Constants.TOAST_SUMMARY_SUCCESS, 'Status changed correctly.');
+    });
+  }
+
+  changeRadioSave() {
+    if(this.currentWhitePaper.draft) {
+      if(this.currentWhitePaper.public) {
+        this.toastService.messageWarning(Constants.TOAST_SUMMARY_WARN, 'A draft can only be private.');
+        this.currentWhitePaper.public = false;
+
+        return false;
+      }
+    }
+
+    return true;
   }
 }

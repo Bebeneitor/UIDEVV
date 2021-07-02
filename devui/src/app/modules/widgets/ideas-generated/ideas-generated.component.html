@@ -76,7 +76,7 @@
               <tr>
                 <th *ngFor="let col of columns" [ngSwitch]="col.field" class="text-center"
                   [ngStyle]="{'width': col.width}">
-                  <input *ngIf="col.field == 'id' || col.field == 'name'" pInputText type="text"
+                  <input *ngIf="col.field == 'id' || col.field == 'name' || col.field == 'provId'" pInputText type="text"
                     style="width : 100%; padding : 5px; border-radius: 5px"
                     (input)="dt.filter($event.target.value, col.field, 'contains')"
                     [placeholder]="'Search by ' + col.header">
@@ -99,9 +99,12 @@
               <tr [pSelectableRow]="rowData">
                 <td class="small-td" *ngFor="let col of columns">
                   <span *ngIf="col.field == 'id'">
-                    <a style="text-decoration: underline; cursor: pointer" nghref="#" (click)="redirect(rowData,'IDEA')" >{{rowData.id}}</a>
+                    <a class="generated-ideas-id" nghref="#" (click)="redirect(rowData,'IDEA')" >{{rowData.id}}</a>
                   </span>
-                  <span *ngIf="col.field != 'id'">
+                  <span *ngIf="col.field == 'provId'">
+                    <a class="generated-ideas-id" nghref="#" (click)="redirect(rowData,'RULE')" >{{rowData.provId}}</a>
+                  </span>
+                  <span *ngIf="col.field != 'id' && col.field != 'provId'">
                     {{rowData[col.field]}}
                   </span>
                 </td>

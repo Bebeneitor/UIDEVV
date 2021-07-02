@@ -1,13 +1,91 @@
-<div class="dnb-table-container">
+<div class="dnb-table-container" #tableRef>
+  <div
+    class="feedback-box"
+    *ngIf="showFeedback"
+    [style.top.px]="feedbackTop"
+    [style.left.px]="feedbackLeft"
+  >
+    <app-feedback
+      *ngIf="!shouldCheckFeedback"
+      [feedback]="currentFeedback"
+      [selectedFeedback]="selectedFeedback"
+      [versionId]="section.drugVersionCode"
+      (closed)="closeFeedback()"
+      (saved)="savedFeedback($event)"
+      (deleted)="removedFeedback($event)"
+    ></app-feedback>
+    <app-view-feedback
+      *ngIf="shouldCheckFeedback"
+      [feedbacks]="selectedFeedbacks"
+      [viewOnly]="isApproverReviewing"
+      (closed)="closeFeedback()"
+      (resolved)="resolved($event)"
+    ></app-view-feedback>
+  </div>
+  <div
+    class="comment-box"
+    *ngIf="showComment"
+    [style.top.px]="feedbackTop"
+    [style.left.px]="feedbackLeft"
+  >
+    <app-comment
+      [comment]="currentComment"
+      [sectionName]="section.section.name"
+      (changed)="commentChange($event)"
+      [versionId]="section.drugVersionCode"
+      (closed)="closeComment()"
+      (saved)="saveComment($event)"
+      (deleted)="removedComment($event)"
+    ></app-comment>
+  </div>
   <table
-    class="table"
+    class="table dnb-table"
     [ngClass]="{ 'new-version-table': !isReadOnly, disabled: disabled }"
   >
     <thead>
       <tr>
-        <th *ngFor="let header of section.headers" class="overflow">
-          {{ header }}
+        <th
+          *ngIf="
+            multiSelect &&
+            blockGroupedCheckBox.indexOf(section.section.code) === -1
+          "
+          class="checkBoxCol"
+        >
+          <p-checkbox
+            name="checkAll"
+            [(ngModel)]="checkAllGroupHeader"
+            (onChange)="checkAllGroupM($event)"
+          ></p-checkbox>
         </th>
+
+        <ng-container
+          *ngFor="let header of section.headers; index as headerIndex"
+        >
+          <th
+            [ngClass]="{
+              overflow: !isReadOnly
+            }"
+            [width]="section.headersUIWidth[headerIndex]"
+            [nextColWidth]="section.headersUIWidth[headerIndex + 1] || 0"
+            (widthChange)="columnsChange($event, headerIndex)"
+            resizable
+          >
+            {{ header }}
+          </th>
+
+          <th
+            *ngIf="
+              multiSelect && headerIndex === section.groups[0].names.length - 1
+            "
+            class="checkBoxCol"
+          >
+            <p-checkbox
+              name="checkAll"
+              [(ngModel)]="checkAllRowHeader"
+              (onChange)="checkAllRowM($event)"
+            ></p-checkbox>
+          </th>
+        </ng-container>
       </tr>
     </thead>
     <tbody
@@ -17,11 +95,12 @@
         index as groupIndex
       "
       [ngClass]="{
-        border: group.hasBorder,
+        border: groupHasBorder(group),
         'group-selected': selectedGroupIndex === groupIndex && contextMenuOpen
       }"
     >
       <tr
+        #rowRef
         *ngFor="
           let row of group.rows;
           index as rowIndex;
@@ -38,11 +117,51 @@
       >
         <ng-container *ngIf="firstRow">
           <td
+            [attr.rowspan]="group.rows.length"
+            *ngIf="
+              multiSelect &&
+              blockGroupedCheckBox.indexOf(section.section.code) === -1
+            "
+            class="checkBoxCol"
+          >
+            <p-checkbox
+              name="multiSelect"
+              [value]="group.codeGroupUI"
+              [(ngModel)]="selectedGroups"
+              (click)="checkAllGroupHeader = false"
+            ></p-checkbox>
+          </td>
+          <td
             *ngFor="let groupNameCol of group.names; index as namesIndex"
             [attr.rowspan]="group.rows.length"
+            [ngClass]="{
+              feedbackLeft:
+                shouldCheckFeedback &&
+                groupNameCol.feedbackData.length > 0 &&
+                groupNameCol.feedbackLeft > 0,
+              feedbackCleared:
+                shouldCheckFeedback &&
+                groupNameCol.feedbackData.length > 0 &&
+                groupNameCol.feedbackLeft == 0,
+              overflow2: !groupNameCol.isReadOnly && isReadOnly,
+              readonlycell: groupNameCol.isReadOnly || !sectionEnable
+            }"
             (contextmenu)="
-              openRowMenu($event, groupIndex, rowIndex, namesIndex, true);
-              $event.preventDefault()
+              openRowMenu(
+                $event,
+                groupIndex,
+                rowIndex,
+                namesIndex,
+                groupNameCol,
+                true,
+                true
+              );
+              $event.preventDefault();
+              rowReference = rowRef;
+              sectionReference = tableRef
+            "
+            (click)="
+              setSelectSectionForPaste(namesIndex, rowIndex, groupIndex, true)
             "
           >
             <ng-container *ngIf="isReadOnly; else editor; index as columnIndex">
@@ -52,33 +171,101 @@
                 [isComparing]="isComparing"
                 [searchInfo]="groupNameCol.searchData"
                 [highLight]="groupNameCol.highlight"
-                [isReadOnly]="groupNameCol.isReadOnly"
+                [isReadOnly]="isReadOnly"
               ></app-cell-editor>
             </ng-container>
             <ng-template #editor>
+              <app-simple-cell
+                *ngIf="!shouldCheckFeedback"
+                [column]="groupNameCol"
+                [feedbackData]="groupNameCol.feedbackData"
+                (selectionSet)="
+                  selectionSet(
+                    $event,
+                    groupNameCol,
+                    namesIndex,
+                    rowRef,
+                    row,
+                    tableRef
+                  )
+                "
+                (feedbackClick)="feedbackClicked($event, groupNameCol, rowRef)"
+              ></app-simple-cell>
               <app-cell-editor
+                #editableCell
+                *ngIf="shouldCheckFeedback"
+                [sectionPosition]="
+                  createSectionPosition(
+                    sectionIndex,
+                    groupIndex,
+                    0,
+                    namesIndex,
+                    true
+                  )
+                "
                 [column]="groupNameCol"
                 [isComparing]="isComparing"
                 [searchInfo]="groupNameCol.searchData"
+                [comments]="groupNameCol.comments"
                 [highLight]="groupNameCol.highlight"
-                [isReadOnly]="!enableEditing"
-                [sectionId]="section.section.name"
+                [compareSide]="true"
+                [isReadOnly]="
+                  sectionEnable ? groupNameCol.isReadOnly : !sectionEnable
+                "
+                [sectionId]="section.section.code"
+                [(focus)]="groupNameCol.focus"
+                (cellNavigate)="
+                  cellHeaderNavigate($event, namesIndex, groupIndex)
+                "
+                (range)="currentRange = $event"
+                (commentsChange)="commentsChange($event, groupNameCol)"
               ></app-cell-editor>
             </ng-template>
           </td>
         </ng-container>
+
+        <td *ngIf="multiSelect" class="checkBoxCol">
+          <p-checkbox
+            name="multiSelect"
+            [value]="row.codeUI"
+            [(ngModel)]="selectedRows"
+            (click)="checkAllRowHeader = false"
+          ></p-checkbox>
+        </td>
+
         <td
           *ngFor="
             let column of row.columns;
             let first = first;
-            let last = last;
+            let lastC = last;
             index as columnIndex
           "
+          [ngClass]="{
+            readonlycell: column.isReadOnly || !sectionEnable,
+            feedbackLeft:
+              shouldCheckFeedback &&
+              column.feedbackData.length > 0 &&
+              column.feedbackLeft > 0,
+            feedbackCleared:
+              shouldCheckFeedback &&
+              column.feedbackData.length > 0 &&
+              column.feedbackLeft == 0
+          }"
           class="overflow2"
           (contextmenu)="
-            openRowMenu($event, groupIndex, rowIndex, columnIndex);
-            $event.preventDefault()
+            openRowMenu(
+              $event,
+              groupIndex,
+              rowIndex,
+              columnIndex,
+              column,
+              false
+            );
+            $event.preventDefault();
+            rowReference = rowRef;
+            sectionReference = tableRef
           "
+          (click)="setSelectSectionForPaste(columnIndex, rowIndex, groupIndex)"
         >
           <ng-container *ngIf="isReadOnly; else editor">
             <app-cell-editor
@@ -87,19 +274,54 @@
               [isComparing]="isComparing"
               [searchInfo]="column.searchData"
               [highLight]="column.highlight"
-              [isReadOnly]="column.isReadOnly"
+              [isReadOnly]="isReadOnly"
             >
             </app-cell-editor>
           </ng-container>
           <ng-template #editor>
+            <app-simple-cell
+              *ngIf="!shouldCheckFeedback"
+              [column]="column"
+              [feedbackData]="column.feedbackData"
+              (selectionSet)="
+                selectionSet(
+                  $event,
+                  column,
+                  group.names.length + columnIndex,
+                  rowRef,
+                  row,
+                  tableRef
+                )
+              "
+              (feedbackClick)="feedbackClicked($event, column, rowRef)"
+            ></app-simple-cell>
             <app-cell-editor
+              #editableCell
+              *ngIf="shouldCheckFeedback"
+              [sectionPosition]="
+                createSectionPosition(
+                  sectionIndex,
+                  groupIndex,
+                  rowIndex,
+                  columnIndex,
+                  false
+                )
+              "
               [column]="column"
               [isComparing]="isComparing"
               [searchInfo]="column.searchData"
+              [comments]="column.comments"
               [highLight]="column.highlight"
-              [isReadOnly]="!enableEditing"
-              [isLastSectionColumn]="last && lastR && lastG"
-              [sectionId]="section.section.name"
+              [compareSide]="true"
+              [isReadOnly]="sectionEnable ? column.isReadOnly : !sectionEnable"
+              [isLastSectionColumn]="lastC && lastR && lastG"
+              [sectionId]="section.section.code"
+              [(focus)]="column.focus"
+              (cellNavigate)="
+                cellGroupNavigate($event, columnIndex, rowIndex, groupIndex)
+              "
+              (range)="currentRange = $event"
+              (commentsChange)="commentsChange($event, column)"
             ></app-cell-editor>
           </ng-template>
         </td>
@@ -109,11 +331,11 @@
 </div>
 <div
   class="context-menu"
-  *ngIf="enableEditing && contextMenuOpen"
+  *ngIf="contextMenuOpen"
   [style.top.px]="top"
   [style.left.px]="left"
 >
-  <div class="options">
+  <div class="options" #rowItems>
     <app-dnb-row-menu
       [section]="section"
       [isGrouped]="true"
@@ -121,10 +343,41 @@
       [rowIndex]="selectedRowIndex"
       [undoItems]="undoItems"
       [menuPermissions]="menuPermissions"
-      [visible]="enableEditing"
+      [visible]="(isApproverReviewing && shouldCheckFeedback) || sectionEnable"
       (undoItemsBack)="undoItems = $event"
       (behaviorEvent)="behavior($event)"
+      [(cancelMultiSelect)]="multiSelect"
+      [typeRemoveMultiple]="typeRemoveMultiple"
     >
     </app-dnb-row-menu>
+    <app-feedback-menu
+      [menuPermissions]="menuPermissions"
+      [visible]="!shouldCheckFeedback && currentFeedback && hasCurrentFeedback"
+      (behaviorEvent)="openFeedback($event)"
+    >
+    </app-feedback-menu>
   </div>
 </div>
+
+<p-dialog
+  styleClass="dnb-dialog"
+  appendTo="body"
+  header="Add Multiple Rows"
+  [modal]="true"
+  [(visible)]="addManyRowsDialog"
+>
+  <div class="add-rows">
+    <span> Rows to add:</span>
+    <input
+      type="number"
+      [(ngModel)]="addRowCount"
+      (keypress)="isNumberKey($event)"
+      (paste)="onPaste($event)"
+      oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+      maxlength="2"
+      min="0"
+      max="100"
+    />
+    <button (click)="addManyRows()" class="dnb-btn">Add</button>
+  </div>
+</p-dialog>

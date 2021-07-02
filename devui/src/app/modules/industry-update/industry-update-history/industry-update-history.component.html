@@ -1,9 +1,10 @@
+
 <h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
 <div>
     <p-table #viewGrid [columns]="cols" [value]="paginatedData" [resizableColumns]="true" columnResizeMode="fit"
         [reorderableColumns]="true" [loading]="loading" [responsive]="true" dataKey="accordianHeading" [expandedRowKeys]="expandedRows"
         [rows]="10" [rowsPerPageOptions]="eclConstantsService.ROWS_PER_PAGE_OPTIONS" [paginator]="true"
-             sortField="effectiveDate" sortOrder="-1">
+            sortField="effectiveDate" sortOrder="-1">
 
       <ng-template pTemplate="caption">
         <app-grid-tools [primeTableLocalReference]="viewGrid"
@@ -11,8 +12,8 @@
         </app-grid-tools>
         <div style="text-align: right">
           <input type="text" pInputText size="50" placeholder="Keyword Search" [(ngModel)]="keywordSearch"
-                 (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
-                 style="width:150px; border-radius: 5px">
+                (input)="viewGrid.filterGlobal($event.target.value, 'contains')"
+                style="width:150px; border-radius: 5px">
           <span style="cursor: pointer"><i *ngIf = "keywordSearch !== ''" (click)="viewGrid.reset(); resetDataTable(viewGrid);" style="cursor: pointer" class="fa fa-times-circle purple" style="margin:4px 4px 4px 4px"></i></span>
           <i *ngIf = "keywordSearch === ''" class="fa fa-search purple" style="margin:4px 4px 4px 4px"></i>
         </div>
@@ -55,15 +56,22 @@
             <td style="width:10%"><span  class="span-centered small-td">{{iu.effectiveDate | date }}</span></td>
 
             <td  style="width:10%">
-                <span *ngIf="iu.action === 'Pending' || iu.action === 'Current'"  class="span-centered" style="text-align: center; ">
-                <button *ngIf="iu.action === 'Pending'" [disabled]="true" type="submit" value="Reassign" (click)="initiateIndustryUpdate(iu.updateInstanceKey)"
-                        style="border-radius: 3px; cursor: default;">Initiate Industry Update Integration</button>
-                <button *ngIf="iu.action === 'Current'" type="submit" value="Reassign" (click)="initiateIndustryUpdate(iu)"
-                        class="btn-primary" style="border-radius: 3px;">Initiate Industry Update Integration</button>
-              </span>
+                <span *ngIf="iu.action === 'Pending' || iu.action === 'Current' || iu.action === 'Current Block'"  class="span-centered" style="text-align: center; ">
+                  <button *ngIf="iu.action === 'Pending' || iu.action === 'Current Block'" [disabled]="true" type="submit" value="Reassign" (click)="initiateIndustryUpdate(iu.updateInstanceKey)"
+                          style="border-radius: 3px; cursor: default;">Initiate Industry Update Integration</button>
+                  <button *ngIf="iu.action === 'Current'" type="submit" value="Reassign" (click)="initiateIndustryUpdate(iu)"
+                          class="btn-primary" style="border-radius: 3px;">Initiate Industry Update Integration</button>
+                </span>
+                <span class="span-centered" style="text-align: center; ">
+                  <button *ngIf="iu.action === 'Current Update Block'" [disabled]="true" type="submit" value="Reassign"  (click)="showPridCreationForm(iu)"
+                    style="border-radius: 3px;">Complete UI integration to ICMS</button>
+                  <button *ngIf="iu.action === 'Current Update'" type="submit" value="Reassign" (click)="showPridCreationForm(iu)"
+                    class="btn-primary" style="border-radius: 3px;">Complete UI integration to ICMS</button>
+                </span>
                 <span *ngIf="iu.action === 'Completed'"  class="span-centered" style="text-align: center; ">
-                 {{iu.action}}
-              </span>
+                  {{iu.action}}
+                </span>
+                
             </td>
 
             <td style="width:10%"><span  class="span-centered small-td">{{iu.status}}</span></td>
@@ -82,11 +90,23 @@
     </p-table>
 
   <br>
-  <button (click)="fetchIndustryUpdateDetails(); " style="display: inherit"
-          class="btn btn-primary btn-default-height float-right small-td" type="button"
-          value="refreshAssignIdea">Refresh</button>
-
+  <div class="float-right">
+    <tr>
+      <td>
+        <button (click)="fetchIndustryUpdateDetails();" style="display: inherit"
+              class="btn btn-sm btn-primary f-11" type="button"
+              value="refreshAssignIdea">Refresh</button>
+      </td>
+    </tr>
+  </div>
 
 </div>
+
+<p-dialog header="Create Project ID" (onHide)="onHide($event)" [(visible)]="projectCreationModal"
+    [style]="{width: '35vw'}" [modal]="true" appendTo="body" [baseZIndex]="10000" [draggable]="false"
+    [resizable]="false">
+    <ecl-prid-form></ecl-prid-form>
+</p-dialog>
+
 <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
 <p-toast [baseZIndex]="999999"></p-toast>

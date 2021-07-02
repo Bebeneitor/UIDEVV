@@ -27,6 +27,7 @@ import { EclTableModule } from 'src/app/shared/components/ecl-table/ecl-table.mo
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { ProvisionalRuleModule } from '../../rule-creation/provisional-rule/provisional-rule.module';
 import { ProvisionalRuleComponent } from '../../rule-creation/provisional-rule/provisional-rule.component';
+import { ImpactBoReportModule } from './impact-bo-report/impact-bo-report.module';
 
 @NgModule({
   declarations: [InitiateImpactComponent
@@ -51,7 +52,8 @@ import { ProvisionalRuleComponent } from '../../rule-creation/provisional-rule/p
     BlockUIModule,
     EclTableModule,
     DynamicDialogModule,
-    ProvisionalRuleModule
+    ProvisionalRuleModule,
+    ImpactBoReportModule
   ],
   providers: [sqlDateConversion, MessageService, InitiateImpactService, UtilsService, DialogService], 
   entryComponents: [

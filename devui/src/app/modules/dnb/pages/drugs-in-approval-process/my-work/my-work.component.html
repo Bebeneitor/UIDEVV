@@ -1,0 +1,71 @@
+<div *ngIf="isEditor || isAdmin">
+  <h5 class="subtitle">Editor</h5>
+  <div class="table-container">
+    <ecl-table
+      #editorTable
+      [tableModel]="myWorkEditorConfig"
+      (onAcctionIcon)="versionEditClick($event)"
+      (onSelectRecord)="setSelectedEditor($event)"
+      (onUnSelectRecord)="setSelectedEditor($event)"
+    >
+      ></ecl-table
+    >
+  </div>
+  <label class="reassing-label"> Reassign to: </label>
+  <div class="reassign-box dnb-page-btns">
+    <p-dropdown
+      #dropListEditor
+      [options]="editors$ | async"
+      [(ngModel)]="selectedEditor"
+      [filter]="true"
+      filterBy="label,value"
+      [style]="{ width: '150px' }"
+    ></p-dropdown>
+    <button
+      *ngIf="
+        (selectedEditorVersions && selectedEditorVersions.length > 0) ||
+        selectedEditor !== null
+      "
+      (click)="reassignEditorSelected()"
+    >
+      Reassign
+    </button>
+  </div>
+</div>
+
+<div *ngIf="isApprover || isAdmin">
+  <h5 class="subtitle">Approver</h5>
+  <div class="table-container">
+    <ecl-table
+      #approverTable
+      [tableModel]="myWorkApproverConfig"
+      (onAcctionIcon)="versionEditClick($event)"
+      (onSelectRecord)="setSelectedApprover($event)"
+      (onUnSelectRecord)="setSelectedApprover($event)"
+    >
+      ></ecl-table
+    >
+  </div>
+  <label class="reassing-label"> Reassign to: </label>
+  <div class="reassign-box dnb-page-btns">
+    <p-dropdown
+      #dropListApprover
+      [options]="approvers$ | async"
+      [(ngModel)]="selectedApprover"
+      [filter]="true"
+      filterBy="label,value"
+      [style]="{ width: '150px' }"
+    ></p-dropdown>
+    <button
+      *ngIf="
+        (selectedApproverVersions && selectedApproverVersions.length > 0) ||
+        selectedApprover !== null
+      "
+      (click)="reassignApproverSelected()"
+    >
+      Reassign
+    </button>
+  </div>
+</div>
+
+<p-confirmDialog class="dnb-modal" key="mywork"></p-confirmDialog>

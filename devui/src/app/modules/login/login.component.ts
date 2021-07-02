@@ -1,28 +1,29 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { AppComponent } from 'src/app/app.component';
-import { AuthService } from 'src/app/services/auth.service';
-import { StorageService } from 'src/app/services/storage.service';
-import { AppUtils } from 'src/app/shared/services/utils';
-import { DnbAuthService } from '../dnb/services/dnb-auth.service';
+import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { MessageService } from "primeng/api";
+import { AppComponent } from "src/app/app.component";
+import { AuthService } from "src/app/services/auth.service";
+import { StorageService } from "src/app/services/storage.service";
+import { Constants } from "src/app/shared/models/constants";
+import { AppUtils } from "src/app/shared/services/utils";
+import { UtilsService } from "src/app/services/utils.service";
+import { OktaAuthService } from "@okta/okta-angular";
+import { LoadingSpinnerService } from "src/app/services/spinner.service";
+import { DnbAuthService } from "../dnb/services/dnb-auth.service";
+import { storageGeneral } from "../dnb/models/constants/storage.constants";
 
 @Component({
   selector: "app-login",
   templateUrl: "./login.component.html",
-  styleUrls: ["./login.component.css"]
+  styleUrls: ["./login.component.css"],
 })
 export class LoginComponent implements OnInit {
-  return: string = "";
-  user: any = {
-    email: "",
-    password: ""
-  };
-
   dataUser: any = {
     userId: 0,
-    email: ""
+    email: "",
   };
+
+  isAuthenticated: boolean;
 
   constructor(
     private messageService: MessageService,
@@ -31,11 +32,27 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private storageService: StorageService,
     private util: AppUtils,
+    private utilsService: UtilsService,
+    private oktaAuth: OktaAuthService,
+    private loadingSpinnerService: LoadingSpinnerService,
     private dnbAuthService: DnbAuthService
-  ) { }
+  ) {
+    this.oktaAuth.$authenticationState.subscribe(
+      (isAuthenticated) => (this.isAuthenticated = isAuthenticated)
+    );
+  }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.storageService.remove("PARENT_NAVIGATION");
+
+    this.loadingSpinnerService.setDisplayMessage("Signing in...");
+    this.loadingSpinnerService.isLoading.next(true);
+
+    this.isAuthenticated = await this.oktaAuth.isAuthenticated();
+    // if user already authenticated, redirect to home
+    if (this.isAuthenticated) {
+      this.afterOktaLogin();
+    }
   }
 
   /**
@@ -45,24 +62,49 @@ export class LoginComponent implements OnInit {
     return this.app.isLogin;
   }
 
+  oktaLogin() {
+    // redirect to Okta-hosted widget login
+
+    this.oktaAuth.signInWithRedirect();
+  }
+
   /**
-   * Check user credentials
+   * Performs the required steps after successful login (Okta):
+   *  1) Validates and Retrieves User Details from DB by username
+   *  2) Get Redis Cache URL config by environment
+   *  3) Authenticate against D&B services
+   *  4) Redirect Home
+   *
    */
-  validateLogin() {
-    return new Promise((resolve, reject) => {
-      this.authService.login(this.user.email, this.user.password).subscribe((resAuth: any) => {
-        let token = resAuth.Authorization;
-        if (token == null || token == undefined) {
-          resolve(resAuth);
-        } else {
+  afterOktaLogin() {
+    // retrieve User Details from ECL DB
+    this.retrieveUserDetails().then((res: any) => {
+      if (!res.code) {
+        // get Redis URL set by environment from ECL Lookups (Service <-- DB)
+        this.utilsService.getCacheUrl().subscribe((response: any) => {
+          Constants.redisCacheUrl = response.data;
+        });
 
-          this.storageService.set('Authorization', token, true);
-
-          this.retrieveUserDetails().then(res => {
-            resolve(res);
+        this.dnbAuthService
+          .getDnbPermissions(this.dataUser.userName)
+          .subscribe((response) => {
+            this.storageService.set(
+              storageGeneral.dnbPermissions,
+              response,
+              true
+            );
           });
-        }
-      });
+
+        this.redirectHome();
+      } else {
+        this.messageService.add({
+          severity: "error",
+          summary: "Error",
+          detail: res.message,
+          life: 2000,
+          closable: false,
+        });
+      }
     });
   }
 
@@ -70,8 +112,10 @@ export class LoginComponent implements OnInit {
    * Get all user data from backend
    */
   retrieveUserDetails() {
-    return new Promise((resolve, reject) => {
-      this.authService.validateUser(this.user.email, this.user.password).subscribe((res: any) => {
+    return new Promise(async (resolve, reject) => {
+      const eclUsername = await this.authService.getUserNameFromAuth();
+
+      this.authService.validateUser(eclUsername).subscribe((res: any) => {
         if (res !== null) {
           this.dataUser = res.data;
           this.dataUser["email"] = res.data.userName;
@@ -94,36 +138,13 @@ export class LoginComponent implements OnInit {
         } else {
           resolve(false);
         }
+      }, (errorReason: any) => {
+        // stop spinner
+        this.loadingSpinnerService.isLoading.next(false);
+        this.authService.goToOktaHomeDelay(3000);
+        throw new Error("Error while signing into ECL: " + errorReason);
       });
     })
-  }
-
-  /**
-   * Validate login (Click button)
-   */
-  login() {
-    //Form validations
-    if (this.user.email === "") {
-      this.messageService.add({ severity: 'error', summary: 'No Data', detail: 'User email is empty!', life: 2000, closable: false });
-      return;
-    }
-
-    if (this.user.password === "") {
-      this.messageService.add({ severity: 'error', summary: 'No Data', detail: 'User password is empty!', life: 2000, closable: false });
-      return;
-    }
-
-    //Here, call web service for validate user credentials, this code will be removed
-    //when the service is working
-
-    this.validateLogin().then((res: any) => {
-      if (!res.code) {
-        this.doLogin();
-        this.dnbAuth();
-      } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: res.message, life: 2000, closable: false });
-      }
-    });
   }
 
   /**
@@ -132,7 +153,7 @@ export class LoginComponent implements OnInit {
    *
    * @memberof LoginComponent
    */
-  doLogin() {
+   redirectHome() {
 
     //Load user data in session, maybe in the future we need to put in session and validate token
     //for protect the user session (session.filter.ts) because now only validate if the userSession
@@ -142,12 +163,16 @@ export class LoginComponent implements OnInit {
     //Call loadPermissions function
     this.app.loadPermissions().then(res => {
       // Redirect to home page
-      const returnUrl = localStorage.getItem("returnUrl");
 
       this.app.isUserLoggedIn = true;
       this.app.isLogin = false;
 
       this.util.getAllCategoriesWidgets([]).then(response => {
+
+        // stop Signing in spinner
+        this.loadingSpinnerService.isLoading.next(false);
+
+        const returnUrl = localStorage.getItem("returnUrl");
         if (returnUrl) {
           this.router.navigateByUrl(returnUrl);
           localStorage.removeItem("returnUrl");
@@ -159,11 +184,4 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  dnbAuth() {
-    this.dnbAuthService
-      .getDnbAuthToken(this.user.email, this.user.password)
-      .subscribe((response) => {
-        this.storageService.set("dnbToken", response.token, false);
-      });
-  }
 }

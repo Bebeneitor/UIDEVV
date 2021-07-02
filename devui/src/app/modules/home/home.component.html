@@ -54,60 +54,55 @@
             <div class="container-fluid" style="padding: 0px">
                 <div class="row">
                     <div *ngFor="let w of widgets1" style="width: 100%;">
+
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-ideas-generated'">
-                            <app-ideas-generated [title]="w.title"></app-ideas-generated>
+                            <app-ideas-generated [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-ideas-generated>
                         </div>
-
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-my-tasks'">
-                            <app-my-tasks [title]="w.title"></app-my-tasks>
-                        </div>
-
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-recently-viewed'">
-                            <app-recently-viewed [title]="w.title"></app-recently-viewed>
-                        </div>
-                        <!--
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-rules-implemented'">
-                            <app-rules-implemented [title]="w.title"></app-rules-implemented>
-                        </div>
-                        -->
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-updated-rules'">
-                            <app-updated-rules [title]="w.title"></app-updated-rules>
+                            <app-updated-rules [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-updated-rules>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-whats-new'">
-                            <app-whats-new [title]="w.title"></app-whats-new>
+                            <app-whats-new [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-whats-new>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-top-ten'">
-                            <app-top-ten [title]="w.title"></app-top-ten>
-                        </div>
-
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-my-contributions'">
-                            <app-my-contributions [title]="w.title"></app-my-contributions>
+                            <app-top-ten [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-top-ten>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-deprecated-rules'">
-                            <app-deprecated-rules [title]="w.title"></app-deprecated-rules>
+                            <app-deprecated-rules [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-deprecated-rules>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-same-sim-analysis'">
-                            <app-same-sim-analysis [title]="w.title"></app-same-sim-analysis>
+                            <app-same-sim-analysis [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-same-sim-analysis>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-team-updates'">
-                            <app-team-updates [title]="w.title"></app-team-updates>
+                            <app-team-updates [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-team-updates>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-contributions'">
+                            <app-my-contributions [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-my-contributions>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-tasks'">
+                            <app-my-tasks [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-my-tasks>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-recently-viewed'">
+                            <app-recently-viewed [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-recently-viewed>
                         </div>
                     </div>
                 </div>
@@ -121,58 +116,52 @@
                     <div *ngFor="let w of widgets2" style="width: 100%;">
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-ideas-generated'">
-                            <app-ideas-generated [title]="w.title"></app-ideas-generated>
+                            <app-ideas-generated [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-ideas-generated>
                         </div>
-
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-my-tasks'">
-                            <app-my-tasks [title]="w.title"></app-my-tasks>
-                        </div>
-
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-recently-viewed'">
-                            <app-recently-viewed [title]="w.title"></app-recently-viewed>
-                        </div>
-
-                        <!--
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-rules-implemented'">
-                            <app-rules-implemented [title]="w.title"></app-rules-implemented>
-                        </div>-->
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-updated-rules'">
-                            <app-updated-rules [title]="w.title"></app-updated-rules>
+                            <app-updated-rules [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-updated-rules>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-whats-new'">
-                            <app-whats-new [title]="w.title"></app-whats-new>
+                            <app-whats-new [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-whats-new>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-top-ten'">
-                            <app-top-ten [title]="w.title"></app-top-ten>
-                        </div>
-
-                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
-                            *ngIf="w['widget-reference'] == 'app-my-contributions'">
-                            <app-my-contributions [title]="w.title"></app-my-contributions>
+                            <app-top-ten [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-top-ten>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-deprecated-rules'">
-                            <app-deprecated-rules [title]="w.title"></app-deprecated-rules>
+                            <app-deprecated-rules [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-deprecated-rules>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-same-sim-analysis'">
-                            <app-same-sim-analysis [title]="w.title"></app-same-sim-analysis>
+                            <app-same-sim-analysis [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-same-sim-analysis>
                         </div>
 
                         <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
                             *ngIf="w['widget-reference'] == 'app-team-updates'">
-                            <app-team-updates [title]="w.title"></app-team-updates>
+                            <app-team-updates [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-team-updates>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-contributions'">
+                            <app-my-contributions [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-my-contributions>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-my-tasks'">
+                            <app-my-tasks [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-my-tasks>
+                        </div>
+
+                        <div class="col-widget col-xs-12 col-sm-12 col-md-12 col-lg-6"
+                            *ngIf="w['widget-reference'] == 'app-recently-viewed'">
+                            <app-recently-viewed [title]="w.title" *ngIf="isValidWidget(w['widget-reference'])"></app-recently-viewed>
                         </div>
                     </div>
                 </div>

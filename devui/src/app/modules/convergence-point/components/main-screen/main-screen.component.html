@@ -1,0 +1,408 @@
+<app-breadcrumb [path]="'ConVergence Point Documentation>' + pageTitle"></app-breadcrumb>
+<hr>
+<div class="container-fluid main-screen">
+  <div class="row">
+    <div class="col-12">
+      <!--Tabs options-->
+      <p-tabView *ngIf="tabs != undefined && tabs.length > 0" (onChange)="changeTab($event)" [activeIndex]="indexTab">
+        <p-tabPanel *ngFor="let t of tabs; let i = index" [header]="t.tab" [selected]="i == 0">
+          <div class="row">
+            <div *ngFor="let rb of t.radioButtons; let j = index" class="col-md-6 col-sm-12">
+              <div style="margin-bottom: 7px;">
+                <!--Options-->
+                <p-radioButton (onClick)="clickRadio(rb.key)" [name]="t.tab" [value]="rb.key" [label]="rb.name"
+                  [(ngModel)]="t.selectedValue"></p-radioButton>
+              </div>
+            </div>
+          </div>
+        </p-tabPanel>
+      </p-tabView>
+    </div>
+  </div>
+
+  <hr>
+
+  <!--Result-->
+  <div class="row">
+    <div class="col-12">
+      <h6 *ngIf="tabs != undefined">{{getNameReport(tabs[indexTab] != undefined ? tabs[indexTab].selectedValue : null)}}</h6>
+
+      <div class="div-result">
+        <!--Table-->
+        <div class="div-tree-table" >
+          <div class="div-icons text-right">
+
+            <!--Checkbox (locked files)-->
+            <div class="f-11 div-locked-files">
+              <p-checkbox (onChange)="filterByColumn()" [(ngModel)]="lockedFiles" binary="true" label="Locked Files">
+              </p-checkbox>
+            </div>
+
+            <!--Table Buttons Top-->
+            <div>
+              <div>
+                <a nghref="#" (click)="showDownload()"><i class="fa fa-download"></i></a>
+                <a nghref="#" (click)="showClone()" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']"><i
+                    class="fa fa-copy"></i></a>
+                <a nghref="#" (click)="showDeletion()" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']"><i
+                    class="fa fa-trash"></i></a>
+                <!--<a nghref="#" (click)="loadData()"><i class="fa fa-refresh"></i></a>-->
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <!--Tree table-->
+          <p-treeTable #tt [value]="data" [columns]="cols" [paginator]="true" [rows]="10"
+            [rowsPerPageOptions]="[10,50,100,500,1000]" (onNodeExpand)="expandModule($event)" (onNodeCollapse)="hideOverlayPanels($event)" dataKey="id"
+            sortMode="multiple" (onPage)="paginate($event)" [first]="first" (onLazyLoad)="loadLazy($event)" [lazy]="true"
+            [totalRecords]="totalRecords">
+
+            <!--Table header-->
+            <ng-template pTemplate="header" let-columns>
+              <tr [ttRow]="rowNode">
+                <th class="text-center" *ngFor="let col of columns" [ngStyle]="{'width': col.width}" [ttSortableColumn]="col.field"
+                  [ttSortableColumnDisabled]="col.field == 'approver'">
+                  {{col.header}}
+                  <p-treeTableSortIcon [field]="col.field" *ngIf="col.field != 'approver'"></p-treeTableSortIcon>
+                </th>
+              </tr>
+              <tr>
+                <th *ngFor="let col of cols">
+                  <input pInputText *ngIf="col.field != 'approver' && filters[col.field] != undefined" type="text" class="w-100"
+                    [(ngModel)]="filters[col.field].value" (input)="filterByColumn()">
+                </th>
+              </tr>
+            </ng-template>
+
+            <!--Table body section-->
+            <ng-template pTemplate="body" let-rowNode let-rowData="rowData" let-columns="columns">
+              <tr>
+                <td *ngFor="let col of columns; let i = index">
+
+                  <!--Toggler and radio-->
+                  <span *ngIf="i == 0 && !rowData.parent">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                  <p-radioButton *ngIf="i == 0" name="item" (click)="selectItemFromTable(rowData)"
+                    [value]="rowData.instanceId" [(ngModel)]="selectedRadio"></p-radioButton>
+                  <span *ngIf="i == 0">&nbsp;</span>
+                  <p-treeTableToggler [rowNode]="rowNode" *ngIf="i == 0 && rowData.parent"></p-treeTableToggler>
+
+                  <!--Approvers input-->
+                  <input readonly [ngStyle]="{'cursor': isCVPUser ? 'default': 'pointer'}" (focus)="selectApprovers($event,rowData,overlayApprovers)"
+                    *ngIf="col.field == 'approver' && !isCVPReferenceTab" type="text" [value]="getApproversText(rowData[col.field])"
+                    class="w-100" />
+
+                  <input readonly [ngStyle]="{'cursor': isCVPUser ? 'default': 'pointer'}" (focus)="selectComments($event,rowData,overlayCommentsAdd)"
+                    *ngIf="col.field == 'approver' && isCVPReferenceTab" type="text" [value]="getCommentsText(rowData)"
+                    class="w-100" />
+
+                  <!--Version column-->
+                  <span *ngIf="col.field == 'version'">
+                    <span *ngIf="!rowData.parent" style="width: 100%; display: block;"
+                      class="text-center" [innerHTML]="highlightText(rowData[col.field], col.field)"></span>
+                    <span *ngIf="rowData.parent">
+                      <select style="width: 100%; margin-right: 5px; text-align-last: center;"
+                        (click)="$event.preventDefault()" [(ngModel)]="rowData.version"
+                        (change)="changeModuleVersion(rowData, rowNode)" class="version-control">
+                        <option [value]="v" *ngFor="let v of rowData.versions">{{v}}</option>
+                      </select>
+                    </span>
+                  </span>
+
+                  <!--Module Name-->
+                  <span *ngIf="col.field == 'moduleList'" [title]="rowData[col.field]">
+
+                    <!--Paper clip icon-->
+                    <span *ngIf="!rowData.parent && !rowData.independent"
+                      style="margin-right: 5px; font-size: 14px; margin-top: 2px; display: inline-block; margin-left: 5px;"><i class="fa fa-paperclip"></i></span>
+
+                      <span *ngIf="!rowData.parent" class="text-center" [innerHTML]="highlightText(rowData.moduleList, col.field)"></span>
+                      <span *ngIf="rowData.parent" class="text-center">{{rowData.moduleList}}</span>
+                    
+
+                    <!--Locked icons-->
+                    <span class="text-danger float-right" (click)="showUnlock(rowData)"
+                      style="font-size: 14px; cursor: pointer;"
+                      [pTooltip]="'Locked by ' + rowData.lockedObject.lockedBy"
+                      *ngIf="rowData.lockedObject && rowData.lockedObject.locked"><i class="fa fa-lock"></i></span>
+
+                    <span class="text-warning float-right" style="margin-right: 3px; font-size: 14px; cursor: pointer;"
+                      [pTooltip]="rowData.lockedObject.submodulesLocked + ' locked sections/attachments'"
+                      *ngIf="rowData.lockedObject && rowData.lockedObject.submodulesLocked != null && rowData.lockedObject.submodulesLocked > 0"><i
+                        class="fa fa-lock"></i></span>
+                  </span>
+
+                  <!--Status-->
+                  <span *ngIf="col.field == 'status'" style="display: block; width: 100%;" class="text-center">
+                    <span *ngIf="rowData.status == 'Returned'" class="text-danger text-center">
+                      
+                      <span *ngIf="rowData.parent">{{rowData.status}}</span>
+                      <span *ngIf="!rowData.parent" [innerHTML]="highlightText(rowData.status, col.field)"></span>
+
+                      <i *ngIf="rowData.commentReturned != null && rowData.commentReturned.text != ''"
+                        class="fa fa-comment" (mouseenter)="selectCommentsReturned($event,rowData,overlayComments)"
+                        (mouseleave)="overlayComments.hide()"
+                        style="cursor: pointer; margin-left: 5px;"></i>
+                    </span>
+                    <span *ngIf="rowData.status != 'Returned'"
+                      style="display: block; width: 100%;" class="text-center">
+                      <span *ngIf="rowData.parent">{{rowData.status}}</span>
+                      <span *ngIf="!rowData.parent" [innerHTML]="highlightText(rowData.status, col.field)"></span>
+                    </span>
+                  </span>
+
+                  <!--Normal text-->
+                  <span
+                    *ngIf="col.field != 'approver' && col.field != 'version' && col.field != 'moduleList' && col.field != 'status'"
+                    class="text-center" style="display: block; width: 100%;">
+                    <span *ngIf="rowData.parent">{{rowData[col.field]}}</span>
+                    <span *ngIf="!rowData.parent" [innerHTML]="highlightText(rowData[col.field], col.field)"></span>
+                  </span>
+                </td>
+              </tr>
+            </ng-template>
+
+            <!--Table footer section-->
+            <ng-template pTemplate="paginatorright" let-state>
+              <span *ngIf="state.totalRecords > 0" class="total-results">
+                Showing <b>{{(state.page * state.rows) + 1}}</b> -
+                <b>{{state.totalRecords > (state.rows * (state.page + 1)) ? state.rows * (state.page + 1) : state.totalRecords}}</b>
+                of <b>{{state.totalRecords}}</b>
+              </span>
+              <span class="total-results" *ngIf="state.totalRecords < 1">No records found.</span>
+            </ng-template>
+          </p-treeTable>
+        </div>
+
+        <!--No data found message
+        <div class="div-tree-table" *ngIf="data.length == 0">
+          <div class="div-no-data">
+            <img src="assets/img/no-data.png" class="img-no-data" />
+            <p class="no-data">NO DATA FOUND</p>
+          </div>
+        </div>-->
+
+        <!--Table buttons-->
+        <div class="buttons-div text-center">
+          <button type="button" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']" (click)="showTemplate()" class="btn btn-primary f-11 btn-main-screen">Template</button>
+          <button type="button" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']"  (click)="showUpload()" class="btn btn-primary f-11 btn-main-screen">Upload</button>
+          <button type="button" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']" class="btn btn-primary f-11 btn-main-screen" [hidden]="data.length == 0"
+            (click)="showAssociate()">Add Section</button>
+
+          <!--Just enabled for status Draft-->
+          <button type="button" (click)="submit()" [hidden]="data.length == 0" *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP', 'ROLE_CVPE']"
+            [disabled]="selectedItem == null || (selectedItem.data.status != DRAFT_STATUS && selectedItem.data.status != IN_DELETION_STATUS)"
+            class="btn btn-primary f-11 btn-main-screen">Submit for Review</button>
+
+          <button type="button" [hidden]="data.length == 0" (click)="openReview()"
+            *ngxPermissionsOnly="['ROLE_CVPA', 'ROLE_CVPAP']"
+            [disabled]="selectedItem == null || (selectedItem.data.status != IN_REVIEW_STATUS && selectedItem.data.status != DELETION_IN_REVIEW)"
+            class="btn btn-primary f-11 btn-main-screen">Approve / Return</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Comments Returned-->
+  <p-overlayPanel #overlayComments [showCloseIcon]="true" [dismissable]="false">
+    <div *ngIf="commentsReturned != null">
+      <b class="f-11">Comments</b>
+      <hr>
+      <p class="f-11" style="margin-bottom: 5px;">{{commentsReturned.user}} added a comment on {{commentsReturned.date}}
+      </p>
+      <div class="f-11" style="text-align: justify; width: 250px;">{{commentsReturned.text}}</div>
+    </div>
+  </p-overlayPanel>
+
+  <!--Approvers overlay panel-->
+  <p-overlayPanel #overlayApprovers [showCloseIcon]="true" [dismissable]="false">
+    <div class="f-11" *ngIf="!displayApprovers" style="width: 250px;">Loading...</div>
+    <app-cvp-approvers *ngIf="displayApprovers" [moduleInstanceId]="moduleInstanceIdApprovers"
+      [approvers]="loadedApprovers" (onChange)="refreshModule($event)"></app-cvp-approvers>
+  </p-overlayPanel>
+
+  <!--Comments overlay panel-->
+  <p-overlayPanel #overlayCommentsAdd [showCloseIcon]="true" [dismissable]="false">
+    <div class="f-11" *ngIf="!displayComments" style="width: 250px;">Loading...</div>
+    <div *ngIf="displayComments">
+      <div style="width: 250px;">
+        <label style="display: block;">Comment:</label>
+        <div class="ui-inputgroup">
+          <input type="text" placeholder="Enter your comment here..." [(ngModel)]="commentToAdd" class="w-100"/>
+          <button pButton (click)="addComment()" type="button" class="btn btn-primary btn-xs"
+            [disabled]="commentToAdd == ''" style="height: 30px;"><i class="fa fa-plus"></i></button>
+        </div>
+      
+        <hr>
+        <div *ngIf="loadedComments.length == 0" class="div-no-data">
+          <img src="assets/img/no-data.png" class="img-no-data" />
+          <p class="no-data">NO COMMENTS HERE</p>
+        </div>
+        <table *ngIf="loadedComments.length > 0" class="table table-hover table-striped table-bordered">
+          <tbody>
+            <tr *ngFor="let la of loadedComments; let i = index">
+              <td>{{la.cvpCommnent}}</td>
+              <td style="width: 5%;">
+                <button type="button" class="btn btn-sm btn-danger" (click)="removeComment(la, i)"><i class="fa fa-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </p-overlayPanel>
+
+  <!--Modal to upload modules-->
+  <p-dialog [blockScroll]="true" [draggable]="false" header="Upload" [(visible)]="displayUpload" positionTop="50"
+    [modal]="true" [responsive]="true">
+    <app-cvp-uploads *ngIf="displayUpload" (onCancel)="cancelUpload($event)" [tabName]="tabs[indexTab].tab"
+      [sectionCode]="this.tabs[this.indexTab].selectedValue"
+      [cvpModuleInstance]="selectedItem != null ? selectedItem.data : null" [parentPage]="pageKey"></app-cvp-uploads>
+  </p-dialog>
+
+  <!--Modal to handle template-->
+  <p-dialog [blockScroll]="true" [draggable]="false" header="Upload / Download Template" [(visible)]="displayTemplate"
+    positionTop="10" [modal]="true" [responsive]="true">
+    <app-cvp-template *ngIf="displayTemplate" (onCancel)="cancelTemplate()" [parentPage]="pageKey"></app-cvp-template>
+  </p-dialog>
+
+  <!--Modal to download modules or submodules-->
+  <p-dialog [blockScroll]="true" [draggable]="false" positionTop="50" class="dialog-download"
+    header="Which would you prefer?" [(visible)]="displayDownload" [modal]="true" [responsive]="true">
+    <app-cvp-download *ngIf="displayDownload && selectedItem != null" [cvpModuleInstance]="selectedItem.data"
+      (onDownload)="downloadFinished($event)" [downloadSubmodules]="downloadSubmodules"></app-cvp-download>
+  </p-dialog>
+
+  <!--Submit to review dialog-->
+  <p-dialog [blockScroll]="true" [draggable]="false" class="dialog-submit" header="Submit for Review"
+    [(visible)]="displaySubmit" [modal]="true" [responsive]="true">
+    <p class="f-11"><b>Are you sure you want to submit the following document for review?</b></p>
+    <span class="f-11" *ngIf="selectedItem != null"><i class="fa fa-file icon-submit"></i>
+      {{selectedItem.data.filePath}}</span>
+    <hr>
+    <div class="row footer-submit">
+      <div class="col-6">
+        <button type="button" class="btn btn-primary f-11 btn-block" (click)="cancelSubmit()">Cancel</button>
+      </div>
+      <div class="col-6">
+        <button type="button" class="btn btn-primary f-11 btn-block" (click)="submitForReview()">Yes, submit for
+          review</button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!--Approve or return item-->
+  <p-dialog [blockScroll]="true" [draggable]="false" positionTop="50" class="dialog-review" header="Review"
+    [(visible)]="displayReview" [modal]="true" [responsive]="true">
+    <div style="width: 280px;">
+      <p class="f-11"><b>Review the following document.</b></p>
+      <span class="f-11" *ngIf="selectedItem != null"><i class="fa fa-file icon-submit"></i>
+        {{selectedItem.data.filePath}}</span>
+      <hr>
+      <div *ngIf="selectedItem != null">
+        <div style="display: inline-block;">
+          <p-radioButton name="approve" value="approve" label="Approve" [(ngModel)]="selectedOptionReview">
+          </p-radioButton>
+        </div>
+        <div style="display: inline-block;" *ngIf="selectedItem.data.status == IN_REVIEW_STATUS">
+          &nbsp;
+          <p-radioButton name="return" value="return" label="Return" [(ngModel)]="selectedOptionReview"></p-radioButton>
+        </div>
+        <div style="display: inline-block;" *ngIf="selectedItem.data.status == DELETION_IN_REVIEW">
+          &nbsp;
+          <p-radioButton name="cancelDeletion" value="cancelDeletion" label="Cancel Deletion"
+            [(ngModel)]="selectedOptionReview"></p-radioButton>
+        </div>
+      </div>
+
+      <hr />
+
+      <!--Comments to return-->
+      <div *ngIf="selectedOptionReview == 'return' || selectedOptionReview == 'cancelDeletion'">
+
+        <label>Comments</label>
+        <textarea [(ngModel)]="commentsReturn" style="width: 100%; height: 70px;" placeholder="Enter comments"
+          maxlength="140"></textarea>
+        <hr />
+      </div>
+
+      <div class="row footer-submit">
+        <div class="col-6">
+          <button type="button" class="btn btn-primary f-11 btn-block" (click)="cancelReview()">Cancel</button>
+        </div>
+        <div class="col-6">
+          <button type="button" class="btn btn-primary f-11 btn-block" (click)="review()"
+            [disabled]="(selectedOptionReview == 'return' || selectedOptionReview == 'cancelDeletion') && commentsReturn == ''">Submit</button>
+        </div>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!--Unlock functionality-->
+  <p-dialog [blockScroll]="true" [draggable]="false" class="dialog-unlock" header="Unlock" [(visible)]="displayUnlock"
+    [modal]="true" [responsive]="true">
+    <p class="f-11"><b>Are you sure you want to unlock this file?</b></p>
+    <span class="f-11" *ngIf="selectedItem != null"><i class="fa fa-file icon-submit"></i>
+      {{selectedItem.data.filePath}}</span>
+    <hr>
+    <div class="row footer-submit">
+      <div class="col-6">
+        <button type="button" class="btn btn-primary f-11 btn-block" (click)="cancelUnlock()">Cancel</button>
+      </div>
+      <div class="col-6">
+        <button type="button" class="btn btn-primary f-11 btn-block" (click)="unlock()">Yes, Unlock</button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!--CLONE MODAL-->
+  <p-dialog [blockScroll]="true" [draggable]="false" positionTop="50" class="dialog-download" header="Clone Module"
+    [(visible)]="displayClone" [modal]="true" [responsive]="true">
+    <app-cvp-clone *ngIf="displayClone && selectedItem != null" [cvpModuleInstance]="selectedItem.data"
+      (onCancel)="cancelClone($event)"></app-cvp-clone>
+  </p-dialog>
+
+  <!--DELETION MODAL-->
+  <p-dialog [blockScroll]="true" [draggable]="false" positionTop="50" class="dialog-download" header="Delete"
+    [(visible)]="displayDeletion" [modal]="true" [responsive]="true">
+    <app-cvp-deletion *ngIf="displayDeletion && selectedItem != null" [cvpModuleInstance]="selectedItem.data"
+      (onCancel)="cancelDeletion($event)" [parentPage]="pageKey"></app-cvp-deletion>
+  </p-dialog>
+
+  <!--ASSOCIATE MODAL-->
+  <p-dialog [blockScroll]="true" [draggable]="false" #associateDialog positionTop="50" class="dialog-download"
+    header="Add Section" [(visible)]="displayAssociate" [modal]="true" [responsive]="true">
+    <app-cvp-associate *ngIf="displayAssociate" [cvpModuleInstance]="selectedItem == null ? null : selectedItem.data"
+      (onCancel)="cancelAssociate($event)" [sectionCode]="this.tabs[this.indexTab].selectedValue"
+      [parentPage]="pageKey"></app-cvp-associate>
+  </p-dialog>
+
+  <!--EXPORT MODAL-->
+  <p-dialog [blockScroll]="true" [draggable]="false" positionTop="50" class="dialog-download" header="Export to PDF"
+    [(visible)]="displayExport" [modal]="true" [responsive]="true">
+    <app-cvp-export *ngIf="displayExport && selectedItem != null" [cvpModuleInstance]="selectedItem.data"
+      (onCancel)="cancelExport()" (blockDocument)="blockDocument($event)"></app-cvp-export>
+  </p-dialog>
+
+  <!--ERROR MESSAGE-->
+  <p-confirmDialog #cd [style]="btn-error-message">
+    <p>{{ displayErrorMessage }}</p>
+    <p-footer>
+      <div class="row">
+        <div class="col-md-8">
+          <button name="cancelDialogbtn" class="btn btn-primary" pButton icon="pi pi-check"
+                  (click)="cd.accept()" label="Ok"></button>
+        </div>
+      </div>
+    </p-footer>
+  </p-confirmDialog>
+
+</div>
+<br>
+<p-blockUI [blocked]="blockedDocument">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" alt="Loading..." />
+    <p style="font-size: 12px;color: #fff;">Exporting, please wait...</p>
+  </div>
+</p-blockUI>

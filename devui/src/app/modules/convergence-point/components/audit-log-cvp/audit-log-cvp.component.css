@@ -1,0 +1,30 @@
+.audit-log-screen .audit-log-filters,
+.audit-log-screen .result-data  {
+    border-radius: 5px;
+    background-color: #FFF;
+    padding: 10px;    
+}
+
+.audit-log-screen .audit-log-filters label {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: #707070;
+}
+
+.audit-log-screen button.cvp-button {
+    width: 200px;
+}
+
+.audit-log-screen h6 {
+    color: #31006F !important;
+    margin-bottom: 12px;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+::ng-deep .audit-log-screen ecl-table p-table div.ui-table-wrapper > table > thead.ui-table-thead > tr > th {
+    word-break: break-word !important;
+}

@@ -1,0 +1,38 @@
+.span-cc-list-search {
+    width: 100%;
+    max-height: 30px;
+}
+
+.input-rule-search {
+    border: 0px !important;
+    height: 25px !important;
+    width: 100%;
+}
+
+.span-cc-list-selection {
+    width: 100%;
+    max-height: 160px;
+    overflow: auto;
+}
+
+.span-cc-selected-user {
+    font-family: 'Montserrat', sans-serif;
+    padding: 2px 4px;
+    margin: 2px;
+    display: inline-block;
+    font-size: 12px;
+    border: 1px solid rgba(161, 161, 161, 1);
+    border-radius: 3px;
+    background-color: #31006F;
+    color: #FFFFFF;
+}
+
+.col-field-box {
+    border: 1px solid #31006F;
+    border-radius: 2px;
+    font-family: 'Montserrat', sans-serif;
+    padding: 4px;
+    font-size: 12px;
+    height: 190px;
+    overflow: auto;
+  }

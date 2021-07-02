@@ -4,6 +4,7 @@ import {
   CanDeactivate,
   RouterStateSnapshot,
 } from "@angular/router";
+import { DnBRoutes } from "../../models/constants/dnb-routes.constants";
 
 export interface LockBackRefreshComponentGuard {
   canDeactivate: () => Promise<boolean>;
@@ -13,7 +14,8 @@ export interface LockBackRefreshComponentGuard {
   providedIn: "root",
 })
 export class ConfirmDeactivateGuard
-  implements CanDeactivate<LockBackRefreshComponentGuard> {
+  implements CanDeactivate<LockBackRefreshComponentGuard>
+{
   canDeactivate(
     component: LockBackRefreshComponentGuard,
     currentRoute: ActivatedRouteSnapshot,
@@ -23,8 +25,9 @@ export class ConfirmDeactivateGuard
     const currentUrl = currentState.url;
     const nextUrl = nextState.url;
     if (
-      currentUrl === "/dnb/new-version" &&
-      nextUrl === "/dnb/drug-versions" &&
+      (currentUrl === DnBRoutes.newVersion ||
+        currentUrl === DnBRoutes.newDrug) &&
+      nextUrl !== (DnBRoutes.newDrug || DnBRoutes.newVersion) &&
       component.canDeactivate
     ) {
       return component.canDeactivate().then(

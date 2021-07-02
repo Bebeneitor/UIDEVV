@@ -1,10 +1,17 @@
-import { Component, Input, OnInit, Output } from '@angular/core';
-import { DialogService, DynamicDialogConfig } from 'primeng/api';
-import { AppUtils } from 'src/app/shared/services/utils';
+import { DatePipe } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { DialogService, DynamicDialogConfig, SelectItem } from 'primeng/api';
 import { ProvisionalRuleComponent } from 'src/app/modules/rule-creation/provisional-rule/provisional-rule.component';
-import { IdeaInfo2 } from 'src/app/shared/models/idea-info';
+import { IdeaComment, IdeaCommentsService } from 'src/app/services/idea-comments.service';
 import { IdeaService } from 'src/app/services/idea.service';
+import { BaseResponse } from 'src/app/shared/models/base-response';
 import { Constants } from 'src/app/shared/models/constants';
+import { IdeaInfo2 } from 'src/app/shared/models/idea-info';
+import { AppUtils } from 'src/app/shared/services/utils';
+import { ResearchRequestService } from "../../../../../services/research-request.service";
+import { ResearchRequestSearchedRuleDto } from "../../../../../shared/models/dto/research-request-searched-rule-dto";
+import { PolicyPackage } from 'src/app/shared/models/policy-package';
+
 
 const PROVISIONAL_RULE_CREATION = 'Provisional Rule Creation';
 const IDEA_STATUS = 'Status - Idea';
@@ -29,9 +36,10 @@ export class NirSearchFormComponent implements OnInit {
   @Input() provisionalBtnDisable: boolean;
   @Input() ruleCreationStatus: boolean;
   @Input() readOnlyView: boolean;
+  @Input() isPdgMedicaidRule: boolean;
 
   business: any[];
-  categories: any[];
+  categories: SelectItem[];
   states: any[];
   jurisdictions: any[];
   newIdea: IdeaInfo2;
@@ -44,11 +52,19 @@ export class NirSearchFormComponent implements OnInit {
   selectedLobs: any[] = [];
   selectedStates: any[] = [];
   selectedJurs: any[] = [];
+  policyPackageValues: any = [];
+  policyPackageSelected: any[] = []; 
 
-  toggleSH: boolean = true;
+  toggleSH: boolean = false;
   response: boolean = false;
   disableState: boolean = true;
   disableJurisdiction: boolean = true;
+  // Research Request
+  rrId: number;
+  rrCode: string;
+  navPageTitle: string = 'My Requests';
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
+  ruleResponseIndicator: boolean = false;
 
   displayIdea = {
     ideaCode: '',
@@ -58,11 +74,16 @@ export class NirSearchFormComponent implements OnInit {
     fullName: '',
     status: ''
   }
+  detailsText: string = 'More Details';
+  ideaComments: IdeaComment[] = [];
 
   constructor(public dialogService: DialogService,
     public config: DynamicDialogConfig,
     private appUtil: AppUtils,
-    private ideaService: IdeaService) {
+    private ideaService: IdeaService,
+    private rrService: ResearchRequestService,
+    private ideaCommentsService: IdeaCommentsService,
+    private datePipe: DatePipe) {
   }
 
   ngOnInit() {
@@ -72,17 +93,31 @@ export class NirSearchFormComponent implements OnInit {
     this.categories = [];
     this.states = [];
     this.jurisdictions = [];
-
     this.appUtil.getAllLobsValue(this.business, this.response);
-    this.appUtil.getAllCategoriesValue(this.categories, this.response);
     this.appUtil.getAllJurisdictionsValue(this.jurisdictions, this.response);
     this.appUtil.getAllStatesValue(this.states, this.response);
-
+    if (this.isPdgMedicaidRule) {
+      this.appUtil.getPdgCategoriesValue(this.categories, this.response);
+    } else {
+      this.appUtil.getAllCategoriesValue(this.categories, this.response);
+    }
+    this.appUtil.getAllPolicyPackageValue(this.policyPackageValues);
+    
     this.getIdeaInfo();
     this.lobInput();
+    this.ideaCommentsService.getIdeaComments(this.ideaId).subscribe((response: BaseResponse) => {
+      this.ideaComments = response.data;
+    });
   }
 
   getIdeaInfo() {
+    this.getRuleResponseIndicatorAndRuleCode(this.ideaId).then((res: any) => {
+      if (res && res.ruleResponseIndicator && res.ruleResponseIndicator !== undefined) {
+        this.ruleResponseIndicator = (res.ruleResponseIndicator === 'Y') ? true : false;
+        this.rrCode = res.ruleCode;
+      }
+    });
+
     this.ideaService.getIdeaInfo(this.ideaId).subscribe((subIdea: any) => {
       this.newIdea = subIdea.data;
 
@@ -94,6 +129,10 @@ export class NirSearchFormComponent implements OnInit {
       this.displayIdea.fullName = newUser.firstName + " " + newUser.lastName
       this.libraryPrmNumber = this.newIdea.libraryPrmNumber;
 
+      this.policyPackageSelected = this.newIdea.eclPolicyPackages
+            .map(eclPolicyPackage => eclPolicyPackage.policyPackage)
+            .map(policyPackage => policyPackage.policyPackageTypeId);
+
       if (this.newIdea.statusId === 1) {
         this.displayIdea.status = 'Active'
       } else {
@@ -104,30 +143,32 @@ export class NirSearchFormComponent implements OnInit {
   }
 
   displayInfo() {
-    if (this.toggleSH === false) {
-      document.getElementById('toggleAdvSH').style.display = 'none';
-      document.getElementById('toggleAdvLabel').textContent = "More Details";
-      this.checkboxPlus = 'assets/img/check-box-icons/plus.png';
-      this.toggleSH = true;
-
-    } else if (this.toggleSH === true) {
-      document.getElementById('toggleAdvSH').style.display = 'flex';
-      document.getElementById('toggleAdvLabel').textContent = "Less Details";
+    if (!this.toggleSH) {
       this.checkboxPlus = 'assets/img/check-box-icons/minus.png';
-      this.toggleSH = false;
+      this.detailsText = 'Less Details';
+    } else {
+      this.checkboxPlus = 'assets/img/check-box-icons/plus.png';
+      this.detailsText = 'More Details';
     }
+    this.toggleSH = !this.toggleSH;
   };
 
   /* Function to show provisional rule creation dialog when the provisional rule button is enabled and clicked */
   showProvisionalDialog(creationStatus: boolean, ruleCode?: string) {
-    // Open the provisional rule dialog if it is a new provisional rule creation 
+    // Open the provisional rule dialog if it is a new provisional rule creation
     if (creationStatus) {
       const ref = this.dialogService.open(ProvisionalRuleComponent, {
         data: {
           ruleId: this.ideaId,
           header: PROVISIONAL_RULE_CREATION,
-          creationStatus: creationStatus
+          creationStatus: creationStatus,
+          ruleResponseInd: this.ruleResponseIndicator,
+          researchRequestId: this.rrCode,
+          ideaIndicator: true,
+          rrNewHeader: 'ID-' + this.ideaId + ' ' + this.displayIdea.ideaName + ' [' + IDEA_STATUS + ']',
+          comesFromIdeaResearch : true
         },
+        showHeader: !this.ruleResponseIndicator,
         header: PROVISIONAL_RULE_CREATION + ': ID-' + this.ideaId + ' ' + this.displayIdea.ideaName + ' [' + IDEA_STATUS + ']',
         width: '80%',
         height: '92%',
@@ -147,13 +188,18 @@ export class NirSearchFormComponent implements OnInit {
           // Disable everything reminder
         }
       });
-    } else { // Open the provisional rule dialog if it is an existing provisional rule created 
+    } else { // Open the provisional rule dialog if it is an existing provisional rule created
       const ref = this.dialogService.open(ProvisionalRuleComponent, {
         data: {
           ruleId: this.ideaId,
           header: PROVISIONAL_RULE_CREATION,
-          creationStatus: creationStatus
+          creationStatus: creationStatus,
+          ruleResponseInd: this.ruleResponseIndicator,
+          researchRequestId: this.rrCode,
+          ideaIndicator: false,
+          rrNewHeader: 'ID-' + this.ideaId + ' ' + this.displayIdea.ideaName + ' [' + PROVISIONAL_STATUS + ']'
         },
+        showHeader: !this.ruleResponseIndicator,
         header: `${PROVISIONAL_RULE_CREATION} : ID-${this.ideaId}  ${this.displayIdea.ideaName} [ ${PROVISIONAL_STATUS} ]`,
         width: '80%',
         closeOnEscape: false,
@@ -215,4 +261,36 @@ export class NirSearchFormComponent implements OnInit {
     document.getElementById("selectJurisdictionID").style.backgroundColor = disableBackground;
   }
 
+  // Source Link for Research Request
+  async getRuleResponseIndicatorAndRuleCode(ruleId: number) {
+    this.ruleResponseSearchDto = new ResearchRequestSearchedRuleDto();
+    return new Promise((resolve, reject) => {
+      this.rrService.getRuleResponseIndicator(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined && resp.data !== {}) {
+          this.ruleResponseSearchDto = resp.data;
+        }
+        resolve(this.ruleResponseSearchDto);
+      });
+    });
+  }
+
+  catInput() {
+    if (!this.readOnlyView && this.isPdgMedicaidRule) {
+      let states = this.appUtil.getStateFromCategory(this.selectedCat, this.categories, this.selectedStates, this.states)
+      this.selectedStates = [...states];
+    }
+  }
+
+  stateInput() {
+    if (!this.readOnlyView && this.isPdgMedicaidRule) {
+      let cat = this.appUtil.getCategoryFromState(this.selectedCat, this.categories, this.selectedStates, this.states)
+      this.selectedCat = cat;
+    }
+
+  }
+
+  getCommentHeader(comment: IdeaComment) {
+    const datePipeString = this.datePipe.transform(comment.creationDate, 'MM/dd/yyyy hh:mm a');
+    return (`${comment.createdUser} added a comment - ${datePipeString} `);
+  }
 }

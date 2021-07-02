@@ -1,8 +1,9 @@
-.labelHeader{
-    font-size: 16px;
+.labelHeader {
+  font-size: 16px;
 }
-.labelSubHeader{
-    font-size: 14px;
+
+.labelSubHeader {
+  font-size: 14px;
 }
 
 .labelForTextbox {
@@ -14,13 +15,19 @@
   margin: 10px;
 }
 
+.radio-align {
+  display: flex;
+  align-items: center;
+}
+
 #fieldset {
   border: 1px solid #c8c8c8;
   width: 90%
 }
+
 #fieldset2 {
   border: 1px solid #c8c8c8;
-  width: 100%;
+  width: 60%;
   background-color: #F5F5F5;
   padding: 5px;
 }
@@ -31,7 +38,7 @@
 }
 
 
-#list-gap{
+#list-gap {
   margin-bottom: 20px;
 }
 
@@ -50,7 +57,7 @@ input {
 }
 
 input[type="radio"] {
-  margin-right: 0;
+  margin-right: 5px;
 }
 
 :host ::ng-deep .ui-listbox .ui-chkbox {
@@ -59,15 +66,15 @@ input[type="radio"] {
 
 
 :host ::ng-deep .list-background .ui-listbox .ui-listbox-list .ui-listbox-item {
-   background: #F5F5F5;
+  background: #F5F5F5;
 }
 
-:host ::ng-deep .list-header .ui-listbox-header{
-   background: #F5F5F5;
+:host ::ng-deep .list-header .ui-listbox-header {
+  background: #F5F5F5;
 }
 
 :host ::ng-deep .list-text .ui-listbox-filter-container {
-   background: #ffffff;
+  background: #ffffff;
 }
 
 
@@ -102,12 +109,22 @@ legend {
   white-space: normal;
 }
 
-:host ::ng-deep.ui-inputtext {
+:host ::ng-deep.ui-listbox .ui-listbox-header .ui-listbox-filter-container input {
   background-color: transparent !important;
   text-overflow: ellipsis;
 }
 
+:host ::ng-deep.ui-state-disabled .ui-listbox-item {
+  outline: none;
+}
+
+:host ::ng-deep.ui-listbox .ui-listbox-header,
+:host ::ng-deep.ui-listbox .ui-listbox-list,
+:host ::ng-deep.ui-listbox {
+  background-color: inherit;
+}
+
 .list-box {
-  width:100%;
-  height:100px;
+  width: 100%;
+  height: 100px;
 }

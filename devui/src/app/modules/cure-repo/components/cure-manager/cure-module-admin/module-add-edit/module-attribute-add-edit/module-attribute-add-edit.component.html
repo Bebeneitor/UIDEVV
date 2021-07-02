@@ -3,8 +3,7 @@
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="form-group nopadding">
                 <label for="attributeName"><span class="required-field-color">*</span>Attribute Name</label>
-                <input formControlName="attributeName" 
-                    pInputText class="form-control" type="text" id="attributeName" />
+                <input formControlName="attributeName" pInputText class="form-control" type="text" id="attributeName" />
                 <small class="text-danger" *ngIf="isInvalidElement('attributeName')">Required field</small>
             </div>
         </div>
@@ -19,12 +18,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="col">
             <div class="form-group nopadding">
                 <label for="uiDataTypes" class="custom-label">UI Data Type</label>
                 <p-dropdown [options]="uiDataTypes" placeholder="Select" formControlName="uiDataTypesDD"
-                    optionLabel="label" id="uiDataTypesDD" dataKey="value" (onChange)="changedValue('uiDataTypesDD')"></p-dropdown>
-                    <small class="text-danger" *ngIf="isInvalidElement('uiDataTypesDD')">Required field</small>
+                    optionLabel="label" id="uiDataTypesDD" dataKey="value" (onChange)="changedValue('uiDataTypesDD')">
+                </p-dropdown>
+                <small class="text-danger" *ngIf="isInvalidElement('uiDataTypesDD')">Required field</small>
             </div>
         </div>
     </div>
@@ -32,8 +32,10 @@
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="form-group">
                 <label for="mandatory" class="custom-label"><span class="required-field-color">*</span>Mandatory</label>
-                <p-radioButton name="mandatoryGroup" formControlName="mandatory" [value]="true" label="Yes" inputId="mandatory1"></p-radioButton>
-                <p-radioButton name="mandatoryGroup" formControlName="mandatory" [value]="false" label="No" inputId="mandatory2"></p-radioButton>
+                <p-radioButton name="mandatoryGroup" formControlName="mandatory" [value]="true" label="Yes"
+                    inputId="mandatory1"></p-radioButton>
+                <p-radioButton name="mandatoryGroup" formControlName="mandatory" [value]="false" label="No"
+                    inputId="mandatory2"></p-radioButton>
                 <small class="text-danger" *ngIf="isInvalidElement('mandatory')">Required field</small>
             </div>
         </div>
@@ -41,14 +43,10 @@
 
     <div class="row">
         <div class="col" style="margin-bottom: 10px; margin-top:10px" Id="provisonalRows">
-            <div *ngIf="formInactiveFlag"class="float-left">
-                <button class="btn btn-primary" (click)="activateAttribute()">Activate</button>
-            </div>
             <div class="float-right">
-                <button class="btn btn-primary" [disabled]="formInactiveFlag"
-                    (click)="updateAttribute()">
-                    <span *ngIf="buttonFlag"><em class="fa fa-plus"></em>  Add</span>
-                    <span *ngIf="!buttonFlag"><em class="fa fa-save"></em> Update</span> 
+                <button class="btn btn-primary" [disabled]="formInactiveFlag" (click)="updateAttribute()">
+                    <span *ngIf="buttonFlag"><em class="fa fa-plus"></em> Add</span>
+                    <span *ngIf="!buttonFlag"><em class="fa fa-save"></em> Update</span>
                 </button> &nbsp;
             </div>
         </div>

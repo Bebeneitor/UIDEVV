@@ -28,7 +28,7 @@ const TOAST_RULES_CHANGED_SUCCESS = 'Rules successfully changed';
 
 export class PolicyOwnerComponent implements OnInit {
 
-  @ViewChild('eclTable') eclTable: EclTableComponent;
+  @ViewChild('eclTable',{static: true}) eclTable: EclTableComponent;
 
   eclTableConfig: EclTableModel = null;
   pageTitle = '';
@@ -248,7 +248,7 @@ export class PolicyOwnerComponent implements OnInit {
             }
           });
           ref.onClose.subscribe(() => {
-            this.eclTable.refreshTable();
+            this.eclTable.resetDataTable();
             let dataList = this.eclTable.value;
             let selectedRules: any[] = [];
             this.selectedRules.forEach((rule: any) => {
@@ -266,7 +266,8 @@ export class PolicyOwnerComponent implements OnInit {
       case "instanceName":
         this.dialogService.open(ReferenceAnalysisComponent, {
           data: {
-            instanceId: event.row.instanceId
+            instanceId: event.row.instanceId,
+            codesType: event.row.codesType == null ? Constants.HCPCS_CODE_TYPE : event.row.codesType
           },
           header: 'Reference Analysis',
           width: '80%',
@@ -300,7 +301,7 @@ export class PolicyOwnerComponent implements OnInit {
     this.selectedRules = [];
     this.eclTable.selectedRecords = [];
     this.eclTable.savedSelRecords = [];
-    this.eclTable.refreshTable();
+    this.eclTable.resetDataTable();
   }
 
 }

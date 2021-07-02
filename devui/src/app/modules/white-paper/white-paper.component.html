@@ -1,6 +1,6 @@
 <p-blockUI [blocked]="blockedDocument">
   <div class="img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" />
+    <img src="assets/img/loading.gif"/>
     <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
   </div>
 </p-blockUI>
@@ -9,39 +9,60 @@
 
   <p-sidebar [style]="{height: '300px', 'overflow-y': 'auto', 'overflow-x': 'hidden'}" *ngIf="showSavedWhitePapers"
     [(visible)]="showSavedWhitePapers" position="top" [baseZIndex]="999999">
-    <div class="row">
-      <div class="col-12" style="margin-top: 10px; padding: 0px;">
-        <a nghref="#" class="whitePaperTabOption" (click)="changeTabWhitePapers('MY')" [ngClass]="{'active': whitePapersTab == 'MY'}">
-          My white papers
-        </a>
 
-        <a nghref="#" class="whitePaperTabOption" (click)="changeTabWhitePapers('SHARED')" [ngClass]="{'active': whitePapersTab == 'SHARED'}">
-          Shared with me
-        </a>
-        <hr>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12" style="margin-top: 10px; padding: 0px;">
+          <a nghref="#" class="whitePaperTabOption" (click)="changeTabWhitePapers('MY')"
+            [ngClass]="{'active': whitePapersTab == 'MY'}">
+            My white papers
+          </a>
+
+          <a nghref="#" class="whitePaperTabOption" (click)="changeTabWhitePapers('SHARED')"
+            [ngClass]="{'active': whitePapersTab == 'SHARED'}">
+            Shared with me
+          </a>
+          <a nghref="#" class="whitePaperTabOption" (click)="changeTabWhitePapers('SEARCH')"
+            [ngClass]="{'active': whitePapersTab == 'SEARCH'}">
+            Search
+          </a>
+          <hr>
+        </div>
       </div>
     </div>
 
     <div class="row" *ngIf="whitePapersTab == 'MY'">
-      <div *ngFor="let w of whitePapers" class="col-2">
+      <div *ngFor="let w of whitePapers; let i = index" class="col-2">
         <div class="text-center"
-          style="width: 100%; height: 108px; border: 1px solid lightgray; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          style="width: 100%; height: 140px; border: 1px solid lightgray; padding: 15px; border-radius: 5px; margin-bottom: 15px;"
+          (mouseenter)="openWhitePaperDetail($event, op, i)" (mouseleave)="op.toggle($event)">
+
           <p style="max-height: 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: pointer;"
             [title]="w.whitePaperName"><small *ngIf="w.draft">(Draft)</small> {{w.whitePaperName}}</p>
+          <p style="margin-bottom: 5px;">
+            {{dashboardService.parseDate(w.creationDate)}}
+          </p>
 
-          <p>{{dashboardService.parseDate(w.creationDate)}}</p>
+          <p-checkbox [disabled]="w.draft" [style]="{'display' : 'inline-block'}" (onChange)="changePublicStatus($event, w)"
+            [(ngModel)]="w.public" binary="true">
+          </p-checkbox>
+          <span style="margin-left: 5px;">Public</span>
+
           <button class="btn btn-primary btn-xs btn-block" (click)="openWhitePaper(w)"
             style="font-size: 11px; margin-top: 10px; height: 18px; display: inline-block;">Open</button>
-          <button class="btn btn-primary btn-xs btn-block" [disabled]="w.draft" (click)="openSharedModal(w.whitePaperId)"
+          <button class="btn btn-primary btn-xs btn-block" [disabled]="w.draft"
+            (click)="openSharedModal(w.whitePaperId)"
             style="font-size: 11px; margin-top: 5px; height: 18px; display: inline-block;">Share</button>
         </div>
       </div>
     </div>
 
     <div class="row" *ngIf="whitePapersTab == 'SHARED'">
-      <div *ngFor="let w of whitePapersShared" class="col-2">
+      <div *ngFor="let w of whitePapersShared; let i = index" class="col-2">
         <div class="text-center"
-          style="width: 100%; border: 1px solid lightgray; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+          style="width: 100%; border: 1px solid lightgray; padding: 15px; border-radius: 5px; margin-bottom: 15px;"
+          (mouseenter)="openWhitePaperDetail($event, op, i)" (mouseleave)="op.toggle($event)">
           <p style="max-height: 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: pointer;"
             [title]="w.whitePaperName">{{w.whitePaperName}}</p>
 
@@ -49,7 +70,62 @@
           <p>{{dashboardService.parseDate(w.creationDate)}}</p>
           <button class="btn btn-primary btn-xs" (click)="openSharedWhitePaper(w)"
             style="font-size: 11px; margin-top: 10px; height: 18px; display: inline-block; width: 100%;">Open</button>
-          <button class="btn btn-primary btn-xs btn-block" [disabled]="w.draft" (click)="openSharedModal(w.whitePaperId)"
+          <button class="btn btn-primary btn-xs btn-block" [disabled]="w.draft"
+            (click)="openSharedModal(w.whitePaperId)"
+            style="font-size: 11px; margin-top: 5px; height: 18px; display: inline-block;">Share</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="whitePapersTab == 'SEARCH'">
+
+      <div class="col-11">
+        <div class="ui-inputgroup">
+          <input pInputText type="text" size="40" [(ngModel)]="keywordSearch"
+            placeholder="Label, Category or Name search..." (keyup)="searchWhitePapers(false)"
+            style="margin-left: 0px !important; width: 100%;">
+          <button pButton type="button" icon="pi pi-search" class="btn btn-primary"
+            (click)="searchWhitePapers(true)"></button>
+        </div>
+
+      </div>
+
+      <div class="col-1">
+        <p-inputSwitch [(ngModel)]="isPublicSearch" (onChange)="searchWhitePapers(false)"></p-inputSwitch>
+        <span style="position: absolute; margin-left: 5px;" *ngIf="isPublicSearch">Public</span>
+        <span style="position: absolute; margin-left: 5px;" *ngIf="!isPublicSearch">Private</span>
+      </div>
+
+      <div class="col-12">
+        <hr>
+      </div>
+
+      <div *ngIf="loadingSearchTab" class="text-center" style="width: 100%;">
+        <br><br>
+        <div class="text-center">
+          <img src="assets/img/loading.gif" style="width: 100px;" />
+        </div>
+      </div>
+
+      <div *ngIf="whitePapersFound.length == 0 && !loadingSearchTab" class="col-12">
+        <div class="div-no-data">
+          <img src="assets/img/no-data.png" class="img-no-data" />
+          <p class="no-data">NO DATA FOUND</p>
+        </div>
+      </div>
+      <div *ngFor="let w of whitePapersFound; let i = index" class="col-2">
+        <div class="text-center"
+          style="width: 100%; border: 1px solid lightgray; padding: 15px; border-radius: 5px; margin-bottom: 15px;"
+          (mouseenter)="openWhitePaperDetail($event, op, i)" (mouseleave)="op.toggle($event)">
+
+          <p style="max-height: 16px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: pointer;"
+            [title]="w.whitePaperName"><small *ngIf="w.draft">(Draft)</small> {{w.whitePaperName}}</p>
+
+          <p>{{dashboardService.parseDate(w.creationDate)}}</p>
+          <button class="btn btn-primary btn-xs btn-block" (click)="openWhitePaper(w)"
+            style="font-size: 11px; margin-top: 10px; height: 18px; display: inline-block;">Open</button>
+          <button class="btn btn-primary btn-xs btn-block" [disabled]="w.draft"
+            (click)="openSharedModal(w.whitePaperId)"
             style="font-size: 11px; margin-top: 5px; height: 18px; display: inline-block;">Share</button>
         </div>
       </div>
@@ -126,7 +202,8 @@
       <div id="toolbarWhitePaper" style="display: block; width: 100%;background-color:#F4F1FA; padding: 0px;">
         <button type="button" class="btn-toolbar-whitepaper" (click)="reset()"><i class="fa fa-file"
             title="New White Paper"></i></button>
-        <button type="button" [disabled]="dashboard.length == 0 || (currentWhitePaper.whitePaperId > 0 && !currentWhitePaper.draft) || !editable"
+        <button type="button"
+          [disabled]="dashboard.length == 0 || (currentWhitePaper.whitePaperId > 0 && !currentWhitePaper.draft) || !editable"
           class="btn-toolbar-whitepaper" (click)="saveSection.toggle($event)" title="Save White Paper"><i
             class="fa fa-save"></i></button>
         <button type="button" class="btn-toolbar-whitepaper" (click)="pdf()" title="Download PDF"><i
@@ -135,12 +212,12 @@
             title="Reset document"></i></button>
         <button type="button" class="btn-toolbar-whitepaper" (click)="showSaved()"><i class="fa fa-folder"
             title="My White Papers"></i></button>
-            
+
         <button *ngIf="originalWhitePaper.whitePaperId > 0 && !originalWhitePaper.draft" type="button"
           class="btn-toolbar-whitepaper" (click)="openSharedModal(currentWhitePaper.whitePaperId)"><i
             class="fa fa-share-alt" title="Share"></i></button>
-            
-          <div>{{currentWhitePaper.whitePaperName}}</div>
+
+        <div>{{currentWhitePaper.whitePaperName}}</div>
       </div>
       <p-tabView id="tabWhitePaper">
 
@@ -435,13 +512,14 @@
   <p-dialog [header]="'Share with'" [(visible)]="displaySharedModal" [modal]="true" [responsive]="true"
     [maximizable]="false" [baseZIndex]="10000">
     <label>Enter users to share:</label>
-    <p-autoComplete *ngIf="displaySharedModal" [style]="{'max-width': '500px', 'width': '500px'}" appendTo="body" [(ngModel)]="usersToShare" [suggestions]="userSuggestionsFiltered"
-      (completeMethod)="filterUsersToShare($event)" placeholder="Users to share"
-      field="firstName" [multiple]="true">
+    <p-autoComplete *ngIf="displaySharedModal" [style]="{'max-width': '500px', 'width': '500px'}" appendTo="body"
+      [(ngModel)]="usersToShare" [suggestions]="userSuggestionsFiltered" (completeMethod)="filterUsersToShare($event)"
+      placeholder="Users to share" field="firstName" [multiple]="true">
     </p-autoComplete>
     <hr>
     <div class="text-right" style="margin-bottom: 10px;">
-      <button [disabled]="usersToShare.length == 0" type="button" class="btn btn-xs btn-primary" (click)="shareWhitePaper()"><i class="fa fa-share-alt"></i> Share</button>
+      <button [disabled]="usersToShare.length == 0" type="button" class="btn btn-xs btn-primary"
+        (click)="shareWhitePaper()"><i class="fa fa-share-alt"></i> Share</button>
     </div>
   </p-dialog>
 
@@ -786,16 +864,41 @@
   </p-dialog>
 
   <p-overlayPanel #saveSection [baseZIndex]="999999">
-    <p-radioButton name="type" [value]="true" [(ngModel)]="currentWhitePaper.draft" label="Draft"></p-radioButton>
-    <p-radioButton name="type" [value]="false" [(ngModel)]="currentWhitePaper.draft" label="Final copy"></p-radioButton>
+    <p-radioButton name="type" [value]="true" [(ngModel)]="currentWhitePaper.draft" label="Draft" (onClick)="changeRadioSave()"></p-radioButton>
+    <p-radioButton name="type" [value]="false" [(ngModel)]="currentWhitePaper.draft" label="Final copy" (onClick)="changeRadioSave()"></p-radioButton>
     <hr>
     <label>Name:</label>
     <input type="text" class="form-control" pInputText [(ngModel)]="currentWhitePaper.whitePaperName"
       placeholder="Enter a name..." maxlength="50" />
+    <label>Label:</label>
+    <input type="text" class="form-control" pInputText [(ngModel)]="currentWhitePaper.whitePaperLabel"
+      placeholder="Label Name" maxlength="50" />
+    <label>Category:</label>
+    <p-multiSelect [options]="categories" [(ngModel)]="currentWhitePaper.categories"></p-multiSelect>
     <hr>
-    <div class="text-right">
-      <button type="button" [disabled]="currentWhitePaper.whitePaperName == ''" class="btn btn-primary btn-xs f-11"
-        (click)="save(saveSection)"><i class="fa fa-save"></i> Save</button>
+    <table style="width: 100%;">
+      <tr>
+        <td class="text-left">
+          <p-checkbox [style]="{'display' : 'inline-block'}" [disabled]="currentWhitePaper.draft" [(ngModel)]="currentWhitePaper.public" binary="true">
+          </p-checkbox>
+          <span style="margin-left: 5px;">Public</span>
+        </td>
+        <td class="text-right">
+          <div class="text-right">
+            <button type="button" [disabled]="currentWhitePaper.whitePaperName == ''"
+              class="btn btn-primary btn-xs f-11" (click)="save(saveSection)"><i class="fa fa-save"></i> Save</button>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+  </p-overlayPanel>
+  <p-overlayPanel #op [baseZIndex]="999999" [style]="{ 'margin-left': '4vw', 'margin-bottom': '10px' }">
+    <div>
+        <label><strong>Label: </strong>{{whitePaperlabel}}</label>
+    </div>
+    <div>
+        <label><strong>Category: </strong>{{whitePaperCategories}}</label>
     </div>
   </p-overlayPanel>
 </div>

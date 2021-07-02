@@ -1,5 +1,15 @@
+.dnb-table {
+  table-layout: fixed;
+}
+
+.dnb-table th {
+  word-break: break-word;
+}
+
 .table th {
   background: #c0afea;
+  position: relative;
+  border-right: none;
 }
 
 .dnb-table-container {
@@ -22,7 +32,7 @@
 .options {
   background-color: #a785ff;
   z-index: 999;
-  width: 120px;
+  width: 150px;
 }
 
 table tr:hover td,
@@ -115,17 +125,64 @@ table tr:hover .options {
 }
 
 .table.disabled {
-  background-color: #b5b5b5;
-  color: #909090;
+  background-color: #eaeaea;
 }
 
-.new-version-table.table.disabled th,
 .new-version-table.table.disabled td {
-  background-color: #b5b5b5;
-  border-color: #909090;
+  background-color: #eaeaea;
 }
 
 table.disabled tr:hover td,
 table.disabled tr.row-selected td {
-  background-color: #b5b5b5;
+  background-color: #eaeaea;
+}
+
+.readonlycell {
+  background-color: #eaeaea !important;
+}
+
+.feedback-box,
+.comment-box {
+  position: absolute;
+  top: 0;
+  margin: 0;
+  width: 300px;
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #b9b9b9;
+  box-shadow: 0 0 5px #b5b5b5;
+  z-index: 99999 !important;
+}
+
+.add-rows {
+  display: flex;
+  align-items: center;
+}
+
+.add-rows > span {
+  margin-right: 5px;
+}
+
+.add-rows > button {
+  margin-left: 5px;
+}
+
+.checkBoxCol {
+  width: 30px !important;
+}
+
+u[style*="orange"] .comment,
+u[style*="yellow"] .comment,
+span[style*="orange"] .comment,
+span[style*="yellow"] .comment {
+  background-color: inherit;
+}
+
+.dnb-dialog .ui-dialog-titlebar {
+  border: 1px solid #c8c8c8 !important;
+  background-color: #3b1e7b !important;
+  color: #f8f9fa !important;
+  padding: 1em !important;
+  font-weight: 700 !important;
+  border-bottom: 0 none !important;
 }

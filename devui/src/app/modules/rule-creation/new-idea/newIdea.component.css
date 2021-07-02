@@ -21,7 +21,7 @@
 
 .newIdeaPage h2 {
   font-family: 'Montserrat', sans-serif;
-  font-size: 24px;
+  font-size: 22px;
   color: #31006F;
 }
 
@@ -69,8 +69,15 @@ textarea {
   border-radius: 2px;
   background-color: #281c71;
   color: white;
-  width:100%;
-  height: 75%;
+  height: 40px;
+  width: 20%;
+}
+
+.btn-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  margin-top: 15px;
 }
 
 .submit-btn {
@@ -86,9 +93,17 @@ textarea {
 .nav-footer {
   text-align: left;
 }
-.refDetails{
+
+.policy-packages {
+  border:1px solid;
+  padding-top: 15px;
+  padding-bottom: 12px;
+}
+
+.refDetails {
    border:1px solid ;
 }
+
 .plusSign{
   max-width: 0.33333%;
 }.plusSignData{
@@ -148,14 +163,19 @@ padding-right: 8px;
   overflow-x: scroll;
 }
 
-.block-img-loading {
-  position: absolute;
-  top: 35%;
-  left: 50%;
-  width: 120px
-}
-
 :host::ng-deep.idea-custom-toast .ui-toast {  
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+.nav-page-title {
+  cursor: pointer;
+  text-decoration: underline;
+  margin-right: 0.6%;
+  white-space: pre;
+}
+
+.fa-chevron-right {
+  margin-right: 0.6%;
+  font-size: 14px;
 }

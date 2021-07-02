@@ -1,0 +1,73 @@
+.footer {
+    height:17px;
+    width: 100%;
+    background-image: none;
+    background-repeat: repeat;
+    background-attachment: scroll;
+    background-position: 0% 0%;
+    position: fixed;
+    bottom: 0pt;
+    left: 0pt;
+    background-color: #fff;
+    text-align: right;
+    z-index: 99999;
+    border-top: 1px solid grey;
+    opacity: 0.7;
+}
+
+.footer_contents {
+    height:24px;
+    margin-right: 15px;
+    font-size: 11px;
+    color : #333;
+}
+:host>>>.ui-dialog-titlebar.ui-widget-header.ui-helper-clearfix.ui-corner-top{
+  border: 1px solid #c8c8c8;
+  background-color: #3b1e7b;
+  color: #f8f9fa;
+  padding: 1em;
+  font-weight: 700;
+  border-bottom: 0 none;
+}
+:host>>>.ui-dialog .ui-dialog-titlebar .ui-dialog-titlebar-icon{
+  color: #f8f9fa;
+}
+:host>>>.ng-tns-c4-1.pi.pi-exclamation-triangle.ui-confirmdialog-icon.ng-star-inserted{
+  color: deeppink;
+  content: "\e922";
+  font-size:3.5em;
+  margin:2px;
+}
+:host>>>.btn.btn-primary.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-icon-left{
+  margin: 0 2em 0 0;
+}
+:host>>>.ui-confirmdialog-message{
+  color: #3b1e7b;
+}
+:host>>>.ui-dialog-content.ui-widget-content{
+  padding: 0.25em 2em;
+}
+
+@media(max-width : 780px) {
+    .footer {
+        text-align: center;
+    }
+  :host>>>.ui-dialog-titlebar.ui-widget-header.ui-helper-clearfix.ui-corner-top{
+    border: 1px solid #c8c8c8;
+    background-color: #3b1e7b;
+    color: #f8f9fa;
+    padding: 1em;
+    font-weight: 700;
+    border-bottom: 0 none;
+  }
+
+  :host>>>.ui-confirm-dialog .pi-times:before {
+    color: white;
+    content: "\e90b";
+  }
+
+  :host>>>.ui-confirm-dialog .pi-exclamation-triangle:before {
+    color: deeppink;
+    content: "\e922";
+  }
+}

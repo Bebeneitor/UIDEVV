@@ -1,3 +1,9 @@
 :host::ng-deep.ui-table-tbody td {
     text-align: center;
 }
+
+::ng-deep .ecl-user-directory ecl-table a.btn-primary {
+    width: 100% !important;
+    font-size: 11px !important;
+    height: 26px !important;
+}

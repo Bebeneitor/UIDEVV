@@ -21,8 +21,8 @@ import { RuleManagerService } from '../../../services/rule-manager.service';
   styleUrls: ['./medical-director-claims.component.css']
 })
 export class MedicalDirectorClaimComponent implements OnInit {
-  @ViewChild('assignedTable') assignedTable: EclTableComponent;
-  @ViewChild('returnedTable') returnedTable: EclTableComponent;
+  @ViewChild('assignedTable',{static: true}) assignedTable: EclTableComponent;
+  @ViewChild('returnedTable',{static: true}) returnedTable: EclTableComponent;
   selectedRules: any[] = [];
   activeTab: number = 0;
   selectedRulesReturned = [];
@@ -199,7 +199,8 @@ export class MedicalDirectorClaimComponent implements OnInit {
       case 'instanceName':
         this.dialogService.open(ReferenceAnalysisComponent, {
           data: {
-            instanceId: event.row.instanceId
+            instanceId: event.row.instanceId,
+            codesType: event.row.codesType == null ? Constants.HCPCS_CODE_TYPE : event.row.codesType
           },
           header: 'Reference Analysis',
           width: '80%',
@@ -222,14 +223,14 @@ export class MedicalDirectorClaimComponent implements OnInit {
   resetDataTable(tableProperty?: string, selectedElement?: string) {
     if (tableProperty && selectedElement) {
       this[selectedElement] = [];
-      this[tableProperty].refreshTable();
+      this[tableProperty].resetDataTable();
     } else {
       if (this.tabIndex == 0) {
-        this.assignedTable.refreshTable();
+        this.assignedTable.resetDataTable();
         this.assignedTable.savedSelRecords = [];
         this.selectedRules = [];
       } else {
-        this.returnedTable.refreshTable();
+        this.returnedTable.resetDataTable();
         this.returnedTable.savedSelRecords = [];
         this.selectedRulesReturned = [];
       }

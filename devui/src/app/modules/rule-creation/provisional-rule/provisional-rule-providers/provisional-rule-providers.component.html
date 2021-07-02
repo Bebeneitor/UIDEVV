@@ -1,28 +1,49 @@
 <fieldset [disabled]="provDialogDisable" id="ruleCreationProvider">
   <legend *ngIf="maintenanceOnly">Provider Updates</legend>
   <label class="provider-header" *ngIf="fromMaintenanceProcess">Provider Selection</label>
-  <div class="flex-row" *ngIf="!fromMaintenanceProcess">
-    <label class="set-space">Provider Type:</label>
-    <span class="set-space">
-      <input type="radio" name="providerTypeInd" [(ngModel)]="currRuleInfo.providerTypeInd" [value]="1"><label>Same
-        Provider</label>
-    </span>
-    <span class="set-space">
-      <input type="radio" name="providerTypeInd" [(ngModel)]="currRuleInfo.providerTypeInd" [value]="0"><label>Any
-        Provider</label>
-    </span>
+
+  <div *ngIf="!fromMaintenanceProcess">
+    <div class="flex-row">
+      <label class="set-space">Provider Type:</label>
+      <span class="set-space" *ngFor="let pType of providerTypes">
+        <input type="radio" [name]="'providerType_' + pType.value + '_' + uniqueId" [(ngModel)]="currRuleInfo.providerTypeInd"
+        [value]="pType.value"><label>{{pType.label}}</label>
+      </span>
+    </div>
+  
+    <div class="flex-row">
+      <label class="set-space">Specific Specialities/Subspecialities Applicable:</label>
+      <span class="set-space">
+        <input type="radio" name="specInd_c_1_{{uniqueId}}" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
+          [(ngModel)]="currRuleInfo.specialityInd" [value]="1"><label>Yes</label>
+      </span>
+      <span class="set-space">
+        <input type="radio" name="specInd_c_0_{{uniqueId}}" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
+          [(ngModel)]="currRuleInfo.specialityInd" [value]="0"><label>No</label>
+      </span>
+    </div>
   </div>
 
-  <div class="flex-row" *ngIf="!fromMaintenanceProcess">
-    <label class="set-space">Specific Specialities/Subspecialities Applicable:</label>
-    <span class="set-space">
-      <input type="radio" name="specialityInd" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
-        [(ngModel)]="currRuleInfo.specialityInd" [value]="1"><label>Yes</label>
-    </span>
-    <span class="set-space">
-      <input type="radio" name="specialityInd" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
-        [(ngModel)]="currRuleInfo.specialityInd" [value]="0"><label>No</label>
-    </span>
+  <div *ngIf="fromMaintenanceProcess">
+    <div class="flex-row">
+      <label class="set-space">Provider Type:</label>
+      <span class="set-space" *ngFor="let pType of providerTypes">
+        <input type="radio" [name]="'providerType_' + pType.value + '_' + uniqueId" [(ngModel)]="parentRuleInfo.providerTypeInd"
+        [value]="pType.value" [disabled]="true"><label>{{pType.label}}</label>
+      </span>
+    </div>
+  
+    <div class="flex-row">
+      <label class="set-space">Specific Specialities/Subspecialities Applicable:</label>
+      <span class="set-space">
+        <input type="radio" name="specInd_m_1_{{uniqueId}}" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
+          [(ngModel)]="parentRuleInfo.specialityInd" [value]="1" [disabled]="true"><label>Yes</label>
+      </span>
+      <span class="set-space">
+        <input type="radio" name="specInd_m_0_{{uniqueId}}" (change)="checkSpecialityType()" (click)="checkSpecialityType()"
+          [(ngModel)]="parentRuleInfo.specialityInd" [value]="0" [disabled]="true"><label>No</label>
+      </span>
+    </div>
   </div>
 
   <div [ngClass]="!fromMaintenanceProcess ? 'flex-row' : 'flex-row disable-field'">

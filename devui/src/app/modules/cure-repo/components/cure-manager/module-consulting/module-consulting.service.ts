@@ -19,21 +19,20 @@ export class ModuleConsultingService {
    */
   getModules(): Observable<any> {
     let originalResponse;
-    return this.http.get(`${environment.restServiceUrl}${RoutingConstants.CURE_URL}/${RoutingConstants.CURE_GET_MODULES}`).pipe(map(this.mapModule), switchMap((response: any) => {
-      const obs = [];
-      originalResponse = response;
-      response.forEach(element => {
-        obs.push(this.getSavedQueryByModuleId(element.value.cureModuleId));
-      });
-      return forkJoin(obs);
-    }), map(values => {
-      let index = 0;
-      return values.map(element => {
-        let el = originalResponse[index];
-        index++;
-        return { ...el, value: { savedQuery: { ...element.data[0] }, ...el.value } }
-      });
-    }));
+    return this.http.get(`${environment.restServiceUrl}${RoutingConstants.CURE_URL}/${RoutingConstants.CURE_GET_MODULES}`)
+      .pipe(
+        map(this.mapModule), 
+        switchMap((response: any) => {
+          originalResponse = response;
+          return forkJoin(this.http.get<BaseResponse>(`${environment.restServiceUrl}${RoutingConstants.CURE_URL}/${RoutingConstants.CURE_MODULE}/${RoutingConstants.CURE_GET_QUERIES}`));
+        }),
+        map((responseQuery:any) => {
+            return originalResponse.map(module => {
+              let query = responseQuery[0].data.filter(elem => module.value.cureModuleId === elem.cureModuleId)[0];
+              return { ...module, value: { savedQuery: { ...query }, ...module.value } }
+            })
+        }) 
+    );
   }
 
 

@@ -1,0 +1,5 @@
+::ng-deep .ecl-table-admin-list ecl-table a.btn-primary {
+    width: 100% !important;
+    font-size: 11px !important;
+    height: 26px !important;
+}

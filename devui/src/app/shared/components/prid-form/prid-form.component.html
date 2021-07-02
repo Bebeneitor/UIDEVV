@@ -1,0 +1,87 @@
+
+<div class="container">
+  <form [formGroup] = "createProjectForm" class="container">
+    <div class="row">
+      <div class="col" style="max-width: 96%; position: relative; left: 12px; top: 1px;">
+          <!-- <div [ngClass]="{'col-9': lotusNotesUrl, 'col': !lotusNotesUrl}"> -->
+              <!-- <div class="form-group nopadding"> -->
+                  <label for="prid"><span class="required-field-color">*</span>PRID</label>
+                  <div class="ui-inputgroup">
+                      <input formControlName="prid" (keyup)="enableSubmit()"
+                          type="text" pInputText
+                          placeholder="prid" class="form-control form-control-sm remove-radius">
+                      <button (click)="showPridCreationForm()" pButton type="button" label="Create Project ID"
+                      class="btn btn-sm btn-primary f-11"></button>
+                      <a [href]="lotusNotesUrl" *ngIf="lotusNotesUrl">Lotus Notes Link</a>
+                  </div>
+              <!-- </div> -->
+              <label *ngIf="getControl('prid').errors?.required && getControl('prid').touched"><span
+                class="required-field-color">PRID is
+                <strong>Required</strong>.</span>
+              </label>
+              <label *ngIf="getControl('prid').errors?.pattern && getControl('prid').touched"><span
+                    class="required-field-color">PRID pattern does not
+                    <strong>match</strong>.</span>
+              </label>
+
+      </div>
+    </div>
+    <div *ngIf="showPrid" style="max-width: 96%; position: relative; left: 12px; top: 6px;">
+      <div class="row">
+        <div class="col">
+            <div class="form-group nopadding">
+                <label for="writtenBy"><span class="required-field-color">*</span>User Name (This must be a valid Notes user name)
+                </label>
+                <input formControlName="name" pInputText class="form-control form-control-sm" type="text"
+                    id="name" placeholder="Valid Notes User Name">
+                <label *ngIf="getControl('name').errors?.required && getControl('name').touched"><span
+                    class="required-field-color">User Name
+                    <strong>Required</strong>.</span></label>
+            </div>
+        </div>
+      </div>
+      <div class="row">
+          <div class="col">
+              <div class="form-group nopadding">
+                <label for="purpose"><span class="required-field-color">*</span>Summary</label>
+                <input formControlName="summary" id="summary" pInputText class="form-control form-control-sm" type="text" >
+                <label *ngIf="getControl('summary').errors?.required && getControl('summary').touched"><span
+                    class="required-field-color">Summary
+                    <strong>Required</strong>.</span></label>
+              </div>
+          </div>
+      </div>
+      <div class="row">
+          <div class="col">
+              <div class="form-group nopadding">
+                <label for="description"><span class="required-field-color">*</span>Description</label>
+                <input formControlName="description" id="description" pInputText class="form-control form-control-sm" type="text" >
+                <label *ngIf="getControl('description').errors?.required && getControl('description').touched"><span
+                    class="required-field-color">Description is
+                    <strong>Required</strong>.</span></label>    
+              </div>
+          </div>
+      </div>
+      <div class="row">
+          <div class="col">
+              <p-messages [closable]="false" [style]="{'background-color': '#9579D3'}"
+                  [showTransitionOptions]="'1000ms ease-out'" [hideTransitionOptions]="'1000ms ease-in'"
+                  [value]="arrayMessage" severity="info"></p-messages>
+          </div>
+      </div>
+    </div>
+    <div class="float-right" style="max-width: 96%; position: relative; padding: 5px 15px 5px 0;">
+      <div class="row">
+        <div class="col">
+          <button *ngIf="showPrid && isNotCreated" type="submit"  pButton icon="pi pi-check"
+           (click)="createPrid()" label="Create"></button>
+  
+           <button *ngIf="!showPrid || !isNotCreated" type="submit" pButton icon="pi pi-check" [disabled]="!isSubmitEnabled"
+           (click)="submitProjectCreation()" label="Submit"></button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+

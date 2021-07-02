@@ -54,6 +54,21 @@
           <app-cpt-code              #cptCode             *ngSwitchCase="localConstants.CPT_CODES_ELL"            ></app-cpt-code>  
           <app-icd-code              #icdCode             *ngSwitchCase="localConstants.ICD_CODES_ELL"            ></app-icd-code>  
           <app-library-status-codes  #libraryStatusCodes  *ngSwitchCase="localConstants.LIBRARY_STATUS_CODES_ID"  ></app-library-status-codes>  
+          <app-payer-catalog         #payerCatalog        *ngSwitchCase="localConstants.PAYER_CATALOG"            ></app-payer-catalog> 
+          <app-policy-types          #policyTypes         *ngSwitchCase="localConstants.POLICY_TYPES_ID"          ></app-policy-types> 
+          <app-reason-code           #reasonTypes         *ngSwitchCase="localConstants.REASON_TYPES_ID"          ></app-reason-code>  
+          <app-project-categories    #projectCategories   *ngSwitchCase="localConstants.PROJECT_CATEGORIES_ID"    ></app-project-categories>                    
+          <app-reference-sources     #referenceSources    *ngSwitchCase="localConstants.REFERENCE_SOURCES_ID"     ></app-reference-sources>
+          <app-reference-title       #refTitle            *ngSwitchCase="localConstants.REFERENCE_TITLE"          ></app-reference-title>                   
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.REQUEST_TYPE"            [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.RPCD_REASONS_TYPE"       [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.RULE_HEADERS_TYPE"       [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.WORK_STATUS"             [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.SUB_SPEC"                [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.REASON"                  [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.INSURANCE"               [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.ELL_POS"                 [currentOption]="selectedScreen" ></app-sub-rule-container>
+          <app-sub-rule-container    #subRuleContainer    *ngSwitchCase="localConstants.GENDER"                  [currentOption]="selectedScreen" ></app-sub-rule-container>
         </div>
       </div>
     </div>

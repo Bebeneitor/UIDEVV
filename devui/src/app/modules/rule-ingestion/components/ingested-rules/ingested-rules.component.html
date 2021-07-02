@@ -1,6 +1,6 @@
 <p-blockUI [blocked]="loading">
   <div class="img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" />
+    <img src="assets/img/loading.gif"/>
     <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
   </div>
 </p-blockUI>
@@ -13,7 +13,7 @@
   <div class="row">
     <div class="col-md-12 col-sm-12">
       <p-tabView [activeIndex]="activeTab" (onChange)="handleChange($event)">
-        <p-tabPanel header="ICMS" *ngIf="!cvpUserRoleOnly">
+        <p-tabPanel header="ICMS" [selected]="true">
           <ng-template pTemplate="content">
             <ecl-table #icmsTable [tableModel]="tableConfig" (onAcctionLink)="redirectToRule($event)"></ecl-table>
           </ng-template>
@@ -21,33 +21,54 @@
 
         <p-tabPanel header="CVP">
           <ng-template pTemplate="content">
-            <ecl-table #cvpIngestionTable [tableModel]='cvpTableConfig' (onAcctionLink)="redirect($event)"
-              (onSelectRecord)="setSelectRules($event)" (onUnSelectRecord)="setSelectRules($event)"></ecl-table>
+            <ecl-table #cvpIngestionTable [tableModel]='cvpTableConfig' (onAcctionLink)="redirect($event)"></ecl-table>
             <br>
             <div class="row">
               <div class="col-6">
                 <button type="button" class="no-print btn btn-primary float-left small-td"
-                  [disabled]="disableExportSelected" (click)="exportCVPTemplate()"
-                  value="Export Selected CVP Template">Export selected CVP Templates to Excel</button>
+                  [disabled]="!cvpIngestionTable.selectedRecords || cvpIngestionTable.selectedRecords <= 0"
+                  (click)="exportTemplate('cvpIngestionTable', 'cvpIngestionId', 'cvpService')" value="Export Selected CVP Template">Export selected CVP Templates to
+                  Excel</button>
               </div>
               <div class="col-6" *ngIf="userHasCvpRole">
                 <ecl-file-uploader [fileUpladerOptions]="fileUpladerOptions"
-                  (uploadEnded)="onCvpTemplateUploadEnded($event)">
+                  (uploadEnded)="onCvpTemplateUploadEnded($event)" [showInputText]="false" [simpleUploader]="true">
                 </ecl-file-uploader>
               </div>
             </div>
             <br><br>
           </ng-template>
         </p-tabPanel>
-        <p-tabPanel header="RPE" *ngIf="!cvpUserRoleOnly">
+        <p-tabPanel header="CPE">
           <ng-template pTemplate="content">
-
+            <ecl-table #cpeTable [tableModel]="cpeTableConfig" (onAcctionLink)="openCpeTemplate($event)"></ecl-table>
+            <br>
+            <div class="row">
+              <div class="col-6">
+                <button type="button" class="no-print btn btn-primary float-left small-td"
+                  [disabled]="!cpeTable.selectedRecords || cpeTable.selectedRecords <= 0" (click)="exportTemplate('cpeTable', 'cpeIngestionId', 'cpeService')"
+                  value="Export Selected CVP Template">Export CPE rules to excel</button>
+              </div>
+              <div class="col-6">
+                <ecl-file-uploader [fileUpladerOptions]="fileUpladerOptions"
+                  (uploadEnded)="onCpeTemplateUploadEnded($event)" [showInputText]="false" [simpleUploader]="true">
+                </ecl-file-uploader>
+            </div>
+            </div>
+            <br><br>
           </ng-template>
         </p-tabPanel>
       </p-tabView>
+      <div class="row">
+        <div class="col-12">
+          <div class="text-right">
+            <button *ngIf="comeFromLibraryRuleScreen" type="button" (click)="returnPreviousScreen()"
+              class="btn btn-primary btn-sm btn-sm f-11 btn-ell-return"><i class="fa fa-reply"></i> Return </button>
+          </div>
+        </div>
+      </div>      
     </div>
   </div>
-
 </div>
 
 <p-toast [baseZIndex]="999999"></p-toast>

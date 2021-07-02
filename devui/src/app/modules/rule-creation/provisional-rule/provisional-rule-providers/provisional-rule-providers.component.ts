@@ -3,6 +3,7 @@ import { UtilsService } from 'src/app/services/utils.service';
 import { Constants } from 'src/app/shared/models/constants';
 import { ProvisionalRuleService } from 'src/app/services/provisional-rule.service';
 import { RuleInfo } from 'src/app/shared/models/rule-info';
+import { AppUtils } from 'src/app/shared/services/utils';
 
 const MATCHED_SPECIALITY_TYPE_LENGTH = 3;
 const SWITCH_FILTER_TYPE = 1;
@@ -20,25 +21,7 @@ const IN_RIGHT = 1,
   providers: [ProvisionalRuleService]
 })
 export class ProvisionalRuleProvidersComponent implements OnInit {
-  currRuleInfo: RuleInfo = new RuleInfo;
-  parentRuleInfo: RuleInfo;
-  @Input() set ruleInfo(rule: RuleInfo) {
-    if (rule && rule.ruleId) {
-      this.currRuleInfo = rule;
-      this.loadProvidersTabData(rule);
-    }
-  }
-  @Input() set ruleInfoOriginal(rule: RuleInfo) {
-    if (rule && rule.ruleId) {
-      if (rule.ruleStatusId.ruleStatusId === Constants.RULE_IMPACTED_VALUE) {
-        this.parentRuleInfo = rule;
-        this.loadProvidersTabData(rule, true);
-      } else {
-        this.currRuleInfo = rule;
-        this.loadProvidersTabData(rule);
-      }
-    }
-  }
+
   @Input() ruleReadOnly: boolean;
   @Input() maintenanceOnly: boolean;
   @Input() fromMaintenanceProcess: boolean;
@@ -47,10 +30,32 @@ export class ProvisionalRuleProvidersComponent implements OnInit {
   @Input() excludedSpecialityTypes: any[];
   @Input() includedSubspecialityTypes: any[];
   @Input() excludedSubspecialityTypes: any[];
+  @Input() uniqueId: string;  
+
+  currRuleInfo: RuleInfo = new RuleInfo;
+  parentRuleInfo: RuleInfo = new RuleInfo;
+  @Input() set ruleInfo(rule: RuleInfo) {
+    if (rule && rule.ruleId) {
+      this.currRuleInfo = rule;
+      this.loadProvidersTabData(rule);
+    }
+  }
+  @Input() set ruleInfoOriginal(rule: RuleInfo) {
+    if (rule && rule.ruleId) {
+      if (rule.ruleStatusId.ruleStatusId === Constants.RULE_IMPACTED_VALUE || this.fromMaintenanceProcess) {
+        this.parentRuleInfo = rule;
+        this.loadProvidersTabData(rule, true);
+      } else {
+        this.currRuleInfo = rule;
+        this.loadProvidersTabData(rule);
+      }
+    }
+  }
 
   specialityInd: number = 0;
   providerTypeInd: number = 0;
 
+  providerTypes: any[] = [];
   specialityTypes: any[] = [];
   selectedspecialityTypes: any[];
   selectedIncludedTypes: any[] = [];
@@ -68,7 +73,8 @@ export class ProvisionalRuleProvidersComponent implements OnInit {
   disableSpecialityList: boolean = true;
   specialityListboxDisable: boolean = true;
 
-  constructor(private utilService: UtilsService, private provisionalRuleService: ProvisionalRuleService) {
+  constructor(private utilService: UtilsService, private provisionalRuleService: ProvisionalRuleService,
+    private utils: AppUtils) {
     this.selectedspecialityTypes = null;
     this.selectedIncludedTypes = null;
     this.selectedExcludedTypes = null;
@@ -77,6 +83,7 @@ export class ProvisionalRuleProvidersComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadProvidersList();
     this.getAllSpecialityTypes(SPECIALITY_TYPE);
     this.getAllSubspecialityTypes(SUBSPECIALITY_TYPE);
   }
@@ -102,7 +109,9 @@ export class ProvisionalRuleProvidersComponent implements OnInit {
       this.excludedSubspecialityTypes = [];
     }
   }
-
+  loadProvidersList() {
+    this.utils.getAllLookUps(Constants.LOOKUP_ICMS_PROVIDER_TYPE, this.providerTypes, false);
+  }
   /**
    * LoadProvidersTab to display Specialty and Sub-Specialty values
    * @param ruleInfo Object contain information to display

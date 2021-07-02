@@ -10,6 +10,10 @@
   width: 400px;
 }
 
+input[type="radio"] {
+  margin-right: 5px;
+}
+
 .flex-column-button {
   display: flex;
   flex-direction: column;
@@ -75,6 +79,8 @@ legend.right:before {
   padding: 10px;
 }
 .set-space {
+  display: flex;
+  align-items: center;
   padding: 0px 15px 15px 15px;
 }
 
@@ -94,8 +100,18 @@ legend.right:before {
   width: 100% !important;
   background-color: #FFFFFF;
 }
-
+:host ::ng-deep.ui-state-disabled .ui-listbox-item {
+  outline: none;
+}
+:host ::ng-deep.ui-listbox .ui-listbox-list {
+  font-size: 12px;
+}
 .disable-field ::ng-deep.ui-inputtext {
   background-color: transparent !important;
   text-overflow: ellipsis;
+}
+
+:host ::ng-deep.ui-listbox .ui-listbox-header,
+:host ::ng-deep.ui-listbox .ui-listbox-list {
+  background-color: inherit;
 }

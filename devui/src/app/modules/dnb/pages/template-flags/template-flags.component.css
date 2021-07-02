@@ -1,0 +1,52 @@
+.template-flags .div-container {
+    border-radius: 5px;
+    background-color: #FFF;
+    width: 100%;
+    padding: 20px;
+}
+
+.template-flags h4 {
+    font-size: 18px !important;
+}
+
+.template-flags .mid-rules {
+    height: 120px !important;
+    font-size: 12px !important;
+}
+
+.template-flags button {
+    width: 100px !important;
+}
+
+.template-flags .text-area-mid-rules {
+    width: 100%;
+    height: 120px;
+    font-size: 12px !important;
+    border-radius: 3px;
+    border: 1px solid #31006F;
+    padding: 15px;
+    overflow: auto;
+}
+
+.template-flags .btn-add-midrule {
+    width: 33px !important;
+}
+
+.template-flags .report-title {
+    font-size: 14px !important;
+    font-weight: bold;
+}
+
+.template-flags .report-subtitle {
+    font-size: 13px !important;
+}
+
+.template-flags .btn-reports {
+    width: 160px !important;
+    font-size: 12px !important;
+}
+
+.template-flags a {
+    color: blue !important;
+    text-decoration: underline;
+}

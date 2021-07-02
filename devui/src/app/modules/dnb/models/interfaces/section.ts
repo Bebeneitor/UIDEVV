@@ -1,18 +1,31 @@
 import { BaseSectionResponse } from "./uibase";
 
+interface Indication {
+  code: string;
+  label?: string;
+}
+
 export interface GeneralInformationTemplateResponse
   extends BaseSectionResponse {
-  data: GeneralInformationRow[];
+  data: GeneralInformationGroup[];
 }
-interface GeneralInformationRow {
-  code: string;
-  comments: string[];
+
+interface GeneralInformationGroup {
   item?: {
     code: string;
     name: string;
   };
+
+  data: GenaralInformationRow[];
+}
+
+interface GenaralInformationRow {
+  code: string;
   itemDetails?: string;
+  comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface LCDTemplateResponse extends BaseSectionResponse {
@@ -24,11 +37,22 @@ interface LCDRow {
   lcd?: string;
   macName?: string;
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface ReferencesTemplateResponse extends BaseSectionResponse {
+  data: ReferencesGroup[];
+}
+
+interface ReferencesGroup {
+  referenceSourceDto?: {
+    code: string;
+    name: string;
+  };
   data: ReferencesRow[];
 }
+
 interface ReferencesRow {
   code: string;
   comments: string[];
@@ -38,6 +62,8 @@ interface ReferencesRow {
   };
   referenceDetails?: string;
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface MedicalJournalTemplateResponse extends BaseSectionResponse {
@@ -48,6 +74,8 @@ interface MedicalJournalRow {
   citation: string;
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface IndicationsTemplateResponse extends BaseSectionResponse {
@@ -63,6 +91,8 @@ interface IndicationsRow {
   ahfsDi: string;
   lcd: string;
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface NotesTemplateResponse extends BaseSectionResponse {
@@ -73,21 +103,31 @@ interface NotesRow {
   comments: string[];
   note?: string;
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
-export interface DailyMaxUnitsTemplateResponse extends BaseSectionResponse {
-  data: DailyMaxUnitsRow[];
+export interface DailyMaxUnitsGroupedTemplateResponse
+  extends BaseSectionResponse {
   codes: string[];
+  data: DailyMaxUnitsGroup[];
+}
+
+interface DailyMaxUnitsGroup {
+  dmuvItemDto?: {
+    code: string;
+    name: string;
+  };
+  data: DailyMaxUnitsRow[];
+  hasBorder?: boolean;
 }
 interface DailyMaxUnitsRow {
   code: string;
   comments: string[];
-  dmuvItemDto?: {
-    code?: string;
-    name: string;
-  };
-  hasBorder?: boolean;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
   order?: number;
+  hasBorder?: boolean;
   currentValues?: string;
   newValues?: string;
 }
@@ -98,10 +138,13 @@ export interface DiagnosisCodeSummaryTemplateResponse
 }
 interface DiagnosisCodeSummaryRow {
   code: string;
-  indication?: string;
+  indication?: Indication;
   icd10Codes: string[];
+  invalidIcd10Codes: string[];
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface ManifestationCodesTemplateResponse
@@ -110,7 +153,7 @@ export interface ManifestationCodesTemplateResponse
 }
 interface ManifestationCodesRow {
   code: string;
-  indication?: string;
+  indication?: Indication;
   icd10Code?: {
     icd10CodeId: number;
     icd10Code: string;
@@ -118,17 +161,26 @@ interface ManifestationCodesRow {
   };
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface MaximumFrequencyTemplateResponse extends BaseSectionResponse {
+  data: MaximumFrequencyGroup[];
+}
+
+interface MaximumFrequencyGroup {
+  indication: string;
   data: MaximumFrequencyRow[];
 }
+
 interface MaximumFrequencyRow {
   code: string;
-  indication?: string;
   maximumFrequency?: string;
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface DiagnosisCodesTemplateResponse extends BaseSectionResponse {
@@ -143,43 +195,67 @@ interface DiagnosisCodesRow {
     icd10Code: string;
     description: string;
   }[];
+  nccnIcdsCodesInvalid?: {
+    icd10CodeId: number;
+    icd10Code: string;
+    description: string;
+  }[];
   lcdIcdsCodes?: {
     icd10CodeId: number;
     icd10Code: string;
     description: string;
   }[];
+  lcdIcdsCodesInvalid?: {
+    icd10CodeId: number;
+    icd10Code: string;
+    description: string;
+  }[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface AgeTemplateResponse extends BaseSectionResponse {
+  data: AgeGroup[];
+}
+
+interface AgeGroup {
+  indication?: Indication;
   data: AgeRow[];
 }
+
 interface AgeRow {
   code: string;
   comments: string[];
+
+  age?: string;
+  order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
+}
+
+export interface DailyMaximumDoseTemplateResponse extends BaseSectionResponse {
+  data: DailyMaximumDoseGroup[];
+}
+
+interface DailyMaximumDoseGroup {
   indication?: {
     code: string;
     label: string;
   };
-  age?: string;
-  order?: number;
-}
-
-export interface DailyMaximumDoseTemplateResponse extends BaseSectionResponse {
   data: DailyMaximumDoseRow[];
 }
 
 interface DailyMaximumDoseRow {
   code: string;
-  indication?: {
-    code: string;
-    label: string;
-  };
+  indication?: Indication;
   maximumDosingPattern?: string;
   maximumDose?: string;
   maximumUnits?: string;
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface GenderTemplateResponse extends BaseSectionResponse {
@@ -189,44 +265,50 @@ export interface GenderTemplateResponse extends BaseSectionResponse {
 interface GenderRow {
   code: string;
   comments: string[];
-  indication?: {
-    code: string;
-    label: string;
-  };
+  indication?: Indication;
   gender?: string;
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface UnitsOverTimeTemplateResponse extends BaseSectionResponse {
+  data: UnitsOverTimeGroup[];
+}
+
+interface UnitsOverTimeGroup {
+  indication?: Indication;
   data: UnitsOverTimeRow[];
 }
 
 interface UnitsOverTimeRow {
   code: string;
-  indication?: {
-    code: string;
-    label: string;
-  };
   units?: string;
   interval?: string;
   comments?: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface VisitOverTimeTemplateResponse extends BaseSectionResponse {
+  data: VisitOverTimeGroup[];
+}
+
+interface VisitOverTimeGroup {
+  indication?: Indication;
   data: VisitOverTimeRow[];
 }
 
 interface VisitOverTimeRow {
   code: string;
-  indication?: {
-    code: string;
-    label: string;
-  };
+  indication?: Indication;
   visits: string;
   interval: string;
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface CombinationTherapyResponse extends BaseSectionResponse {
@@ -234,10 +316,7 @@ export interface CombinationTherapyResponse extends BaseSectionResponse {
 }
 
 interface CombinationTherapyGroup {
-  indication: {
-    code: string;
-    label: string;
-  };
+  indication: Indication;
   data: CombinationTherapyRow[];
 }
 
@@ -247,6 +326,8 @@ interface CombinationTherapyRow {
   codes?: { code?: string }[];
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface DosingPatternsResponse extends BaseSectionResponse {
@@ -254,10 +335,7 @@ export interface DosingPatternsResponse extends BaseSectionResponse {
 }
 
 interface DosingPatternsGroup {
-  indication: {
-    code: string;
-    label: string;
-  };
+  indication: Indication;
   data: DosingPatternsRow[];
 }
 
@@ -271,26 +349,33 @@ interface DosingPatternsRow {
   ahfsDi: string;
   other: string;
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface DiagnosisCodeOverlapsResponse extends BaseSectionResponse {
+  data: DiagnosisCodeOverlapsGroup[];
+}
+
+interface DiagnosisCodeOverlapsGroup {
+  icd10Code: { icd10Code: string };
+  hasBorder?: boolean;
   data: DiagnosisCodeOverlapsRow[];
 }
+
 interface DiagnosisCodeOverlapsRow {
   code: string;
   hasBorder?: boolean;
   order?: number;
-  icd10Code?: { description: string; icd10Code: string };
-  indication?: {
-    code: string;
-    label: string;
-  };
+  indication?: Indication;
   units?: string;
   frequency?: string;
   unitsOverTime?: string;
   visitsOverTime?: string;
   age?: string;
   comments: string[];
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface GlobalReviewIndicationsResponse extends BaseSectionResponse {
@@ -299,10 +384,12 @@ export interface GlobalReviewIndicationsResponse extends BaseSectionResponse {
 
 interface GlobalReviewIndicationsRow {
   code: string;
-  indication?: { code: string; label: string };
+  indication?: Indication;
   globalReviewIndication?: string;
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface SecondaryMalignancyResponse extends BaseSectionResponse {
@@ -314,6 +401,7 @@ interface SecondaryMalignancyGroup {
   malignancyIcdsCodes: malignancyIcdCodes[];
   secondarySite: string;
   data: SecondaryMalignancyRow[];
+  hasBorder?: boolean;
 }
 
 interface malignancyIcdCodes {
@@ -331,6 +419,8 @@ interface SecondaryMalignancyRow {
   visitsOverTime: string;
   age?: string;
   comments: string[];
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface GlobalReviewCodesResponse extends BaseSectionResponse {
@@ -348,6 +438,8 @@ interface GlobalReviewCodesRow {
     icd10Code: string;
   };
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
 }
 
 export interface RulesTemplateResponse extends BaseSectionResponse {
@@ -361,4 +453,29 @@ interface RulesRow {
   rule: string;
   comments: string[];
   order?: number;
+  feedbackItemsList?: FeedbackItemsList[];
+  documentNoteList?: CommentItemsList[];
+}
+
+export interface FeedbackItemsList {
+  beginIndex: number;
+  createdBy: string;
+  createdById: number;
+  createdOn?: string;
+  endIndex: number;
+  feedback: string;
+  feedbackStatusCode: string;
+  itemId: number;
+  sectionRowUuid: string;
+  sourceText: string;
+  uiColumnAttribute: string;
+}
+
+export interface CommentItemsList {
+  sectionCode: string;
+  sectionRowUuid: string;
+  uiColumnAttribute: string;
+  documentNote: string;
+  beginIndex: number;
+  endIndex: number;
 }

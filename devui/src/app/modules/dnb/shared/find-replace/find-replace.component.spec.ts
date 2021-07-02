@@ -2,6 +2,7 @@ import { Component, Input, NO_ERRORS_SCHEMA } from "@angular/core";
 import { async, ComponentFixture, TestBed } from "@angular/core/testing";
 import { ConfirmationService } from "primeng/api";
 import { UISection } from "../../models/interfaces/uibase";
+import { DnbUndoRedoService } from "../../services/undo-redo.service";
 import { FindReplaceComponent } from "./find-replace.component";
 
 @Component({
@@ -17,11 +18,12 @@ class FindReplaceChildComponent {
 fdescribe("findReplaceComponent", () => {
   let component: FindReplaceComponent;
   let fixture: ComponentFixture<FindReplaceComponent>;
+  let undoRedo: DnbUndoRedoService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [FindReplaceComponent, FindReplaceChildComponent],
-      providers: [ConfirmationService],
+      providers: [ConfirmationService, DnbUndoRedoService],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   }));
@@ -29,6 +31,8 @@ fdescribe("findReplaceComponent", () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(FindReplaceComponent);
     component = fixture.componentInstance;
+    undoRedo = TestBed.get(DnbUndoRedoService);
+
     component.sections = [
       {
         current: {
@@ -38,6 +42,7 @@ fdescribe("findReplaceComponent", () => {
             name: "test",
           },
           headers: [],
+          headersUIWidth: [],
           id: "combination_therapy",
           rows: [
             {
@@ -46,6 +51,8 @@ fdescribe("findReplaceComponent", () => {
                 {
                   isReadOnly: true,
                   value: "[HCPCS] (Descriptor)",
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
             },
@@ -60,6 +67,7 @@ fdescribe("findReplaceComponent", () => {
             name: "test",
           },
           headers: [],
+          headersUIWidth: [],
           id: "general_information",
           rows: [
             {
@@ -68,6 +76,8 @@ fdescribe("findReplaceComponent", () => {
                 {
                   isReadOnly: false,
                   value: "[HCPCS] (Descriptor)",
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
             },
@@ -83,6 +93,7 @@ fdescribe("findReplaceComponent", () => {
             name: "test",
           },
           headers: [],
+          headersUIWidth: [],
           id: "combination_therapy",
           groups: [
             {
@@ -94,6 +105,8 @@ fdescribe("findReplaceComponent", () => {
                     {
                       isReadOnly: true,
                       value: "test",
+                      feedbackData: [],
+                      feedbackLeft: 0,
                     },
                   ],
                 },
@@ -110,6 +123,7 @@ fdescribe("findReplaceComponent", () => {
             name: "test",
           },
           headers: [],
+          headersUIWidth: [],
           id: "combination_therapy",
           groups: [
             {
@@ -121,6 +135,8 @@ fdescribe("findReplaceComponent", () => {
                     {
                       isReadOnly: true,
                       value: "test",
+                      feedbackData: [],
+                      feedbackLeft: 0,
                     },
                   ],
                 },
@@ -134,7 +150,11 @@ fdescribe("findReplaceComponent", () => {
     component.drugNameColumn = {
       value: "drug",
       isReadOnly: false,
+      feedbackData: [],
+      feedbackLeft: 0,
     };
+    undoRedo.sections = component.sections;
+    undoRedo.drugNameColumn = component.drugNameColumn;
     fixture.detectChanges();
   });
 
@@ -175,8 +195,6 @@ fdescribe("findReplaceComponent", () => {
     component.startSearch();
     component.replaceAll();
     expect(component.coincidences.length).toBe(1);
-    component.undoReplaceAll();
-    expect(component.coincidences.length).toBe(2);
   });
 
   it("should move down and up in coincidences", () => {

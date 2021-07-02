@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppUtils } from 'src/app/shared/services/utils';
 import { IndustryUpdateService } from 'src/app/services/industry-update.service';
 import { BaseResponse } from 'src/app/shared/models/base-response';
 import {ECLConstantsService} from "../../../services/ecl-constants.service";
-import {ConfirmationService, MessageService} from "primeng/api";
+import {ConfirmationService, MessageService, DynamicDialogRef, DialogService} from "primeng/api";
+import { DialogModule } from 'primeng/dialog';
+import { PridFormComponent } from 'src/app/shared/components/prid-form/prid-form.component';
 
 @Component({
   selector: 'app-industry-update-history',
@@ -24,12 +27,24 @@ export class IndustryUpdateHistoryComponent implements OnInit {
   totalRecords : number = 0;
   keywordSearch: string;
 
+  showSubmit: boolean;
+
+  createProjectForm: FormGroup;
+  templateForm: FormGroup;
+
+  submitBtnDisable = false;
+  saveDisplay = false;
+  Message: string;
+  isSubmit = false;
+
   filters: any = {
     industryUpdate: '',
     date: '',
     action: '',
     status: ''
   }
+
+  arrayMessage = [];
 
   cols = [
     { field: 'industryUpdateName', header: 'Industry Update', width: '50%' },
@@ -38,12 +53,16 @@ export class IndustryUpdateHistoryComponent implements OnInit {
     { field: 'status', header: 'Status', width: '15%' }
   ];
 
+  projectCreationModal;
 
   constructor(private route: ActivatedRoute, private utils: AppUtils,
               private industryUpdateService: IndustryUpdateService,
               private eclConstantsService: ECLConstantsService,
               private messageService: MessageService,
-              private confirmationService: ConfirmationService) { }
+              private confirmationService: ConfirmationService,
+              private fb: FormBuilder,
+              public ref: DynamicDialogRef,
+              private dialogService: DialogService) { }
 
   ngOnInit() {
     this.route.data.subscribe(params => {
@@ -51,6 +70,13 @@ export class IndustryUpdateHistoryComponent implements OnInit {
     });
     this.userId = this.utils.getLoggedUserId();
     this.fetchIndustryUpdateDetails();
+
+    // Create the prid project form.
+    this.createProjectForm = this.fb.group({
+      name: new FormControl(null, [Validators.required]),
+      summary: new FormControl(null, [Validators.required]),
+      description: new FormControl(null, [Validators.required])
+    });
   }
 
   private fetchIndustryUpdateDetails(): void {
@@ -92,7 +118,7 @@ export class IndustryUpdateHistoryComponent implements OnInit {
     }
 
     this.industryDetails.forEach(iu => {
-      if(iu.action === 'Current')
+      if(iu.action === 'Current' || iu.action === 'Current Update' || iu.action === 'Current Block' || iu.action === 'Current Update Block')
         this.expandedRows[iu.accordianHeading] = true;
     });
 
@@ -167,7 +193,7 @@ export class IndustryUpdateHistoryComponent implements OnInit {
                 this.messageService.add({
                   severity: 'success',
                   summary: 'Info',
-                  detail: "Initiation of Industry Update for '" + industryUpdate.industryUpdateName + "' successfully completed.",
+                  detail: "ICMS Industry Update for '" + industryUpdate.industryUpdateName + "' is started, after completion you will receive an email.",
                   life: 3000,
                   closable: true
                 });
@@ -214,6 +240,33 @@ export class IndustryUpdateHistoryComponent implements OnInit {
     this.loading = true;
     this.keywordSearch = "";
     this.loading = false;
+  }
+
+  /**
+   * Open the dialog window which calls the PRID component
+   * @param iu 
+   */
+  public showPridCreationForm(iu: any) {
+    const dialogRef: DynamicDialogRef = this.dialogService.open(PridFormComponent, {
+      data: iu,
+      header: 'PRID Details',
+      width: '40%',
+      contentStyle: { "max-height": "70%", "overflow": "auto" }
+    });
+    dialogRef.onClose.subscribe(data=> {
+      this.fetchIndustryUpdateDetails();
+    });
+  }
+
+  saveDialog() {
+    this.saveDisplay = false;
+    if (this.isSubmit) {
+      this.ref.close();
+    }
+  }
+
+  onHide(event){
+    this.arrayMessage = [];
   }
 
 }

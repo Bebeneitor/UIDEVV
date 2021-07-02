@@ -53,7 +53,7 @@
         </div>
       </div>
 
-      <div class="container-fluid" style="padding: 0px;" [hidden]="typeView != 'table'">
+      <div class="container-fluid new-rule-table" style="padding: 0px;" [hidden]="typeView != 'table'">
         <div class="">
 
           <div *ngIf="data.length == 0" class="div-no-data">
@@ -62,6 +62,16 @@
           </div>
 
           <p-table [hidden]="data.length == 0" #dt [columns]="cols" [value]="data" [paginator]="true" [rows]="15">
+            <ng-template pTemplate="colgroup" let-columns>
+              <colgroup>
+                  <col style="width:17%;">
+                  <col style="width:24%;">
+                  <col style="width:24%;">
+                  <col style="width:17%;">
+                  <col style="width:14%;">
+              </colgroup>
+          </ng-template>
+            
             <ng-template pTemplate="header" let-columns>
               <tr>
                 <th class="small-th" style="text-align: center" *ngFor="let col of columns"
@@ -78,10 +88,11 @@
                   <input *ngIf="col.field != 'category'" pInputText type="text"
                     style="width : 100%; padding : 5px; border-radius: 5px"
                     (input)="dt.filter($event.target.value, col.field, 'contains')"
-                    [placeholder]="'Search by ' + col.header">
+                    [placeholder]="'Search by ' + col.header" pTooltip="Search by {{col.header}}" tooltipPosition="bottom">
 
                   <p-dropdown *ngIf="col.field == 'category'" [(ngModel)]="selectedCategory" appendTo='body'
                     [options]="categories" [style]="{'width':'100%'}"
+                    [placeholder]="'Search by ' + col.header" pTooltip="Search by {{col.header}}" tooltipPosition="bottom"
                     (onChange)="dt.filter($event.value, col.field, 'equals')"></p-dropdown>
                 </th>
               </tr>
@@ -90,21 +101,24 @@
               <tr [pSelectableRow]="rowData">
                 <td class="small-td" *ngFor="let col of columns">
                   <span *ngIf="col.field == 'id'">
-                    <a style="text-decoration: underline; cursor: pointer; color:inherit" nghref="#"
-                      (click)="redirect(rowData.ruleId, 'RULE')">{{rowData.id}}</a>
+                    <a class="rule-link" nghref="#" (click)="redirect(rowData.ruleId, 'RULE')">{{rowData.id}}</a>
                   </span>
-                  <span *ngIf="col.field != 'id' && col.field != 'ideaCode'">
+                  <span *ngIf="col.field != 'id' && col.field != 'ideaCode' && col.field != 'provRuleCode'">
                     {{rowData[col.field]}}
                   </span>
+                  <span *ngIf="col.field == 'provRuleCode'"> 
+                    <a *ngIf="rowData.provRuleCode != ''"  class="rule-link"  nghref="#"
+                      (click)="redirect(rowData.provRuleId, 'RULE')">{{rowData.provRuleCode}}</a>
+                 </span> 
                   <span *ngIf="col.field == 'ideaCode'">
-                    <a *ngIf="rowData.ideaCode != ''" style="text-decoration: underline; cursor: pointer; color:inherit" nghref="#"
+                    <a *ngIf="rowData.ideaCode != ''"  class="rule-link" nghref="#"
                       (click)="redirect(rowData.ideaId, 'IDEA')">{{rowData.ideaCode}}</a>
                   </span>
                 </td>
               </tr>
             </ng-template>
           </p-table>
-
+          
           <button style="margin-top: 10px;" *ngIf="selectedCategory != null && isClick"
             class="btn btn-sm btn-block btn-primary" (click)="return()"><i class="fa fa-arrow-left"
               aria-hidden="true"></i> Back</button>

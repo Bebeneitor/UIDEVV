@@ -18,8 +18,13 @@
             <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                 <div class="form-group">
                     <label for="moduleView"><span class="required-field-color">*</span>Module View</label>
-                    <input formControlName="moduleView" pInputText class="form-control" type="text" 
-                       id="moduleView" [attr.disabled]="formInactive"/>
+                    <p-dropdown #modelViewSelector [options]="availableModelViewNames" 
+                    styleClass="form-control"  [filter]="true" 
+                            formControlName="moduleView" id="moduleView" [attr.disabled]="formInactive" 
+                            (onChange)="inactiveSaveButton()" 
+                            placeholder="Select one module view" 
+                            [style]="{'padding-top':'0px'}">
+                    </p-dropdown>
                     <small class="text-danger" *ngIf="isInvalidElement('moduleView')">Required field</small>
                 </div>
             </div>
@@ -32,14 +37,15 @@
                 </button>
             </div>
         </div>
-        <ecl-table #attributesTable [tableModel]="attributesTableModel" (onAcctionIcon)="onClickEditAttribute($event)"></ecl-table>
+        <ecl-table #attributesTable [tableModel]="attributesTableModel" (onAcctionIcon)="onClickEditAttribute($event)" 
+        (onAcctionButton)="onAcctionButton($event)"></ecl-table>
         <div class="row">
             <div class="col" style="margin-bottom: 10px; margin-top:10px" Id="provisonalRows">
                 <div *ngIf="formInactive"class="float-left">
                     <button class="btn btn-primary" (click)="activateModule()">Activate</button>
                 </div>
                 <div class="float-right">
-                    <button class="btn btn-primary" [disabled]="formInactive"
+                    <button class="btn btn-primary" [disabled]="saveButtonInactive"
                         (click)="saveCureModule()">
                         <i class="fa fa-save"></i> Save
                     </button> &nbsp;

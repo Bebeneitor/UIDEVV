@@ -1,0 +1,31 @@
+.pinned-section {
+  padding: 30px;
+}
+
+.sticky-sections {
+  position: fixed;
+  display: inline-block;
+  right: 15px;
+  left: 0;
+  z-index: 999999;
+  top: 0em;
+  padding: 10px;
+  background: #412585;
+  width: calc(100% - 450px);
+  margin-left: auto;
+}
+
+.font {
+  color: #3b1e7b !important;
+}
+
+h5 {
+  font-size: 18px;
+  color: #707070 !important;
+  float: right;
+  display: inline-block;
+}
+
+h4 {
+  display: inline-block;
+}

@@ -8,3 +8,11 @@ quill-editor ::ng-deep .ql-container {
     "Segoe UI Symbol";
   font-size: 12px;
 }
+
+quill-editor ::ng-deep .comment {
+  background: #d4c7f5;
+  display: inline-block;
+  font-size: inherit;
+  font-weight: normal;
+  text-decoration: inherit;
+}

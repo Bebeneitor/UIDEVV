@@ -1,0 +1,72 @@
+<p-dialog
+  #dialog
+  header="Mid Rule Search"
+  [(visible)]="openDialog"
+  (onHide)="dialogHidden()"
+>
+  <div class="dialog-content">
+    <div class="mid-rule-header row">
+      <div class="col-5">
+        <label>
+          <h6>Mid Rule</h6>
+        </label>
+        <input
+          appMaxLength="10"
+          [(ngModel)]="filter.midRuleFilter"
+          class="textBox"
+          type="text"
+          pInputText
+        />
+      </div>
+
+      <div class="col-5">
+        <label>
+          <h6>Keyword Search</h6>
+        </label>
+        <input
+          appMaxLength="50"
+          [(ngModel)]="filter.ruleLogicFilter"
+          class="textBox"
+          type="text"
+          pInputText
+        />
+      </div>
+      <div class="dnb-page-btns col-2">
+        <button class="button" style="float: right" (click)="filterData()">
+          Search
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <label class="fontSize">Select Row</label>
+      <ecl-table
+        #midRulesTable
+        (onAcctionLink)="selectedMidRule($event)"
+        [tableModel]="midRulesExistingECL"
+      ></ecl-table>
+    </div>
+
+    <div>
+      <label class="fontSize"> Description</label>
+      <textarea
+        class="midRuleSizeTextArea"
+        disabled
+        pInputTextarea
+        autoResize="autoResize"
+        [ngModel]="midRule.eclRuleLogicOriginal"
+      ></textarea>
+    </div>
+  </div>
+  <p-footer>
+    <div class="dnb-page-btns">
+      <button
+        class="button"
+        (click)="addExistingMidRule()"
+        [disabled]="disableAdd"
+      >
+        Add
+      </button>
+    </div>
+  </p-footer>
+</p-dialog>

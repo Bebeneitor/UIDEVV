@@ -1,6 +1,6 @@
 <p-blockUI [blocked]="blockedDocument">
   <div class="img-loading text-center">
-    <img src="assets/img/loading.gif" style="width: 60%" />
+    <img src="assets/img/loading.gif"/>
     <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
   </div>
 </p-blockUI>
@@ -9,6 +9,25 @@
   <div class="row">
     <div class="col-12">
       <h4 style="font-size: 14px; margin-bottom: 0px;">ELL Library View</h4>
+      <hr>
+      <div class="more-details-link-section text-left">
+        <a nghref="#" (click)="changeLegendExpanded()"><i *ngIf="!legendExpanded"
+            class="fa fa-chevron-down"></i><i *ngIf="legendExpanded" class="fa fa-chevron-up"></i>Legend</a>
+      </div>
+      <hr *ngIf="legendExpanded">
+      <div *ngIf="legendExpanded">
+        <fieldset>
+          <table class = "legend-table">
+            <tr>
+              <ng-container *ngFor="let cp of colorsPallete">
+                <td>
+                  <label [class]="cp.cssColor">{{cp.label}}</label>
+                </td>
+              </ng-container>
+            </tr>
+          </table>
+        </fieldset>
+      </div>
       <label *ngIf="showAll" style="position: absolute; right: 15px; top: 0"><span class="indexed-bullet"></span>
         Indexed</label>
       <hr>
@@ -129,8 +148,8 @@
           [yearRange]="yearValidRangeEft" [minDate]="minDate" [maxDate]="endDate" dateFormat="mm/dd/yy"></p-calendar>
     
         <label>Final Date:</label>
-        <p-calendar [(ngModel)]="finalDate" [readonlyInput]="true" [yearNavigator]="true" [yearRange]="yearValidRangeEft"
-          [minDate]="minDate" [maxDate]="endDate" dateFormat="mm/dd/yy"></p-calendar>
+        <p-calendar [(ngModel)]="finalDate" [readonlyInput]="true" [monthNavigator]="true" [yearNavigator]="true" 
+          [yearRange]="yearValidRangeEft" [minDate]="minDate" [maxDate]="endDate" dateFormat="mm/dd/yy"></p-calendar>
         <hr>
         <div class="alert alert-info f-11">Will find documents created or modified on the date or between the dates
           specified. Choose the kind of date range and select the date.</div>
@@ -168,11 +187,7 @@
           <tr [ttRow]="rowNode">
             <td>
               <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-              <span *ngIf="rowData && rowData.typeLoad == undefined" [innerHTML]="highlight(rowData.medPolTitle)"></span>
-              <span *ngIf="rowData && rowData.typeLoad == 'TOPIC'"><a nghref="#"
-                  (click)="redirectToTopicDetail(rowData.topicKey)" [innerHTML]="rowData.topicTitle ? highlight(rowData.topicTitle) : 'Loading...'"></a></span>
-              <span *ngIf="rowData && rowData.typeLoad == 'DECISION'"><a nghref="#"
-                  (click)="redirectToDecisionPoint(rowData.dpKey)" [innerHTML]="rowData.dpDesc ? highlight(rowData.dpDesc) : 'Loading...'"></a></span>
+              <span *ngIf="rowData"><a nghref="#" (click)="redirectToScreen(rowData)" [innerHTML]="formatText(rowData)"></a></span>
             </td>
           </tr>
         </ng-template>

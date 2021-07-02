@@ -1,0 +1,74 @@
+.template-head{
+    font-size:14px;
+}
+.colorRed{
+    color:red;
+}
+.text-area{
+    width: 100%;
+    height: 84px;
+    border: 1px solid #31006F;
+}
+.width100{
+    width:100%;
+}
+::ng-deep .reference .ui-tabview .ui-tabview-panels{
+    border-top: 1px solid #c8c8c8 !important;
+    border-right:none;
+    border-left:none;
+    border-bottom: 2px solid #c8c8c8 !important;
+    padding-bottom: 20px;
+}
+.file-template{
+    border: 1px solid #31006F;
+    padding: 32px;
+    font-size: 11px !important;
+    text-align: center;
+}
+.readonly-text{
+    width: 100%;
+    min-height: 84px;
+    border:none !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+}
+.readonly-field{
+    width: 100%;
+    min-height: 20px;
+    border:none !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+}
+
+.readonly-radio{
+    border:none !important;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+}
+
+::ng-deep body .nro .ui-multiselect .ui-multiselect-label { padding : 0.48em;}
+
+::ng-deep .nro .ui-dropdown .ui-dropdown-label {width : 89%;}
+
+.expand-cols{
+    width: 100% !important;
+    z-index: 15;
+    display: block;
+    position: absolute;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 3px 5px 5px #888;
+}
+.normal-cols{
+  transition: all 0.25s ease-in-out;
+  height: 84px !important;
+}
+
+.text-input{
+    display: block;
+    width: 100%;
+    background-color: #F5F5F5 !important;
+}
+
+.mssp-rev-row-height{
+    min-height:110px !important;
+}

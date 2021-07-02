@@ -1,10 +1,7 @@
 <h5 style="font-size : 17px;margin-bottom: 15px;">{{pageTitle}}</h5>
-<p-tabView (onChange)="handleTabViewChange($event)"  [activeIndex]="indexVal">
+<p-tabView (onChange)="handleTabViewChange($event)"  [activeIndex]="tabIndex">
   <p-tabPanel [header]="constantsHeader.TAB_NOT_ASSIGNED">
-    
-   
     <div>
-       
         <div  style="margin-right: 10px;" class="float-right">          
             <label style="margin-right: 10px;">Team Filter</label>
             <p-dropdown [autoWidth]="false" [style]="pDropdownStyle" 
@@ -14,12 +11,12 @@
         <br>       
        <ecl-table #notAssignedTable *ngIf="tabIndex == 0" 
             [tableModel]='notAssignedTabModel' 
-            (onAcctionLink)="showReferenceInfo($event)"
+            (onAcctionLink)="showIdeaOrReferenceInfo($event)"
             (onSelectRecord)="setSelectRules($event, 'notAssigned')"
             (onUnSelectRecord)="setSelectRules($event, 'notAssigned')"
             (onServiceCall)="onServiceCall($event, 'notAssigned')"></ecl-table>
         <br>
-        <p-dropdown #userDD required [options]="users" [disabled]="!this.selectedIdeasNotAssigned || this.selectedIdeasNotAssigned.length < 1"
+        <p-dropdown #userDD required [options]="researchAnalystUsers" [disabled]="!this.selectedIdeasNotAssigned || this.selectedIdeasNotAssigned.length < 1"
             [(ngModel)]="selectedUserNotAssigned" [filter]="true" (onChange)="this.userDD.resetFilter();" filterBy="label,value" [style]="{'width':'150px'}"
             class="float-left small-td"></p-dropdown>
 
@@ -30,9 +27,7 @@
         <button (click)="resetDataTable('notAssigned');" style="display: inherit"
             class="btn btn-primary btn-default-height float-right small-td" type="button"
             value="refreshAssignIdea">Refresh</button>
-
     </div>
-
   </p-tabPanel>
   <p-tabPanel [header]="constantsHeader.TAB_ASSIGNED">
     <div>
@@ -45,15 +40,14 @@
         <br>
         <ecl-table #assignedTable *ngIf="tabIndex == 1" 
             [tableModel]='assignedTabModel' 
-            (onAcctionLink)="showReferenceInfo($event)"
+            (onAcctionLink)="showIdeaOrReferenceInfo($event)"
             (onSelectRecord)="setSelectRules($event, 'assigned')"
             (onUnSelectRecord)="setSelectRules($event, 'assigned')"
             (onServiceCall)="onServiceCall($event, 'assigned')">
 
         </ecl-table>
         <br>
-
-        <p-dropdown #userDD1 required [options]="users" [disabled]="!this.selectedIdeasAssigned || this.selectedIdeasAssigned.length < 1"
+        <p-dropdown #userDD1 required [options]="researchAnalystUsers" [disabled]="!this.selectedIdeasAssigned || this.selectedIdeasAssigned.length < 1"
             [(ngModel)]="selectedUserAssigned" [filter]="true" (onChange)="this.userDD1.resetFilter();" filterBy="label,value" [style]="{'width':'150px'}"
             class="float-left small-td"></p-dropdown>
 
@@ -64,9 +58,7 @@
         <button (click)="resetDataTable('assigned');" style="display: inherit"
             class="btn btn-primary btn-default-height float-right small-td" type="button"
             value="refreshAssignIdea">Refresh</button>
-
     </div>
-
   </p-tabPanel>
   <p-tabPanel [header]="constantsHeader.TAB_RETURNED">
     <div>
@@ -79,14 +71,13 @@
         <br>
         <ecl-table #returnedTable *ngIf="tabIndex == 2" 
             [tableModel]='returnedTabModel' 
-            (onAcctionLink)="showReferenceInfo($event)"
+            (onAcctionLink)="showIdeaOrReferenceInfo($event)"
             (onSelectRecord)="setSelectRules($event, 'returned')"
             (onUnSelectRecord)="setSelectRules($event, 'returned')"
             (onServiceCall)="onServiceCall($event, 'returned')"
             (onHoverColumn)="showReturnComments($event)">
         </ecl-table>        
         <br>
-
         <p-dropdown #userDD2 required [options]="researchAnalystUsers" [disabled]="!this.selectedIdeasReturned || this.selectedIdeasReturned.length < 1"
             [(ngModel)]="selectedUserReturned" [filter]="true" (onChange)="this.userDD2.resetFilter();" filterBy="label,value" [style]="{'width':'150px'}"
             class="float-left small-td"></p-dropdown>
@@ -98,9 +89,7 @@
         <button (click)="resetDataTable('returned');" style="display: inherit"
             class="btn btn-primary btn-default-height float-right small-td" type="button"
             value="refreshAssignIdea">Refresh</button>
-
     </div>
-
   </p-tabPanel>
 </p-tabView>
 <p-overlayPanel #op>

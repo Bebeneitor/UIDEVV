@@ -1,0 +1,44 @@
+::ng-deep p-dialog .ui-dialog-content.ui-widget-content {
+  padding: 15px !important;
+}
+.dialog-content {
+  overflow-y: auto;
+  max-height: 80vh;
+  max-width: 80vw;
+}
+
+table {
+  margin: 0;
+  font-size: 12px;
+}
+
+table tr {
+  cursor: pointer;
+}
+
+.mid-rule-header {
+  width: 100% !important;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 5px;
+  align-items: flex-end;
+}
+
+.midRuleSizeTextArea {
+  width: 100% !important;
+  height: 80px !important;
+  display: block;
+}
+
+.textBox {
+  width: 90%;
+}
+
+.fontSize {
+  padding-top: 5px;
+  font-size: smaller;
+}
+
+.selectedRow {
+  background-color: #f3f0fd;
+}

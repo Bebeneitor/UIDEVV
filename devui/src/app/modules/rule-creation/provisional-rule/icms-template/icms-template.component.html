@@ -1,4 +1,11 @@
+
 <div class="form-container">
+    <p-blockUI [blocked]="loading">
+        <div class="img-loading text-center">
+            <img src="assets/img/loading.gif" />
+            <p style="font-size: 12px;color: #fff;">Loading, please wait...</p>
+        </div>
+    </p-blockUI>
     <div class="row">
         <div class="col-lg-6 col-md-9 col-sm-12 col-xs-12">
             <span><strong>
@@ -44,7 +51,7 @@
                     <p-multiSelect [disabled]="config.data.readOnlyView" [maxSelectedLabels]="0" [options]="clients"
                         [(ngModel)]="eclIcmsNotifiedRules.clients" placeholder="Select" id="client"
                         name="eclIcmsNotifiedRules.clients" [filter]="true" filterBy="label,value"
-                        (ngModelChange)="checkIsValid($event, 'Client Required')">
+                        (ngModelChange)="checkIsValid($event, 'Client Required')" (onPanelShow)="shortBySelection('Client Required')">
                     </p-multiSelect>
                 </div>
             </div>
@@ -63,7 +70,7 @@
                 <div class="form-group nopadding">
                     <label for="writtenBy">Written By</label>
                     <p-dropdown [options]="users" [(ngModel)]="eclIcmsNotifiedRules.writtenBy" id="writtenBy"
-                        placeholder="Select" name="eclIcmsNotifiedRules.writtenBy"
+                        placeholder="Select" name="eclIcmsNotifiedRules.writtenBy" 
                         disabled>
                     </p-dropdown>
                 </div>
@@ -266,8 +273,8 @@
                 <div class="form-group nopadding">
                     <label class="custom-label" [ngClass]="{'required-field-color': setRequired('Reason Codes')}" 
                     for="reasonCodes"><span class="required-field-color">*</span>Reason Codes</label>
-                    <p-dropdown id="reasonCodes"
-                     [options]="reasonCodes" overlayVisible="true" 
+                    <p-dropdown id="reasonCodes" overlayVisible="true" 
+                     [options]="reasonCodes" [style]="{'minWidth':'50px', 'width': '540px'}"
                         [(ngModel)]="eclIcmsNotifiedRules.reasonCodes" placeholder="Select"
                         name="eclIcmsNotifiedRules.reasonCodes" [filter]="true" filterBy="label,value" 
                         (ngModelChange)="checkIsValid($event, 'Reason Codes')"
@@ -275,6 +282,7 @@
                     </p-dropdown>
                 </div>
             </div>
+
         </div>
 
         <div class="row">

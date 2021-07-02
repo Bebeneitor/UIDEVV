@@ -14,7 +14,10 @@ import { EclColumn } from 'src/app/shared/components/ecl-table/model/ecl-column'
 import { EclTableColumnManager } from 'src/app/shared/components/ecl-table/model/ecl-table-manager';
 import { EclTableModel } from 'src/app/shared/components/ecl-table/model/ecl-table-model';
 import { Constants } from 'src/app/shared/models/constants';
+import { PageTitleConstants as ptc } from 'src/app/shared/models/page-title-constants';
 import { EclTableComponent } from 'src/app/shared/components/ecl-table/ecl-table.component';
+import {ResearchRequestSearchedRuleDto} from "../../../shared/models/dto/research-request-searched-rule-dto";
+import {ResearchRequestService} from "../../../services/research-request.service";
 
 
 @Component({
@@ -35,7 +38,7 @@ export class ReassignProvisionalRulesComponent implements OnInit {
   pageTitle: string;
 
   user: any;
-  @ViewChild('eclTable') eclTable: EclTableComponent;
+  @ViewChild('eclTable',{static: true}) eclTable: EclTableComponent;
 
   comments: any[] = [];
   users: any[] = [{ label: "Search for User", value: null }];
@@ -46,8 +49,13 @@ export class ReassignProvisionalRulesComponent implements OnInit {
   selectedUser: string = "";
   selectedComment: string = "";
 
+  // Research Request
+  rrId: number;
+  rrCode: string;
+  ruleResponseSearchDto: ResearchRequestSearchedRuleDto;
+
   constructor(public dialogService: DialogService, private messageService: MessageService, private http: HttpClient, private utils: AppUtils,
-    public route: ActivatedRoute, private constants: ECLConstantsService, private utilService: UtilsService) { }
+    public route: ActivatedRoute, private constants: ECLConstantsService, private utilService: UtilsService, private rrService: ResearchRequestService) { }
 
 
   ngOnInit() {
@@ -81,32 +89,48 @@ export class ReassignProvisionalRulesComponent implements OnInit {
     this.tableConfig.excelFileName = "Reassignment For Provisional Rules";
     this.tableConfig.dataKey = 'ruleCode';
     this.tableConfig.checkBoxSelection = true;
+    this.tableConfig.sortBy = 'daysOld';
+    this.tableConfig.sortOrder = 0;
   }
 
 
   viewRuleModal(ruleRow: any) {
-    this.dialogService.open(ProvisionalRuleComponent, {
-      data: {
-        ruleId: ruleRow.row.eclId,
-        header: 'Provisional Details'
-      },
-      header: 'Provisional Details',
-      width: '80%',
-      height: '92%',
-      closeOnEscape: false,
-      closable: false,
-      contentStyle: {
-        'max-height': '92%',
-        'overflow': 'auto',
-        'padding-top': '0',
-        'padding-bottom': '0',
-        'border': 'none'
+    let ruleResponseIndicator: boolean = false;
+    let rrId: string = '';
+    this.rrService.isRuleCreatedFromRR(ruleRow.row.eclId).subscribe((resp: any) => {
+      if (resp.data !== null && resp.data !== undefined ) {
+        ruleResponseIndicator = true;
+        rrId = resp.data;
       }
+      this.dialogService.open(ProvisionalRuleComponent, {
+        data: {
+          ruleId: ruleRow.row.eclId,
+          header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
+          provDialogDisable: true,
+          stageId: Constants.ECL_PROVISIONAL_STAGE,
+          provSetup: Constants.ECL_PROVISIONAL_STAGE,
+          ruleResponseInd: ruleResponseIndicator,
+          researchRequestId: rrId,
+        },
+        showHeader: !ruleResponseIndicator,
+        header: ptc.PROVISIONAL_RULE_DETAIL_TITLE,
+        width: '80%',
+        height: '92%',
+        closeOnEscape: false,
+        closable: false,
+        contentStyle: {
+          'max-height': '92%',
+          'overflow': 'auto',
+          'padding-top': '0',
+          'padding-bottom': '0',
+          'border': 'none'
+        }
+      });
     });
   }
 
   /**
-  * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT  
+  * This method to fetch all the available reassign workflow comments by loopup type RULE_REASSIGN_WORKFLOW_COMMENT
   */
   private getAllReassignComments() {
     this.comments = [];
@@ -172,7 +196,20 @@ export class ReassignProvisionalRulesComponent implements OnInit {
     this.eclTable.selectedRecords = [];
     this.eclTable.savedSelRecords = [];
     this.eclTable.keywordSearch = '';
-    this.eclTable.refreshTable();
+    this.eclTable.resetDataTable();
+  }
+
+  // Source Link for Research Request
+  async getRuleResponseIndicatorAndRuleCode(ruleId: number) {
+    this.ruleResponseSearchDto = new ResearchRequestSearchedRuleDto();
+    return new Promise((resolve, reject) => {
+      this.rrService.getRuleResponseIndicator(ruleId).subscribe((resp: any) => {
+        if (resp.data !== null && resp.data !== undefined && resp.data !== {}) {
+          this.ruleResponseSearchDto = resp.data;
+        }
+        resolve(this.ruleResponseSearchDto);
+      });
+    });
   }
 
 

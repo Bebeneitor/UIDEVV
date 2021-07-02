@@ -1,280 +1,405 @@
-<div *ngIf="!fromMaintenanceProcess">
-  <fieldset class="col-md-12" [disabled]="provDialogDisable">
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-4" id="impacts-left"><label>Do Modifiers have impact on claim process?</label></div>
+<div class="impact-container">
+  <div *ngIf="!fromMaintenanceProcess">
+    <fieldset class="col-md-12 no-pad" [disabled]="provDialogDisable">
+      <!-- Gender -->
+      <div class="row pad-btm">
+        <div class="col-md-2 margin-16r">
+          <label>Gender: </label>
+          <select name="Gender" [(ngModel)]="ruleInfo.genderInd" tabindex="6" style="width:100%;">
+            <option selected [value]=null>Please Select</option>
+            <option [value]="1">Male</option>
+            <option [value]="2">Female</option>
+            <option [value]="3">Both</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label>CV Code: </label>
+          <select name="cvCode" [(ngModel)]="ruleInfo.cvCode" tabindex="7" style="width:100%;">
+            <option selected [value]=null>Please Select</option>
+            <option [value]="cvCode.id" *ngFor="let cvCode of cvCodes">{{cvCode.description}}
+            </option>
+          </select>
+        </div>
+      </div>
 
-          <div class="col-md-1"><input type="radio" name="claimImpactInd" [(ngModel)]="ruleInfo.claimImpactInd"
-                                       [value]="1"><label>Yes</label>
-          </div>
-          <div class="col-md-1">
-            <input type="radio" name="claimImpactInd" [(ngModel)]="ruleInfo.claimImpactInd"
-                   [value]="0"><label>No</label>
+      <!-- Age Limit Applicable -->
+      <div class="row pad-btm">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-2">
+              <label>Age Limit Applicable:</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="ageLimit" [value]="1" [(ngModel)]="ruleInfo.ageLimitInd" tabindex="8">
+              <label>Yes</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="ageLimit" [value]="0" [(ngModel)]="ruleInfo.ageLimitInd" tabindex="9">
+              <label>No</label>
+            </div>
+            <!-- Miles Limit Applicable: -->
+            <div class="col-md-2">
+              <label>Miles Limit Applicable:</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="milesLimit" [value]="1" [(ngModel)]="ruleInfo.mileLimitInd"
+                tabindex="10"><label>Yes</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="milesLimit" [value]="0" [(ngModel)]="ruleInfo.mileLimitInd"
+                tabindex="11"><label>No</label>
+            </div>
+            <div class="col-md-2">
+              <label>Dosage Limit Applicable:</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="dosageLimit" [value]="1" [(ngModel)]="ruleInfo.dosageLimitInd"
+                tabindex="12"><label>Yes</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="dosageLimit" [value]="0" [(ngModel)]="ruleInfo.dosageLimitInd"
+                tabindex="13"><label>No</label>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row"><label style="width:100%;"><span *ngIf="ruleInfo.claimImpactInd === 1" class="required-field-color">*</span>If Yes, Details</label></div>
-        <div class="row">
-          <textarea cols="8" name="claimImpactDetails" [(ngModel)]="ruleInfo.claimImpactDetails" pTooltip="{{ruleInfo.claimImpactDetails}}" tooltipPosition="top"
-                    style="width:100%;height: 90px;"></textarea>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-4"><label><span *ngIf="ruleInfo.ageLimitInd === 1"
+                  class="required-field-color">*</span>Age Limit Details </label></div>
+            <div class="col-md-4"> <label><span *ngIf="ruleInfo.mileLimitInd === 1"
+                  class="required-field-color">*</span>Miles Limit Details </label> </div>
+            <div class="col-md-4"><label><span *ngIf="ruleInfo.dosageLimitInd === 1"
+                  class="required-field-color">*</span>Dosage Limit Details </label></div>
+          </div>
         </div>
       </div>
-    </div>
+      <div class="row pad-btm">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-4">
+              <input type="text" [(ngModel)]="ruleInfo.ageLimitDetails" style="width:100%;" name="ageLimitDetails"
+                id="ageLimitDetails" title="{{ruleInfo.ageLimitDetails}}" tabindex="9" />
+            </div>
+            <div class="col-md-4">
+              <input type="text" style="width:100%;" name="milesLimitDetails" id="milesLimitDetails"
+                [(ngModel)]="ruleInfo.mileLimitDetails" title="{{ruleInfo.mileLimitDetails}}" tabindex="12" />
 
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-4" id="impacts-left"><label>Do Diagnosis codes have impact on claim process?</label></div>
-          <div class="col-md-1"><input type="radio" name="dosageImpactInd" [(ngModel)]="ruleInfo.dosageImpactInd"
-                                       [value]="1"><label>Yes</label></div>
-          <div class="col-md-1"><input type="radio" name="dosageImpactInd" [(ngModel)]="ruleInfo.dosageImpactInd"
-                                       [value]="0"><label>No</label></div>
-        </div>
-      </div>
-    </div>
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row"><label style="width:100%;"><span *ngIf="ruleInfo.dosageImpactInd === 1"
-                                                          class="required-field-color">*</span>If Yes, Details</label>
-        </div>
-        <div class="row">
-          <textarea cols="8" name="dosageImpactDetails" [(ngModel)]="_ruleInfo.procedureCodeDto.diagnosisCodes"
-                pTooltip="{{ruleInfo.dosageImpactDetails}}" tooltipPosition="top" style="width:100%;height: 90px;"></textarea>
-        </div>
-      </div>
-    </div>
-    <!-- Gender -->
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row"><label>Gender: </label></div>
-        <div class="row">
-          <div class="col-md-3" id="impacts-left">
-            <select name="Gender" [(ngModel)]="ruleInfo.genderInd" tabindex="6" style="width:100%;">
-              <option selected [value]="">Please Select</option>
-              <option [value]="1">Male</option>
-              <option [value]="2">Female</option>
-              <option [value]="3">Both</option>
-            </select>
+            </div>
+            <div class="col-md-4">
+              <input type="text" style="width:100%;" name="dosageLimitDetails" id="dosageLimitDetails"
+                [(ngModel)]="ruleInfo.dosageLimitDetails" title="{{ruleInfo.dosageLimitDetails}}" tabindex="15" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Age Limit Applicable -->
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12" id="impacts-left">
-        <div class="row">
-          <div class="col-md-2"><label>Age Limit Applicable: </label></div>
-          <div class="col-md-1">
-            <input type="radio" name="ageLimit" [value]="1"
-                   [(ngModel)]="ruleInfo.ageLimitInd" tabindex="7"> <label>Yes</label>
-          </div>
-          <div class="col-md-1">
-            <input type="radio" name="ageLimit" [value]="0"
-                   [(ngModel)]="ruleInfo.ageLimitInd" tabindex="8"> <label>No</label>
-          </div>
-          <!-- Miles Limit Applicable: -->
-          <div class="col-md-2"><label>Miles Limit Applicable: </label> </div>
-          <div class="col-md-1">
-            <input type="radio" name="milesLimit" [value]="1"
-                   [(ngModel)]="ruleInfo.mileLimitInd" tabindex="10"><label>Yes</label>
-          </div>
-          <div class="col-md-1">
-            <input type="radio" name="milesLimit" [value]="0"
-                   [(ngModel)]="ruleInfo.mileLimitInd" tabindex="11"><label>No</label>
-          </div>
-          <div class="col-md-2"><label>Dosage Limit Applicable: </label></div>
-          <div class="col-md-1">
-            <input type="radio" name="dosageLimit" [value]="1"
-                   [(ngModel)]="ruleInfo.dosageLimitInd" tabindex="13"><label>Yes</label>
-          </div>
-          <div class="col-md-1">
-            <input type="radio" name="dosageLimit" [value]="0"
-                   [(ngModel)]="ruleInfo.dosageLimitInd" tabindex="14"><label>No</label>
-          </div>
-        </div>
-      </div>
-    </div>
+    </fieldset>
 
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12" id="impacts-left">
-        <div class="row">
-          <div class="col-md-4"><label><span *ngIf="ruleInfo.ageLimitInd === 1" class="required-field-color">*</span>Age Limit Details </label></div>
-          <div class="col-md-4"> <label><span *ngIf="ruleInfo.mileLimitInd === 1" class="required-field-color">*</span>Miles Limit Details </label> </div>
-          <div class="col-md-4"><label><span *ngIf="ruleInfo.dosageLimitInd === 1" class="required-field-color">*</span>Dosage Limit Details </label></div>
-        </div>
-      </div>
-    </div>
+  </div>
 
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12" id="impacts-left">
-        <div class="row" id="rowHeight">
-          <div class="col-md-4">
-            <input type="text" [(ngModel)]="ruleInfo.ageLimitDetails" style="width:100%;" name="ageLimitDetails" id="ageLimitDetails" title="{{ruleInfo.ageLimitDetails}}" tabindex="9" />
-           </div>
-          <div class="col-md-4">
-            <input type="text" style="width:100%;" name="milesLimitDetails" id="milesLimitDetails" [(ngModel)]="ruleInfo.mileLimitDetails" title="{{ruleInfo.mileLimitDetails}}" tabindex="12" />
+  <div *ngIf="fromMaintenanceProcess">
+    <fieldset class="col-md-12 no-pad" [disabled]="provDialogDisable">
 
-          </div>
-          <div class="col-md-4">
-            <input type="text" style="width:100%;" name="dosageLimitDetails" id="dosageLimitDetails" [(ngModel)]="ruleInfo.dosageLimitDetails" title="{{ruleInfo.dosageLimitDetails}}" tabindex="15" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </fieldset>
-</div>
-<div *ngIf="fromMaintenanceProcess">
-  <fieldset class="col-md-12" [disabled]="provDialogDisable">
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-4" id="impacts-left"><label>Do Modifiers have impact on claim process?</label></div>
-
-          <div class="col-md-1"><input type="radio" name="claimImpactInd" [(ngModel)]="ruleInfo.claimImpactInd"
-                                       [value]="1"><label>Yes</label>
-          </div>
-          <div class="col-md-1">
-            <input type="radio" name="claimImpactInd" [(ngModel)]="ruleInfo.claimImpactInd"
-                                       [value]="0"><label>No</label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row"><label style="width:100%;"><span *ngIf="ruleInfo.claimImpactInd === 1" class="required-field-color">*</span>If Yes, Details</label></div>
-        <div class="row">
-          <app-dif-markups-editor id="impacts-text-mark-up" name="claimImpactDetails" #markpupEd class="textarea" [(ngModel)]="ruleInfo.claimImpactDetails"
-                                  [originalText]="ruleInfo.claimImpactDetailsOriginal"  [provDialogDisable]="provDialogDisable">
-
-          </app-dif-markups-editor>
-        </div>
-      </div>
-    </div>
-
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-4" id="impacts-left"><label>Do Diagnosis codes have impact on claim process?</label></div>
-          <div class="col-md-1"><input type="radio" name="dosageImpactInd" [(ngModel)]="ruleInfo.dosageImpactInd"
-                                       [value]="1"><label>Yes</label></div>
-          <div class="col-md-1"><input type="radio" name="dosageImpactInd" [(ngModel)]="ruleInfo.dosageImpactInd"
-                                       [value]="0"><label>No</label></div>
-        </div>
-      </div>
-    </div>
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row"><label style="width:100%;"><span *ngIf="ruleInfo.dosageImpactInd === 1"
-                                                          class="required-field-color">*</span>If Yes, Details</label>
-        </div>
-        <div class="row">
-          <app-dif-markups-editor id="impacts-text-mark-up" name="dosageImpactDetails" #markpupEd class="textarea"
-              [(ngModel)]="_ruleInfo.procedureCodeDto.diagnosisCodes"
-              [saveAsDelta]="false" [originalText]="parentRuleInfo.procedureCodeDto.diagnosisCodes"
-              [provDialogDisable]="provDialogDisable">
-          </app-dif-markups-editor>
-        </div>
-      </div>
-    </div>
-    <!-- Gender -->
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12">
-        <div class="row"><label>Gender: </label></div>
-        <div class="row">
-          <div class="col-md-3" id="impacts-left">
+      <div class="row pad-btm">
+        <div class="col-md-2 margin-16r">
+          <label>Gender: </label>
           <select name="Gender" [(ngModel)]="ruleInfo.genderInd" tabindex="6" style="width:100%;">
             <option selected [value]="">Please Select</option>
             <option [value]="1">Male</option>
             <option [value]="2">Female</option>
             <option [value]="3">Both</option>
           </select>
+        </div>
+        <div class="col-md-2">
+          <label>CV Code:</label>
+          <select name="cvCode" [(ngModel)]="ruleInfo.cvCode" tabindex="7" style="width:100%;">
+            <option selected [value]="">Please Select</option>
+            <option [value]="cvCode.id" *ngFor="let cvCode of cvCodes">{{cvCode.description}}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row pad-btm">
+        <div class="col-md-12">
+          <div class="row">
+            <!-- AGE -->
+            <div class="col-md-2">
+              <label>Age Limit Applicable:</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="ageLimit" [value]="1" [(ngModel)]="ruleInfo.ageLimitInd" tabindex="7">
+              <label>Yes</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="ageLimit" [value]="0" [(ngModel)]="ruleInfo.ageLimitInd" tabindex="8">
+              <label>No</label>
+            </div>
+            <!-- MILES-->
+            <div class="col-md-2">
+              <label>Miles Limit Applicable:</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="milesLimit" [value]="1" [(ngModel)]="ruleInfo.mileLimitInd"
+                tabindex="10"><label>Yes</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="milesLimit" [value]="0" [(ngModel)]="ruleInfo.mileLimitInd"
+                tabindex="11"><label>No</label>
+            </div>
+            <!-- DOSAGE -->
+            <div class="col-md-2">
+              <label>Dosage Limit Applicable:</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="dosageLimit" [value]="1" [(ngModel)]="ruleInfo.dosageLimitInd"
+                tabindex="13"><label>Yes</label>
+            </div>
+            <div class="col-md-1">
+              <input type="radio" name="dosageLimit" [value]="0" [(ngModel)]="ruleInfo.dosageLimitInd"
+                tabindex="14"><label>No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-4"><label><span *ngIf="ruleInfo.ageLimitInd === 1"
+                  class="required-field-color">*</span>Age Limit Details </label></div>
+            <div class="col-md-4"> <label><span *ngIf="ruleInfo.mileLimitInd === 1"
+                  class="required-field-color">*</span>Miles Limit Details </label> </div>
+            <div class="col-md-4"><label><span *ngIf="ruleInfo.dosageLimitInd === 1"
+                  class="required-field-color">*</span>Dosage Limit Details </label></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row pad-btm">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-4">
+              <app-dif-markups-editor id="impacts-text-mark-up" name="ageLimitDetails" id="ageLimitDetails" #markpupEd
+                class="textarea" [(ngModel)]="ruleInfo.ageLimitDetails" [height]="textHeight"
+                [originalText]="ruleInfo.ageLimitDetailsOriginal" [provDialogDisable]="provDialogDisable">
+              </app-dif-markups-editor>
+            </div>
+            <div class="col-md-4">
+              <app-dif-markups-editor id="impacts-text-mark-up" name="milesLimitDetails" id="milesLimitDetails"
+                #markpupEd class="textarea" [(ngModel)]="ruleInfo.mileLimitDetails" [height]="textHeight"
+                [originalText]="ruleInfo.mileLimitDetailsOriginal" [provDialogDisable]="provDialogDisable">
+              </app-dif-markups-editor>
+            </div>
+            <div class="col-md-4">
+              <app-dif-markups-editor id="impacts-text-mark-up" name="dosageLimitDetails" id="dosageLimitDetails"
+                #markpupEd class="textarea" [(ngModel)]="ruleInfo.dosageLimitDetails" [height]="textHeight"
+                [originalText]="ruleInfo.dosageLimitDetailsOriginal" [provDialogDisable]="provDialogDisable">
+              </app-dif-markups-editor>
+            </div>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <div *ngIf="!fromMaintenanceProcess">
+    <!-- Adjust Units -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <label for="reduceUnits">Adjust Units</label>
+          </div>
+        </div>
+        <div class="row pad-btm">
+          <div class="col-md-12">
+            <textarea id="adjustComments" rows="3" [disabled]="provDialogDisable" cols="100%"
+              style="width:100%; height: 100%;" name="comments" tabindex="6" [(ngModel)]="_ruleInfo.reduceUnits"
+              title="{{_ruleInfo.reduceUnits}}" tabindex="16"></textarea>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Age Limit Applicable -->
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12" id="impacts-left">
+    <!-- Apply a Percentage Reduction -->
+    <div class="row">
+      <div class="col-md-12">
         <div class="row">
-          <div class="col-md-2"><label>Age Limit Applicable: </label></div>
-          <div class="col-md-1">
-            <input type="radio" name="ageLimit" [value]="1"
-                   [(ngModel)]="ruleInfo.ageLimitInd" tabindex="7"> <label>Yes</label>
+          <div class="col-md-12">
+            <label for="applyPercReduction">Apply a Percentage Reduction</label>
           </div>
-          <div class="col-md-1">
-            <input type="radio" name="ageLimit" [value]="0"
-                   [(ngModel)]="ruleInfo.ageLimitInd" tabindex="8"> <label>No</label>
-          </div>
-            <!-- Miles Limit Applicable: -->
-          <div class="col-md-2"><label>Miles Limit Applicable: </label> </div>
-          <div class="col-md-1">
-            <input type="radio" name="milesLimit" [value]="1"
-                   [(ngModel)]="ruleInfo.mileLimitInd" tabindex="10"><label>Yes</label>
-          </div>
-          <div class="col-md-1">
-            <input type="radio" name="milesLimit" [value]="0"
-                   [(ngModel)]="ruleInfo.mileLimitInd" tabindex="11"><label>No</label>
-          </div>
-          <div class="col-md-2"><label>Dosage Limit Applicable: </label></div>
-          <div class="col-md-1">
-            <input type="radio" name="dosageLimit" [value]="1"
-                   [(ngModel)]="ruleInfo.dosageLimitInd" tabindex="13"><label>Yes</label>
-          </div>
-          <div class="col-md-1">
-            <input type="radio" name="dosageLimit" [value]="0"
-                   [(ngModel)]="ruleInfo.dosageLimitInd" tabindex="14"><label>No</label>
+        </div>
+        <div class="row pad-btm">
+          <div class="col-md-12">
+            <textarea id="applyComments" rows="3" [disabled]="provDialogDisable" cols="100%"
+              style="width:100%; height: 100%;" name="comments" tabindex="6" [(ngModel)]="_ruleInfo.applyPercReduction"
+              title="{{_ruleInfo.applyPercReduction}}" tabindex="16"></textarea>
           </div>
         </div>
       </div>
     </div>
-
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12" id="impacts-left">
+    <!-- Other Applicable Exceptions or Limitations -->
+    <div class="row">
+      <div class="col-md-12">
         <div class="row">
-          <div class="col-md-4"><label><span *ngIf="ruleInfo.ageLimitInd === 1" class="required-field-color">*</span>Age Limit Details </label></div>
-          <div class="col-md-4"> <label><span *ngIf="ruleInfo.mileLimitInd === 1" class="required-field-color">*</span>Miles Limit Details </label> </div>
-           <div class="col-md-4"><label><span *ngIf="ruleInfo.dosageLimitInd === 1" class="required-field-color">*</span>Dosage Limit Details </label></div>
-         </div>
+          <div class="col-md-12">
+            <label class="commentsLabel">UDF/Other Applicable Exceptions or Limitations</label>
+          </div>
+        </div>
+        <div class="row" id="maginBottom">
+          <div class="col-md-12">
+            <textarea id="otherComments" maxlength="4000" [disabled]="provDialogDisable" rows="3" cols="100%"
+              style="width:100%; height: 100%;" name="comments" tabindex="6" [(ngModel)]="_ruleInfo.otherExceptions"
+              title="{{_ruleInfo.otherExceptions}}" tabindex="16"
+              (paste)="checkMultiValidation(3, $event, _ruleInfo.otherExceptions)"
+              (keypress)="checkMultiValidation(2, $event)" (input)="checkMultiValidation(1)"></textarea>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="row" Id="provisonalRows">
-      <div class="col-md-12" id="impacts-left">
-        <div class="row" id="rowHeight">
-          <div class="col-md-4">
-              <app-dif-markups-editor id="impacts-text-mark-up"  name="ageLimitDetails" id="ageLimitDetails" #markpupEd class="textarea"
-                                    [(ngModel)]="ruleInfo.ageLimitDetails"
-                                    [originalText]="ruleInfo.ageLimitDetailsOriginal"
-                                    [provDialogDisable]="provDialogDisable">
-
+  </div>
+  <div *ngIf="fromMaintenanceProcess">
+    <!-- Adjust Units -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <label for="reduceUnits">Adjust Units</label>
+          </div>
+        </div>
+        <div class="row pad-btm">
+          <div class="col-md-12">
+            <app-dif-markups-editor id="adjust-units-text-mark-up" name="adjustUnits" id="adjustUnits" #markpupEd
+              class="textarea" [(ngModel)]="ruleInfo.reduceUnits" [originalText]="ruleInfo.reduceUnitsOriginal"
+              [provDialogDisable]="provDialogDisable">
             </app-dif-markups-editor>
           </div>
-          <div class="col-md-4">
-            <app-dif-markups-editor id="impacts-text-mark-up"  name="milesLimitDetails" id="milesLimitDetails" #markpupEd class="textarea"
-                                    [(ngModel)]="ruleInfo.mileLimitDetails"
-                                    [originalText]="ruleInfo.mileLimitDetailsOriginal"
-                                    [provDialogDisable]="provDialogDisable">
+        </div>
+      </div>
+    </div>
+    <!-- Apply a Percentage Reduction -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <label for="applyPercReduction">Apply a Percentage Reduction</label>
+          </div>
+        </div>
+        <div class="row pad-btm">
+          <div class="col-md-12">
+            <app-dif-markups-editor id="apply-perc-reduction-text-mark-up" name="applyPercReduction"
+              id="applyPercReduction" #markpupEd class="textarea" [(ngModel)]="ruleInfo.applyPercReduction"
+              [originalText]="ruleInfo.applyPercReductionOriginal" [provDialogDisable]="provDialogDisable">
+            </app-dif-markups-editor>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Other Applicable Exceptions or Limitations -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-12">
+            <label class="commentsLabel">UDF/Other Applicable Exceptions or Limitations</label>
+          </div>
+        </div>
+        <div class="row" id="maginBottom">
+          <div class="col-md-12">
+            <app-dif-markups-editor id="other-exceptions-text-mark-up" name="otherExceptions" id="otherExceptions"
+              #markpupEd class="textarea" [(ngModel)]="ruleInfo.otherExceptions" [maxLength]="4000"
+              [originalText]="otherExceptionsOriginal" [provDialogDisable]="provDialogDisable">
+            </app-dif-markups-editor>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            </app-dif-markups-editor>
+  <br>
+
+  <fieldset class="pt-1" [disabled]="provDialogDisable">
+
+    <div class="row" *ngIf="fromMaintenanceProcess">
+      <div class="col-md-12">
+
+        <p-dataView #dv1 class="grey-box" filterBy="fileName" [value]="codesFilesOld" [paginator]="false" [rows]="5">
+          <ng-template let-CodesFilesOld pTemplate="listItem">
+            <div class="row">
+              <span style="cursor: pointer; margin-left: 35px;"><i style="cursor: pointer"
+                  [ngClass]="getFileIcon(CodesFilesOld)"
+                  style="margin:4px 4px 4px 8px"></i>{{CodesFilesOld.fileName}}</span>
+
+            </div>
+          </ng-template>
+        </p-dataView>
+      </div>
+    </div>
+    <br>
+
+
+    <div class="row">
+      <div class="col-md-12">
+        <label>Attachments</label>
+        <div class="file-template" (drop)="dropFileHandler($event)" (dragover)="$event.preventDefault()">
+          <div *ngIf="!provDialogDisable" class="no-files-legend">Drop files to attach or <a nghref="#" (click)="clickFileUpload()">browse</a>
           </div>
-          <div class="col-md-4">
-             <app-dif-markups-editor id="impacts-text-mark-up"  name="dosageLimitDetails" id="dosageLimitDetails" #markpupEd class="textarea"
-                                    [(ngModel)]="ruleInfo.dosageLimitDetails"
-                                    [originalText]="ruleInfo.dosageLimitDetailsOriginal"
-                                    [provDialogDisable]="provDialogDisable">
-            </app-dif-markups-editor>
+          <div [ngClass]="provDialogDisable?'notes-file-100':'notes-file'">
+            <div class="col-md-12">
+              <div *ngIf="isSavedFileExist">
+                <div *ngFor="let item of codesFiles; let i=index;">
+                  <div class="pb-1">
+                    <span (click)="downloadFile(item)" [ngClass]="getFileIcon(item.fileName)" aria-hidden="true"></span>&nbsp;
+                    <span class="file-info">{{item.fileName}}</span>
+                    <span [hidden]="provDialogDisable || (item?.previouslyAttached || !item?.createdByCurrentUser)" class="fa fa-times delete-file"
+                      (click)="removeFile(item);"></span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="isAddedFileExist">
+                <div *ngFor="let item of addedFiles; let i=index;">
+                  <div class="pb-1">
+                    <span (click)="downloadAddedFile(item)" [ngClass]="getFileIcon(item.name)" aria-hidden="true"></span>&nbsp;
+                    <span class="file-info">{{item.name}}</span>
+                    <span [hidden]="provDialogDisable" class="fa fa-times delete-file"
+                      (click)="onRemoveFile(item);"></span>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="!(isAddedFileExist || isSavedFileExist)">
+                <div class="text-center">
+                  <span class="file-info no-files-text">No Attachments</span>
+                </div>
+              </div>
+            </div>
           </div>
+          <input type="file" hidden #fileUpload (change)="onFileSelected($event)" multiple />
+
         </div>
       </div>
     </div>
 
   </fieldset>
 </div>
+
+<p-dialog header="Saved File" [class]="confirmDialog" [(visible)]="removeAttachmentDisplay">
+  <p class="message-bold"> <span class="icon-float-left">
+      <i class="pi pi-exclamation-triangle"></i>
+    </span>
+    <span>Are you sure you want to delete this attachment?</span>
+  </p>
+  <p class="message-center">This action cannot be undone.</p>
+  <p-footer>
+    <div class="row">
+      <div class="col-md-5">
+        <button name="removeAttachmentCancelBtn" class="btn btn-primary" pButton (click)="removeAttachmentCancel()"
+          label="Cancel"></button>
+      </div>
+      <div class="col-md-6">
+        <button name="removeAttachmentDeletebtn" class="btn btn-primary" pButton (click)="removeAttachmentDelete()"
+          label="Delete"></button>
+      </div>
+    </div>
+  </p-footer>
+</p-dialog>

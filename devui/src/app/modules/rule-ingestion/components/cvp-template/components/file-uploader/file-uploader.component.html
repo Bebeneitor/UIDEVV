@@ -10,7 +10,7 @@
   <div class="file-uploader-container" *ngIf="!isTextArea">
     <input *ngIf="showInputText" [(ngModel)]="inputText" pInputText type="text" [disabled]="flag == 0 || disabled"
       [placeholder]="label" [ngClass]="(showInputText && showInputFile) ? 'input-text-one' : 'input-text-one-100'"
-      (focus)="setData($event)" (input)="setData($event)" />
+      (focus)="setData($event)" (input)="setData($event)" [pTooltip]="showTooltip ? inputText : null"/>
 
     <div
       [ngClass]="(showInputText && showInputFile) ? 'ui-inputgroup input-group-file-uploader' : 'ui-inputgroup input-group-file-uploader-100'"
@@ -29,7 +29,7 @@
     <div style="display: block;">
       <textarea *ngIf="showInputText && isTextArea" [(ngModel)]="inputText" [disabled]="flag == 0 || disabled"
         [placeholder]="label" [ngClass]="input-text-area" (focus)="setData($event)"
-        (input)="setData($event)" style="width: 100%; height: 70px;"></textarea>
+        (input)="setData($event)" style="width: 100%; height: 70px;" [pTooltip]="showTooltip ? inputText : null"></textarea>
     </div>
 
     <div

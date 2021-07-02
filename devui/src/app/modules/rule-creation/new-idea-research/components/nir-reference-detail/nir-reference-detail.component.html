@@ -3,7 +3,7 @@
         <div><label> Reference Source</label></div>
         <div>
             <p-dropdown id="selectionSourceId" class="ref-search" [options]="newRefSource" name="selectSource" [style]="{'width':'205px'}"
-                [(ngModel)]="selectedSource" [disabled]="readOnlyView" (onChange)="showRefDetailsPage($event)">
+                [(ngModel)]="selectedSource" [disabled]="readOnlyView || pdgMedicaidIdea" (onChange)="showRefDetailsPage($event)">
             </p-dropdown>
         </div>
     </div>
@@ -51,7 +51,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <!-- <h4 class="modal-title">Reference Details {{reference.referenceSource.sourceDesc}} need to confirm to with PO</h4> -->
-                <h4 class="modal-title">Reference Details</h4>
+                <h4 class="modal-title"><strong>Reference Details</strong></h4>
                 <button type="button" class="close" (click)="closEcleRefDetailsDialog()">&times;</button>
 
             </div>
@@ -110,6 +110,18 @@
                                     <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
                                 </span>
                                 <span (click)="deleteReferenceFile(1)">
+                                    <a>
+                                        <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <span *ngIf="eclRef.refFile1 === true">
+                                <span (click)="referenceFileDownload2(refFileDownload1,reference.refDocFileName1,reference.refDocFileType1)">
+                                    <span id="refAttach" class="file-name-display">{{reference.refDocFileName1}}</span>
+                                    <span id="refAttach"><img src="assets/img/downloadIcon.png" alt="download"></span>
+                                </span>
+                                <span (click)="deleteReferenceFile(2)">
                                     <a>
                                         <i class="fa fa-times" aria-hidden="true" style="font-family: fontawesome !important; font-size: 1.2em; margin-left: 0.5em; color: #281c71;"></i>
                                     </a>

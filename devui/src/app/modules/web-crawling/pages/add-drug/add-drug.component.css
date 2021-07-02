@@ -1,0 +1,104 @@
+.topnav a {
+  float: left;
+  color: #31006F;
+  text-align: center;
+  padding: 14px 10px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.topnav a.active {
+  color: Black;
+}
+
+.topnav-right {
+  float: right;
+}
+
+.heading {
+  height: 35px;
+  color: #31006F;
+  font-size: 16px;
+}
+
+.errorStyle {
+  color: red;
+  font-size: 10px;
+  float:left
+}
+
+th {
+  height: 35px;
+  color: #31006F !important;
+  font-size: 14px;
+  font-weight: normal !important;
+  text-align: center;
+}
+
+.tablestyle {
+  width: 810px;
+}
+
+td {
+  height: 30px;
+  color: #31006F !important;
+  font-size: 14px;
+  text-align: center;
+}
+
+.single-input {
+  background-color: #FFFFFF;
+  border: 1px solid #31006F;
+  width: 100%;
+  height: 30px;
+  color: #31006F;
+  font-size: 14px;
+}
+
+.backButtonStyle {
+  height: 30px;
+  border-radius: 2px;
+  font-size: 14px;
+  color: #31006F;
+}
+
+.buttonStyle {
+  color: white;
+  height: 30px;
+  border-radius: 2px;
+  background-color: #31006F;
+  font-size: 14px;
+  border: 0;
+}
+
+.single-text {
+  background-color: #FFFFFF;
+  width: 100%;
+  color: #31006F;
+  font-size: 14px;
+}
+
+.table-head {
+  background-color: #31006F !important;
+  color: white !important;
+}
+
+.plus-icon {
+  color: #31006F;
+  background-color: white;
+  font-size: 22px;
+}
+
+.minus-icon {
+  color: red;
+  background-color: white;
+  font-size: 22px;
+}
+
+.t-style {
+  color: #31006F;
+}
+
+input[type="checkbox"] {
+  transform: scale(1.5);
+}

@@ -1,0 +1,28 @@
+<div class="col-md-12 mt-3 pb-3 pdg-template" *ngIf="_ruleInfo?.pdgTemplateDto?.pdgType">
+    <div>
+        <label>PDG Medicaid Template/ Final Preview</label>
+        <p-dropdown class="pdg-option" [style]="{'width':'25%'}" [options]="pdgOptions" [(ngModel)]="selectedPdgOption" (onChange)="pdgOptionChanged($event);">
+        </p-dropdown>
+    </div>
+    <div class="mt-3 row ">
+        <div class="col-md-1">
+            <input type="radio" [disabled]="disableNro || provDialogDisable" id="nro" name="radioType" value="NRO" [(ngModel)]="_ruleInfo.pdgTemplateDto.pdgType" />
+            <label for="nro" [ngClass]="(_ruleInfo.pdgTemplateDto.pdgType == 'NRO')?'active-blue':''"
+                class="pl-1">NRO</label>
+        </div>
+        <div class="col-md-2">
+            <input type="radio" [disabled]="disableHpp || provDialogDisable" id="hpp" name="radioType" value="HPP" [(ngModel)]="_ruleInfo.pdgTemplateDto.pdgType" />
+            <label for="hpp" [ngClass]="(_ruleInfo.pdgTemplateDto.pdgType == 'HPP')?'active-blue':''" class="pl-1">HPP
+                to MSSP</label>
+        </div>
+    </div>
+</div>
+<app-pdg-preview-info [hidden]="!isPreviewEnabled" [ruleId]="_ruleInfo.ruleId" [pdgType]="_ruleInfo?.pdgTemplateDto?.pdgType" [previewRuleInfo]="previewRuleInfo"></app-pdg-preview-info>
+<div [hidden]="isPreviewEnabled">
+<app-template-nro-hpp  [pdgType]="_ruleInfo?.pdgTemplateDto?.pdgType"
+[_pdgOption]="selectedPdgOption" [refSourceOpts]="refSourceOpts" [optionStates]="optionStates" [optionCvCodes]="cvCodeOpts" [optionClaimTypes]="claimTypesOpts"
+    [optionReasonCodes]="reasonCodeOpts" [optionIndustryUpdate] = "industryUpdateOpts" [optionRefTitle]="refTitleOpts" [provDialogDisable]="provDialogDisable"
+    [(ruleInfo)]="_ruleInfo" [(selectedStates)]="selectedStates" [selectedReferences]="_selectedReferences" [stage]="stage"
+    [(pdgTemplateObj)]="pdgTemplateObj" (stateChanged)="onStateChanged($event)" (claimTypeChanged)="onClaimTypeChanged($event)"
+    (messageSend)="messageRecieve($event)"></app-template-nro-hpp>
+</div>

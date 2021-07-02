@@ -19,15 +19,17 @@
       </div>
 
       <div class="col-md-8">
-        <div class="row"><label>Notes</label></div>
+        <div class="row"><label>Estimation Reason</label></div>
         <div class="row">
           <app-dif-markups-editor *ngIf="fromMaintenanceProcess && originalOppValue" name="cvpComments"
             #markpupEd class="opp-textarea-field" [(ngModel)]="opportunityValue.cvpComments" [saveAsDelta]="true"
             [originalText]="originalOppValue.cvpComments" [provDialogDisable]="provDialogDisable" [maxLength]="1000">
           </app-dif-markups-editor>
-          <textarea *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" rows="4" maxlength="1000" name="cvpNotes"
+          <textarea id="taCvpNotes" *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" rows="4" maxlength="1000" name="cvpNotes"
             [disabled]="provDialogDisable" [(ngModel)]="opportunityValue.cvpComments"
-            (paste)="checkLength($event, 'CVP Notes')"></textarea>
+            (paste)="checkMultiValidation(3, taCvpNotes, $event, opportunityValue.cvpComments)" 
+            (keypress)="checkMultiValidation(2,'taCvpNotes',$event)" 
+            (input)="checkMultiValidation(1,'taCvpNotes')"></textarea>
         </div>
       </div>
 
@@ -46,15 +48,17 @@
       </div>
 
       <div class="col-md-8">
-        <div class="row"><label>Notes</label></div>
+        <div class="row"><label>Estimation Reason</label></div>
         <div class="row">
           <app-dif-markups-editor *ngIf="fromMaintenanceProcess && originalOppValue" name="icmsComments"
             #markpupEd class="opp-textarea-field" [(ngModel)]="opportunityValue.icmsComments" [saveAsDelta]="true"
             [originalText]="originalOppValue.icmsComments" [provDialogDisable]="provDialogDisable" [maxLength]="1000">
           </app-dif-markups-editor>
-          <textarea *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" rows="4" maxlength="1000"
+          <textarea id="taIcmsNotes" *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" rows="4" maxlength="1000"
             name="icmsNotes" [(ngModel)]="opportunityValue.icmsComments" [disabled]="provDialogDisable"
-            (paste)="checkLength($event, 'ICMS Notes')"></textarea>
+            (paste)="checkMultiValidation(3, taIcmsNotes, $event, opportunityValue.icmsComments)" 
+            (keypress)="checkMultiValidation(2,'taIcmsNotes',$event)" 
+            (input)="checkMultiValidation(1,'taIcmsNotes')"></textarea>
         </div>
       </div>
 
@@ -82,15 +86,17 @@
       </div>
 
       <div class="col-md-8">
-        <div class="row"><label>Notes</label></div>
+        <div class="row"><label>Estimation Reason</label></div>
         <div class="row">
           <app-dif-markups-editor *ngIf="fromMaintenanceProcess && originalOppValue" name="rpeComments"
             #markpupEd class="opp-textarea-field" [(ngModel)]="opportunityValue.rpeComments" [saveAsDelta]="true"
             [originalText]="originalOppValue.rpeComments" [provDialogDisable]="provDialogDisable" [maxLength]="1000">
           </app-dif-markups-editor>
-          <textarea *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" maxlength="1000" rows="4" name="rpeNotes"
+          <textarea id="taCpeNotes" *ngIf="!fromMaintenanceProcess" class="opp-textarea-field" maxlength="1000" rows="4" name="rpeNotes"
             [(ngModel)]="opportunityValue.rpeComments" [disabled]="provDialogDisable"
-            (paste)="checkLength($event, 'CPE Notes')"></textarea>
+            (paste)="checkMultiValidation(3, taCpeNotes, $event, opportunityValue.rpeComments)" 
+            (keypress)="checkMultiValidation(2,'taCpeNotes',$event)" 
+            (input)="checkMultiValidation(1,'taCpeNotes')"></textarea>
         </div>
       </div>
 

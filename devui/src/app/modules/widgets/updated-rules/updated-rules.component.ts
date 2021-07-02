@@ -29,7 +29,7 @@ export class UpdatedRulesComponent implements OnInit {
   minDate: Date = Constants.MIN_VALID_DATE;
   maxDate: Date = new Date();
 
-  @ViewChild("dt") dt;
+  @ViewChild("dt",{static: true}) dt;
 
   yearValidRangeEft = `${Constants.EFT_MIN_VALID_YEAR}:${Constants.EFT_MAX_VALID_YEAR}`;
   

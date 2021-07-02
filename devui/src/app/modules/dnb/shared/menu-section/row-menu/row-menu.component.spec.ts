@@ -1,10 +1,11 @@
 import { SimpleChange } from "@angular/core";
 import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+import { NgxPermissionsModule } from "ngx-permissions";
 import {
   GroupedSection,
   GroupRow,
   Row,
-  Section,
+  Section
 } from "../../../models/interfaces/uibase";
 import { RowMenuComponent } from "./row-menu.component";
 
@@ -17,6 +18,7 @@ fdescribe("RowMenuComponent", () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [RowMenuComponent],
+      imports: [NgxPermissionsModule.forRoot()],
     }).compileComponents();
   }));
 
@@ -25,6 +27,7 @@ fdescribe("RowMenuComponent", () => {
     component = fixture.componentInstance;
     component.section = {
       headers: ["header 1", "header 2", "header 3"],
+      headersUIWidth: [10, 10, 10],
       section: { code: "code", name: "section" },
       drugVersionCode: "id",
       id: "id",
@@ -34,6 +37,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Row1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           hasBorder: false,
@@ -43,6 +48,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Row2",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           hasBorder: false,
@@ -52,6 +59,7 @@ fdescribe("RowMenuComponent", () => {
     groupedSection = {
       id: "sectionotwo",
       headers: ["header 1", "header 2"],
+      headersUIWidth: [10, 10],
       section: { code: "code", name: "Section Name" },
       drugVersionCode: "id",
       groups: [
@@ -60,6 +68,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group One",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -68,6 +78,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Old Column 1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -79,6 +91,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Two",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -87,6 +101,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Old Column 1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -104,17 +120,11 @@ fdescribe("RowMenuComponent", () => {
 
   it("should remove a row", () => {
     component.removeRow();
-    expect((component.section as Section).rows.length).toBe(1);
+    expect((component.section as Section).rows.length).toBe(2);
     component.removeRow();
-    expect((component.section as Section).rows.length).toBe(1);
-  });
-
-  it("should undo removed row", () => {
-    component.removeRow();
-    expect((component.section as Section).rows.length).toBe(1);
-    component.undoRemoveRow();
     expect((component.section as Section).rows.length).toBe(2);
   });
+
 
   it("should add a row", () => {
     component.addRow();
@@ -156,6 +166,7 @@ fdescribe("RowMenuComponent", () => {
   it("should remove a row for grouped section", async () => {
     component.section = {
       headers: ["header 1", "header 2"],
+      headersUIWidth: [10, 10],
       section: { code: "code", name: "section" },
       drugVersionCode: "id",
       id: "id",
@@ -165,6 +176,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Name 1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -173,6 +186,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -182,6 +197,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row2",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -210,75 +227,14 @@ fdescribe("RowMenuComponent", () => {
     fixture.detectChanges();
     await fixture.whenStable();
     component.ngOnChanges({ undoItems: new SimpleChange(null, change, true) });
-    expect((component.section as GroupedSection).groups[0].rows.length).toBe(1);
-  });
-
-  it("should undo removed row for grouped section", async () => {
-    component.section = {
-      headers: ["header 1", "header 2"],
-      section: { code: "code", name: "section" },
-      drugVersionCode: "id",
-      id: "id",
-      groups: [
-        {
-          names: [
-            {
-              value: "Group Name 1",
-              isReadOnly: true,
-            },
-          ],
-          rows: [
-            {
-              columns: [
-                {
-                  value: "Group Row1",
-                  isReadOnly: true,
-                },
-              ],
-              hasBorder: false,
-            },
-            {
-              columns: [
-                {
-                  value: "Group Row2",
-                  isReadOnly: true,
-                },
-              ],
-              hasBorder: false,
-            },
-          ],
-        },
-      ],
-    };
-    component.isGrouped = true;
-    fixture.detectChanges();
-    const change = {
-      undoFlag: true,
-      backUpIndexRow: component.rowIndex,
-      backUpIndexGroup: component.groupIndex,
-      wasGroupRemoved: false,
-      backUpGroup: (component.section as GroupedSection).groups[
-        component.groupIndex
-      ],
-      backUpRow: (component.section as GroupedSection).groups[
-        component.groupIndex
-      ].rows[component.rowIndex],
-    };
-    component.removeRow();
-    expect((component.section as GroupedSection).groups[0].rows.length).toBe(1);
-
-    component.undoItems = change;
-    component.ngOnChanges({ undoItems: new SimpleChange(null, change, true) });
-    fixture.detectChanges();
-    await fixture.whenStable();
-    component.ngOnChanges({ undoItems: new SimpleChange(null, change, true) });
-    component.undoRemoveRow();
     expect((component.section as GroupedSection).groups[0].rows.length).toBe(2);
   });
+
 
   it("should add a group for grouped section", () => {
     component.section = {
       headers: ["header 1", "header 2"],
+      headersUIWidth: [10, 10],
       section: { code: "code", name: "section" },
       drugVersionCode: "id",
       id: "id",
@@ -288,6 +244,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Name 1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -296,6 +254,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -305,6 +265,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row2",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -322,6 +284,7 @@ fdescribe("RowMenuComponent", () => {
   it("should add a dosing for selected group", () => {
     component.section = {
       headers: ["header 1", "header 2"],
+      headersUIWidth: [10, 10],
       section: { code: "code", name: "section" },
       drugVersionCode: "id",
       id: "id",
@@ -331,6 +294,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Name 1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -339,6 +304,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -348,6 +315,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row2",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -365,6 +334,7 @@ fdescribe("RowMenuComponent", () => {
   it("should duplicate a dosing for selected group", () => {
     component.section = {
       headers: ["header 1", "header 2"],
+      headersUIWidth: [10, 10],
       section: { code: "code", name: "section" },
       drugVersionCode: "id",
       id: "id",
@@ -374,6 +344,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Name 1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -382,6 +354,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -391,6 +365,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row2",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -413,6 +389,7 @@ fdescribe("RowMenuComponent", () => {
   it("should remove a group", () => {
     component.section = {
       headers: ["header 1", "header 2"],
+      headersUIWidth: [10, 10],
       section: { code: "code", name: "section" },
       drugVersionCode: "id",
       id: "id",
@@ -422,6 +399,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Name 1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -430,6 +409,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -439,6 +420,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row2",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -456,6 +439,7 @@ fdescribe("RowMenuComponent", () => {
   it("should remove a group", async () => {
     component.section = {
       headers: ["header 1", "header 2"],
+      headersUIWidth: [10, 10],
       section: { code: "code", name: "section" },
       drugVersionCode: "id",
       id: "id",
@@ -465,6 +449,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Name 1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -473,6 +459,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -482,6 +470,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row2",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -493,6 +483,8 @@ fdescribe("RowMenuComponent", () => {
             {
               value: "Group Name 1",
               isReadOnly: true,
+              feedbackData: [],
+              feedbackLeft: 0,
             },
           ],
           rows: [
@@ -501,6 +493,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row1",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -510,6 +504,8 @@ fdescribe("RowMenuComponent", () => {
                 {
                   value: "Group Row2",
                   isReadOnly: true,
+                  feedbackData: [],
+                  feedbackLeft: 0,
                 },
               ],
               hasBorder: false,
@@ -533,14 +529,6 @@ fdescribe("RowMenuComponent", () => {
       ].rows[component.rowIndex],
     };
     component.removeGroup();
-    expect((component.section as GroupedSection).groups.length).toBe(1);
-
-    component.undoItems = change;
-    component.ngOnChanges({ undoItems: new SimpleChange(null, change, true) });
-    fixture.detectChanges();
-    await fixture.whenStable();
-    component.ngOnChanges({ undoItems: new SimpleChange(null, change, true) });
-    component.undoRemoveGroup();
     expect((component.section as GroupedSection).groups.length).toBe(2);
   });
 
@@ -569,12 +557,9 @@ fdescribe("RowMenuComponent", () => {
     };
     component.toggleSeparationGroup(group, row, 0);
     expect(row.hasBorder).toBe(true);
-    expect(group.hasBorder).toBe(true);
-    group.hasBorder = false;
     group.rows = [row, row2];
     component.toggleSeparationGroup(group, row2, 0);
     expect(row2.hasBorder).toBe(true);
-    expect(group.hasBorder).toBe(false);
   });
 
   it("should emit copy", () => {
@@ -642,6 +627,42 @@ fdescribe("RowMenuComponent", () => {
   it("it should  emit copy row", () => {
     const event = spyOn(component.behaviorEvent, "emit");
     component.copyRow();
+    expect(event).toHaveBeenCalled();
+  });
+
+  it("it should emit mid rule", () => {
+    const event = spyOn(component.behaviorEvent, "emit");
+    component.addMidRule();
+    expect(event).toHaveBeenCalled();
+  });
+
+  it("it should emit behaviorMultipleRow", () => {
+    const event = spyOn(component.behaviorEvent, "emit");
+    component.behaviorMultipleRow("behavior");
+    expect(event).toHaveBeenCalled();
+  });
+
+  it("it should emit add comment", () => {
+    const event = spyOn(component.behaviorEvent, "emit");
+    component.addComment();
+    expect(event).toHaveBeenCalled();
+  });
+
+  it("it should emit edit comment", () => {
+    const event = spyOn(component.behaviorEvent, "emit");
+    component.editComment();
+    expect(event).toHaveBeenCalled();
+  });
+
+  it("it should emit remove indication", () => {
+    const event = spyOn(component.behaviorEvent, "emit");
+    component.indicationRemove();
+    expect(event).toHaveBeenCalled();
+  });
+
+  it("it should emit added indication", () => {
+    const event = spyOn(component.behaviorEvent, "emit");
+    component.indicationAdded();
     expect(event).toHaveBeenCalled();
   });
 });

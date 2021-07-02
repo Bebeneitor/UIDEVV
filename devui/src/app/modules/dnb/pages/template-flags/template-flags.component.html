@@ -1,0 +1,151 @@
+<div class="template-flags">
+  <app-breadcrumb path="Drugs & Biologicals>CPE Table Creation"></app-breadcrumb>
+  <hr>
+  <div class="row">
+    <div class="col-12">
+      <h4>CPE Table Creation</h4>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="div-container">
+        
+
+        <p-tabView (onChange)="handleTabChange($event)">
+          <p-tabPanel header="CPE Load File">
+            <div class="row">
+              <div class="col-12">
+                <label>DNB Edit Flag</label>
+                <p-dropdown [options]="dngEditFlags" [(ngModel)]="selectedFlag" [style]="{'width': '100%'}" placeholder="Select DNB Flag"></p-dropdown>
+              </div>
+            </div>
+    
+            <div class="row">
+              <div class="col-12">
+                <label>ICMS Mid Rules List</label>
+                <div class="text-area-mid-rules" contenteditable="true" (paste)="onPaste($event)" (input)="setMidRuleValue($event)" [innerHTML]="midRules" (focus)="clearMidRule()" (keypress)="checkKey($event)"></div>
+              </div>
+            </div>
+    
+            <hr>
+    
+            <div class="row">
+              <div class="col-6">
+                <button type="button" class="btn btn-primary float-left btn-reports" (click)="refresh()">Refresh</button>
+              </div>
+              <div class="col-6">
+                <button type="button" class="btn btn-primary float-right btn-reports"  [disabled]="!enableGenerateButton" (click)="generateTemplate()">Generate</button>
+              </div>
+            </div>
+          </p-tabPanel>
+          <p-tabPanel header="MidRule Diff Report">
+            <div class="row">
+              <div class="col-md-12">
+                <h4 class="report-title">MidRule Diff Report</h4>
+                <span class="report-subtitle">You may enter the data manually or upload it using this <a nghref="#" (click)="downloadTemplate()">template</a></span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-5">
+                <div class="row">
+                  <div class="col-4">
+                    <label>MidRule</label>
+                    <input type="text" class="form-control" placeholder="MidRule" [(ngModel)]="midRuleAdd.midRule" (keypress)="isNumberKey($event)"/>
+                  </div>
+
+                  <div class="col-4">
+                    <label>Previous Version</label>
+                    <input type="text" class="form-control" placeholder="Previous Version" [(ngModel)]="midRuleAdd.previousVersion" (keypress)="isNumberKey($event)"/>
+                  </div>
+
+                  <div class="col-4">
+                    <label>New Version</label>
+                    <div class="ui-inputgroup">
+                      <input type="text" class="form-control" placeholder="New Version" [(ngModel)]="midRuleAdd.nextVersion" (keypress)="isNumberKey($event)"/>
+                      <button type="button" class="btn btn-primary btn-sm btn-add-midrule" (click)="addMidRule()"><i class="fa fa-plus"></i></button>      
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-12">
+                    <hr>
+
+                    <div *ngIf="midRulesReport.length == 0" class="div-no-data">
+                      <img src="assets/img/no-data.png" class="img-no-data" />
+                      <p class="no-data">NO DATA HERE</p>
+                    </div>
+
+                    <table class="table table-bordered table-striped table-hover" *ngIf="midRulesReport.length > 0">
+                      <thead>
+                        <tr>
+                          <th>MidRule</th>
+                          <th>Previous Version</th>
+                          <th>New Version</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr *ngFor="let midRule of midRulesReport; let i = index">
+                          <td>{{midRule.midRule}}</td>
+                          <td>{{midRule.previousVersion}}</td>
+                          <td>{{midRule.nextVersion}}</td>
+                          <td class="text-center">
+                            <button type="button" class="btn btn-danger btn-sm" (click)="removeMidRule(i)" style="width: 40px !important;"><i class="fa fa-remove"></i></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-2 text-center" style="line-height: 130px !important;">
+                - OR -
+              </div>
+
+              <div class="col-5">
+                <!--Data by file-->
+                <label>Upload File</label>
+                <app-file-loader #fileLoader (onFileLoad)="loadFile($event)" extraText="Allowed extensions .xlsx or .xls" allowedExtensions=".xls,.xlsx"></app-file-loader>
+                <span class="report-subtitle"><span class="text-danger">*</span> Use the <a nghref="#" (click)="downloadTemplate()">template</a> provided. Two versions are required for each MidRule to get its code difference.</span>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12"><hr></div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <button type="button" class="btn btn-primary float-left btn-reports" (click)="refreshReport()">Refresh</button>
+              </div>
+              <div class="col-6">
+                <button type="button" class="btn btn-primary float-right btn-reports" (click)="generateReport()">Generate Report</button>
+              </div>
+            </div>
+          </p-tabPanel>
+      </p-tabView>
+
+      </div>
+
+      <div *ngIf="invalidMidRules.length > 0">
+        <hr>
+        <ul>
+          <li *ngFor="let i of invalidMidRules" class="text-danger" style="font-size: 13px !important;">The MidRule {{i.midRule}} <span *ngIf="i.version != null">with version {{i.version}}</span> is not valid.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-confirmDialog class="dnb-modal"></p-confirmDialog>
+
+<p-blockUI [blocked]="block">
+  <div class="img-loading text-center">
+    <img src="assets/img/loading.gif" style="width: 60%" alt="Loading..." />
+    <p style="font-size: 12px;color: #fff;">Generating {{blockMessage}}, please wait...</p>
+  </div>
+</p-blockUI>

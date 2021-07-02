@@ -1,0 +1,123 @@
+.icds-tab h4 {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 0px !important;
+}
+
+.icds-tab .line-height-header {
+    line-height: 30px !important;
+    margin-top: -8px;
+}
+
+.icds-tab input.search-header {
+    width: 100%;
+}
+
+.icds-tab div.div-buttons > button {
+    width: 33%;
+    margin: 2px;
+}
+
+.icds-tab .section-table {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    clear: both;
+}
+
+.icds-tab .top-bar{
+    padding-top:16px;
+}
+
+.icds-tab .label-text {
+    padding-top:10px;
+}
+
+.icds-tab .active-blue{
+    color:#31006F;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.icds-tab .fa{
+    font-size: 14px;
+}
+
+.icds-tab #remove .fa{
+    cursor: pointer;
+    color:#31006F;
+    font-size: 16px !important;
+}
+
+::ng-deep .icds-tab .section-table span.span-row {
+    display: block;
+    width: 100%;
+}
+
+.icds-tab p-table .input-group-append button{
+    z-index:0;
+}
+
+/* spread sheet upload styles */
+
+.file-template {
+    width: 100%;
+    height: 100px;
+    border: 1px dotted #9179B7;
+}
+
+.file-template > .no-files-legend {
+    line-height: 100px;
+    text-align: center;
+    width: 100%;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.file-template > .loaded-files {
+    margin-top: 25px;
+    text-align: center;
+    width: 100%;
+    font-size: 11px;
+    position: relative;
+}
+
+.file-template > .loaded-files > a.remove-button {
+    position: absolute;
+    top: -15px;
+    right: 35%;
+}
+
+.file-template > .loaded-files > i.fa.fa-file {
+    color: #31006F;
+    display: block;
+    font-size: 14px;
+}
+
+.file-template > .loaded-files > span.file-info {
+    display: block;
+    font-size: 14px;
+    height: 14px;
+    margin-bottom: 5px;
+}
+
+.file-template > .no-files-legend > a {
+    cursor: pointer;
+    color: #9179B7;
+    text-decoration: underline;
+}
+.error{
+    color:red;
+    font-size:12px;
+}
+
+#legend #square {
+    display: inline-block;
+    margin-right: 2px;
+    height:10px;
+    width: 10px;
+    background-color: orange;
+}
+
+#legend label{
+    color:black;
+}

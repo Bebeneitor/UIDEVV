@@ -1,12 +1,13 @@
 export interface menuPermissions {
   separation: boolean;
+  completeSeparatiion: boolean;
 
   addDosing: boolean;
   duplicateDosing: boolean;
 
   addRow: boolean;
+  addManyRows: boolean;
   removeRow: boolean;
-  undoRemoveRow: boolean;
 
   addGroupRow: { visible: boolean; label: string };
 
@@ -18,7 +19,6 @@ export interface menuPermissions {
 
   addGroup: boolean;
   removeGroup: boolean;
-  undoRemoveGroup: boolean;
 
   copyGroup: boolean;
   undoCopyGroup: boolean;
@@ -30,17 +30,27 @@ export interface menuPermissions {
   moveGroupDown: boolean;
   moveUp: boolean;
   moveDown: boolean;
+
+  addMidRule: boolean;
+  checkFeedback: boolean;
+
+  multiSelect: boolean;
+  addComment: boolean;
+  editComment: boolean;
+
+  indicationRemove: { visible: boolean; label: string };
+  indicationAdded: { visible: boolean; label: string };
 }
 
 export const defaultMenuPermissions: menuPermissions = {
   separation: false,
-
+  completeSeparatiion: false,
   addDosing: false,
   duplicateDosing: false,
 
   addRow: true,
+  addManyRows: true,
   removeRow: true,
-  undoRemoveRow: true,
 
   addGroupRow: { visible: false, label: "Add Row" },
 
@@ -52,7 +62,6 @@ export const defaultMenuPermissions: menuPermissions = {
 
   addGroup: false,
   removeGroup: false,
-  undoRemoveGroup: false,
 
   copyGroup: false,
   undoCopyGroup: false,
@@ -64,17 +73,29 @@ export const defaultMenuPermissions: menuPermissions = {
   moveGroupDown: false,
   moveUp: true,
   moveDown: true,
+
+  addMidRule: false,
+
+  checkFeedback: false,
+
+  multiSelect: true,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
 };
 
 export const defaultReadOnlyMenuPermissions: menuPermissions = {
   separation: false,
+  completeSeparatiion: false,
 
   addDosing: false,
   duplicateDosing: false,
 
   addRow: false,
+  addManyRows: false,
   removeRow: false,
-  undoRemoveRow: false,
 
   addGroupRow: { visible: false, label: "Add Row" },
 
@@ -86,7 +107,6 @@ export const defaultReadOnlyMenuPermissions: menuPermissions = {
 
   addGroup: false,
   removeGroup: false,
-  undoRemoveGroup: false,
 
   copyGroup: false,
   undoCopyGroup: false,
@@ -98,17 +118,29 @@ export const defaultReadOnlyMenuPermissions: menuPermissions = {
   moveGroupDown: false,
   moveUp: false,
   moveDown: false,
+
+  addMidRule: false,
+
+  checkFeedback: false,
+
+  multiSelect: false,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
 };
 
 export const defaultEditableMenuPermissions: menuPermissions = {
   separation: false,
+  completeSeparatiion: false,
 
   addDosing: false,
   duplicateDosing: false,
 
   addRow: true,
+  addManyRows: true,
   removeRow: true,
-  undoRemoveRow: true,
 
   addGroupRow: { visible: false, label: "Add Row" },
 
@@ -120,7 +152,6 @@ export const defaultEditableMenuPermissions: menuPermissions = {
 
   addGroup: false,
   removeGroup: false,
-  undoRemoveGroup: false,
 
   copyGroup: false,
   undoCopyGroup: false,
@@ -132,17 +163,28 @@ export const defaultEditableMenuPermissions: menuPermissions = {
   moveGroupDown: false,
   moveUp: true,
   moveDown: true,
+
+  addMidRule: false,
+
+  checkFeedback: false,
+  multiSelect: true,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
 };
 
 export const defaultReadOnlyGroupMenuPermissions: menuPermissions = {
   separation: false,
+  completeSeparatiion: false,
 
   addDosing: false,
   duplicateDosing: false,
 
   addRow: false,
+  addManyRows: false,
   removeRow: false,
-  undoRemoveRow: false,
 
   addGroupRow: { visible: false, label: "Add Row" },
 
@@ -154,7 +196,6 @@ export const defaultReadOnlyGroupMenuPermissions: menuPermissions = {
 
   addGroup: false,
   removeGroup: false,
-  undoRemoveGroup: false,
 
   copyGroup: true,
   undoCopyGroup: true,
@@ -166,17 +207,28 @@ export const defaultReadOnlyGroupMenuPermissions: menuPermissions = {
   moveGroupDown: false,
   moveUp: false,
   moveDown: false,
+
+  addMidRule: false,
+
+  checkFeedback: false,
+  multiSelect: false,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
 };
 
 export const defaultEditableGroupMenuPermissions: menuPermissions = {
   separation: false,
+  completeSeparatiion: false,
 
   addDosing: false,
   duplicateDosing: false,
 
   addRow: false,
+  addManyRows: true,
   removeRow: false,
-  undoRemoveRow: false,
 
   addGroupRow: { visible: false, label: "Add Row" },
 
@@ -188,7 +240,6 @@ export const defaultEditableGroupMenuPermissions: menuPermissions = {
 
   addGroup: true,
   removeGroup: true,
-  undoRemoveGroup: true,
 
   copyGroup: false,
   undoCopyGroup: false,
@@ -199,18 +250,29 @@ export const defaultEditableGroupMenuPermissions: menuPermissions = {
   moveGroupUp: true,
   moveGroupDown: true,
   moveUp: true,
-  moveDown: true,
+  moveDown: false,
+
+  addMidRule: false,
+
+  checkFeedback: false,
+  multiSelect: true,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
 };
 
 export const defaulReadOnlyGroupRowMenuPermissions: menuPermissions = {
   separation: false,
+  completeSeparatiion: false,
 
   addDosing: false,
   duplicateDosing: false,
 
   addRow: false,
+  addManyRows: false,
   removeRow: false,
-  undoRemoveRow: false,
 
   addGroupRow: { visible: false, label: "Add Row" },
 
@@ -222,7 +284,6 @@ export const defaulReadOnlyGroupRowMenuPermissions: menuPermissions = {
 
   addGroup: false,
   removeGroup: false,
-  undoRemoveGroup: false,
 
   copyGroup: false,
   undoCopyGroup: false,
@@ -234,16 +295,27 @@ export const defaulReadOnlyGroupRowMenuPermissions: menuPermissions = {
   moveGroupDown: false,
   moveUp: false,
   moveDown: false,
+
+  addMidRule: false,
+
+  checkFeedback: false,
+  multiSelect: false,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
 };
 export const defaultEditableGroupRowMenuPermissions: menuPermissions = {
   separation: false,
+  completeSeparatiion: false,
 
   addDosing: false,
   duplicateDosing: false,
 
   addRow: false,
+  addManyRows: true,
   removeRow: true,
-  undoRemoveRow: true,
 
   addGroupRow: { visible: true, label: "Add Row Group" },
 
@@ -255,7 +327,6 @@ export const defaultEditableGroupRowMenuPermissions: menuPermissions = {
 
   addGroup: false,
   removeGroup: false,
-  undoRemoveGroup: false,
 
   copyGroup: false,
   undoCopyGroup: false,
@@ -267,4 +338,58 @@ export const defaultEditableGroupRowMenuPermissions: menuPermissions = {
   moveGroupDown: false,
   moveUp: true,
   moveDown: true,
+
+  addMidRule: false,
+
+  checkFeedback: false,
+  multiSelect: true,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
+};
+
+export const checkFeedbackOnlyMenuPermissions: menuPermissions = {
+  separation: false,
+  completeSeparatiion: false,
+
+  addDosing: false,
+  duplicateDosing: false,
+
+  addRow: false,
+  addManyRows: false,
+  removeRow: false,
+
+  addGroupRow: { visible: false, label: "Add Row" },
+
+  copyRow: false,
+  undoCopyRow: false,
+
+  copyColumn: false,
+  pasteColumn: false,
+
+  addGroup: false,
+  removeGroup: false,
+
+  copyGroup: false,
+  undoCopyGroup: false,
+
+  copyRowGroup: false,
+  undoCopyRowGroup: false,
+
+  moveGroupUp: false,
+  moveGroupDown: false,
+  moveUp: false,
+  moveDown: false,
+
+  addMidRule: false,
+
+  checkFeedback: true,
+  multiSelect: false,
+  addComment: false,
+  editComment: false,
+
+  indicationRemove: { visible: false, label: "Indication Removed" },
+  indicationAdded: { visible: false, label: "Indication Added" },
 };

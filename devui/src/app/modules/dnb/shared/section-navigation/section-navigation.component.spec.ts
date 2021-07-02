@@ -35,6 +35,7 @@ fdescribe("SectionNavigationComponent", () => {
       {
         name: "section",
         id: "section",
+        completed: false
       },
     ];
     fixture.detectChanges();

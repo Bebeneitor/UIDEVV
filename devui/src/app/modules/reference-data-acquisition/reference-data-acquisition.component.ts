@@ -25,7 +25,7 @@ const DELTA_FILE_NAME = 'deltaFileName';
 })
 export class ReferenceDataAcquisitionComponent implements OnInit {
 
-  @ViewChild('viewGrid') viewGrid: any;
+  @ViewChild('viewGrid',{static: true}) viewGrid: any;
   cols: any[];
   data: any[] = [];
   selectedData: any[] = [];

@@ -1,3 +1,4 @@
+<app-dnb-breadcrumb></app-dnb-breadcrumb>
 <div
   class="content dnb-page"
   [ngClass]="{
@@ -18,71 +19,80 @@
       <div class="sentinal"></div>
       <div class="dnb-page-header sticky-header">
         <h1 class="dnb-title">
-          Drug:
+          <span class="dnb-drug-title-name">
+            Drug:
 
-          <span class="drug-name">
-            <app-cell-editor
-              [attr.slm-id]="'drug_name_text'"
-              [column]="drugNameColumn"
-              [searchInfo]="drugNameColumn.searchData"
-              [highLight]="drugNameColumn.highlight"
-              [isReadOnly]="showFindAndReplace"
-            ></app-cell-editor>
+            <span class="drug-name">
+              <app-cell-editor
+                [attr.slm-id]="'drug_name_text'"
+                [column]="undoRedo.drugNameColumn"
+                [searchInfo]="undoRedo.drugNameColumn.searchData"
+                [highLight]="undoRedo.drugNameColumn.highlight"
+                [isReadOnly]="true"
+              ></app-cell-editor>
+            </span>
           </span>
         </h1>
         <div class="dnb-header-buttons">
-          <span class="dnb-toggle">
+          <span class="dnb-toggle" *ngIf="!isApproverReviewing">
             <button
               [attr.slm-id]="'toggle_find_replace_btn'"
               (click)="showFindAndReplace = !showFindAndReplace"
+              tabindex="-1"
             >
-              Find & Replace
+              Find {{ enableEditing ? "& Replace" : "" }}
             </button>
           </span>
-          <span class="dnb-toggle">
-            <button [attr.slm-id]="'clear_all_btn'" (click)="confirmClearAll()">
-              Clear All Sections
-            </button>
-          </span>
-          <span class="dnb-toggle" *ngIf="undoCopySectionFlag">
-            <button
-              (click)="confirmUndoCopyAll()"
-              [attr.slm-id]="'undo_copy_sections_btn'"
-            >
-            {{ shouldShowUndo ? "Undo Copy to All" : "Redo Copy to All" }}
-            </button>
-          </span>
-          <span class="dnb-toggle">
-            <button
-              [attr.slm-id]="'copy_sections_btn'"
-              (click)="openSectionSelect($event)"
-              [disabled]="showFindAndReplace"
-            >
-              Copy Sections
-            </button>
-            <p-overlayPanel #sectionsOverlay [dismissable]="true">
-              <p-listbox
-                [options]="selectedSectionsOptions"
-                [(ngModel)]="selectedSections"
-                checkbox="true"
-                multiple="true"
-              >
-              </p-listbox>
+          <ng-container *ngIf="enableEditing">
+            <span class="dnb-toggle">
               <button
-                class="dnb-btn"
-                [attr.slm-id]="'copy_selected_sections_btn'"
-                (click)="copyAll($event)"
+                [attr.slm-id]="'clear_all_btn'"
+                (click)="confirmClearAll()"
+                tabindex="-1"
               >
-                Copy Selected
+                Clear All Sections
               </button>
-            </p-overlayPanel>
-          </span>
-          <span class="dnb-toggle">
+            </span>
+            <span class="dnb-toggle">
+              <button
+                [attr.slm-id]="'copy_sections_btn'"
+                (click)="openSectionSelect($event)"
+                tabindex="-1"
+                [disabled]="!shouldShowCurrent"
+              >
+                Copy Sections
+              </button>
+              <p-overlayPanel
+                #sectionsOverlay
+                [dismissable]="true"
+                styleClass="copy-overlay"
+              >
+                <p-listbox
+                  [options]="selectedSectionsOptions"
+                  [(ngModel)]="selectedSections"
+                  checkbox="true"
+                  multiple="true"
+                >
+                </p-listbox>
+                <button
+                  class="dnb-btn"
+                  [attr.slm-id]="'copy_selected_sections_btn'"
+                  (click)="copyAll($event)"
+                  tabindex="-1"
+                  *ngIf="selectedSections.length > 0"
+                >
+                  Copy Selected
+                </button>
+              </p-overlayPanel>
+            </span>
+          </ng-container>
+          <span class="dnb-toggle" *ngIf="enableEditing">
             <p-inputSwitch
               [(ngModel)]="shouldCompare"
               [attr.slm-id]="'should_compare_btn'"
               [disabled]="!shouldShowCurrent"
               (onChange)="onSwitchChange($event)"
+              tabindex="-1"
             ></p-inputSwitch>
             <label>{{ toggleLabel }}</label>
           </span>
@@ -91,82 +101,195 @@
               [(ngModel)]="isFullScreen"
               [attr.slm-id]="'is_full_screen_btn'"
               (onChange)="onSwitchFullChange($event)"
+              tabindex="-1"
             ></p-inputSwitch>
             <label>{{ toggleFullLabel }}</label>
           </span>
-          <span class="dnb-toggle current-toggle">
+          <span
+            class="dnb-toggle current-toggle"
+            *appDnbRoles="[dnbCodes.EDIT_DRDS]"
+          >
             <p-inputSwitch
-              [(ngModel)]="shouldShowCurrent"
+              [ngModel]="shouldShowCurrent"
               [attr.slm-id]="'show_current_btn'"
               [disabled]="shouldCompare"
+              (onChange)="onCurrentChange($event)"
+              tabindex="-1"
             ></p-inputSwitch>
             <label
               ><span>{{ shouldShowCurrent ? "Show" : "Hide" }}</span>
               Current</label
             >
           </span>
+          <p-overlayPanel
+            #mi
+            [dismissable]="true"
+            styleClass="ingest-overlay"
+            (onShow)="openMI = true"
+            (onHide)="openMI = false"
+          >
+            <app-dnb-upload-ingestion
+              *ngIf="openMI"
+              [drugName]="undoRedo.drugNameColumn.value"
+              [drugCode]="drugCode"
+              (getIngestedContent)="getIngestedContent($event)"
+            ></app-dnb-upload-ingestion>
+          </p-overlayPanel>
+          <button
+            *ngIf="enableEditing"
+            class="dnb-btn inges-btn"
+            [attr.slm-id]="'manual_ingestion_btn'"
+            (click)="mi.toggle($event)"
+            tabindex="-1"
+          >
+            <i class="fa fa-upload"></i>DRD
+          </button>
         </div>
         <app-find
-          [sections]="sections"
+          #find
+          [sections]="undoRedo.sections"
           [shouldShowCurrent]="shouldShowCurrent"
-          [drugNameColumn]="drugNameColumn"
+          [drugNameColumn]="undoRedo.drugNameColumn"
           [(showFindAndReplace)]="showFindAndReplace"
-          [showButtonReplace]="true"
+          [showButtonReplace]="enableEditing"
         ></app-find>
       </div>
-      <div class="sortable_list">
+      <div class="section-titles">
+        <div class="row">
+          <span class="col-6 dnd-label-percentage">
+            Percentage Completed: {{ percentage | percent: "1.0" }}
+          </span>
+        </div>
+        <div class="row">
+          <span class="col-6 dnd-label-percentage">
+            Mark All Sections Completed
+            <p-checkbox
+              [(ngModel)]="shouldMarkSections"
+              (onChange)="allMarkSections($event)"
+              binary="true"
+              [disabled]="!enableEditing"
+            ></p-checkbox>
+          </span>
+        </div>
         <div class="row">
           <div class="col-6 dnb-btn" *ngIf="shouldShowCurrent">
             Current Drug Version: {{ versionA }}
           </div>
           <div class="col-6">{{ versionB }}</div>
         </div>
-        <div *ngFor="let section of sections; trackBy: trackBySections">
+      </div>
+      <div class="sortable_list">
+        <div
+          *ngFor="
+            let section of undoRedo.sections;
+            index as sectionIndex;
+            trackBy: trackBySections
+          "
+        >
           <ng-container *ngIf="!section.grouped; else groupedSection">
             <app-dnb-sections-container
               [id]="section.id"
+              [sectionIndex]="sectionIndex"
               [attr.slm-id]="section.id"
               [currentVersion]="section.current"
               [(newVersion)]="section.new"
               [hasRowHeading]="section.hasRowHeading"
-              [isComparing]="shouldCompare"
-              [enableEditing]="!showFindAndReplace"
+              [isComparing]="
+                section.new.section.code === rulesCode ? false : shouldCompare
+              "
+              [enableEditing]="enableEditing && !showFindAndReplace"
+              [isApproverReviewing]="isApproverReviewing"
+              [feedbackComplete]="feedbackComplete"
               [showCurrent]="shouldShowCurrent"
+              [focusType]="section.new.focusType"
+              [showEllOpts]="true"
               (stickySection)="stickySection($event)"
               (toggleSectionCopy)="toggleSectionCopy($event)"
+              (toggleCompleted)="toggleCompleted($event, sectionIndex)"
+              (sectionNavigate)="sectionNavigateEvt($event, sectionIndex)"
+              (dataPopulateSections)="dataPopulateSections($event)"
+              (feedbackUpdate)="feedbackUpdate($event, sectionIndex)"
+              (validIcdCodes)="validIcdCodes($event)"
             >
             </app-dnb-sections-container>
           </ng-container>
           <ng-template #groupedSection>
             <app-dnb-grouped-sections-container
               [id]="section.id"
+              [sectionIndex]="sectionIndex"
               [attr.slm-id]="section.id"
               [currentVersion]="section.current"
               [(newVersion)]="section.new"
               [isComparing]="shouldCompare"
-              [enableEditing]="!showFindAndReplace"
+              [enableEditing]="enableEditing && !showFindAndReplace"
+              [isApproverReviewing]="isApproverReviewing"
+              [feedbackComplete]="feedbackComplete"
               [showCurrent]="shouldShowCurrent"
               (stickySection)="stickySection($event)"
               (toggleSectionCopy)="toggleSectionCopy($event)"
+              (toggleCompleted)="toggleCompleted($event, sectionIndex)"
+              [focusType]="section.new.focusType"
+              (sectionNavigate)="sectionNavigateEvt($event, sectionIndex)"
+              (dataPopulateSections)="dataPopulateSections($event)"
+              (feedbackUpdate)="feedbackUpdate($event, sectionIndex)"
             ></app-dnb-grouped-sections-container>
           </ng-template>
         </div>
       </div>
-      <div class="dnb-page-btns">
-        <button [disabled]="saveDisabled" (click)="confirmSaveData()">
+      <div class="dnb-page-btns dnb-buttons-floating" *ngIf="showButtons">
+        <div *ngIf="enableEditing" class="dnb-action-btns">
+          <button (click)="undo()" [disabled]="position < 1">
+            <i class="fa fa-undo" aria-hidden="true"></i>
+          </button>
+          <button (click)="redo()" [disabled]="position >= stack.length - 1">
+            <i class="fa fa-repeat" aria-hidden="true"></i>
+          </button>
+        </div>
+        <ng-container *ngIf="isApproverReviewing">
+          <button *ngIf="feedbackComplete" (click)="addMoreFeedback()">
+            Add More Feedback
+          </button>
+          <button
+            *ngIf="!feedbackComplete"
+            [disabled]="saveDisabled"
+            (click)="confirmReturnData()"
+          >
+            Return
+          </button>
+        </ng-container>
+        <span class="dnb-toggle autosave-toggle">
+          <label class="dnd-label-autosave">
+            {{ labelAutosave }}
+            <i
+              *ngIf="labelAutosave === 'Saving'"
+              class="fa fa-spinner fa-pulse"
+            ></i>
+          </label>
+        </span>
+        <span
+          class="dnb-toggle autosave-toggle"
+          *ngIf="
+            enableEditing
+          "
+        >
+          <p-inputSwitch
+            [(ngModel)]="switchAutosave"
+            [attr.slm-id]="'is_autosave_btn'"
+            (onChange)="isAutosavingActive($event)"
+            tabindex="-1"
+          ></p-inputSwitch>
+          <label> Autosave </label>
+        </span>
+        <button
+          [disabled]="saveDisabled"
+          (click)="confirmSaveData()"
+          *ngIf="!isApproverReviewing"
+        >
           Save
         </button>
-        <button (click)="openDialogSubmit()" [disabled]="submitReviewDisable">
+        <button [disabled]="submitReviewDisable" (click)="validateFeedback()">
           Submit
         </button>
-      </div>
-
-      <div class="row sticky-sections" *ngIf="stickySections.length > 0">
-        <app-sections-sticky
-          [stickySection]="stickySections"
-          (behaviorEvnt)="undoStickSection($event)"
-        >
-        </app-sections-sticky>
       </div>
     </div>
   </div>

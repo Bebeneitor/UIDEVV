@@ -2,6 +2,8 @@ import { Component, forwardRef, Input, OnInit, ViewChild, Output, EventEmitter }
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import * as Quill from 'quill';
 import * as Delta from 'quill-delta';
+import { Constants } from 'src/app/shared/models/constants';
+import { ToastMessageService } from 'src/app/services/toast-message.service';
 
 /**Used to integrate component into template-driven forms.  */
 export const EDITOR_VALUE_ACCESSOR: any = {
@@ -80,6 +82,7 @@ export class DifMarkupsEditorComponent implements OnInit {
   }
 
   @Input() height = '100px';
+  @Input() minHeight = '100%';
   @Input() maxLength = 0;
   @Input() set provDialogDisable(value: boolean) {
     this.enabled = !value;
@@ -103,14 +106,13 @@ export class DifMarkupsEditorComponent implements OnInit {
     this.textToCompare = val;
     this.updateView();
   }
-
-  textToCompare: string = "";
+  textToCompare: string = '';
   @Input() scrollContainer: string;
   get updatedText(): string {
     return this.getTextFromDelta(this.quill.getContents());
   }
-  @ViewChild('markuped') markupEd;
-  @ViewChild('qlcontainer') qlContainer;
+  @ViewChild('markuped',{static: true}) markupEd;
+  @ViewChild('qlcontainer',{static: true}) qlContainer;
   /** the Quill Text Editor */
   quill: any;
 
@@ -120,7 +122,7 @@ export class DifMarkupsEditorComponent implements OnInit {
   notify: boolean = false;
 
 
-  constructor() { }
+  constructor(private toastService: ToastMessageService) { }
 
   ngOnInit() {
     this.quill = new Quill(this.markupEd.nativeElement, {
@@ -163,6 +165,9 @@ export class DifMarkupsEditorComponent implements OnInit {
   }
 
   updateView() {
+    if (!this.currentText || !this.textToCompare) {
+      return;
+    }
     if (!this.quill) {
       return;
     }
@@ -170,10 +175,17 @@ export class DifMarkupsEditorComponent implements OnInit {
     try {
       let modDelta = this.readModDeltaFromText(this.text);
       if (modDelta) {
+        this.modifiedDelta = this.text;
         this.setInitValueFromModDelta(modDelta);
       } else {
         this.updateViewForText();
       }
+      if (this._saveAsDelta) {
+        this.onModelChange(this.modifiedDelta);
+      } else {
+        this.onModelChange(this.updatedText);
+      }
+      this.onModelTouched();
     } catch (e) {
     }
   }
@@ -214,6 +226,7 @@ export class DifMarkupsEditorComponent implements OnInit {
       } else {
         this.setInitialText("");
       }
+      this.updateView();
     }
   }
 
@@ -229,6 +242,7 @@ export class DifMarkupsEditorComponent implements OnInit {
     try {
       let modDelta = this.readModDeltaFromText(initTxt);
       if (modDelta) {
+        this.modifiedDelta = initTxt;
         this.setInitValueFromModDelta(modDelta);
       } else {
         this.setInitValueFromText(initTxt);
@@ -281,6 +295,8 @@ export class DifMarkupsEditorComponent implements OnInit {
       // Calculate diff, returned as a Delta:
       initDl = this.stringDiff(this.textToCompare, this.currentText);
     }
+    this.modifiedDelta = JSON.stringify(
+      this.calculateModifedDelta(initDl));
     this.quill.setContents(initDl)
   }
 
@@ -342,6 +358,8 @@ export class DifMarkupsEditorComponent implements OnInit {
     let exceedLength = this.updatedText.length - this.maxLength;
     if (!this.maxLength || exceedLength <= 0) {
       return;
+    } else {
+      this.toastService.messageWarning(Constants.TOAST_SUMMARY_WARN, "Cannot add more than " + this.maxLength + " characters");
     }
     if (inDel) {
       if (d.insert && fnd === 0) {         // Remove Insert or re-apply deleted attribute
@@ -378,10 +396,7 @@ export class DifMarkupsEditorComponent implements OnInit {
       if (op.insert == null) {
         return;
       }
-      if (op.insert === "\n") {
-        return;
-      }
-      if (this.isOpInsert(op)) {
+      if (this.isOpInsert(op) || op.insert === '\n')  {
         modDeltaArr.push({ i: op.insert });
       } else if (this.isOpDelete(op)) {
         modDeltaArr.push({ d: op.insert.length });
@@ -389,6 +404,12 @@ export class DifMarkupsEditorComponent implements OnInit {
         modDeltaArr.push({ r: op.insert.length });
       }
     });
+    if (modDeltaArr.length > 0) {
+      let last = modDeltaArr[modDeltaArr.length - 1];
+      if (last['i'] === '\n') {
+        modDeltaArr.pop();
+      }
+    }
     return modDeltaArr;
   }
 

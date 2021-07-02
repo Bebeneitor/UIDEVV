@@ -18,7 +18,7 @@ import { Constants } from 'src/app/shared/models/constants';
   styleUrls: ['./provisional-rule-codes.component.css']
 })
 export class ProvisionalRuleCodesComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('uploadControl') uploadControl: FileUpload;
+  @ViewChild('uploadControl',{static: true}) uploadControl: FileUpload;
   @ViewChildren(ProcedureCodeBoxComponent) procCodeBoxes: QueryList<ProcedureCodeBoxComponent>;
 
   _ruleInfo: RuleInfo = new RuleInfo();

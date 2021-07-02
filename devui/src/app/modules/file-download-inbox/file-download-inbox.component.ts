@@ -16,7 +16,7 @@ import { ToastMessageService } from 'src/app/services/toast-message.service';
     styleUrls: ['./file-download-inbox.component.css']
 })
 export class FileDownloadInboxComponent implements OnInit{
-    @ViewChild('fileInboxTable') fileInboxTable: EclTableComponent;
+    @ViewChild('fileInboxTable',{static: true}) fileInboxTable: EclTableComponent;
 
     fileInboxTableModel: EclTableModel;
 
@@ -37,13 +37,14 @@ export class FileDownloadInboxComponent implements OnInit{
         this.fileInboxTableModel = new EclTableModel();
         let manager = new EclTableColumnManager();
 
-        manager.addTextColumn("fileName", "File Name", '25%', false, EclColumn.TEXT, true);
-        manager.addTextColumn('userName', 'Created By', '18%', false, EclColumn.TEXT, true);
+        manager.addTextColumn("fileName", "File Name", '20%', false, EclColumn.TEXT, true);
+        manager.addTextColumn("failureReason", "Failure Reason", '12%', false, EclColumn.TEXT, true);
+        manager.addTextColumn('userName', 'Created By', '13%', false, EclColumn.TEXT, true);
         manager.addDateColumn('creationDt', 'Creation Date', '15%', false, true, 'date', 'MM/dd/yyyy hh:mm:ss aa');
-        manager.addTextColumn('processName', 'Creator Process', '15%', false, EclColumn.TEXT, true);
-        manager.addTextColumn('processStatus', 'Status', '15%', false, EclColumn.TEXT, true);
-        manager.addIconColumn('download', 'Download', '5%', 'fa fa-download');
-        manager.addIconColumn('tags', 'Tags', '3%', 'fa fa-tags');
+        manager.addTextColumn('processName', 'Creator Process', '13%', false, EclColumn.TEXT, true);
+        manager.addTextColumn('processStatus', 'Status', '13%', false, EclColumn.TEXT, true);
+        manager.addIconColumn('download', 'Download', '6%', 'fa fa-download');
+        manager.addIconColumn('tags', 'Tags', '4%', 'fa fa-tags');
         manager.addIconColumn('delete', 'Delete', '4%', 'fa fa-trash');
 
         this.fileInboxTableModel.lazy = true;
